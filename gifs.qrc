@@ -1,0 +1,22 @@
+<RCC>
+  <qresource prefix="loading_gifs">
+    <file>icons/gifs/200.gif</file>
+    <file>icons/gifs/DNA_loading.gif</file>
+    <file>icons/gifs/DNA_loading_2.gif</file>
+    <file>icons/gifs/DNA_loading_3.gif</file>
+    <file>icons/gifs/fullscreen_icon.png</file>
+    <file>icons/gifs/labmadeprote.gif</file>
+    <file>icons/gifs/loading.gif</file>
+    <file>icons/gifs/loading_2.gif</file>
+    <file>icons/gifs/loading_3.gif</file>
+    <file>icons/gifs/loading_4.gif</file>
+    <file>icons/gifs/loading_5.gif</file>
+    <file>icons/gifs/loading_6.gif</file>
+    <file>icons/gifs/loading_7.gif</file>
+    <file>icons/gifs/Myn6.gif</file>
+    <file>icons/gifs/no_background.gif</file>
+    <file>icons/gifs/please_wait.gif</file>
+    <file>icons/gifs/processing.gif</file>
+    <file>icons/gifs/protein_binding.gif</file>
+  </qresource>
+</RCC>
