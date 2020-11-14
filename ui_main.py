@@ -137,8 +137,19 @@ class MainWindow(QMainWindow):
         self.PDB_ID_lineEdit.textChanged.connect(lambda: Functions.PDB_ID_lineEdit(self))
         self.fetch_pdb_Button.clicked.connect(lambda: Functions.Fetch_PDB_File(self))
 
-        # self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
+        self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
+        Functions.Send_Available_Platforms_to_GUI(self)
+        self.minimize_checkBox.stateChanged.connect(lambda: Functions.minimize_Step_isVisible(self))
+        self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
+        self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
+        self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
 
+        """
+        
+        self.Run.clicked.connect(self.run_script_builder)
+        
+        
+        """
         ########################################################################
         #
         ## END --------------- WIDGETS FUNCTIONS/PARAMETERS ----------------- ##
@@ -155,7 +166,7 @@ class MainWindow(QMainWindow):
         try:
             upload_condition, pdb_path = Functions.browse_pdbFile(self)
 
-            if path.exists(pdb_path):
+            if os.path.exists(pdb_path):
                 fixer = PDBFixer(pdb_path)
                 fixer.removeHeterogens(keepWater=False)
 
@@ -189,6 +200,16 @@ class MainWindow(QMainWindow):
 
     def output_folder_browse(self):
         Functions.output_file(self)
+
+    def Stocasthic_Changed(self):
+        Functions.Stochastic_changed(self)
+
+
+
+
+
+
+
 
     ########################################################################
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS

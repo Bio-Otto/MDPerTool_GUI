@@ -65,6 +65,14 @@ class Helper_Functions():
                 # self.combobox_2.append(str(model).split(" ")[1] + str(chain))
         return combobox
 
+    def available_platforms(self):
+        """
+            :return: The function will return available platforms on your system for OpenMM Engine
+        """
+        import simtk.openmm
+        return [simtk.openmm.Platform.getPlatform(index).getName() for index in
+                range(simtk.openmm.Platform.getNumPlatforms())]
+
 
 class Functions(MainWindow):
 
@@ -164,13 +172,13 @@ class Functions(MainWindow):
         self.kind_of_integrator = self.integrator_kind_comboBox.currentText()
 
         if self.kind_of_integrator in ["Langevin", "Brownian"]:
-            self.Additional_Integrator_groupBox.setEnabled(False)
-            self.Additional_Integrators_checkBox.setChecked(False)
-            self.Additional_Integrators_checkBox.setEnabled(False)
-        else:
             self.Additional_Integrator_groupBox.setEnabled(True)
             self.Additional_Integrators_checkBox.setChecked(True)
             self.Additional_Integrators_checkBox.setEnabled(True)
+        else:
+            self.Additional_Integrator_groupBox.setEnabled(False)
+            self.Additional_Integrators_checkBox.setChecked(False)
+            self.Additional_Integrators_checkBox.setEnabled(False)
 
     def minimize_Step_isVisible(self):
         if not self.minimize_checkBox.isChecked():
@@ -185,6 +193,13 @@ class Functions(MainWindow):
         if self.DCD_Reporter_checkBox.isChecked():
             self.DCD_Reporter_Options_groupBox.setEnabled(True)
 
+    def XTC_Reporter_Changed(self):
+        if not self.XTC_Reporter_checkBox.isChecked():
+            self.XTC_Reporter_Options_groupBox.setEnabled(False)
+
+        if self.XTC_Reporter_checkBox.isChecked():
+            self.XTC_Reporter_Options_groupBox.setEnabled(True)
+
     def State_Data_Reporter_Changed(self):
         if not self.State_Data_Reporter_checkBox.isChecked():
             self.State_Data_Reporter_Options_groupBox.setEnabled(False)
@@ -192,13 +207,18 @@ class Functions(MainWindow):
         if self.State_Data_Reporter_checkBox.isChecked():
             self.State_Data_Reporter_Options_groupBox.setEnabled(True)
 
-    def available_platforms(self):
-        """
-            :return: The function will return available platforms on your system for OpenMM Engine
-        """
-        import simtk.openmm
-        return [simtk.openmm.Platform.getPlatform(index).getName() for index in
-                range(simtk.openmm.Platform.getNumPlatforms())]
+    def Send_Available_Platforms_to_GUI(self):
+        self.platforms = Helper_Functions.available_platforms(self)
+        self.platform_list_on_the_program = [self.platform_comboBox.itemText(i) for i in
+                                             range(self.platform_comboBox.count())]
+
+        for item_no, i in enumerate(self.platform_list_on_the_program):
+            if i not in self.platforms:
+                print(item_no)
+                self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
+                self.platform_comboBox.setCurrentIndex(item_no + 1)
+
+
 
 
 class InputFile:
