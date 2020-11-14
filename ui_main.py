@@ -172,6 +172,8 @@ class MainWindow(QMainWindow):
                 modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                          ph=7, chains_to_remove=delete_chains)
 
+                self.upload_pdb_textEdit.setText(modified_pdb)
+
                 self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
                 for i in self.combobox:
                     self.res1_comboBox.addItem(str(i))
@@ -312,7 +314,7 @@ class SplashScreen(QMainWindow):
         self.timer.start(35)
 
         # CHANGE DESCRIPTION
-        self.label_title.setText("MDPerTool V0.1")
+        self.label_title.setText("MDPerTool v0.1")
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
         # Initial Text
         self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")

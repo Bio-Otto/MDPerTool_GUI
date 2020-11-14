@@ -36,20 +36,21 @@ from simtk.openmm.app import *
 
 from checkBox_menu import *
 
-from ui_main import *
+#
+# import threading
+# import time, sys
+# import multiprocessing
+# from os import getpid
 
-import threading
-import time, sys
-import multiprocessing
-from os import getpid
-import os
+
 from os import path
 from urllib.request import urlretrieve
 from checkBox_menu import *
-
+from ui_main import *
 
 class Helper_Functions():
     def fill_residue_combobox(self, pdb_path):
+        print(pdb_path)
         from prody.proteins.pdbfile import parsePDB
         combobox = []
 
@@ -65,9 +66,6 @@ class Helper_Functions():
         return combobox
 
 
-
-
-
 class Functions(MainWindow):
 
     def output_file(self):
@@ -75,7 +73,7 @@ class Functions(MainWindow):
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             output_file = QFileDialog.getExistingDirectory(options=options)
-            # self.Output_Folder_textEdit.setText(self.output_file)
+            self.Output_Folder_textEdit.setText(output_file)
             return True
         except:
             return False
@@ -95,7 +93,7 @@ class Functions(MainWindow):
         self.pdb_filename = os.path.splitext(self.pdb_filename)
 
         if self.pdb_filename[1] == '.pdb':
-            self.upload_pdb_textEdit.setText(self.pdb_path)
+            # self.upload_pdb_textEdit.setText(self.pdb_path)
             return True, self.pdb_path
         elif self.pdb_filename[1] != "":
             QMessageBox.critical(self, "Error", "this is not a pdb file")
@@ -136,10 +134,13 @@ class Functions(MainWindow):
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result, self.Output_Folder_textEdit.toPlainText(), ph=7, chains_to_remove=delete_chains)
+                    fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                            self.Output_Folder_textEdit.toPlainText(), ph=7,
+                                                            chains_to_remove=delete_chains)
                     print(delete_chains)
                     print("fetched pdb: %s" % fetched_pdb)
 
+                    self.upload_pdb_textEdit.setText(fetched_pdb)
                     self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
                     for i in self.combobox:
                         self.res1_comboBox.addItem(str(i))
@@ -272,10 +273,17 @@ class pdb_Tools:
             :param output_path: the manipulated pdb file will return as full path if specified
                                 otherwise will return already exist path
         """
-        print("OUT: %s" % output_path)
+        ## get name of pdb file ##
+        name_of_pdb = os.path.basename(file_pathway).split('.')[0]
+
         print("Creating PDBFixer...")
         fixer = PDBFixer(file_pathway)
         print("Finding missing residues...")
+
+        if chains_to_remove is not None:
+            print("toDelete: %s" % chains_to_remove)
+            fixer.removeChains(chainIds=chains_to_remove)
+
         fixer.findMissingResidues()
 
         chains = list(fixer.topology.chains())
@@ -292,40 +300,39 @@ class pdb_Tools:
         fixer.replaceNonstandardResidues()
         print("Removing heterogens...")
         fixer.removeHeterogens(keepWater=False)
-
+        """
         print("Finding missing atoms...")
         fixer.findMissingAtoms()
         print("Adding missing atoms...")
         fixer.addMissingAtoms()
         print("Adding missing hydrogens...")
         fixer.addMissingHydrogens(pH=ph)
+        """
         print("Writing PDB file...")
 
-        modeller = Modeller(fixer.topology, fixer.positions)
+        ####  FOR DELETE WITH MODELLER USE FOLLOWING SCRIPT
 
-        if chains_to_remove is not None:
-            toDelete = [r for r in modeller.topology.chains() if r.id in chains_to_remove]
-            modeller.delete(toDelete)
+        # if chains_to_remove is not None:
+        #     toDelete = [r for r in modeller.topology.chains() if r.id in chains_to_remove]
+        #     modeller.delete(toDelete)
 
         if output_path != "":
-            print("bbbbbb")
             PDBFile.writeFile(
-                modeller.topology,
-                modeller.positions,
-                open(os.path.join(output_path, "%s_fixed_ph%s.pdb" % ('pdbid', 7)),
+                fixer.topology,
+                fixer.positions,
+                open(os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph)),
                      "w"),
                 keepIds=True)
             return output_path
 
         if output_path == "":
             new_outpath_dir = os.path.dirname(file_pathway)
-            new_outpath = os.path.join(new_outpath_dir, "%s_fixed_ph%s.pdb" % ('pdbid', 7))
-            print(new_outpath)
+            new_outpath = os.path.join(new_outpath_dir, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
             PDBFile.writeFile(
-                modeller.topology,
-                modeller.positions,
+                fixer.topology,
+                fixer.positions,
                 open(new_outpath, "w"), keepIds=True)
-            print("newpath: %s" % new_outpath)
+
             return new_outpath
 
         # # Remove the ligand and write a pdb file
@@ -336,3 +343,8 @@ class pdb_Tools:
         #     open(os.path.join('/home/enaz/Desktop/MDPERTOOL_v01/Output',
         #                       "%s_fixed_ph%s_apo.pdb" % ('pdbid', 7)), "w"),
         #     keepIds=True)
+
+#
+# pdb = 'C:\\Users\\HIbrahim\\Desktop\\MDPERTOOL_v01\\Download\\1gg1.pdb'
+# out = 'C:\\Users\\HIbrahim\\Desktop\\MDPERTOOL_v01\\Download'
+# pdb_Tools().fetched_pdb_fix(pdb, output_path=out, ph=7, chains_to_remove=['B', 'C'])
