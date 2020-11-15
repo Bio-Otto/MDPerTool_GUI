@@ -23,7 +23,7 @@ from icons import *
 
 # IMPORT FUNCTIONS
 from ui_functions import *
-
+from builder import *
 # from app_functions import *
 # from browse_menu import browse_file
 
@@ -143,13 +143,9 @@ class MainWindow(QMainWindow):
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
+        self.Run.clicked.connect(lambda: Advanced.send_arg_to_Engine(self))
 
-        """
-        
-        self.Run.clicked.connect(self.run_script_builder)
-        
-        
-        """
+
         ########################################################################
         #
         ## END --------------- WIDGETS FUNCTIONS/PARAMETERS ----------------- ##
