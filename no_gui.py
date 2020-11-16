@@ -1,10 +1,10 @@
-from MD_1 import *
-from MD_2 import *
-from Classic_MD import *
-from Velocity_Changer import *
-from get_positions_from_trajectory_file import *
-from Energy_decomposition_from_pdb_trajectory import *
-from response_time_creator import *
+from no_gui.MD_1 import *
+from no_gui.MD_2 import *
+from no_gui.Classic_MD import *
+from no_gui.Velocity_Changer import *
+from no_gui.get_positions_from_trajectory_file import *
+from no_gui.Energy_decomposition_from_pdb_trajectory import *
+from no_gui.response_time_creator import *
 from simtk import unit
 from simtk.openmm import *
 import time
@@ -107,7 +107,6 @@ print("\n--- %s seconds ---" % (time.time() - start_time))
 if __name__ == '__main__':
     import argparse
 
-
     parser = argparse.ArgumentParser(description='The Program applying Energy Dissipation Concept using powerfull '
                                                  'OpenMM Molecular Dynamic Toolkit, which also supports the Cuda '
                                                  'platform. Each residual energy calculation required for the concept '
@@ -117,12 +116,30 @@ if __name__ == '__main__':
                                                  'in the script.')
 
     """
-    ## CLASSIC MD PARAMETERS
-    temperature = 310
-    
+    platform_to_use = 'OpenCL'
+    properties = None
+    precision = 'single'
+    friction_cofficient = 1.0  # picosecond^-1
+    minimize = True
+    minimize_max_step = 500
+    CPU_Thread = 2
+    equilibrate = True
+    equilibration_step = 500
+    report_interval = 100
+    write_system_xml = False
+    system_file_name = 'system.xml'
+    state_file_name = 'state.xml'
+    last_pdb = 'last_structure.pdb'
+    write_to_dcd_trajectory = True
+    dcd_trajectory_write_period = 100
+    write_to_xtc_trajectory = False
+    xtc_trajectory_write_period = 100
     """
 
-    parser.add_argument('-p', '--topology', type=str, nargs='+', help='Need *.pdb file for loading trajectory file',
+
+
+
+    parser.add_argument('-p', '--topology', type=str, help='Need *.pdb file for loading trajectory file',
                         required=True)
 
     parser.add_argument('-pff', '--protein_ff', choices=['amber03', 'amber10', 'amber96', 'amber99sb', 'amber99sbildn',
@@ -141,25 +158,26 @@ if __name__ == '__main__':
 
     parser.add_argument('-ts', '--long_md_total_step', default=300000, nargs='?',
                         type=int, help='It is the total number of steps the simulation wants to run. (The program '
-                                         'defaultly will use "300000")', required=False)
+                                       'defaultly will use "300000")', required=False)
 
     parser.add_argument('-nbc', '--nonbonded_cutoff', default=12.0, nargs='?',
                         type=float, help='cut-off was applied to the non-covalent interactions. (The program '
-                                         'defaultly will use "12 Å ")',
+                                         'defaultly will use "12 Å ") NOT: Switching distance must satisfy 0 <= '
+                                         'r_switch < r_cutoff',
                         required=False)
 
     parser.add_argument('-wp', '--water_padding', default=15, nargs='?', type=int, help='The program determining '
-                                                                                          'largest dimension of '
-                                                                                          'protein, and a cubic box of'
-                                                                                          ' size(largest dimension)+'
-                                                                                          '2*padding is used. (The '
-                                                                                          'program defaultly will use '
-                                                                                          '"15 Å")', required=False)
+                                                                                        'largest dimension of '
+                                                                                        'protein, and a cubic box of'
+                                                                                        ' size(largest dimension)+'
+                                                                                        '2*padding is used. (The '
+                                                                                        'program defaultly will use '
+                                                                                        '"15 Å")', required=False)
 
     parser.add_argument('-dnx-use', '--use_device_index', choices=[True, False], default=False, nargs='?',
                         type=bool, help='This option can only be used with OpenCL or CUDA platform. You can also '
-                                         'specify the gpu number you want on systems with more than one GPU. NOTE: '
-                                         'OpenCL must use only one gpu. (eg: <- gpu_id 0> or <- gpu-id 0,1>)',
+                                        'specify the gpu number you want on systems with more than one GPU. NOTE: '
+                                        'OpenCL must use only one gpu. (eg: <- gpu_id 0> or <- gpu-id 0,1>)',
                         required=False)
 
     parser.add_argument('-dnx', '--device_index', nargs='?', type=int, help='This option can only be used with OpenCL '
@@ -169,10 +187,25 @@ if __name__ == '__main__':
                                                                             '<- gpu-id 0,1>)', required=False)
 
     parser.add_argument('-temp', '--temperature', nargs='?',
-                        type=float, help='The temperature unit is kelvin. (The program defaultly will use "310 Kelvin ")', required=False)
+                        type=float,
+                        help='The temperature unit is kelvin. (The program defaultly will use "310 Kelvin ")',
+                        required=False)
 
     parsed = parser.parse_args()
     print('Result:', vars(parsed))
 
     print("\n--- %s seconds ---" % (time.time() - start_time))
 
+    print(type(parsed.topology))
+
+    Classic_MD_Engine(pdb_path=parsed.topology, protein_ff=parsed.protein_ff, water_ff=parsed.water_ff,
+                      time_step=parsed.long_md_time_step, nonbondedCutoff=parsed.nonbonded_cutoff,
+                      water_padding=parsed.water_padding, Device_Index=parsed.use_device_index,
+                      Device_Index_Number=parsed.device_index, total_Steps=parsed.long_md_total_step,
+                      temp=parsed.temperature)
+
+
+
+
+
+    # python no_gui.py -p /no_gui/2j0w.pdb -pff amber10 -wff tip3p -lts 1.0 -ts 3000 -nbc 10.0 -wp 10 -dnx-use True -dnx 0 -temp 300

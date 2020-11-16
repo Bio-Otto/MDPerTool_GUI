@@ -4,7 +4,7 @@ from simtk.openmm import app
 import simtk.openmm as mm
 from simtk.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
 from sys import stdout
-from apply_pdbfixer import fix_pdb
+from .apply_pdbfixer import fix_pdb
 from simtk.openmm import *
 from mdtraj.reporters import XTCReporter
 

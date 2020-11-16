@@ -6,7 +6,7 @@ import parmed as pmd
 import numpy as np
 import time
 import pandas as pd
-from response_time_creator import getResidueResponseTimes
+from .response_time_creator import getResidueResponseTimes
 
 VELUNIT = angstrom / picosecond
 RESIDUE_NAME = str
