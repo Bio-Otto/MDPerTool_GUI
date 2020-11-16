@@ -3,6 +3,8 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMessageBox
 import os
 import pystache
+
+
 # from OpenMM_Runner import OpenMMScriptRunner
 
 
@@ -20,8 +22,41 @@ class Advanced(QtCore.QThread):
         Nonbounded_cutoff_active = True
         Additional_Integrator = False
         properties_active = False
+        CPU_properties_active = False
         Device_ID_active = False
+        precision = 'single'
+        water_active = False
         # global selected_platform
+
+        print("Simulation parameters preparing for the start ...")
+
+        ## FORCEFIELD CONFIGURATIONS
+        self.protein_ff = self.protein_forcefield_comboBox.currentText() + '.xml'
+
+        if 'obc' or 'gbvi' in self.protein_forcefield_comboBox.currentText():
+            water_active = True
+
+        if self.protein_forcefield_comboBox.currentText() == 'charmm36':
+            print("Protein FF: %s" % self.protein_ff)
+            self.water_ff = '%s/%s.xml' % (self.protein_forcefield_comboBox.currentText(), self.water_forcefield_comboBox.currentText())
+            print("Water FF: %s" % self.water_ff)
+        else:
+            self.water_ff = '%s.xml' % self.water_forcefield_comboBox.currentText()
+            print("Protein FF: %s" % self.protein_ff)
+            print("Water FF: %s" % self.water_ff)
+
+        ## SOLUTION WATER MODEL
+        if len((self.water_ff.split('/')[-1]).split('.')[0]) <= 5:
+            self.water_model = (self.water_ff.split('/')[-1]).split('.')[0]
+            print("Water Model for Solution 1: %s" % self.water_model)
+
+        elif (self.water_ff.split('/')[-1]).split('.')[0] == 'tip4pew':
+            self.water_model = (self.water_ff.split('/')[-1]).split('.')[0]
+            print("Water Model for Solution 2: %s" % self.water_model)
+
+        else:
+            self.water_model = (self.water_ff.split('/')[-1]).split('.')[0][0:5]
+            print("Water Model for Solution 3: %s" % self.water_model)
 
         try:
             self.out_dir = self.Output_Folder_textEdit.toPlainText()
@@ -69,26 +104,34 @@ class Advanced(QtCore.QThread):
         if self.platform_comboBox.currentText() in ["CUDA", "OpenCL"]:
             properties_active = True
 
+        if self.platform_comboBox.currentText() == "CPU":
+            CPU_properties_active = True
+
         if self.Device_ID_checkBox.isChecked():
             Device_ID_active = True
 
-        platform, properties = Advanced_Helper_Functions.selected_platform(self, self.platform_comboBox.currentText())
+        platform, properties, precision = Advanced_Helper_Functions.selected_platform(self, self.platform_comboBox.currentText(),
+                                                                           Device_ID_active, precision)
         print("HAAAAA")
         script_structure = dict(pdb=self.upload_pdb_textEdit.toPlainText(),
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
+
                                 long_simulation_time=self.run_duration_spinBox_2.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
+
                                 Number_of_CPU=self.Number_CPU_spinBox_2.value(),
                                 all_cpu=self.All_CPU_checkBox.isChecked(),
-                                platform=platform, properties=properties,
-                                properties_active=properties_active,
+                                platform=platform, properties=properties, precision=precision,
+                                properties_active=properties_active, CPU_properties_active=CPU_properties_active,
                                 Device_ID_active=Device_ID_active,
                                 Device_Number=self.Device_Number_comboBox.currentText(),
 
-                                protein_ff=self.protein_forcefield_comboBox.currentText(),  # FORCEFIELD
-                                water_ff=self.water_forcefield_comboBox.currentText(),  # FORCEFIELD
-                                model_water=self.water_forcefield_comboBox.currentText().split('.')[0],
-                                water_active=True,  # FORCEFIELD if protein include obc or gbvi
+                                protein_ff=self.protein_ff,  # FORCEFIELD
+                                water_ff=self.water_ff,  # FORCEFIELD
+                                model_water=self.water_model,
+                                water_active=water_active,  # FORCEFIELD if protein include obc or gbvi
+                                water_padding=self.water_padding_lineEdit.text(),
+
                                 integrator_kind=self.integrator_kind_comboBox.currentText(),  # INTEGRATOR
                                 integrator_time_step=self.integrator_time_step.toPlainText(),  # INTEGRATOR
                                 friction=self.friction_textEdit.toPlainText(),  # ADDITIONAL INTEGRATOR
@@ -121,32 +164,49 @@ class Advanced_Helper_Functions(QtCore.QThread):
         super(Advanced_Helper_Functions, self).__init__(parent)
 
     @pyqtSlot()
-    def selected_platform(self, platform):
+    def selected_platform(self, platform_name, Device_ID_active, precision):
         print("hoooo burada")
-        if platform == 'CUDA':
-            properties = {'CudaPrecision': 'mixed'}
-            return platform, properties
 
-        elif platform == 'OpenCL':
-            properties = {'OpenCLPrecision': 'mixed'}
-            return platform, properties
+        if platform_name == 'OpenCL' and Device_ID_active == True:
+            properties = {'OpenCLPrecision': '%s' % precision,
+                          'OpenCLDeviceIndex': '%s' % self.Device_Number_comboBox.currentText()}
+            return platform_name, properties, precision
 
-        else:
+        if platform_name == 'OpenCL' and Device_ID_active == False:
+            properties = {'OpenCLPrecision': '%s' % precision}
+            return platform_name, properties, precision
+
+        if platform_name == 'CUDA' and Device_ID_active == True:
+            properties = {'CUDAPrecision': '%s' % precision, 'CUDADeviceIndex': '%s' % self.Device_Index_Number}
+            return platform_name, properties, precision
+
+        if platform_name == 'CPU':
+            print("The CPU platform always uses 'mixed' precision.")
+            print("Simulation process will use %s Thread(s)" % self.Number_CPU_spinBox_2.value())
+            properties = {'CpuThreads': '%s' % self.Number_CPU_spinBox_2.value()}
+            precision = 'mixed'
+            return platform_name, properties, precision
+
+        if platform_name == 'Reference':
+            print("The Reference platform always uses 'double' precision.")
             properties = None
-            return platform, properties
+            precision = 'double'
+            return platform_name, properties, precision
+        print("System will use '%s' Platform with '%s' Precision" % (platform_name, precision))
 
     @pyqtSlot()
     def update_display(self, script_structure):
 
-        print(script_structure)
+        # print(script_structure)
         renderer = pystache.Renderer()
-        print("ok")
+        # print("ok")
         template = pystache.parse(u'''
         ###########################################################################
         ############### This script was generated by MDPerTool v0.1 ###############
         ###########################################################################
         
         from simtk.openmm import app
+        from simtk.openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds
         import simtk.openmm as mm
         from simtk.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
         from sys import stdout
@@ -154,26 +214,86 @@ class Advanced_Helper_Functions(QtCore.QThread):
         from simtk.openmm import *
         from mdtraj.reporters import XTCReporter
 
+        
+        print('pdb file fixing and preparing for simulation ...')
+        fixed_pdb_name = fix_pdb('{{pdb}}')
+        
+        print('Loading pdb to simulation engine ...')
+        pdb = app.PDBFile(fixed_pdb_name)
 
-        print('Loading...')
-        pdb = PDBFile('{{pdb}}')
-        modeller = Modeller(pdb.topology, pdb.positions)
+        box = pdb.topology.getUnitCellDimensions()
 
-        forcefield = ForceField('{{protein_ff}}'{{#water_active}}, '{{water_ff}}'{{/water_active}})
+        print('Modeller of pdb file is preparing ...')
+        modeller = mm.app.Modeller(pdb.topology, pdb.positions)
+        modeller.topology.setUnitCellDimensions(box)
 
-
-        print('Adding hydrogens...')
+        print('Forcefield parameters loading to the simulation system ...')
+        forcefield = app.ForceField('{{protein_ff}}'{{#water_active}}, '{{water_ff}}'{{/water_active}})
+        
+        print('Adding missing hydrogens to the model ...')
         modeller.addHydrogens(forcefield)
-        print('Adding solvent...')
-        modeller.addSolvent(forcefield, model='{{model_water}}', padding=10 * angstrom)
+
+        print('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
+        modeller.addSolvent(forcefield, model='{{model_water}}', padding={{water_padding}})
+
+        print('Constructing an OpenMM System')
+        self.system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
+                                              {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
+                                              constraints={{Constraints}}, rigidWater={{Rigid_Water}}, 
+                                              ewaldErrorTolerance=0.005)
+        
+        
+        self.system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
+
+        nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
+        nonbonded.setUseSwitchingFunction(use=True)
+        nonbonded.setSwitchingDistance(10.0 * angstrom)
+        nonbonded.setUseDispersionCorrection(True)
+        
+        print('Creating a LangevinIntegrator.')
+        integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}})
+
+        platform = mm.Platform.getPlatformByName('{{platform}}')
+        
+        {{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
+        {{#CPU_properties_active}}properties = {'CpuThreads': '{{Number_of_CPU}}'}{{/CPU_properties_active}}
+        
+        simulation = app.Simulation(modeller.topology, self.system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
+        
+        simulation.context.setPositions(modeller.positions)
+
+        simulation.context.computeVirtualSites()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        ''')
+
+        contents = renderer.render(template, script_structure)
+        print(contents)
+        # OpenMMScriptRunner(script_structure)
+
+        """
 
 
-
-        system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
-            {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}} constraints={{Constraints}}, rigidWater={{Rigid_Water}})
-
-        integrator = {{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}})
-        platform = Platform.getPlatformByName('{{platform}}')
         {{#properties_active}}properties = {'{{platform}}Precision': 'mixed'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 
 
@@ -195,11 +315,4 @@ class Advanced_Helper_Functions(QtCore.QThread):
         print('Running Production...')    
         simulation.step({{Number_of_steps}})
         print('Done')
-        ''')
-
-        contents = renderer.render(template, script_structure)
-        print(contents)
-        # OpenMMScriptRunner(script_structure)
-
-
-
+        """

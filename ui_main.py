@@ -139,6 +139,7 @@ class MainWindow(QMainWindow):
 
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         Functions.Send_Available_Platforms_to_GUI(self)
+        self.platform_comboBox.currentTextChanged.connect(lambda: Functions.platform_comboBox_Changed(self))
         self.minimize_checkBox.stateChanged.connect(lambda: Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))

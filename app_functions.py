@@ -218,6 +218,14 @@ class Functions(MainWindow):
                 self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
                 self.platform_comboBox.setCurrentIndex(item_no + 1)
 
+    def platform_comboBox_Changed(self):
+        if self.platform_comboBox.currentText() in ["CPU", "Reference"]:
+            self.Device_Number_comboBox.setEnabled(False)
+            self.Device_ID_checkBox.setEnabled(False)
+
+        else:
+            self.Device_Number_comboBox.setEnabled(True)
+            self.Device_ID_checkBox.setEnabled(True)
 
 
 
