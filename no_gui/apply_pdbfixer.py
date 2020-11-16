@@ -12,7 +12,6 @@ import os
 
 
 def fix_pdb(pdb_id):
-    print(pdb_id)
     path = os.getcwd()
     if len(pdb_id) != 4:
         print("Creating PDBFixer...")
