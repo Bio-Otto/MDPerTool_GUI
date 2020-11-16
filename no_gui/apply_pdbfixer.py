@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from pdbfixer import PDBFixer
 from simtk.openmm.app.pdbfile import PDBFile
 from simtk.openmm import app

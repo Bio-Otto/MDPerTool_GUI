@@ -7,6 +7,7 @@ from Energy_decomposition_from_pdb_trajectory import *
 from response_time_creator import *
 from simtk import unit
 from simtk.openmm import *
+import time
 
 start_time = time.time()
 
@@ -49,6 +50,7 @@ perturbation_report_interval = 10
 dissipated_trajectory_name = 'energy_perturbation_trajectory'
 undissipated_trajectory_name = 'without_energy_perturbation_trajectory'
 
+
 """
 ################################################  CLASSIC MD PROCEDURE  ################################################
 Classic_MD_Engine(pdb_path=pdb_file, protein_ff=protein_ff, water_ff=water_ff, time_step=classic_md_time_step,
@@ -82,8 +84,6 @@ Reference_MD_Engine(pdb_path=last_pdb, state_file=state_file_name, protein_ff=pr
                     report_interval=perturbation_report_interval, write_to_dcd=write_to_dcd_trajectory,
                     dcd_write_period=1, write_to_xtc=write_to_xtc_trajectory, xtc_write_period=1,
                     undissipated_traj_name=undissipated_trajectory_name)
-"""
-## GLOBAL VARIABLES
 
 
 if write_to_dcd_trajectory:
@@ -105,46 +105,48 @@ print("\n--- %s seconds ---" % (time.time() - start_time))
 
 """
 
-print("Getting snapshots")
-reference_snapshots_list, modified_snapshots_list = read_model_from_multi_pdb(multi_pdb_name_for_without_perturbation,
-                                                                              multi_pdb_name_for_perturbation)
-print("Getting positions")
-all_list = reference_snapshots_list + modified_snapshots_list
+if __name__ == '__main__':
+    import argparse
+    """
+    ## CLASSIC MD PARAMETERS
+    
+    classic_md_time_step = 2.0  # femtosecond
+    nonbonded_cutoff = 12.0  # angstrom
+    water_padding = 10  # angstrom
+    Device_Index = False
+    Device_Index_Number = 1
+    classic_md_total_step = 3000
+    temperature = 310
+    
+    """
 
+    parser = argparse.ArgumentParser(description='The Program applying Energy Dissipation Concept using powerfull '
+                                                 'OpenMM Molecular Dynamic Toolkit, which also supports the Cuda '
+                                                 'platform. Each residual energy calculation required for the concept '
+                                                 'can be calculated using OpenMM''s flexible and useful infrastructure.' 
+                                                 'In addition, you can use the package only for energy decomposition. '
+                                                 'For this, it will be sufficient to specify a XTC or a DCD file '
+                                                 'in the script.')
 
-print(reference_snapshots_list)
-print(modified_snapshots_list)
+    parser.add_argument('-p', '--topology', type=str, nargs='+', help='Need *.pdb file for loading trajectory file',
+                        required=True)
 
+    parser.add_argument('-pff', '--protein_forcefield', choices=['amber03', 'amber10', 'amber96', 'amber99sb',
+                                                                 'amber99sbildn', 'charmm36'], nargs='?', type=str,
+                        help='Protein Forcefield (The program defaultly will use "amber96" forcefield)',
+                        required=False)
 
-position_list = get_snapshot_positions(all_list)
-
-
-# from multiprocessing import Process
-#
-# first = 0
-# processes = []
-# for m in range(3):
-#     last_res = first + 40
-#     p = Process(target=main, args=(all_list, position_list, first, last_res))
-#     p.start()
-#     time.sleep(0.3)
-#     processes.append(p)
-#     first = last_res
-#
-# for p in processes:
-#     p.join()
-
-
-main(all_list, position_list, 0, 448)
-
-for delete_filename in all_list:
-    if os.path.exists(delete_filename):
-        os.remove(delete_filename)
-    else:
-        print("The file does not exist")
+    parser.add_argument('-wff', '--water_forcefield', choices=['tip3p', 'tip5p', 'spce', 'tip4pew'], nargs='?',
+                        type=str, help='Water Forcefield (The program defaultly will use "tip3p" forcefield)',
+                        required=False)
 
 
 
-getResidueResponseTimes('reference_energy_file.csv', 'modified_energy_file.csv')
-"""
-print("\n--- %s seconds ---" % (time.time() - start_time))
+
+
+    parsed = parser.parse_args()
+    print('Result:', vars(parsed))
+
+
+
+    print("\n--- %s seconds ---" % (time.time() - start_time))
