@@ -73,7 +73,7 @@ def get_residue_atoms():
         RESIDUE_NAME[index] = residues[index].name
         per_residue_atoms[index] = list(indicated_res_atoms)
 
-    return per_residue_atoms, RESIDUE_NAME
+    return per_residue_atoms, RESIDUE_NAME, len(residues)
 
 
 def main(pdb_filename, pos_list, start_res, stop_res):
@@ -138,14 +138,14 @@ def main(pdb_filename, pos_list, start_res, stop_res):
     Nonbonded_F, Harmonic_BF, Harmonic_AF, Periodic_TF, NonBonded_Exception_Parameters = collect_all_parameters(system)
 
     # log = open('log_%s.txt' % model_number, 'a')
-    per_res_atoms_list, selected_res_name = get_residue_atoms()
+    per_res_atoms_list, selected_res_name, res_number = get_residue_atoms()
 
     # per_res_atoms_list, selected_res_name = get_residue_atoms()
 
     simulation.context.setPositions(modeller.positions)
     simulation.context.computeVirtualSites()
 
-    for res_num in range(start_res, stop_res, 1):  # for res_num in range(len(all_residues)):
+    for res_num in range(res_number):  # for res_num in range(len(all_residues)):
 
         by_pass_atoms_index = []
         for i in range(len(per_res_atoms_list[res_num])):
