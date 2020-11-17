@@ -13,10 +13,10 @@ class Classic_MD_Engine:
     def __init__(self, pdb_path, protein_ff='amber96', water_ff='tip3p', time_step=2.0, nonbondedCutoff=12.0,
                  water_padding=15, Device_Index=False, Device_Index_Number=1, total_Steps=300000, temp=310,
                  platform_name='OpenCL', properties=None, precision='single', friction_cofficient=1.0, minimize=True,
-                 minimize_steps=5000, CPU_Threads=2,
-                 equilibrate=True, equilibration_step=500, report_interval=500, write_system_xml=False,
-                 system_file_name='system.xml', state_file_name='state.xml', last_pdb_filename='last.pdb',
-                 write_to_dcd=False, dcd_write_period=50, write_to_xtc=False, xtc_write_period=50):
+                 minimize_steps=5000, CPU_Threads=2, equilibrate=True, equilibration_step=500, report_interval=500,
+                 write_system_xml=False, system_file_name='system.xml', state_file_name='state.xml',
+                 last_pdb_filename='last.pdb', write_to_dcd=False, dcd_write_period=50, write_to_xtc=False,
+                 xtc_write_period=50):
 
         print("Simulation parameters preparing for the start ...")
         self.Device_Index = Device_Index

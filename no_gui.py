@@ -106,6 +106,7 @@ print("\n--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == '__main__':
     import argparse
+    import multiprocessing
 
     parser = argparse.ArgumentParser(description='The Program applying Energy Dissipation Concept using powerfull '
                                                  'OpenMM Molecular Dynamic Toolkit, which also supports the Cuda '
@@ -114,30 +115,6 @@ if __name__ == '__main__':
                                                  'In addition, you can use the package only for energy decomposition. '
                                                  'For this, it will be sufficient to specify a XTC or a DCD file '
                                                  'in the script.')
-
-    """
-    platform_to_use = 'OpenCL'
-    properties = None
-    precision = 'single'
-    friction_cofficient = 1.0  # picosecond^-1
-    minimize = True
-    minimize_max_step = 500
-    CPU_Thread = 2
-    equilibrate = True
-    equilibration_step = 500
-    report_interval = 100
-    write_system_xml = False
-    system_file_name = 'system.xml'
-    state_file_name = 'state.xml'
-    last_pdb = 'last_structure.pdb'
-    write_to_dcd_trajectory = True
-    dcd_trajectory_write_period = 100
-    write_to_xtc_trajectory = False
-    xtc_trajectory_write_period = 100
-    """
-
-
-
 
     parser.add_argument('-p', '--topology', type=str, help='Need *.pdb file for loading trajectory file',
                         required=True)
@@ -152,8 +129,8 @@ if __name__ == '__main__':
 
     parser.add_argument('-lts', '--long_md_time_step', default=2.0, nargs='?',
                         type=float, help='The aim is to obtain the equilibrium state of the protein,'
-                                         ' whose population is the highest in the initial ensemble (The program '
-                                         'defaultly will use "2 femtosecond")',
+                                         ' whose population is the highest in the initial ensemble '
+                                         '(The program defaultly will use "2 femtosecond")',
                         required=False)
 
     parser.add_argument('-ts', '--long_md_total_step', default=300000, nargs='?',
@@ -186,10 +163,76 @@ if __name__ == '__main__':
                                                                             '<- gpu_id 0> and example for "CUDA": '
                                                                             '<- gpu-id 0,1>)', required=False)
 
-    parser.add_argument('-temp', '--temperature', nargs='?',
-                        type=float,
-                        help='The temperature unit is kelvin. (The program defaultly will use "310 Kelvin ")',
+    parser.add_argument('-temp', '--temperature', nargs='?', type=float, help='The temperature unit is kelvin. '
+                                                                              '(The program defaultly will use "310 '
+                                                                              'Kelvin ")', required=False)
+
+
+    parser.add_argument('-plt', '--platform', nargs='?', type=str, default='OpenCL', help='The program defaultly will '
+                                                                                          'use "OpenCL" platform',
                         required=False)
+
+    parser.add_argument('-precision', '--plt_precision', nargs='?', type=str, default='single', help='The program '
+                                                                                                     'defaultly will '
+                                                                                                     'use platform '
+                                                                                                     'precision as '
+                                                                                                     '"single"',
+                        required=False)
+
+    parser.add_argument('-nt', '--cpu_thread', nargs='?', type=int, default=multiprocessing.cpu_count()/2,
+                        help='If you chose "CPU" for simulation platform, the program automatically will use half of '
+                             'all threads. For this issue you can specify threads number by indicating <-nt>',
+                        required=False)
+
+    parser.add_argument('-friction', '--friction_coff', nargs='?', type=float, default=1.0, help='The program defaultly'
+                                                                                                 ' will use '
+                                                                                                 '"1.0 /picosecond"',
+                        required=False)
+
+    parser.add_argument('-minim', '--minimize', choices=[True, False], default=True, nargs='?', type=bool,
+                        help='The program defaultly will minimize system for 500 steps automatically. But you can by '
+                             'pass the minimize with -minim False', required=False)
+
+    parser.add_argument('-minim_step', '--minimize_step', default=500, nargs='?', type=int,
+                        help='The program defaultly will minimize system for 500 steps if mimimize option is not '
+                             '"False"', required=False)
+
+    parser.add_argument('-equ', '--equilibrate', choices=[True, False], default=True, nargs='?', type=bool,
+                        help='The program defaultly will equilibrate system for 500 steps. But you can by pass the '
+                             'equilibrate with -equ False', required=False)
+
+    parser.add_argument('-equ-step', '--equilibrate_step', default=500, nargs='?', type=int,
+                        help='The program defaultly will equilibrate system for 500 steps if equilibrate option is not '
+                             '"False"', required=False)
+
+    parser.add_argument('-ri', '--report_interval', default=100, nargs='?', type=int,
+                        help='The program defaultly will report situations every 100 steps.',
+                        required=False)
+
+    parser.add_argument('-wdcd', '--write_dcd', choices=[True, False], default=True, nargs='?', type=bool,
+                        help='The program defaultly will use dcd reporting. But you can exchange it with XTC file '
+                             'format', required=True)
+
+    parser.add_argument('-dcd-per', '--dcd_period', default=100, nargs='?', type=int,
+                        help='The program defaultly will report trajectories every 100 steps.',
+                        required=False)
+
+    parser.add_argument('-wxtc', '--write_xtc', choices=[True, False], default=False, nargs='?', type=bool,
+                        help='You can use XTC file format for output', required=False)
+
+    parser.add_argument('-xtc_per', '--xtc_period', default=100, nargs='?', type=int,
+                        help='If you use XTC write condition The program defaultly will report trajectories every '
+                             '100 steps. But you can change it by using <-xtc-per> argument', required=False)
+
+
+    #################################    ENERGY PERTURBATION SIMULATION ARGUMENTS    #################################
+
+    parser.add_argument('-pert_res', '--perturbed_residues', type=list, help='You must list the residue or residues '
+                                                                             'you want to perturbed.', required=True)
+
+    parser.add_argument('-speed_factor', '--velocity_speed_factor', type=int,
+                        help='Indicate how many times you want to increase the velocity of the residue atoms you want '
+                             'to perturbed.', required=True)
 
     parsed = parser.parse_args()
     print('Result:', vars(parsed))
@@ -202,10 +245,31 @@ if __name__ == '__main__':
                       time_step=parsed.long_md_time_step, nonbondedCutoff=parsed.nonbonded_cutoff,
                       water_padding=parsed.water_padding, Device_Index=parsed.use_device_index,
                       Device_Index_Number=parsed.device_index, total_Steps=parsed.long_md_total_step,
-                      temp=parsed.temperature)
+                      temp=parsed.temperature, platform_name=parsed.platform, precision=parsed.plt_precision,
+                      friction_cofficient=parsed.friction_coff, minimize=parsed.minimize,
+                      minimize_steps=parsed.minimize_step, CPU_Threads=parsed.cpu_thread,
+                      equilibrate=parsed.equilibrate, equilibration_step=parsed.equilibrate_step,
+                      report_interval=parsed.report_interval, write_to_dcd=parsed.write_dcd,
+                      dcd_write_period=parsed.dcd_period, write_to_xtc=parsed.write_xtc,
+                      xtc_write_period=parsed.xtc_period)
+
+    state_file_name = 'state.xml'
+    last_pdb = 'last_structure.pdb'
+
+    modify_atoms = convert_res_to_atoms(last_pdb, parsed.pert_res, 'CA')
+    print(modify_atoms)
+    name_of_changed_state_xml = change_velocity(state_file_name, parsed.velocity_speed_factor, modify_atoms)
 
 
+    """
+    speed_factor = 4
+    perturbation_total_Steps = 2000
+    perturbation_time_step = 1.0
+    perturbation_report_interval = 10
+    dissipated_trajectory_name = 'energy_perturbation_trajectory'
+    undissipated_trajectory_name = 'without_energy_perturbation_trajectory'
+    """
 
+    # python no_gui.py -p no_gui/2j0w.pdb -pff amber10 -wff tip3p -lts 3.0 -ts 3000 -nbc 10.0 -wp 10 -dnx-use True -dnx 0 -temp 300 -wdcd True
 
-
-    # python no_gui.py -p /no_gui/2j0w.pdb -pff amber10 -wff tip3p -lts 1.0 -ts 3000 -nbc 10.0 -wp 10 -dnx-use True -dnx 0 -temp 300
+    # python no_gui.py -p no_gui/2j0w.pdb -pff amber10 -wff tip3p -lts 3.0 -ts 3000 -nbc 10.0 -wp 10 -dnx-use True -dnx 0 -temp 300 -wdcd True
