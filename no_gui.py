@@ -9,105 +9,20 @@ from simtk import unit
 from simtk.openmm import *
 import time
 
-start_time = time.time()
-
-## CLASSIC MD PARAMETERS
-pdb_file = '2j0w.pdb'  # Inıtıal pdb structure
-protein_ff = 'charmm36'  # [amber03, amber10, amber96, amber99sb, amber99sbildn] === [charmm36]
-water_ff = 'tip5p'  # [tip3p, tip5p, spce, tip4pew] === [spce, tip3p-pme-b, tip3p-pme-f, tip5p]
-classic_md_time_step = 2.0  # femtosecond
-nonbonded_cutoff = 12.0  # angstrom
-water_padding = 10  # angstrom
-Device_Index = False
-Device_Index_Number = 1
-classic_md_total_step = 3000
-temperature = 310
-platform_to_use = 'OpenCL'
-properties = None
-precision = 'single'
-friction_cofficient = 1.0  # picosecond^-1
-minimize = True
-minimize_max_step = 500
-CPU_Thread = 2
-equilibrate = True
-equilibration_step = 500
-report_interval = 100
-write_system_xml = False
-system_file_name = 'system.xml'
-state_file_name = 'state.xml'
-last_pdb = 'last_structure.pdb'
-write_to_dcd_trajectory = True
-dcd_trajectory_write_period = 100
-write_to_xtc_trajectory = False
-xtc_trajectory_write_period = 100
-
-## PERTURBATION DYNAMICS PARAMETERS
-pertured_residue = ['SER345']
-speed_factor = 4
-perturbation_total_Steps = 2000
-perturbation_time_step = 1.0
-perturbation_report_interval = 10
-dissipated_trajectory_name = 'energy_perturbation_trajectory'
-undissipated_trajectory_name = 'without_energy_perturbation_trajectory'
-
-"""
-################################################  CLASSIC MD PROCEDURE  ################################################
-Classic_MD_Engine(pdb_path=pdb_file, protein_ff=protein_ff, water_ff=water_ff, time_step=classic_md_time_step,
-                  nonbondedCutoff=nonbonded_cutoff, water_padding=water_padding, Device_Index=Device_Index,
-                  Device_Index_Number=Device_Index_Number, total_Steps=classic_md_total_step, temp=temperature,
-                  platform_name=platform_to_use, properties=properties, precision=precision,
-                  friction_cofficient=friction_cofficient, minimize=minimize, minimize_steps=minimize_max_step,
-                  CPU_Threads=CPU_Thread, equilibrate=equilibrate, equilibration_step=equilibration_step,
-                  report_interval=report_interval, write_system_xml=write_system_xml, system_file_name=system_file_name,
-                  state_file_name=state_file_name, last_pdb_filename=last_pdb, write_to_dcd=write_to_dcd_trajectory,
-                  dcd_write_period=dcd_trajectory_write_period, write_to_xtc=write_to_xtc_trajectory,
-                  xtc_write_period=xtc_trajectory_write_period)
-
-##############################################  DISSIPATION MD PROCEDURE  ##############################################
-modify_atoms = convert_res_to_atoms(last_pdb, pertured_residue, 'CA')
-print(modify_atoms)
-name_of_changed_state_xml = change_velocity(state_file_name, 4, modify_atoms)
-
-Dissipation_MD_Engine(pdb_path=last_pdb, state_file=name_of_changed_state_xml, protein_ff=protein_ff, water_ff=water_ff,
-                      time_step=perturbation_time_step, nonbondedCutoff=nonbonded_cutoff, Device_Index=Device_Index,
-                      Device_Index_Number=Device_Index_Number, dissipation_total_Steps=perturbation_total_Steps,
-                      platform_name=platform_to_use, properties=properties, precision=precision,
-                      CPU_Threads=CPU_Thread, report_interval=perturbation_report_interval,
-                      write_to_dcd=write_to_dcd_trajectory, dcd_write_period=1, write_to_xtc=write_to_xtc_trajectory,
-                      xtc_write_period=1, dissipated_traj_name=dissipated_trajectory_name)
-
-Reference_MD_Engine(pdb_path=last_pdb, state_file=state_file_name, protein_ff=protein_ff, water_ff=water_ff,
-                    time_step=perturbation_time_step, nonbondedCutoff=nonbonded_cutoff, Device_Index=Device_Index,
-                    Device_Index_Number=Device_Index_Number, reference_total_Steps=perturbation_total_Steps,
-                    platform_name=platform_to_use, properties=properties, precision=precision, CPU_Threads=CPU_Thread,
-                    report_interval=perturbation_report_interval, write_to_dcd=write_to_dcd_trajectory,
-                    dcd_write_period=1, write_to_xtc=write_to_xtc_trajectory, xtc_write_period=1,
-                    undissipated_traj_name=undissipated_trajectory_name)
-
-
-if write_to_dcd_trajectory:
-    reference_traj_file_for_pos = undissipated_trajectory_name + '.dcd'
-    dissipation_traj_file_for_pos = dissipated_trajectory_name + '.dcd'
-
-if write_to_xtc_trajectory:
-    reference_traj_file_for_pos = undissipated_trajectory_name + '.xtc'
-    dissipation_traj_file_for_pos = dissipated_trajectory_name + '.xtc'
-
-position_list, unwrap_pdb = get_openmm_pos_from_traj(last_pdb, reference_traj_file_for_pos,
-                                                     dissipation_traj_file_for_pos, write_dcd=False)
-
-main(unwrap_pdb, position_list, 0, 250)
-
-getResidueResponseTimes('reference_energy_file.csv', 'modified_energy_file.csv')
-
-print("\n--- %s seconds ---" % (time.time() - start_time))
-
-"""
 
 if __name__ == '__main__':
     import argparse
-    import multiprocessing
+    import multiprocessing as mp
 
+    ### VARIABLES
+    state_file_name = 'state.xml'
+    last_pdb = 'last_structure.pdb'
+    dissipated_trajectory_name = 'energy_perturbation_trajectory'
+    undissipated_trajectory_name = 'without_energy_perturbation_trajectory'
+    reference_traj_file_for_pos = str
+    dissipation_traj_file_for_pos = str
+
+    ### PARSER
     parser = argparse.ArgumentParser(description='The Program applying Energy Dissipation Concept using powerfull '
                                                  'OpenMM Molecular Dynamic Toolkit, which also supports the Cuda '
                                                  'platform. Each residual energy calculation required for the concept '
@@ -127,119 +42,103 @@ if __name__ == '__main__':
                         type=str, help='Water Forcefield (The program defaultly will use "tip3p" forcefield)',
                         required=False)
 
-    parser.add_argument('-lts', '--long_md_time_step', default=2.0, nargs='?',
-                        type=float, help='The aim is to obtain the equilibrium state of the protein,'
-                                         ' whose population is the highest in the initial ensemble '
-                                         '(The program defaultly will use "2 femtosecond")',
+    parser.add_argument('-lts', '--long_md_time_step', default=2.0, nargs='?', type=float,
+                        help='The aim is to obtain the equilibrium state of the protein, whose population is the '
+                             'highest in the initial ensemble (The program defaultly will use "2 femtosecond")',
                         required=False)
 
-    parser.add_argument('-ts', '--long_md_total_step', default=300000, nargs='?',
-                        type=int, help='It is the total number of steps the simulation wants to run. (The program '
-                                       'defaultly will use "300000")', required=False)
+    parser.add_argument('-ts', '--long_md_total_step', default=300000, nargs='?', type=int,
+                        help='It is the total number of steps the simulation wants to run. (The program defaultly will '
+                             'use "300000")', required=False)
 
-    parser.add_argument('-nbc', '--nonbonded_cutoff', default=12.0, nargs='?',
-                        type=float, help='cut-off was applied to the non-covalent interactions. (The program '
-                                         'defaultly will use "12 Å ") NOT: Switching distance must satisfy 0 <= '
-                                         'r_switch < r_cutoff',
-                        required=False)
+    parser.add_argument('-nbc', '--nonbonded_cutoff', default=12.0, nargs='?', type=float, required=False,
+                        help='cut-off was applied to the non-covalent interactions. (The program defaultly will use '
+                             '"12 Å ") NOT: Switching distance must satisfy 0 <= r_switch < r_cutoff')
 
-    parser.add_argument('-wp', '--water_padding', default=15, nargs='?', type=int, help='The program determining '
-                                                                                        'largest dimension of '
-                                                                                        'protein, and a cubic box of'
-                                                                                        ' size(largest dimension)+'
-                                                                                        '2*padding is used. (The '
-                                                                                        'program defaultly will use '
-                                                                                        '"15 Å")', required=False)
+    parser.add_argument('-wp', '--water_padding', default=15, nargs='?', type=int, required=False,
+                        help='The program determining largest dimension of protein, and a cubic box of size(largest '
+                             'dimension)+2*padding is used. (The program defaultly will use "15 Å")')
 
-    parser.add_argument('-dnx-use', '--use_device_index', choices=[True, False], default=False, nargs='?',
-                        type=bool, help='This option can only be used with OpenCL or CUDA platform. You can also '
-                                        'specify the gpu number you want on systems with more than one GPU. NOTE: '
-                                        'OpenCL must use only one gpu. (eg: <- gpu_id 0> or <- gpu-id 0,1>)',
-                        required=False)
+    parser.add_argument('-dnx-use', '--use_device_index', choices=[True, False], default=False, nargs='?', type=bool,
+                        help='This option can only be used with OpenCL or CUDA platform. You can also specify the gpu '
+                             'number you want on systems with more than one GPU. NOTE: OpenCL must use only one gpu. '
+                             '(eg: <- gpu_id 0> or <- gpu-id 0,1>)', required=False)
 
-    parser.add_argument('-dnx', '--device_index', nargs='?', type=int, help='This option can only be used with OpenCL '
-                                                                            'or CUDA platform. NOTE: OpenCL must use '
-                                                                            'only one gpu. (eg. for "OpenCL": '
-                                                                            '<- gpu_id 0> and example for "CUDA": '
-                                                                            '<- gpu-id 0,1>)', required=False)
+    parser.add_argument('-dnx', '--device_index', nargs='?', type=int, required=False,
+                        help='This option can only be used with OpenCL or CUDA platform. NOTE: OpenCL must use only one'
+                             ' gpu. (eg. for "OpenCL": <- gpu_id 0> and example for "CUDA": <- gpu-id 0,1>)')
 
-    parser.add_argument('-temp', '--temperature', nargs='?', type=float, help='The temperature unit is kelvin. '
-                                                                              '(The program defaultly will use "310 '
-                                                                              'Kelvin ")', required=False)
+    parser.add_argument('-temp', '--temperature', nargs='?', type=float, required=False,
+                        help='The temperature unit is kelvin. (The program defaultly will use "310 Kelvin")')
 
+    parser.add_argument('-plt', '--platform', nargs='?', type=str, default='OpenCL', required=False,
+                        help='The program defaultly will use "OpenCL" platform')
 
-    parser.add_argument('-plt', '--platform', nargs='?', type=str, default='OpenCL', help='The program defaultly will '
-                                                                                          'use "OpenCL" platform',
-                        required=False)
+    parser.add_argument('-precision', '--plt_precision', nargs='?', type=str, default='single', required=False,
+                        help='The program defaultly will use platform precision as "single"')
 
-    parser.add_argument('-precision', '--plt_precision', nargs='?', type=str, default='single', help='The program '
-                                                                                                     'defaultly will '
-                                                                                                     'use platform '
-                                                                                                     'precision as '
-                                                                                                     '"single"',
-                        required=False)
-
-    parser.add_argument('-nt', '--cpu_thread', nargs='?', type=int, default=multiprocessing.cpu_count()/2,
+    parser.add_argument('-nt', '--cpu_thread', nargs='?', type=int, default=mp.cpu_count() / 2, required=False,
                         help='If you chose "CPU" for simulation platform, the program automatically will use half of '
-                             'all threads. For this issue you can specify threads number by indicating <-nt>',
-                        required=False)
+                             'all threads. For this issue you can specify threads number by indicating <-nt>')
 
-    parser.add_argument('-friction', '--friction_coff', nargs='?', type=float, default=1.0, help='The program defaultly'
-                                                                                                 ' will use '
-                                                                                                 '"1.0 /picosecond"',
-                        required=False)
+    parser.add_argument('-friction', '--friction_coff', nargs='?', type=float, default=1.0, required=False,
+                        help='The program defaultly will use "1.0 /picosecond"')
 
     parser.add_argument('-minim', '--minimize', choices=[True, False], default=True, nargs='?', type=bool,
-                        help='The program defaultly will minimize system for 500 steps automatically. But you can by '
-                             'pass the minimize with -minim False', required=False)
+                        required=False, help='The program defaultly will minimize system for 500 steps automatically. '
+                                             'But you can by pass the minimize with -minim False')
 
-    parser.add_argument('-minim_step', '--minimize_step', default=500, nargs='?', type=int,
+    parser.add_argument('-minim_step', '--minimize_step', default=500, nargs='?', type=int, required=False,
                         help='The program defaultly will minimize system for 500 steps if mimimize option is not '
-                             '"False"', required=False)
+                             '"False"')
 
     parser.add_argument('-equ', '--equilibrate', choices=[True, False], default=True, nargs='?', type=bool,
-                        help='The program defaultly will equilibrate system for 500 steps. But you can by pass the '
-                             'equilibrate with -equ False', required=False)
+                        required=False, help='The program defaultly will equilibrate system for 500 steps. But you can'
+                                             ' by pass the equilibrate with -equ False')
 
-    parser.add_argument('-equ-step', '--equilibrate_step', default=500, nargs='?', type=int,
-                        help='The program defaultly will equilibrate system for 500 steps if equilibrate option is not '
-                             '"False"', required=False)
+    parser.add_argument('-equ-step', '--equilibrate_step', default=500, nargs='?', type=int, required=False,
+                        help='The program defaultly will equilibrate system for 500 steps if equilibrate option is not'
+                             ' "False"')
 
-    parser.add_argument('-ri', '--report_interval', default=100, nargs='?', type=int,
-                        help='The program defaultly will report situations every 100 steps.',
-                        required=False)
+    parser.add_argument('-ri', '--report_interval', default=100, nargs='?', type=int, required=False,
+                        help='The program defaultly will report situations every 100 steps.')
 
     parser.add_argument('-wdcd', '--write_dcd', choices=[True, False], default=True, nargs='?', type=bool,
-                        help='The program defaultly will use dcd reporting. But you can exchange it with XTC file '
-                             'format', required=True)
+                        required=True, help='The program defaultly will use dcd reporting. But you can exchange it with'
+                                            ' XTC file format')
 
-    parser.add_argument('-dcd-per', '--dcd_period', default=100, nargs='?', type=int,
-                        help='The program defaultly will report trajectories every 100 steps.',
-                        required=False)
+    parser.add_argument('-dcd-per', '--dcd_period', default=100, nargs='?', type=int, required=False,
+                        help='The program defaultly will report trajectories every 100 steps.')
 
     parser.add_argument('-wxtc', '--write_xtc', choices=[True, False], default=False, nargs='?', type=bool,
-                        help='You can use XTC file format for output', required=False)
+                        required=False, help='You can use XTC file format for output', )
 
-    parser.add_argument('-xtc_per', '--xtc_period', default=100, nargs='?', type=int,
-                        help='If you use XTC write condition The program defaultly will report trajectories every '
-                             '100 steps. But you can change it by using <-xtc-per> argument', required=False)
+    parser.add_argument('-xtc_per', '--xtc_period', default=100, nargs='?', type=int, required=False,
+                        help='If you use XTC write condition The program defaultly will report trajectories every 100'
+                             ' steps. But you can change it by using <-xtc-per> argument')
 
 
     #################################    ENERGY PERTURBATION SIMULATION ARGUMENTS    #################################
 
-    parser.add_argument('-pert_res', '--perturbed_residues', type=list, help='You must list the residue or residues '
-                                                                             'you want to perturbed.', required=True)
+    parser.add_argument('-pert_res', '--perturbed_residues', type=list, required=True,
+                        help='You must list the residue or residues you want to perturbed.')
 
-    parser.add_argument('-speed_factor', '--velocity_speed_factor', type=int,
+    parser.add_argument('-speed_factor', '--velocity_speed_factor', type=int, required=True,
                         help='Indicate how many times you want to increase the velocity of the residue atoms you want '
-                             'to perturbed.', required=True)
+                             'to perturbed.', )
+
+    parser.add_argument('-pts', '--perturbation_total_step', default=2000, type=int, required=False,
+                        help='It is the total number of steps the perturbation simulation wants to run. '
+                             '(The program defaultly will use "2000")')
+
+    parser.add_argument('-per_ts', '--perturbation_time_step', default=1.0, nargs='?', type=float, required=False,
+                        help='(The program defaultly will use "1 femtosecond")')
+
+    parser.add_argument('-per_ri', '--perturbation_report_interval', default=10, nargs='?', type=int, required=False,
+                        help='The program defaultly will report perturbation simulation reports every 10 steps.')
 
     parsed = parser.parse_args()
-    print('Result:', vars(parsed))
-
-    print("\n--- %s seconds ---" % (time.time() - start_time))
-
-    print(type(parsed.topology))
+    start_time = time.time()
 
     Classic_MD_Engine(pdb_path=parsed.topology, protein_ff=parsed.protein_ff, water_ff=parsed.water_ff,
                       time_step=parsed.long_md_time_step, nonbondedCutoff=parsed.nonbonded_cutoff,
@@ -253,22 +152,45 @@ if __name__ == '__main__':
                       dcd_write_period=parsed.dcd_period, write_to_xtc=parsed.write_xtc,
                       xtc_write_period=parsed.xtc_period)
 
-    state_file_name = 'state.xml'
-    last_pdb = 'last_structure.pdb'
-
     modify_atoms = convert_res_to_atoms(last_pdb, parsed.pert_res, 'CA')
     print(modify_atoms)
     name_of_changed_state_xml = change_velocity(state_file_name, parsed.velocity_speed_factor, modify_atoms)
 
+    Dissipation_MD_Engine(pdb_path=last_pdb, state_file=name_of_changed_state_xml, protein_ff=parsed.protein_ff,
+                          water_ff=parsed.water_ff, time_step=parsed.perturbation_time_step,
+                          nonbondedCutoff=parsed.nonbonded_cutoff, Device_Index=parsed.use_device_index,
+                          Device_Index_Number=parsed.device_index,
+                          dissipation_total_Steps=parsed.perturbation_total_step,
+                          platform_name=parsed.platform, precision=parsed.plt_precision,
+                          CPU_Threads=parsed.cpu_thread, report_interval=parsed.perturbation_report_interval,
+                          write_to_dcd=parsed.write_dcd, dcd_write_period=1, write_to_xtc=parsed.write_xtc,
+                          xtc_write_period=1, dissipated_traj_name=dissipated_trajectory_name)
 
-    """
-    speed_factor = 4
-    perturbation_total_Steps = 2000
-    perturbation_time_step = 1.0
-    perturbation_report_interval = 10
-    dissipated_trajectory_name = 'energy_perturbation_trajectory'
-    undissipated_trajectory_name = 'without_energy_perturbation_trajectory'
-    """
+    Reference_MD_Engine(pdb_path=last_pdb, state_file=state_file_name, protein_ff=parsed.protein_ff,
+                        water_ff=parsed.water_ff, time_step=parsed.perturbation_time_step,
+                        nonbondedCutoff=parsed.nonbonded_cutoff, Device_Index=parsed.use_device_index,
+                        Device_Index_Number=parsed.device_index, reference_total_Steps=parsed.perturbation_total_step,
+                        platform_name=parsed.platform, precision=parsed.plt_precision, CPU_Threads=parsed.cpu_thread,
+                        report_interval=parsed.perturbation_report_interval, write_to_dcd=parsed.write_dcd,
+                        dcd_write_period=1, write_to_xtc=parsed.write_xtc, xtc_write_period=1,
+                        undissipated_traj_name=undissipated_trajectory_name)
+
+    if parsed.write_dcd:
+        reference_traj_file_for_pos = undissipated_trajectory_name + '.dcd'
+        dissipation_traj_file_for_pos = dissipated_trajectory_name + '.dcd'
+
+    if parsed.write_xtc:
+        reference_traj_file_for_pos = undissipated_trajectory_name + '.xtc'
+        dissipation_traj_file_for_pos = dissipated_trajectory_name + '.xtc'
+
+    position_list, unwrap_pdb = get_openmm_pos_from_traj(last_pdb, reference_traj_file_for_pos,
+                                                         dissipation_traj_file_for_pos, write_dcd=False)
+
+    main(unwrap_pdb, position_list, 0, 250)
+
+    getResidueResponseTimes('reference_energy_file.csv', 'modified_energy_file.csv')
+
+    print("\n--- %s seconds ---" % (time.time() - start_time))
 
     # python no_gui.py -p no_gui/2j0w.pdb -pff amber10 -wff tip3p -lts 3.0 -ts 3000 -nbc 10.0 -wp 10 -dnx-use True -dnx 0 -temp 300 -wdcd True
 
