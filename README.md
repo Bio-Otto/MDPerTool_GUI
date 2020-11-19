@@ -10,10 +10,10 @@ For terminal usage just use;
 $ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
 ```
 
->**_-p_**  -->  Give the absolute path of your pdb file. 
-> **_-wdcd_**  -->  The program defaultly will use dcd reporting. But you can exchange it with XTC file format using ```-wdcd False -wxtc True``` argument
-> **_-pert_res_**  -->  You must list the residue or residues you want to perturbed.
-> **_-speed_factor_**  -->  Indicate how many times you want to increase the velocity of the residue atoms you want to perturbed.
+* __-p__  -->  Give the absolute path of your pdb file. 
+* __-wdcd__  -->  The program defaultly will use dcd reporting. But you can exchange it with XTC file format using ```-wdcd False -wxtc True``` argument
+* __-pert_res__  -->  You must list the residue or residues you want to perturbed.
+* __-speed_factor__  -->  Indicate how many times you want to increase the velocity of the residue atoms you want to perturbed.
 
 
 ## Then run it.
