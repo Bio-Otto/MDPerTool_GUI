@@ -43,7 +43,7 @@ $ python no_gui.py -h
 For production Molecular Dynamic Simulation just type...
 
 ```sh
-$ no_gui.py -p <pdb file> -pff charmm36 -wff tip5p -wdcd
+$ no_gui.py -p <pdb file> -pff <charmm36> -wff <tip5p> -wdcd <True>
 ```
 
 The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
