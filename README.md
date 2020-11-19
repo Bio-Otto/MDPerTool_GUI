@@ -1,7 +1,7 @@
 # Energy Dissipation Concept with MDPERTOOL v0.1 
 
 [![Powered by |Ozbek' Lab](https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png)](http://compbio.bioe.eng.marmara.edu.tr/)
-[![build succeeded](https://img.shields.io/badge/<MDPERTOOL>-<v0.1>-<ff69b4)]
+![build succeeded](https://img.shields.io/badge/<MDPERTOOL>-<v0.1>-<ff69b4)
 A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
 
 For terminal usage just use; 
@@ -98,4 +98,3 @@ MIT
 
 
 [MDPERTOOL]: <https://github.com/Bio-Otto/MDPERTOOL_v01>
-[version]: <https://img.shields.io/badge/<MDPERTOOL>-<v0.1>-<ff69b4>>
