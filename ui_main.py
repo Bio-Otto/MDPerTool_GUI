@@ -23,7 +23,7 @@ from icons import *
 
 # IMPORT FUNCTIONS
 from ui_functions import *
-
+from builder import *
 # from app_functions import *
 # from browse_menu import browse_file
 
@@ -137,7 +137,15 @@ class MainWindow(QMainWindow):
         self.PDB_ID_lineEdit.textChanged.connect(lambda: Functions.PDB_ID_lineEdit(self))
         self.fetch_pdb_Button.clicked.connect(lambda: Functions.Fetch_PDB_File(self))
 
-        # self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
+        self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
+        Functions.Send_Available_Platforms_to_GUI(self)
+        self.platform_comboBox.currentTextChanged.connect(lambda: Functions.platform_comboBox_Changed(self))
+        self.minimize_checkBox.stateChanged.connect(lambda: Functions.minimize_Step_isVisible(self))
+        self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
+        self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
+        self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
+        self.Run.clicked.connect(lambda: Advanced.send_arg_to_Engine(self))
+
 
         ########################################################################
         #
@@ -155,7 +163,7 @@ class MainWindow(QMainWindow):
         try:
             upload_condition, pdb_path = Functions.browse_pdbFile(self)
 
-            if path.exists(pdb_path):
+            if os.path.exists(pdb_path):
                 fixer = PDBFixer(pdb_path)
                 fixer.removeHeterogens(keepWater=False)
 
@@ -172,6 +180,8 @@ class MainWindow(QMainWindow):
                 modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                          ph=7, chains_to_remove=delete_chains)
 
+                self.upload_pdb_textEdit.setText(modified_pdb)
+
                 self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
                 for i in self.combobox:
                     self.res1_comboBox.addItem(str(i))
@@ -187,6 +197,16 @@ class MainWindow(QMainWindow):
 
     def output_folder_browse(self):
         Functions.output_file(self)
+
+    def Stocasthic_Changed(self):
+        Functions.Stochastic_changed(self)
+
+
+
+
+
+
+
 
     ########################################################################
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS
@@ -312,7 +332,7 @@ class SplashScreen(QMainWindow):
         self.timer.start(35)
 
         # CHANGE DESCRIPTION
-        self.label_title.setText("MDPerTool V0.1")
+        self.label_title.setText("MDPerTool v0.1")
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
         # Initial Text
         self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")
