@@ -14,39 +14,17 @@ For terminal usage just use **_python no_gui.py -p pdb_file -wdcd True -pert_res
 
 ### Also you can check full functional parameters with typing <**_python no_gui.py -h_**>
 
-usage: no_gui.py [-h] -p TOPOLOGY
-                 [-pff [{amber03,amber10,amber96,amber99sb,amber99sbildn,charmm36}]]
-                 [-wff [{tip3p,tip5p,spce,tip4pew}]]
-                 [-lts [LONG_MD_TIME_STEP]] [-ts [LONG_MD_TOTAL_STEP]]
-                 [-nbc [NONBONDED_CUTOFF]] [-wp [WATER_PADDING]]
-                 [-dnx-use [{True,False}]] [-dnx [DEVICE_INDEX]]
-                 [-temp [TEMPERATURE]] [-plt [PLATFORM]]
-                 [-precision [PLT_PRECISION]] [-nt [CPU_THREAD]]
-                 [-friction [FRICTION_COFF]] [-minim [{True,False}]]
-                 [-minim_step [MINIMIZE_STEP]] [-equ [{True,False}]]
-                 [-equ-step [EQUILIBRATE_STEP]] [-ri [REPORT_INTERVAL]] -wdcd
-                 [{True,False}] [-dcd-per [DCD_PERIOD]] [-wxtc [{True,False}]]
-                 [-xtc_per [XTC_PERIOD]] -pert_res PERTURBED_RESIDUES
-                 -speed_factor VELOCITY_SPEED_FACTOR
-                 [-pts PERTURBATION_TOTAL_STEP]
-                 [-per_ts [PERTURBATION_TIME_STEP]]
-                 [-per_ri [PERTURBATION_REPORT_INTERVAL]]
 
-The Program applying Energy Dissipation Concept using powerfull OpenMM
-Molecular Dynamic Toolkit, which also supports the Cuda platform. Each
-residual energy calculation required for the concept can be calculated using
-OpenMMs flexible and useful infrastructure.In addition, you can use the
-package only for energy decomposition. For this, it will be sufficient to
-specify a XTC or a DCD file in the script.
+The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
 
 optional arguments:
   -h, --help            show this help message and exit
   -p TOPOLOGY, --topology TOPOLOGY
-                        Need *.pdb file for loading trajectory file
-  -pff [{amber03,amber10,amber96,amber99sb,amber99sbildn,charmm36}], --protein_ff [{amber03,amber10,amber96,amber99sb,amber99sbildn,charmm36}]
+                        Need .pdb file for loading trajectory file
+  -pff [{amber03,amber10,amber96,amber99sb,amber99sbildn,charmm36}]
                         Protein Forcefield (The program defaultly will use
                         "amber96" forcefield)
-  -wff [{tip3p,tip5p,spce,tip4pew}], --water_ff [{tip3p,tip5p,spce,tip4pew}]
+  -wff [{tip3p,tip5p,spce,tip4pew}]
                         Water Forcefield (The program defaultly will use
                         "tip3p" forcefield)
   -lts [LONG_MD_TIME_STEP], --long_md_time_step [LONG_MD_TIME_STEP]
@@ -64,9 +42,9 @@ optional arguments:
                         r_cutoff
   -wp [WATER_PADDING], --water_padding [WATER_PADDING]
                         The program determining largest dimension of protein,
-                        and a cubic box of size(largest dimension)+2*padding
+                        and a cubic box of size(largest dimension)+2.padding
                         is used. (The program defaultly will use "15 Å")
-  -dnx-use [{True,False}], --use_device_index [{True,False}]
+  -dnx-use [{True,False}]
                         This option can only be used with OpenCL or CUDA
                         platform. You can also specify the gpu number you want
                         on systems with more than one GPU. NOTE: OpenCL must
