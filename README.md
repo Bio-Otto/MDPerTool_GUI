@@ -4,12 +4,16 @@
 
 A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
 
-For terminal usage just use **_python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4_**
+For terminal usage just use; 
 
-* **_-p_**    --> Give the absolute path of your pdb file. 
-* **_-wdcd_**    --> The program defaultly will use dcd reporting. But you can exchange it with XTC file format using **_-wdcd False -wxtc True_** argument
-* **_-pert_res_**   --> You must list the residue or residues you want to perturbed.
-* **_-speed_factor_**   --> Indicate how many times you want to increase the velocity of the residue atoms you want to perturbed.
+```sh
+$ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
+```
+
+>**_-p_**  -->  Give the absolute path of your pdb file. 
+> **_-wdcd_**  -->  The program defaultly will use dcd reporting. But you can exchange it with XTC file format using ```**_-wdcd False -wxtc True_**``` argument
+> **_-pert_res_**  -->  You must list the residue or residues you want to perturbed.
+> **_-speed_factor_**  -->  Indicate how many times you want to increase the velocity of the residue atoms you want to perturbed.
 
 
 ## Then run it.
@@ -30,6 +34,55 @@ MDPERTOOL uses a number of open source projects to work properly:
 
 And of course MDPERTOOL v0.1 itself is open source with a [public repository][MDPERTOOL] on GitHub.
 
+### Also you can check full functional parameters with typing 
+
+```sh
+$ python no_gui.py -h
+```
+
+The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
+
+# New Features!
+
+  - Import a HTML file and watch it magically convert to Markdown
+  - Drag and drop images (requires your Dropbox account be linked)
+
+### Installation
+
+```sh
+$ cd MDPERTOOL_v01
+$ python setup.py --install
+```
+
+For production Molecular Dynamic Simulation just type...
+
+```sh
+$ no_gui.py -p <pdb file> -pff charmm36 -wff tip5p -wdcd
+```
+
+### Features of MDPERTOOL v0.1
+
+MDPERTOOL is currently extended with the following features. Instructions on how to use them in your own works are linked below.
+
+| Feature | README |
+| ------ | ------ |
+| Each Residue Decomposition | [plugins/dropbox/README.md][MDPERTOOL] |
+| Molecular Dynamic Simulation | [plugins/github/README.md][MDPERTOOL] |
+| Energy Dissipation Network | [plugins/googledrive/README.md][MDPERTOOL] |
+| Free Energy Calculations | [plugins/onedrive/README.md][MDPERTOOL] |
+
+### Development
+
+Want to contribute?
+Get branch and Join us to make MDPERTOOL great!
+
+Open your favorite Terminal and run these commands.
+
+First Tab:
+```sh
+$ node app
+```
+
 ### Todos
 
  - Write MORE Tests
@@ -47,10 +100,3 @@ MIT
 
 
 [MDPERTOOL]: <https://github.com/Bio-Otto/MDPERTOOL_v01>
-
-### Also you can check full functional parameters with typing <**_python no_gui.py -h_**>
-
-
-The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
-
-
