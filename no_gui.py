@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
     #################################    ENERGY PERTURBATION SIMULATION ARGUMENTS    #################################
 
-    parser.add_argument('-pert_res', '--perturbed_residues', type=list, required=True,
+    parser.add_argument('-pert_res', '--perturbed_residues', nargs='+', required=True,
                         help='You must list the residue or residues you want to perturbed.')
 
     parser.add_argument('-speed_factor', '--velocity_speed_factor', type=int, required=True,
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                       dcd_write_period=parsed.dcd_period, write_to_xtc=parsed.write_xtc,
                       xtc_write_period=parsed.xtc_period)
 
-    modify_atoms = convert_res_to_atoms(last_pdb, parsed.pert_res, 'CA')
+    modify_atoms = convert_res_to_atoms(last_pdb, parsed.perturbed_residues, 'CA')
     print(modify_atoms)
     name_of_changed_state_xml = change_velocity(state_file_name, parsed.velocity_speed_factor, modify_atoms)
 
