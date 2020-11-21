@@ -16,8 +16,10 @@ class Advanced(QtCore.QThread):
     def send_arg_to_Engine(self):
         rigid_water = True
         minimize = True
+        equilubrate = True
         no_minimize_value = True
         DCD_Reporter = True
+        XTC_Reporter =False
         State_Data_Reporter = True
         Nonbounded_cutoff_active = True
         Additional_Integrator = False
@@ -26,6 +28,8 @@ class Advanced(QtCore.QThread):
         Device_ID_active = False
         precision = 'single'
         water_active = False
+        equilubrate_steps = self.Max_equilubrate_steps_textEdit.toPlainText()
+        StateData_freq = self.StateData_frequency_textEdit.toPlainText()
         # global selected_platform
 
         print("Simulation parameters preparing for the start ...")
@@ -38,7 +42,8 @@ class Advanced(QtCore.QThread):
 
         if self.protein_forcefield_comboBox.currentText() == 'charmm36':
             print("Protein FF: %s" % self.protein_ff)
-            self.water_ff = '%s/%s.xml' % (self.protein_forcefield_comboBox.currentText(), self.water_forcefield_comboBox.currentText())
+            self.water_ff = '%s/%s.xml' % (
+                self.protein_forcefield_comboBox.currentText(), self.water_forcefield_comboBox.currentText())
             print("Water FF: %s" % self.water_ff)
         else:
             self.water_ff = '%s.xml' % self.water_forcefield_comboBox.currentText()
@@ -89,12 +94,37 @@ class Advanced(QtCore.QThread):
         if not self.minimize_checkBox.isChecked():
             minimize = False
 
+        if not self.equilubrate_checkBox.isChecked():
+            equilubrate = False
+
+        if equilubrate_steps == "":
+            equilubrate_steps = 500
+
         if not self.DCD_Reporter_checkBox.isChecked():
             DCD_Reporter = False
+
+        if self.XTC_Reporter_checkBox.isChecked():
+            XTC_Reporter = True
 
         if not self.State_Data_Reporter_checkBox.isChecked():
             State_Data_Reporter = False
 
+        ## STATE DATA FREQUENCY
+        if StateData_freq == "" and State_Data_Reporter:
+            StateData_freq = 100
+            if StateData_freq > self.Number_of_steps_textEdit.toPlainText():
+                StateData_freq = int(self.Number_of_steps_textEdit.toPlainText() / 2)
+                print("You did not enter the stateData frequency. Therefore it will be automatically set to %s."
+                      % StateData_freq)
+
+        elif StateData_freq != "" and State_Data_Reporter:
+            if StateData_freq > self.Number_of_steps_textEdit.toPlainText():
+                StateData_freq = int(int(self.Number_of_steps_textEdit.toPlainText()) / 2)
+                print("You entered the stateData frequency bigger than total steps. Therefore it will be "
+                      "automatically set to half of the total steps which is equal to %s. "
+                      % StateData_freq)
+
+        ## NONBOUNDED CUTOFF ACTIVE OR NOT
         if self.nonBounded_Method_comboBox.currentText == 'NoCutoff':
             Nonbounded_cutoff_active = False
 
@@ -110,8 +140,9 @@ class Advanced(QtCore.QThread):
         if self.Device_ID_checkBox.isChecked():
             Device_ID_active = True
 
-        platform, properties, precision = Advanced_Helper_Functions.selected_platform(self, self.platform_comboBox.currentText(),
-                                                                           Device_ID_active, precision)
+        platform, properties, precision = Advanced_Helper_Functions.selected_platform(self,
+                                                                                      self.platform_comboBox.currentText(),
+                                                                                      Device_ID_active, precision)
         print("HAAAAA")
         script_structure = dict(pdb=self.upload_pdb_textEdit.toPlainText(),
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
@@ -148,11 +179,14 @@ class Advanced(QtCore.QThread):
                                 Minimize=minimize,
                                 no_minimize_value=no_minimize_value,
                                 Max_minimization_iteration=self.Max_minimize_iter_textEdit.toPlainText(),
-                                DCDReporter=DCD_Reporter,
-                                State_Data_Reporter=State_Data_Reporter,
+                                Equilubrate=equilubrate, Equilubrate_steps=equilubrate_steps,
+                                DCDReporter=DCD_Reporter, XTCReporter=XTC_Reporter,
                                 DCD_write_freq=self.DCD_write_freq_textEdit.toPlainText(),
                                 DCD_output_name=self.DCD_Output_Name_textEdit.toPlainText(),
-                                StateData_freq=self.StateData_frequency_textEdit.toPlainText(),
+                                XTC_write_freq=self.XTC_write_freq_textEdit.toPlainText(),
+                                XTC_output_name=self.XTC_Output_Name_textEdit.toPlainText(),
+                                State_Data_Reporter=State_Data_Reporter,
+                                StateData_freq=StateData_freq,
                                 output_directory=self.out_dir
                                 )
         Advanced_Helper_Functions.update_display(self, script_structure)
@@ -237,13 +271,13 @@ class Advanced_Helper_Functions(QtCore.QThread):
         modeller.addSolvent(forcefield, model='{{model_water}}', padding={{water_padding}})
 
         print('Constructing an OpenMM System')
-        self.system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
+        system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
                                               {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
                                               constraints={{Constraints}}, rigidWater={{Rigid_Water}}, 
                                               ewaldErrorTolerance=0.005)
         
         
-        self.system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
+        system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
 
         nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
@@ -264,26 +298,61 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
         simulation.context.computeVirtualSites()
         
+        {{#Minimize}}
+        print('Minimizing...')
+        simulation.minimizeEnergy({{#no_minimize_value}}maxIterations={{Max_minimization_iteration}}{{/no_minimize_value}})
+        print("Minimization done, the energy is", simulation.context.getState(getEnergy=True).getPotentialEnergy())
+        positions = simulation.context.getState(getPositions=True).getPositions()
+        print("Minimized geometry is written to 'minimized.pdb'")
+        app.PDBFile.writeModel(modeller.topology, positions, open('minimized.pdb', 'w'), keepIds=True){{/Minimize}}
+        
+        simulation.context.setVelocitiesToTemperature({{Temperature}})
+        
+        {{#Equilubrate}}
+        print('Equilibrating...')
+        simulation.step({{Equilubrate_steps}}){{/Equilubrate}}
+
+        {{#DCDReporter}}
+        print('The trajectories will be saved in DCD file format.')
+        print("Saving DCD File for every {{DCD_write_freq}} period")
+        simulation.reporters.append(DCDReporter('{{DCD_output_name}}', {{DCD_write_freq}}))
+        {{/DCDReporter}}
+        
+        {{#XTCReporter}}
+        print('The trajectories will be saved in XTC file format.')
+        print("Saving XTC File for every {{XTC_write_freq}} period")
+        simulation.reporters.append(XTCReporter('{{XTC_output_name}}', {{XTC_write_freq}}))
+        {{/XTCReporter}}
+        
+        {{#State_Data_Reporter}}
+        simulation.reporters.append(app.StateDataReporter(stdout, {{StateData_freq}}, step=True, 
+        time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, 
+        remainingTime=True, speed=True, volume=True, density=True, totalSteps={{Number_of_steps}}))
+        {{/State_Data_Reporter}}
+        
+        print('Running Production...')
+        simulation.step({{Number_of_steps}})
+        print('Done!')
+
+        lastpositions = simulation.context.getState(getPositions=True).getPositions()
+
+        last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('last.pdb', 'w'), keepIds=True)
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        state = simulation.context.getState(getPositions=True, getVelocities=True)
+
+        with open('system.xml', 'w') as f:
+            system_xml = mm.XmlSerializer.serialize(self.system)
+            f.write(system_xml)
+            
+        with open('integrator.xml', 'w') as f:
+            integrator_xml = mm.XmlSerializer.serialize(integrator)
+            f.write(integrator_xml)
+
+        with open('state.xml', 'w') as f:
+            f.write(mm.XmlSerializer.serialize(state))
+
+        simulation.context.setTime(0)  
 
         ''')
 
@@ -291,28 +360,3 @@ class Advanced_Helper_Functions(QtCore.QThread):
         print(contents)
         # OpenMMScriptRunner(script_structure)
 
-        """
-
-
-        {{#properties_active}}properties = {'{{platform}}Precision': 'mixed'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
-
-
-        simulation = Simulation(modeller.topology, system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
-        simulation.context.setPositions(modeller.positions)
-
-        print('Minimizing...')
-        {{#Minimize}}simulation.minimizeEnergy({{#no_minimize_value}}maxIterations={{/no_minimize_value}}{{Max_minimization_iteration}}){{/Minimize}}
-
-        simulation.context.setVelocitiesToTemperature({{Temperature}})
-
-        print('Starting')
-        {{#DCDReporter}}simulation.reporters.append(DCDReporter('{{DCD_output_name}}', {{DCD_write_freq}})){{/DCDReporter}}
-
-        {{#State_Data_Reporter}}simulation.reporters.append(StateDataReporter(stdout, {{StateData_freq}}, step=True, 
-        time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, 
-        remainingTime=True, speed=True, totalSteps={{Number_of_steps}})){{/State_Data_Reporter}}
-
-        print('Running Production...')    
-        simulation.step({{Number_of_steps}})
-        print('Done')
-        """

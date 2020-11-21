@@ -1450,7 +1450,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                         </property>
                         <property name="currentIndex">
-                         <number>0</number>
+                         <number>1</number>
                         </property>
                         <widget class="QWidget" name="Perturb_Quick">
                          <attribute name="title">
@@ -3664,7 +3664,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                            <enum>QTabWidget::Rounded</enum>
                           </property>
                           <property name="currentIndex">
-                           <number>0</number>
+                           <number>3</number>
                           </property>
                           <property name="movable">
                            <bool>true</bool>
@@ -3947,7 +3947,7 @@ QGroupBox::indicator {
                                   <widget class="QComboBox" name="platform_comboBox">
                                    <property name="minimumSize">
                                     <size>
-                                     <width>180</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -4044,7 +4044,7 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                   <widget class="QComboBox" name="Device_Number_comboBox">
                                    <property name="minimumSize">
                                     <size>
-                                     <width>180</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -4273,7 +4273,7 @@ QGroupBox::indicator {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>180</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -4447,7 +4447,7 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>180</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -5628,7 +5628,7 @@ QGroupBox::indicator {
                                  <rect>
                                   <x>9</x>
                                   <y>100</y>
-                                  <width>351</width>
+                                  <width>561</width>
                                   <height>121</height>
                                  </rect>
                                 </property>
@@ -5646,7 +5646,7 @@ QGroupBox::indicator {
                                   <rect>
                                    <x>9</x>
                                    <y>30</y>
-                                   <width>321</width>
+                                   <width>261</width>
                                    <height>81</height>
                                   </rect>
                                  </property>
@@ -5764,6 +5764,175 @@ QCheckBox::indicator:checked {
                                   </item>
                                   <item row="1" column="1">
                                    <widget class="QTextEdit" name="Max_minimize_iter_textEdit">
+                                    <property name="minimumSize">
+                                     <size>
+                                      <width>0</width>
+                                      <height>38</height>
+                                     </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                     <size>
+                                      <width>16777215</width>
+                                      <height>38</height>
+                                     </size>
+                                    </property>
+                                    <property name="font">
+                                     <font>
+                                      <family>Segoe UI</family>
+                                      <pointsize>10</pointsize>
+                                     </font>
+                                    </property>
+                                    <property name="styleSheet">
+                                     <string notr="true">QTextEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding: 10px;
+}
+QTextEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QTextEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}
+
+QTextEdit:disabled {
+background-color: rgb(93, 83, 91);
+}</string>
+                                    </property>
+                                    <property name="html">
+                                     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;500&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                 </layout>
+                                </widget>
+                                <widget class="QWidget" name="formLayoutWidget_5">
+                                 <property name="geometry">
+                                  <rect>
+                                   <x>290</x>
+                                   <y>30</y>
+                                   <width>261</width>
+                                   <height>81</height>
+                                  </rect>
+                                 </property>
+                                 <layout class="QFormLayout" name="formLayout_5">
+                                  <property name="verticalSpacing">
+                                   <number>9</number>
+                                  </property>
+                                  <property name="leftMargin">
+                                   <number>3</number>
+                                  </property>
+                                  <property name="topMargin">
+                                   <number>8</number>
+                                  </property>
+                                  <property name="rightMargin">
+                                   <number>3</number>
+                                  </property>
+                                  <property name="bottomMargin">
+                                   <number>4</number>
+                                  </property>
+                                  <item row="0" column="0">
+                                   <widget class="QLabel" name="label_43">
+                                    <property name="sizePolicy">
+                                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                      <horstretch>0</horstretch>
+                                      <verstretch>0</verstretch>
+                                     </sizepolicy>
+                                    </property>
+                                    <property name="font">
+                                     <font>
+                                      <family>Segoe UI</family>
+                                      <pointsize>10</pointsize>
+                                     </font>
+                                    </property>
+                                    <property name="text">
+                                     <string>Equilibrate:</string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item row="1" column="0">
+                                   <widget class="QLabel" name="label_44">
+                                    <property name="sizePolicy">
+                                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                      <horstretch>0</horstretch>
+                                      <verstretch>0</verstretch>
+                                     </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                     <size>
+                                      <width>107</width>
+                                      <height>0</height>
+                                     </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                     <size>
+                                      <width>107</width>
+                                      <height>16777215</height>
+                                     </size>
+                                    </property>
+                                    <property name="font">
+                                     <font>
+                                      <family>Segoe UI</family>
+                                      <pointsize>10</pointsize>
+                                     </font>
+                                    </property>
+                                    <property name="text">
+                                     <string>Equilibrate steps: </string>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item row="0" column="1">
+                                   <widget class="QCheckBox" name="equilubrate_checkBox">
+                                    <property name="sizePolicy">
+                                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                      <horstretch>0</horstretch>
+                                      <verstretch>0</verstretch>
+                                     </sizepolicy>
+                                    </property>
+                                    <property name="font">
+                                     <font>
+                                      <family>Segoe UI</family>
+                                      <pointsize>10</pointsize>
+                                     </font>
+                                    </property>
+                                    <property name="styleSheet">
+                                     <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+
+
+</string>
+                                    </property>
+                                    <property name="text">
+                                     <string/>
+                                    </property>
+                                    <property name="checked">
+                                     <bool>true</bool>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item row="1" column="1">
+                                   <widget class="QTextEdit" name="Max_equilubrate_steps_textEdit">
                                     <property name="minimumSize">
                                      <size>
                                       <width>0</width>
@@ -6058,6 +6227,13 @@ QTextEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                     </property>
+                                    <property name="html">
+                                     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;100&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                    </property>
                                    </widget>
                                   </item>
                                  </layout>
@@ -6068,7 +6244,7 @@ QTextEdit:focus {
                                  <rect>
                                   <x>10</x>
                                   <y>110</y>
-                                  <width>351</width>
+                                  <width>511</width>
                                   <height>131</height>
                                  </rect>
                                 </property>
@@ -6094,7 +6270,7 @@ QTextEdit:focus {
                                   <rect>
                                    <x>10</x>
                                    <y>29</y>
-                                   <width>321</width>
+                                   <width>491</width>
                                    <height>92</height>
                                   </rect>
                                  </property>
@@ -6326,7 +6502,7 @@ p, li { white-space: pre-wrap; }
                                    </widget>
                                   </item>
                                   <item row="0" column="1">
-                                   <widget class="QTextEdit" name="DCD_write_freq_textEdit_3">
+                                   <widget class="QTextEdit" name="XTC_write_freq_textEdit">
                                     <property name="minimumSize">
                                      <size>
                                       <width>0</width>
@@ -6368,7 +6544,7 @@ p, li { white-space: pre-wrap; }
                                    </widget>
                                   </item>
                                   <item row="1" column="1">
-                                   <widget class="QTextEdit" name="DCD_Output_Name_textEdit_3">
+                                   <widget class="QTextEdit" name="XTC_Output_Name_textEdit">
                                     <property name="minimumSize">
                                      <size>
                                       <width>0</width>

@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 
 ## ==> MAIN WINDOW
-import app_modules
+# import app_modules
 from PyQt5 import uic
 from icons import *
 
