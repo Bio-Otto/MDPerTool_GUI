@@ -1308,7 +1308,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>1</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1450,7 +1450,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                         </property>
                         <property name="currentIndex">
-                         <number>1</number>
+                         <number>0</number>
                         </property>
                         <widget class="QWidget" name="Perturb_Quick">
                          <attribute name="title">
@@ -3664,7 +3664,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                            <enum>QTabWidget::Rounded</enum>
                           </property>
                           <property name="currentIndex">
-                           <number>3</number>
+                           <number>0</number>
                           </property>
                           <property name="movable">
                            <bool>true</bool>
@@ -6889,6 +6889,15 @@ QCheckBox::indicator:checked {
                        </widget>
                       </item>
                      </layout>
+                    </item>
+                   </layout>
+                  </widget>
+                  <widget class="QWidget" name="Simulation_Graphs">
+                   <layout class="QGridLayout" name="gridLayout_9">
+                    <item row="0" column="0">
+                     <widget class="QGroupBox" name="graphics_GroupBox">
+                      <layout class="QVBoxLayout" name="verticalLayout_15"/>
+                     </widget>
                     </item>
                    </layout>
                   </widget>
