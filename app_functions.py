@@ -49,6 +49,8 @@ from checkBox_menu import *
 from ui_main import *
 
 class Helper_Functions():
+
+
     def fill_residue_combobox(self, pdb_path):
         print(pdb_path)
         from prody.proteins.pdbfile import parsePDB

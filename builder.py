@@ -14,6 +14,8 @@ class Advanced(QtCore.QThread):
 
     @pyqtSlot()
     def send_arg_to_Engine(self):
+        pdb_pfile = os.path.abspath(self.upload_pdb_textEdit.toPlainText().strip())
+        print(pdb_pfile)
         rigid_water = True
         minimize = True
         equilubrate = True
@@ -144,7 +146,7 @@ class Advanced(QtCore.QThread):
                                                                                       self.platform_comboBox.currentText(),
                                                                                       Device_ID_active, precision)
         print("HAAAAA")
-        script_structure = dict(pdb=self.upload_pdb_textEdit.toPlainText(),
+        script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
 
                                 long_simulation_time=self.run_duration_spinBox_2.value(),
