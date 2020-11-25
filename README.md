@@ -18,7 +18,7 @@ $ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
 
 ## Then run it.
 
-### Dependicies
+### Dependencies
 
 MDPERTOOL uses a number of open source projects to work properly:
 
