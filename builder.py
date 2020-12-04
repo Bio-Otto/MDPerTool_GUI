@@ -9,6 +9,8 @@ import queue
 import threading
 import itertools
 import tokenize
+from omm_runner import *
+
 
 # from OpenMM_Runner import OpenMMScriptRunner
 
@@ -19,14 +21,16 @@ class Advanced(QtCore.QThread):
 
     @pyqtSlot()
     def send_arg_to_Engine(self):
-        pdb_pfile = os.path.abspath(self.upload_pdb_textEdit.toPlainText().strip())
+        self.stackedWidget.setCurrentIndex(1)
+        pdb_pfile = os.path.abspath(self.upload_pdb_textEdit.toPlainText().strip()).replace('\\', '/')
+
         print(pdb_pfile)
         rigid_water = True
         minimize = True
         equilubrate = True
         no_minimize_value = True
         DCD_Reporter = True
-        XTC_Reporter =False
+        XTC_Reporter = False
         State_Data_Reporter = True
         Nonbounded_cutoff_active = True
         Additional_Integrator = False
@@ -73,7 +77,7 @@ class Advanced(QtCore.QThread):
         try:
             self.out_dir = self.Output_Folder_textEdit.toPlainText()
             if self.out_dir == '':
-                print("hiiii")
+
                 answer = QMessageBox.question(self, 'Warning',
                                               "There is no specified Output Directory. "
                                               "If you want to specify, please click the 'Yes' button, "
@@ -87,8 +91,11 @@ class Advanced(QtCore.QThread):
                     path_out = os.getcwd() + "/output"
                     Path(path_out).mkdir(parents=True, exist_ok=True)
 
-                    self.out_dir = path_out
-                print("HAAAAA")
+                    self.out_dir = os.path.abspath(path_out.strip()).replace('\\', '/')
+                    self.Output_Folder_textEdit.setText(self.out_dir)
+            else:
+                self.out_dir = os.path.abspath(self.out_dir.strip()).replace('\\', '/')
+                self.Output_Folder_textEdit.setText(self.out_dir)
         except:
             QMessageBox.critical(self, "Error", "An error occured while getting output directory")
 
@@ -150,7 +157,7 @@ class Advanced(QtCore.QThread):
         platform, properties, precision = Advanced_Helper_Functions.selected_platform(self,
                                                                                       self.platform_comboBox.currentText(),
                                                                                       Device_ID_active, precision)
-        print("HAAAAA")
+
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
 
@@ -196,8 +203,10 @@ class Advanced(QtCore.QThread):
                                 StateData_freq=StateData_freq,
                                 output_directory=self.out_dir
                                 )
-        Advanced_Helper_Functions.update_display(self, script_structure)
-        # self.update_display(script_structure)
+        self.created_script = Advanced_Helper_Functions.update_display(self, script_structure)
+        # return self.created_script
+        # # self.update_display(script_structure)
+        # self.Real_Time_Graphs.run_script(self.created_script)
 
 
 class Advanced_Helper_Functions(QtCore.QThread):
@@ -206,7 +215,6 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
     @pyqtSlot()
     def selected_platform(self, platform_name, Device_ID_active, precision):
-        print("hoooo burada")
 
         if platform_name == 'OpenCL' and Device_ID_active == True:
             properties = {'OpenCLPrecision': '%s' % precision,
@@ -247,17 +255,17 @@ class Advanced_Helper_Functions(QtCore.QThread):
 ###########################################################################
 
 from simtk.openmm import app
-from simtk.openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds
+from simtk.openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter
 import simtk.openmm as mm
 from simtk.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
 from sys import stdout
 from apply_pdbfixer import fix_pdb
 from simtk.openmm import *
-from mdtraj.reporters import XTCReporter
+from mdtraj import reporters
 
 
 print('pdb file fixing and preparing for simulation ...')
-fixed_pdb_name = fix_pdb('{{pdb}}')
+fixed_pdb_name = fix_pdb('{{pdb}}', output='{{output_folder}}')
 
 print('Loading pdb to simulation engine ...')
 pdb = app.PDBFile(fixed_pdb_name)
@@ -286,7 +294,7 @@ system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBounded
 
 system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
 
-nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
+nonbonded = [f for f in system.getForces() if isinstance(f, NonbondedForce)][0]
 nonbonded.setUseSwitchingFunction(use=True)
 nonbonded.setSwitchingDistance(10.0 * angstrom)
 nonbonded.setUseDispersionCorrection(True)
@@ -299,7 +307,7 @@ platform = mm.Platform.getPlatformByName('{{platform}}')
 {{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 {{#CPU_properties_active}}properties = {'CpuThreads': '{{Number_of_CPU}}'}{{/CPU_properties_active}}
 
-simulation = app.Simulation(modeller.topology, self.system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
+simulation = app.Simulation(modeller.topology, system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
 
 simulation.context.setPositions(modeller.positions)
 
@@ -311,7 +319,7 @@ simulation.minimizeEnergy({{#no_minimize_value}}maxIterations={{Max_minimization
 print("Minimization done, the energy is", simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 print("Minimized geometry is written to 'minimized.pdb'")
-app.PDBFile.writeModel(modeller.topology, positions, open('minimized.pdb', 'w'), keepIds=True){{/Minimize}}
+app.PDBFile.writeModel(modeller.topology, positions, open('{{output_folder}}/minimized.pdb', 'w'), keepIds=True){{/Minimize}}
 
 simulation.context.setVelocitiesToTemperature({{Temperature}})
 
@@ -328,11 +336,12 @@ simulation.reporters.append(DCDReporter('{{DCD_output_name}}', {{DCD_write_freq}
 {{#XTCReporter}}
 print('The trajectories will be saved in XTC file format.')
 print("Saving XTC File for every {{XTC_write_freq}} period")
-simulation.reporters.append(XTCReporter('{{XTC_output_name}}', {{XTC_write_freq}}))
+simulation.reporters.append(reporters.XTCReporter('{{XTC_output_name}}', {{XTC_write_freq}}))
 {{/XTCReporter}}
 
 {{#State_Data_Reporter}}
-simulation.reporters.append(app.StateDataReporter(stdout, {{StateData_freq}}, step=True, 
+print('State Report will tell you.')
+simulation.reporters.append(StateDataReporter(stdout, {{StateData_freq}}, step=True, 
 time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, 
 remainingTime=True, speed=True, volume=True, density=True, totalSteps={{Number_of_steps}}))
 {{/State_Data_Reporter}}
@@ -349,7 +358,7 @@ last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('last.pd
 state = simulation.context.getState(getPositions=True, getVelocities=True)
 
 with open('system.xml', 'w') as f:
-    system_xml = mm.XmlSerializer.serialize(self.system)
+    system_xml = mm.XmlSerializer.serialize(system)
     f.write(system_xml)
     
 with open('integrator.xml', 'w') as f:
@@ -363,7 +372,10 @@ simulation.context.setTime(0)
 
         ''')
 
-        contents = renderer.render(template, script_structure)
-        print(contents)
-        # OpenMMScriptRunner(script_structure)
+        self.contents = renderer.render(template, script_structure)
+        return self.contents
+        # Graphs().run_script(contents)
 
+        # runner = OpenMMScriptRunner(contents)
+        # runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
+        # OpenMMScriptRunner(script_structure)

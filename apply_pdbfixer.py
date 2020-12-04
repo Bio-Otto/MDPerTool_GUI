@@ -13,8 +13,14 @@ import time
 import os
 
 
-def fix_pdb(pdb_id):
-    path = os.getcwd()
+def fix_pdb(pdb_id, output=None):
+    if output is not None:
+        path = output
+        print("1. de: %s" % path)
+    else:
+        path = os.getcwd()
+        print("2. de: %s" % path)
+
     if len(pdb_id) != 4:
         print("Creating PDBFixer...")
         fixer = PDBFixer(pdb_id)

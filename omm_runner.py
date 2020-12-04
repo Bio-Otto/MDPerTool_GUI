@@ -1,37 +1,29 @@
-# from PyQt5.QtWidgets import QVBoxLayout, QPushButton
 from simtk.openmm.app import StateDataReporter
 from io import StringIO
 import time
 import queue
 import threading
-import itertools
 import tokenize
-import os
 import pystache
 import numpy as np
-# from chaco.api import Plot, ArrayPlotData, PlotAxis, VPlotContainer
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 from pyqtgraph import PlotWidget, plot, dockarea
 import pyqtgraph as pg
-import sys  # We need sys so that we can pass argv to QApplication
-import os
 from PyQt5.QtCore import QTimer, QDateTime, pyqtSlot
 import subprocess
 import os
 import sys
-import platform
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent)
 from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
                          QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PyQt5.QtWidgets import *
-from ui_main import MainWindow
+
 
 # ##############################################################################
 # # Functions
 # ##############################################################################
-
 
 def queue_reporter_factory(queue):
     """Factory function that returns a dynamically defined OpenMM
@@ -154,15 +146,17 @@ class OpenMMScriptRunner(QtCore.QObject):
 
 
 # ###########################################################################
-# # Functions
-# ###########################################################################
 
 
-class Graphs(MainWindow):
+class Graphs(QWidget):
     # global curve, data, p6
-    def create_monitoring(self):
+    def __init__(self, *args, **kwargs):
+        # self.contents = contents
+        # super().__init__()
+        super().__init__(*args, **kwargs)
 
         self.real_time_as_minute = []
+        self.real_speed = []
         pg.setConfigOption('background', None)
         pg.setConfigOption('foreground', (197, 198, 199))
         self.win = pg.GraphicsWindow(show=True, title="Basic plotting examples")
@@ -209,6 +203,20 @@ class Graphs(MainWindow):
 
         self.first_entrance = 0
 
+    def pretty_speed(self, ins_speed):
+        """Format the speed (ns/day) as pretty"""
+
+        speed_style = ins_speed.split(':')
+        if len(speed_style) == 1:
+            if speed_style[0] == '--':
+                return self.real_speed.append(float(0))
+            return self.real_speed.append(float(speed_style[0]))
+
+        if len(speed_style) == 2:
+            if speed_style[0] == '--' or speed_style[1] == '--':
+                return self.real_speed.append(float(0))
+            return self.real_speed.append(float(ins_speed))
+
     def pretty_time(self, t_remaining):
         """Format the time as minute"""
 
@@ -241,9 +249,11 @@ class Graphs(MainWindow):
         y_potential = np.array(data["Potential Energy (kJ/mole)"], dtype=np.float)
         y_kinetic = np.array(data["Kinetic Energy (kJ/mole)"], dtype=np.float)
         y_total = np.array(data["Total Energy (kJ/mole)"], dtype=np.float)
-        y_speed = np.array(data["Speed (ns/day)"], dtype=np.float)
+
+        y_speed = np.array(data["Speed (ns/day)"])[-1]
         y_time_remaining = np.array(data["Time Remaining"])[-1]
 
+        self.pretty_speed(y_speed)
         self.pretty_time(y_time_remaining)
 
         if x.shape == y_temp.shape:
@@ -263,7 +273,7 @@ class Graphs(MainWindow):
             self.simulation_time_graph.setData(x=x, y=self.real_time_as_minute, pen=pg.mkPen((0, 0, 255), width=3),
                                                fillLevel=0.0, name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
 
-            self.simulation_speed_graph.setData(x=x, y=y_speed, pen=pg.mkPen((200, 200, 200), width=3),
+            self.simulation_speed_graph.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
                                                 symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0, name="Speed",
                                                 brush=(150, 150, 50, 30))
 

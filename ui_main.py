@@ -1,10 +1,3 @@
-################################################################################
-##
-## BY: WANDERSON M.PIMENTA
-## PROJECT MADE WITH: Qt Designer and PySide2
-## V: 1.0.0
-##
-################################################################################
 import os
 import sys
 import platform
@@ -14,26 +7,27 @@ from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime
 from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
                          QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PyQt5.QtWidgets import *
-from PyQt5 import uic
 
 ## ==> MAIN WINDOW
 # import app_modules
 from PyQt5 import uic
 from icons import *
-
+import pyqtgraph as pg
 # IMPORT FUNCTIONS
+# from omm_runner import *
 from ui_functions import *
 from builder import *
+from omm_runner import *
+
 # from app_functions import *
 # from browse_menu import browse_file
-
+# from omm_runner import *
 ## ==> GLOBALS
 counter = 0
 
 
 # YOUR APPLICATION
 class MainWindow(QMainWindow):
-
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
         uic.loadUi('MAIN_GUI.ui', self)
@@ -46,8 +40,16 @@ class MainWindow(QMainWindow):
         ## START - WINDOW ATTRIBUTES
         ########################################################################
 
+        ## START - SIMULATION MONITORING
+        # self.created_script = None
+        self.Real_Time_Graphs = Graphs()
+        self.verticalLayout_16.addWidget(self.Real_Time_Graphs.win)
+        self.setLayout(self.verticalLayout_16)
+        ## END - SIMULATION MONITORING
+
         ## REMOVE ==> STANDARD TITLE BAR
         UIFunctions.removeTitleBar(True)
+
         ## ==> END ##
 
         ## SET ==> WINDOW TITLE
@@ -144,8 +146,8 @@ class MainWindow(QMainWindow):
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
-        self.Run.clicked.connect(lambda: Advanced.send_arg_to_Engine(self))
 
+        self.Run.clicked.connect(self.run_btn_clicked)
 
         ########################################################################
         #
@@ -157,6 +159,12 @@ class MainWindow(QMainWindow):
         ########################################################################
         self.show()
         ## ==> END ##
+    def run_btn_clicked(self):
+        Advanced.send_arg_to_Engine(self)
+        # thread_1 = threading.Thread(target=self.Real_Time_Graphs.run_script, args=(self.created_script,), daemon=True)
+        # thread_1.start()                                  # Start the execution
+        self.Real_Time_Graphs.run_script(self.created_script)
+
 
     def upload_pdb_from_local(self):
         global selected_chains
@@ -200,13 +208,6 @@ class MainWindow(QMainWindow):
 
     def Stocasthic_Changed(self):
         Functions.Stochastic_changed(self)
-
-
-
-
-
-
-
 
     ########################################################################
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS
