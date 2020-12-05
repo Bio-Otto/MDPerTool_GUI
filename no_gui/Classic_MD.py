@@ -11,12 +11,12 @@ from mdtraj.reporters import XTCReporter
 
 class Classic_MD_Engine:
     def __init__(self, pdb_path, protein_ff='amber96', water_ff='tip3p', time_step=2.0, nonbondedCutoff=12.0,
-                 water_padding=15, Device_Index=False, Device_Index_Number=1, total_Steps=300000, temp=310,
-                 platform_name='OpenCL', properties=None, precision='single', friction_cofficient=1.0, minimize=True,
-                 minimize_steps=5000, CPU_Threads=2, equilibrate=True, equilibration_step=500, report_interval=500,
-                 write_system_xml=False, system_file_name='system.xml', state_file_name='state.xml',
-                 last_pdb_filename='last.pdb', write_to_dcd=False, dcd_write_period=50, write_to_xtc=False,
-                 xtc_write_period=50):
+                 switching_distance = 10.0, water_padding=15, Device_Index=False, Device_Index_Number=1,
+                 total_Steps=300000, temp=310, platform_name='OpenCL', properties=None, precision='single',
+                 friction_cofficient=1.0, minimize=True, minimize_steps=5000, CPU_Threads=2, equilibrate=True,
+                 equilibration_step=500, report_interval=500, write_system_xml=False, system_file_name='system.xml',
+                 state_file_name='state.xml', last_pdb_filename='last.pdb', write_to_dcd=False, dcd_write_period=50,
+                 write_to_xtc=False, xtc_write_period=50):
 
         print("Simulation parameters preparing for the start ...")
         self.Device_Index = Device_Index
@@ -29,7 +29,7 @@ class Classic_MD_Engine:
                 properties = {'OpenCLPrecision': '%s' % precision}
 
             if platform_name == 'CUDA' and self.Device_Index == True:
-                properties = {'CUDAPrecision': '%s' % precision, 'CUDADeviceIndex': '%s' % self.Device_Index_Number}
+                properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
 
             if platform_name == 'CPU':
                 print("The CPU platform always uses 'mixed' precision.")
@@ -58,6 +58,7 @@ class Classic_MD_Engine:
 
         self.time_step = time_step * femtosecond
         self.nonbondedCutoff = nonbondedCutoff * angstrom
+        self.switching_distance = switching_distance * angstrom
         self.water_padding = water_padding * angstrom
         self.total_Steps = total_Steps
         self.temp = temp * kelvin
@@ -127,7 +128,7 @@ class Classic_MD_Engine:
 
         nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
-        nonbonded.setSwitchingDistance(10.0 * angstrom)
+        nonbonded.setSwitchingDistance(self.switching_distance)
         nonbonded.setUseDispersionCorrection(True)
 
         print('Creating a LangevinIntegrator.')
