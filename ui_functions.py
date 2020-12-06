@@ -1,18 +1,3 @@
-################################################################################
-##
-## BY: WANDERSON M.PIMENTA
-## PROJECT MADE WITH: Qt Designer and PySide2
-## V: 1.0.0
-##
-## This project can be used freely for all uses, as long as they maintain the
-## respective credits only in the Python scripts, any information in the visual
-## interface (GUI) can be modified without any implication.
-##
-## There are limitations on Qt licenses if you want to use your products
-## commercially, I recommend reading them on the official website:
-## https://doc.qt.io/qtforpython/licenses.html
-##
-################################################################################
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
@@ -21,7 +6,7 @@ from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFont
                          QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 
 ## ==> GUI FILE
-from ui_main import MainWindow
+from ui_main import *
 # IMPORT QSS CUSTOM
 from ui_styles import Style
 
@@ -32,6 +17,7 @@ GLOBAL_TITLE_BAR = True
 ## ==> COUT INITIAL MENU
 count = 1
 from app_functions import *
+
 
 class UIFunctions(MainWindow):
     ## ==> GLOBALS
@@ -66,10 +52,12 @@ class UIFunctions(MainWindow):
             self.frame_size_grip.show()
 
     ## ==> RETURN STATUS
+    @staticmethod
     def returStatus():
         return GLOBAL_STATE
 
     ## ==> SET STATUS
+    @staticmethod
     def setStatus(status):
         global GLOBAL_STATE
         GLOBAL_STATE = status

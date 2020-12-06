@@ -11,10 +11,10 @@ from mdtraj.reporters import XTCReporter
 class Dissipation_MD_Engine:
 
     def __init__(self, pdb_path, state_file='state.xml', protein_ff='amber96', water_ff='tip3p', time_step=1.0,
-                 nonbondedCutoff=12.0, Device_Index=False, Device_Index_Number=1, dissipation_total_Steps=1000,
-                 platform_name='OpenCL', properties=None, precision='single', CPU_Threads=2, report_interval=1,
-                 write_to_dcd=True, dcd_write_period=1, write_to_xtc=False, xtc_write_period=1,
-                 dissipated_traj_name='dissipated_traj'):
+                 nonbondedCutoff=12.0, switching_distance= 10.0, Device_Index=False, Device_Index_Number=1,
+                 dissipation_total_Steps=1000, platform_name='OpenCL', properties=None, precision='single',
+                 CPU_Threads=2, report_interval=1, write_to_dcd=True, dcd_write_period=1, write_to_xtc=False,
+                 xtc_write_period=1, dissipated_traj_name='dissipated_traj'):
 
         print("Simulation parameters preparing for the start ...")
         self.Device_Index = Device_Index
@@ -28,7 +28,7 @@ class Dissipation_MD_Engine:
                 properties = {'OpenCLPrecision': '%s' % precision}
 
             if platform_name == 'CUDA' and self.Device_Index == True:
-                properties = {'CUDAPrecision': '%s' % precision, 'CUDADeviceIndex': '%s' % self.Device_Index_Number}
+                properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
 
             if platform_name == 'CPU':
                 print("The CPU platform always uses 'mixed' precision.")
@@ -68,6 +68,7 @@ class Dissipation_MD_Engine:
             print("Water Model for Solution 3: %s" % self.water_model)
 
         self.state_file = state_file
+        self.switching_distance = switching_distance * angstrom
         self.time_step = time_step * femtosecond
         self.nonbondedCutoff = nonbondedCutoff * angstrom
         self.dissipation_total_Steps = dissipation_total_Steps
@@ -94,7 +95,7 @@ class Dissipation_MD_Engine:
 
         nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
-        nonbonded.setSwitchingDistance(10.0 * angstrom)
+        nonbonded.setSwitchingDistance(self.switching_distance)
         # nonbonded.setUseDispersionCorrection(True)
         # nonbonded.setReciprocalSpaceForceGroup(1)
 

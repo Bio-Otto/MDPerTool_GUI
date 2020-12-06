@@ -14,12 +14,8 @@ def convert_res_to_atoms(pdb_path, selected_res, atom_to_extract=None):
     for inx, residue in enumerate(topology.residues):
         if str(residue) in selected_res:
             for i in range(len([atom for atom in topology.atoms])):
-
-                # print(i)
-                # print(str(residue))
-
                 if str(topology.atom(i).residue) == selected_res[selected_res.index(str(residue))]:
-                    print(topology.atom(i).residue)
+                    # print(topology.atom(i).residue)
                     selected_res_atoms.append(i)
 
     if atom_to_extract is not None:

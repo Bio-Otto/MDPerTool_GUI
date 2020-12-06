@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     ### VARIABLES
     state_file_name = 'state.xml'
-    last_pdb = 'last_structure.pdb'
+    last_pdb = 'last.pdb'
     dissipated_trajectory_name = 'energy_perturbation_trajectory'
     undissipated_trajectory_name = 'without_energy_perturbation_trajectory'
     reference_traj_file_for_pos = str
@@ -54,6 +54,10 @@ if __name__ == '__main__':
     parser.add_argument('-nbc', '--nonbonded_cutoff', default=12.0, nargs='?', type=float, required=False,
                         help='cut-off was applied to the non-covalent interactions. (The program defaultly will use '
                              '"12 Å ") NOT: Switching distance must satisfy 0 <= r_switch < r_cutoff')
+
+    parser.add_argument('-swd', '--switch_distance', default=10.0, type=float, required=False,
+                        help='The program defaultly will use 10 Å NOT: Switching distance must satisfy '
+                             '0 <= r_switch < r_cutoff')
 
     parser.add_argument('-wp', '--water_padding', default=15, nargs='?', type=int, required=False,
                         help='The program determining largest dimension of protein, and a cubic box of size(largest '
@@ -120,7 +124,7 @@ if __name__ == '__main__':
 
     #################################    ENERGY PERTURBATION SIMULATION ARGUMENTS    #################################
 
-    parser.add_argument('-pert_res', '--perturbed_residues', type=list, required=True,
+    parser.add_argument('-pert_res', '--perturbed_residues', nargs='+', required=True,
                         help='You must list the residue or residues you want to perturbed.')
 
     parser.add_argument('-speed_factor', '--velocity_speed_factor', type=int, required=True,
@@ -142,24 +146,24 @@ if __name__ == '__main__':
 
     Classic_MD_Engine(pdb_path=parsed.topology, protein_ff=parsed.protein_ff, water_ff=parsed.water_ff,
                       time_step=parsed.long_md_time_step, nonbondedCutoff=parsed.nonbonded_cutoff,
-                      water_padding=parsed.water_padding, Device_Index=parsed.use_device_index,
-                      Device_Index_Number=parsed.device_index, total_Steps=parsed.long_md_total_step,
-                      temp=parsed.temperature, platform_name=parsed.platform, precision=parsed.plt_precision,
-                      friction_cofficient=parsed.friction_coff, minimize=parsed.minimize,
-                      minimize_steps=parsed.minimize_step, CPU_Threads=parsed.cpu_thread,
+                      switching_distance=parsed.switch_distance, water_padding=parsed.water_padding,
+                      Device_Index=parsed.use_device_index, Device_Index_Number=parsed.device_index,
+                      total_Steps=parsed.long_md_total_step, temp=parsed.temperature, platform_name=parsed.platform,
+                      precision=parsed.plt_precision, friction_cofficient=parsed.friction_coff,
+                      minimize=parsed.minimize, minimize_steps=parsed.minimize_step, CPU_Threads=parsed.cpu_thread,
                       equilibrate=parsed.equilibrate, equilibration_step=parsed.equilibrate_step,
                       report_interval=parsed.report_interval, write_to_dcd=parsed.write_dcd,
                       dcd_write_period=parsed.dcd_period, write_to_xtc=parsed.write_xtc,
                       xtc_write_period=parsed.xtc_period)
 
-    modify_atoms = convert_res_to_atoms(last_pdb, parsed.pert_res, 'CA')
+    modify_atoms = convert_res_to_atoms(last_pdb, parsed.perturbed_residues, 'CA')
     print(modify_atoms)
     name_of_changed_state_xml = change_velocity(state_file_name, parsed.velocity_speed_factor, modify_atoms)
 
     Dissipation_MD_Engine(pdb_path=last_pdb, state_file=name_of_changed_state_xml, protein_ff=parsed.protein_ff,
                           water_ff=parsed.water_ff, time_step=parsed.perturbation_time_step,
-                          nonbondedCutoff=parsed.nonbonded_cutoff, Device_Index=parsed.use_device_index,
-                          Device_Index_Number=parsed.device_index,
+                          nonbondedCutoff=parsed.nonbonded_cutoff, switching_distance=parsed.switch_distance,
+                          Device_Index=parsed.use_device_index, Device_Index_Number=parsed.device_index,
                           dissipation_total_Steps=parsed.perturbation_total_step,
                           platform_name=parsed.platform, precision=parsed.plt_precision,
                           CPU_Threads=parsed.cpu_thread, report_interval=parsed.perturbation_report_interval,
@@ -168,9 +172,10 @@ if __name__ == '__main__':
 
     Reference_MD_Engine(pdb_path=last_pdb, state_file=state_file_name, protein_ff=parsed.protein_ff,
                         water_ff=parsed.water_ff, time_step=parsed.perturbation_time_step,
-                        nonbondedCutoff=parsed.nonbonded_cutoff, Device_Index=parsed.use_device_index,
-                        Device_Index_Number=parsed.device_index, reference_total_Steps=parsed.perturbation_total_step,
-                        platform_name=parsed.platform, precision=parsed.plt_precision, CPU_Threads=parsed.cpu_thread,
+                        nonbondedCutoff=parsed.nonbonded_cutoff, switching_distance=parsed.switch_distance,
+                        Device_Index=parsed.use_device_index, Device_Index_Number=parsed.device_index,
+                        reference_total_Steps=parsed.perturbation_total_step, platform_name=parsed.platform,
+                        precision=parsed.plt_precision, CPU_Threads=parsed.cpu_thread,
                         report_interval=parsed.perturbation_report_interval, write_to_dcd=parsed.write_dcd,
                         dcd_write_period=1, write_to_xtc=parsed.write_xtc, xtc_write_period=1,
                         undissipated_traj_name=undissipated_trajectory_name)
