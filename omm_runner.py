@@ -147,7 +147,6 @@ class OpenMMScriptRunner(QtCore.QObject):
 
 # ###########################################################################
 
-
 class Graphs(QWidget):
     # global curve, data, p6
     def __init__(self, *args, **kwargs):

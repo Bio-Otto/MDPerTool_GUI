@@ -1,4 +1,3 @@
-
 from PyQt5.QtWidgets import QFileDialog, QWidget
 from PyQt5.QtWidgets import QMessageBox
 
@@ -25,8 +24,8 @@ from urllib.request import urlretrieve
 from checkBox_menu import *
 from ui_main import *
 
-class Helper_Functions():
 
+class Helper_Functions():
 
     def fill_residue_combobox(self, pdb_path):
         print(pdb_path)
@@ -205,7 +204,6 @@ class Functions(MainWindow):
         else:
             self.Device_Number_comboBox.setEnabled(True)
             self.Device_ID_checkBox.setEnabled(True)
-
 
 
 class InputFile:
