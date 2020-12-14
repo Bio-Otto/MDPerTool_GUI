@@ -9,6 +9,7 @@ from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFont
 from ui_main import *
 # IMPORT QSS CUSTOM
 from ui_styles import Style
+import sip
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0
@@ -17,7 +18,7 @@ GLOBAL_TITLE_BAR = True
 ## ==> COUT INITIAL MENU
 count = 1
 from app_functions import *
-
+from PyMolWidget import PymolQtWidget
 
 class UIFunctions(MainWindow):
     ## ==> GLOBALS
@@ -199,7 +200,9 @@ class UIFunctions(MainWindow):
         ## REMOVE ==> STANDARD TITLE BAR
         if GLOBAL_TITLE_BAR:
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-            self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+            self.frame_main.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+            # self.centralwidget.setAttribute(QtCore.Qt.WA_NoSystemBackground)
+            self.setStyleSheet("background:rgb(27, 29, 35);")
             self.frame_label_top_btns.mouseDoubleClickEvent = dobleClickMaximizeRestore
         else:
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -210,12 +213,14 @@ class UIFunctions(MainWindow):
             self.frame_size_grip.hide()
 
         ## SHOW ==> DROP SHADOW
-        self.shadow = QGraphicsDropShadowEffect(self)
-        self.shadow.setBlurRadius(17)
-        self.shadow.setXOffset(0)
-        self.shadow.setYOffset(0)
-        self.shadow.setColor(QColor(0, 0, 0, 150))
-        self.frame_main.setGraphicsEffect(self.shadow)
+        # self.shadow = QGraphicsDropShadowEffect(self)
+        # self.shadow.setBlurRadius(17)
+        # self.shadow.setXOffset(0)
+        # self.shadow.setYOffset(0)
+        # self.shadow.setColor(QColor(0, 0, 0, 50))
+        # self.frame_main.setGraphicsEffect(self.shadow)
+        ## DROP SHADOW EFFECT
+
 
         ## ==> RESIZE WINDOW
         self.sizegrip = QSizeGrip(self.frame_size_grip)
@@ -232,4 +237,45 @@ class UIFunctions(MainWindow):
 
     ########################################################################
     ## END - GUI DEFINITIONS
+    ########################################################################
+
+    ########################################################################
+    ## == > OPEN SOURCE PYMOL 2.4 INTEGRATION START
+    # def start_pymol(self):
+    #     self.ProteinView = PymolQtWidget(self)
+    #
+    #     layout = QVBoxLayout(self.Pymol_Widget)
+    #     layout.addWidget(self.ProteinView)
+    #     self.ProteinView.initial_pymol_visual()
+    #     self.ProteinView.show()
+
+    def start_pymol(self):
+        # Creating the PyMolWidget
+        try:
+            self.ProteinView = PymolQtWidget(self)
+            verticalLayoutProteinView = QVBoxLayout(self.Pymol_Widget)
+            verticalLayoutProteinView.addWidget(self.ProteinView)
+            self.setLayout(verticalLayoutProteinView)
+            self.ProteinView.update()
+            self.ProteinView.show()
+            verticalLayoutProteinView.setContentsMargins(0, 0, 0, 0)
+            # self.deleteLayout(verticalLayoutProteinView)
+            self.ProteinView.initial_pymol_visual()
+        except Exception as instance:
+            if self.Pymol_Widget.isVisible():
+                QMessageBox.critical(self, 'Visualize Problem!.', repr(instance) +
+                                     "\n\nAn error occurred while loading the pdb file."
+                                     "\n\nPlease select a pdb file for visualize by PyMol")
+            else:
+                QMessageBox.critical(self, 'PyMol can''be initialized', repr(instance) +
+                                     "\n\nPyMol widget could not be initialized. "
+                                     "Molecule viewer will not start, "
+                                     "however the rest of the UI will be functional. "
+                                     "Upgrading your graphics card drivers or reinstalling PyMol"
+                                     "may solve this issue.")
+
+    def deleteLayout(self, verticalLayoutProteinView):
+        if verticalLayoutProteinView is not None:
+            sip.delete(verticalLayoutProteinView)
+    ## == > OPEN SOURCE PYMOL 2.4 INTEGRATION START
     ########################################################################

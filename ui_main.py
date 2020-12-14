@@ -3,10 +3,18 @@ import sys
 import platform
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+                          QSize, QTime, QUrl, Qt, QEvent, QRectF)
+from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QRegion)
+from PyQt5.QtWidgets import *
+import os
+import sys
+from platform import system, release
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent)
 from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-from PyQt5.QtWidgets import *
+                         QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
 
 ## ==> MAIN WINDOW
 # import app_modules
@@ -49,7 +57,12 @@ class MainWindow(QMainWindow):
         ## END - SIMULATION MONITORING
 
         ## REMOVE ==> STANDARD TITLE BAR
+
+        UIFunctions.start_pymol(self)
         UIFunctions.removeTitleBar(True)
+
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+
 
         ## ==> END ##
 
@@ -158,7 +171,7 @@ class MainWindow(QMainWindow):
 
         ## SHOW ==> MAIN WINDOW
         ########################################################################
-        self.show()
+
         ## ==> END ##
     def run_btn_clicked(self):
         Advanced.send_arg_to_Engine(self)
@@ -283,11 +296,16 @@ class MainWindow(QMainWindow):
     ########################################################################
     def resizeEvent(self, event):
         self.resizeFunction()
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), 5, 5)
+        reg = QRegion(path.toFillPolygon().toPolygon())
+        self.setMask(reg)
         return super(MainWindow, self).resizeEvent(event)
 
     def resizeFunction(self):
         print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
     ## ==> END ##
+
 
 
 # SPLASH SCREEN
@@ -331,7 +349,7 @@ class SplashScreen(QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.progress)
         # TIMER IN MILLISECONDS
-        self.timer.start(35)
+        self.timer.start(5)
 
         # CHANGE DESCRIPTION
         self.label_title.setText("MDPerTool v0.1")

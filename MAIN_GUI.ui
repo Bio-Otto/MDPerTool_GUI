@@ -533,12 +533,15 @@
     <normaloff>:/big_icons/icons/big_icons/style_icon_48x48.png</normaloff>:/big_icons/icons/big_icons/style_icon_48x48.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow {background: transparent; }
+   <string notr="true">QMainWindow {
+							background: transparent; 
+						}
+
 QToolTip {
-	color: #ffffff;
-	background-color: rgba(27, 29, 35, 160);
-	border: 1px solid rgb(100, 100, 100);
-}</string>
+					color: #ffffff;
+					background-color: rgba(27, 29, 35, 160);
+					border: 1px solid rgb(100, 100, 100);
+				}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
@@ -567,7 +570,7 @@ color: rgb(210, 210, 210);</string>
        <string notr="true"/>
       </property>
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
@@ -1308,7 +1311,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
