@@ -157,6 +157,11 @@ class Advanced(QtCore.QThread):
         platform, properties, precision = Advanced_Helper_Functions.selected_platform(self,
                                                                                       self.platform_comboBox.currentText(),
                                                                                       Device_ID_active, precision)
+        cuda_precision_prefix = None
+        cuda_active = False
+        if platform == 'CUDA':
+            cuda_precision_prefix = 'Cuda'
+            cuda_active = True
 
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
@@ -166,7 +171,8 @@ class Advanced(QtCore.QThread):
 
                                 Number_of_CPU=self.Number_CPU_spinBox_2.value(),
                                 all_cpu=self.All_CPU_checkBox.isChecked(),
-                                platform=platform, properties=properties, precision=precision,
+                                platform=platform, properties=properties, precision=precision, cuda_active=cuda_active,
+                                cuda_precision_prefix=cuda_precision_prefix,
                                 properties_active=properties_active, CPU_properties_active=CPU_properties_active,
                                 Device_ID_active=Device_ID_active,
                                 Device_Number=self.Device_Number_comboBox.currentText(),
@@ -203,7 +209,9 @@ class Advanced(QtCore.QThread):
                                 StateData_freq=StateData_freq,
                                 output_directory=self.out_dir
                                 )
+
         self.created_script = Advanced_Helper_Functions.update_display(self, script_structure)
+
         # return self.created_script
         # # self.update_display(script_structure)
         # self.Real_Time_Graphs.run_script(self.created_script)
@@ -226,7 +234,11 @@ class Advanced_Helper_Functions(QtCore.QThread):
             return platform_name, properties, precision
 
         if platform_name == 'CUDA' and Device_ID_active == True:
-            properties = {'CUDAPrecision': '%s' % precision, 'CUDADeviceIndex': '%s' % self.Device_Index_Number}
+            properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
+            return platform_name, properties, precision
+
+        if platform_name == 'CUDA' and not Device_ID_active:
+            properties = {'CudaPrecision': '%s' % precision}
             return platform_name, properties, precision
 
         if platform_name == 'CPU':
@@ -302,9 +314,13 @@ nonbonded.setUseDispersionCorrection(True)
 print('Creating a LangevinIntegrator.')
 integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}})
 
-platform = mm.Platform.getPlatformByName('{{platform}}')
+if {{cuda_active}}:
+    platform = mm.Platform.getPlatformByName('{{platform}}')
+    {{#properties_active}}properties = {'{{cuda_precision_prefix}}Precision': '{{precision}}'{{#Device_ID_active}},'{{cuda_precision_prefix}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
+else:
+    platform = mm.Platform.getPlatformByName('{{platform}}')
+    {{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 
-{{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 {{#CPU_properties_active}}properties = {'CpuThreads': '{{Number_of_CPU}}'}{{/CPU_properties_active}}
 
 simulation = app.Simulation(modeller.topology, system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
@@ -373,6 +389,7 @@ simulation.context.setTime(0)
         ''')
 
         self.contents = renderer.render(template, script_structure)
+        print(self.contents)
         return self.contents
         # Graphs().run_script(contents)
 

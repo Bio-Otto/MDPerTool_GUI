@@ -26,6 +26,7 @@ import pyqtgraph as pg
 from ui_functions import *
 from builder import *
 from omm_runner import *
+from pdbfixer import PDBFixer
 
 # from app_functions import *
 # from browse_menu import browse_file
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
         ########################################################################
 
         ## START - SIMULATION MONITORING
-        # self.created_script = None
+        self.created_script = None
         self.Real_Time_Graphs = Graphs()
         self.verticalLayout_16.addWidget(self.Real_Time_Graphs.win)
         self.setLayout(self.verticalLayout_16)
@@ -177,6 +178,7 @@ class MainWindow(QMainWindow):
         Advanced.send_arg_to_Engine(self)
         # thread_1 = threading.Thread(target=self.Real_Time_Graphs.run_script, args=(self.created_script,), daemon=True)
         # thread_1.start()                                  # Start the execution
+        # print(self.created_script)
         self.Real_Time_Graphs.run_script(self.created_script)
 
 
