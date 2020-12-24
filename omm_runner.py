@@ -206,6 +206,9 @@ class Graphs(QWidget):
         """Format the speed (ns/day) as pretty"""
 
         speed_style = ins_speed.split(':')
+        if ins_speed == '':
+            return self.real_speed.append(float(0))
+
         if len(speed_style) == 1:
             if speed_style[0] == '--':
                 return self.real_speed.append(float(0))
@@ -220,6 +223,8 @@ class Graphs(QWidget):
         """Format the time as minute"""
 
         time_style = t_remaining.split(':')
+        if t_remaining == '':
+            return self.real_time_as_minute.append(float(0))
 
         if len(time_style) == 1:
             if time_style[0] == '--':

@@ -175,10 +175,12 @@ class MainWindow(QMainWindow):
 
         ## ==> END ##
     def run_btn_clicked(self):
-        Advanced.send_arg_to_Engine(self)
-        # thread_1 = threading.Thread(target=self.Real_Time_Graphs.run_script, args=(self.created_script,), daemon=True)
-        # thread_1.start()                                  # Start the execution
-        # print(self.created_script)
+        self.start_monitoring = Advanced.send_arg_to_Engine(self)
+        if self.start_monitoring:
+            self.show_simulation_monitoring()
+
+    def show_simulation_monitoring(self):
+        self.stackedWidget.setCurrentIndex(1)
         self.Real_Time_Graphs.run_script(self.created_script)
 
 

@@ -199,10 +199,11 @@ class UIFunctions(MainWindow):
 
         ## REMOVE ==> STANDARD TITLE BAR
         if GLOBAL_TITLE_BAR:
+            self.setStyleSheet("background:rgb(27, 29, 35);")
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
             self.frame_main.setAttribute(QtCore.Qt.WA_TranslucentBackground)
             # self.centralwidget.setAttribute(QtCore.Qt.WA_NoSystemBackground)
-            self.setStyleSheet("background:rgb(27, 29, 35);")
+            # self.setStyleSheet("background:rgb(27, 29, 35);")
             self.frame_label_top_btns.mouseDoubleClickEvent = dobleClickMaximizeRestore
         else:
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)

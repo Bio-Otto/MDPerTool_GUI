@@ -10,7 +10,6 @@ from PyQt5.QtWidgets import QMessageBox
 #
 
 import gzip
-
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMessageBox
