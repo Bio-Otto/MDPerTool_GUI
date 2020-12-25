@@ -16,7 +16,11 @@ stylesheet = """
             border-image: none;
             border: 0px transparent black;
             outline: 0;
+            border: 1.5px solid;
+            border-radius: 5px;
+            padding: 8px;
         }
+        
         QLineEdit 
         {
             background-color: rgb(27, 29, 35); 
@@ -63,7 +67,10 @@ stylesheet = """
             text-align: center; 
             font-weight: bold;
             margin-top:10px;
+            margin-left:3px;
+            margin-right:2px;
         }
+        
         QListView::item:!selected:hover 
         {
             background: rgb(64, 71, 88); 

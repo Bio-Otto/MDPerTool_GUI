@@ -10,18 +10,22 @@ import threading
 import itertools
 import tokenize
 from omm_runner import *
+from ui_styles import Style
 
 
 # from OpenMM_Runner import OpenMMScriptRunner
 
 
 class Advanced(QtCore.QThread):
+
     def __init__(self, parent=None):
         super(Advanced, self).__init__(parent)
 
+        self.start_monitoring = False
+
     @pyqtSlot()
     def send_arg_to_Engine(self):
-        self.stackedWidget.setCurrentIndex(1)
+        # self.stackedWidget.setCurrentIndex(1)
         pdb_pfile = os.path.abspath(self.upload_pdb_textEdit.toPlainText().strip()).replace('\\', '/')
 
         print(pdb_pfile)
@@ -33,6 +37,7 @@ class Advanced(QtCore.QThread):
         XTC_Reporter = False
         State_Data_Reporter = True
         Nonbounded_cutoff_active = True
+        use_switching_distance = True
         Additional_Integrator = False
         properties_active = False
         CPU_properties_active = False
@@ -77,16 +82,25 @@ class Advanced(QtCore.QThread):
         try:
             self.out_dir = self.Output_Folder_textEdit.toPlainText()
             if self.out_dir == '':
+                """Output Directory Help."""
+                msgbox = QMessageBox(QMessageBox.Question, "There is no specified output directory",
+                                     "If you want to specify, please click the 'Yes' button, "
+                                     "otherwise the system will create an output folder named 'output'")
 
-                answer = QMessageBox.question(self, 'Warning',
-                                              "There is no specified Output Directory. "
-                                              "If you want to specify, please click the 'Yes' button, "
-                                              "otherwise the system will create an output folder named 'output'",
-                                              QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if answer == QMessageBox.Yes:
+                msgbox.setIcon(QMessageBox.Question)
+                msgbox.addButton(QMessageBox.Yes)
+                msgbox.addButton(QMessageBox.No)
+                msgbox.setDefaultButton(QMessageBox.Yes)
+                # msgbox.setCheckBox(cb)
+                # msg.setWindowIcon(QIcon(ICON_PATH))
+                msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+                msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+                output_answer = msgbox.exec_()
+
+                if output_answer == QMessageBox.Yes:
                     return False
 
-                if answer == QMessageBox.No:
+                if output_answer == QMessageBox.No:
                     from pathlib import Path
                     path_out = os.getcwd() + "/output"
                     Path(path_out).mkdir(parents=True, exist_ok=True)
@@ -101,6 +115,33 @@ class Advanced(QtCore.QThread):
 
         if not self.rigid_water_checkBox.isChecked():
             rigid_water = False
+        if not self.use_switching_checkBox.isChecked():
+            use_switching_distance = False
+
+        try:
+            if use_switching_distance:
+                if float(self.switching_distance_textEdit.toPlainText().split('*')[0]) >= float(
+                        self.nonbounded_CutOff_textEdit.toPlainText().split('*')[0]):
+
+                    """Display help."""
+                    msg = QMessageBox()
+                    # msg.setWindowTitle("Nonbonded Force Warning")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText('Nonbonded Force Warning')
+                    msg.setInformativeText("Switching Distance must smaller than nonbonded cutoff. "
+                                           "Switching distance must satisfy \n0 <= r_switch < r_cutoff")
+
+                    # msg.setWindowIcon(QIcon(ICON_PATH))
+                    msg.setDetailedText("Solutions pages still in progress, so we can not redirect you a link.")
+                    msg.setStyleSheet(Style.MessageBox_stylesheet)
+                    msg.setWindowFlags(QtCore.Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
+                    answer = msg.exec_()
+
+                    if answer == QMessageBox.Ok:
+                        return False
+
+        except:
+            QMessageBox.critical(self, "Error", "An error occured while getting Nonbonded Parameters")
 
         if self.Max_minimize_iter_textEdit.toPlainText() == "":
             no_minimize_value = False
@@ -157,6 +198,11 @@ class Advanced(QtCore.QThread):
         platform, properties, precision = Advanced_Helper_Functions.selected_platform(self,
                                                                                       self.platform_comboBox.currentText(),
                                                                                       Device_ID_active, precision)
+        cuda_precision_prefix = None
+        cuda_active = False
+        if platform == 'CUDA':
+            cuda_precision_prefix = 'Cuda'
+            cuda_active = True
 
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
@@ -166,7 +212,8 @@ class Advanced(QtCore.QThread):
 
                                 Number_of_CPU=self.Number_CPU_spinBox_2.value(),
                                 all_cpu=self.All_CPU_checkBox.isChecked(),
-                                platform=platform, properties=properties, precision=precision,
+                                platform=platform, properties=properties, precision=precision, cuda_active=cuda_active,
+                                cuda_precision_prefix=cuda_precision_prefix,
                                 properties_active=properties_active, CPU_properties_active=CPU_properties_active,
                                 Device_ID_active=Device_ID_active,
                                 Device_Number=self.Device_Number_comboBox.currentText(),
@@ -188,6 +235,8 @@ class Advanced(QtCore.QThread):
                                 Rigid_Water=rigid_water,
                                 NonBounded_cutoff=self.nonbounded_CutOff_textEdit.toPlainText(),
                                 Nonbounded_cutoff_active=Nonbounded_cutoff_active,
+                                use_switching_distance=use_switching_distance,
+                                switching_distance=self.switching_distance_textEdit.toPlainText(),
 
                                 Number_of_steps=self.Number_of_steps_textEdit.toPlainText(),
                                 Minimize=minimize,
@@ -203,7 +252,11 @@ class Advanced(QtCore.QThread):
                                 StateData_freq=StateData_freq,
                                 output_directory=self.out_dir
                                 )
+
         self.created_script = Advanced_Helper_Functions.update_display(self, script_structure)
+
+        self.start_monitoring = True
+        return self.start_monitoring
         # return self.created_script
         # # self.update_display(script_structure)
         # self.Real_Time_Graphs.run_script(self.created_script)
@@ -226,7 +279,11 @@ class Advanced_Helper_Functions(QtCore.QThread):
             return platform_name, properties, precision
 
         if platform_name == 'CUDA' and Device_ID_active == True:
-            properties = {'CUDAPrecision': '%s' % precision, 'CUDADeviceIndex': '%s' % self.Device_Index_Number}
+            properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
+            return platform_name, properties, precision
+
+        if platform_name == 'CUDA' and not Device_ID_active:
+            properties = {'CudaPrecision': '%s' % precision}
             return platform_name, properties, precision
 
         if platform_name == 'CPU':
@@ -294,17 +351,23 @@ system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBounded
 
 system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
 
+{{#use_switching_distance}}
 nonbonded = [f for f in system.getForces() if isinstance(f, NonbondedForce)][0]
 nonbonded.setUseSwitchingFunction(use=True)
-nonbonded.setSwitchingDistance(10.0 * angstrom)
+nonbonded.setSwitchingDistance({{switching_distance}})
 nonbonded.setUseDispersionCorrection(True)
+{{/use_switching_distance}}
 
 print('Creating a LangevinIntegrator.')
 integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}})
 
-platform = mm.Platform.getPlatformByName('{{platform}}')
+if {{cuda_active}}:
+    platform = mm.Platform.getPlatformByName('{{platform}}')
+    {{#properties_active}}properties = {'{{cuda_precision_prefix}}Precision': '{{precision}}'{{#Device_ID_active}},'{{cuda_precision_prefix}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
+else:
+    platform = mm.Platform.getPlatformByName('{{platform}}')
+    {{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 
-{{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 {{#CPU_properties_active}}properties = {'CpuThreads': '{{Number_of_CPU}}'}{{/CPU_properties_active}}
 
 simulation = app.Simulation(modeller.topology, system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
@@ -373,6 +436,7 @@ simulation.context.setTime(0)
         ''')
 
         self.contents = renderer.render(template, script_structure)
+        print(self.contents)
         return self.contents
         # Graphs().run_script(contents)
 

@@ -3,10 +3,18 @@ import sys
 import platform
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+                          QSize, QTime, QUrl, Qt, QEvent, QRectF)
+from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QRegion)
+from PyQt5.QtWidgets import *
+import os
+import sys
+from platform import system, release
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent)
 from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-from PyQt5.QtWidgets import *
+                         QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
 
 ## ==> MAIN WINDOW
 # import app_modules
@@ -18,12 +26,14 @@ import pyqtgraph as pg
 from ui_functions import *
 from builder import *
 from omm_runner import *
+from pdbfixer import PDBFixer
 
 # from app_functions import *
 # from browse_menu import browse_file
 # from omm_runner import *
 ## ==> GLOBALS
 counter = 0
+
 
 
 # YOUR APPLICATION
@@ -41,14 +51,19 @@ class MainWindow(QMainWindow):
         ########################################################################
 
         ## START - SIMULATION MONITORING
-        # self.created_script = None
+        self.created_script = None
         self.Real_Time_Graphs = Graphs()
         self.verticalLayout_16.addWidget(self.Real_Time_Graphs.win)
         self.setLayout(self.verticalLayout_16)
         ## END - SIMULATION MONITORING
 
         ## REMOVE ==> STANDARD TITLE BAR
+
+        UIFunctions.start_pymol(self)
         UIFunctions.removeTitleBar(True)
+
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+
 
         ## ==> END ##
 
@@ -157,12 +172,15 @@ class MainWindow(QMainWindow):
 
         ## SHOW ==> MAIN WINDOW
         ########################################################################
-        self.show()
+
         ## ==> END ##
     def run_btn_clicked(self):
-        Advanced.send_arg_to_Engine(self)
-        # thread_1 = threading.Thread(target=self.Real_Time_Graphs.run_script, args=(self.created_script,), daemon=True)
-        # thread_1.start()                                  # Start the execution
+        self.start_monitoring = Advanced.send_arg_to_Engine(self)
+        if self.start_monitoring:
+            self.show_simulation_monitoring()
+
+    def show_simulation_monitoring(self):
+        self.stackedWidget.setCurrentIndex(1)
         self.Real_Time_Graphs.run_script(self.created_script)
 
 
@@ -282,11 +300,16 @@ class MainWindow(QMainWindow):
     ########################################################################
     def resizeEvent(self, event):
         self.resizeFunction()
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), 5, 5)
+        reg = QRegion(path.toFillPolygon().toPolygon())
+        self.setMask(reg)
         return super(MainWindow, self).resizeEvent(event)
 
     def resizeFunction(self):
         print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
     ## ==> END ##
+
 
 
 # SPLASH SCREEN
@@ -330,7 +353,7 @@ class SplashScreen(QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.progress)
         # TIMER IN MILLISECONDS
-        self.timer.start(35)
+        self.timer.start(5)
 
         # CHANGE DESCRIPTION
         self.label_title.setText("MDPerTool v0.1")
