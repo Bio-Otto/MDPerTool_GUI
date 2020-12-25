@@ -4,6 +4,7 @@
 
 <p align="left">
   <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="50" title="Available on Ubuntu 20.10">
+  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="50" title="Available on Windows">
 </p>
 
 A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
