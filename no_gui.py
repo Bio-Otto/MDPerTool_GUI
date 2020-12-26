@@ -72,7 +72,7 @@ if __name__ == '__main__':
                         help='This option can only be used with OpenCL or CUDA platform. NOTE: OpenCL must use only one'
                              ' gpu. (eg. for "OpenCL": <- gpu_id 0> and example for "CUDA": <- gpu-id 0,1>)')
 
-    parser.add_argument('-temp', '--temperature', nargs='?', type=float, required=False,
+    parser.add_argument('-temp', '--temperature', nargs='?', type=float, required=False, default=310,
                         help='The temperature unit is kelvin. (The program defaultly will use "310 Kelvin")')
 
     parser.add_argument('-plt', '--platform', nargs='?', type=str, default='OpenCL', required=False,
