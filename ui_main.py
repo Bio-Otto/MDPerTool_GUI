@@ -22,18 +22,18 @@ from PyQt5 import uic
 from icons import *
 import pyqtgraph as pg
 # IMPORT FUNCTIONS
-# from omm_runner import *
+from omm_runner import *
 from ui_functions import *
 from builder import *
 from omm_runner import *
 from pdbfixer import PDBFixer
+
 
 # from app_functions import *
 # from browse_menu import browse_file
 # from omm_runner import *
 ## ==> GLOBALS
 counter = 0
-
 
 
 # YOUR APPLICATION
@@ -63,7 +63,6 @@ class MainWindow(QMainWindow):
         UIFunctions.removeTitleBar(True)
 
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-
 
         ## ==> END ##
 
@@ -148,7 +147,8 @@ class MainWindow(QMainWindow):
         #                                                                      #
         ## ==> USER CODES BELLOW                                              ##
         ########################################################################
-
+        self.quit_pushButton.clicked.connect(lambda: UIFunctions.close_application(self))
+        self.stop_pushButton.clicked.connect(self.stop_button_clicked)
         self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
         self.PDB_ID_lineEdit.textChanged.connect(lambda: Functions.PDB_ID_lineEdit(self))
@@ -174,15 +174,32 @@ class MainWindow(QMainWindow):
         ########################################################################
 
         ## ==> END ##
+
     def run_btn_clicked(self):
+        self.Run.setEnabled(False)
+        self.start_monitoring = False
         self.start_monitoring = Advanced.send_arg_to_Engine(self)
+
         if self.start_monitoring:
             self.show_simulation_monitoring()
+
+        if not self.start_monitoring:
+            self.Run.setEnabled(False)
+
+    def stop_button_clicked(self):
+        self.__stop = True
+        try:
+            print("burada fakat boş")
+            self.Real_Time_Graphs.stop_th()
+        except Exception as ins:
+            print("#######")
+            print("problem var")
+            print(ins)
+            print("#######")
 
     def show_simulation_monitoring(self):
         self.stackedWidget.setCurrentIndex(1)
         self.Real_Time_Graphs.run_script(self.created_script)
-
 
     def upload_pdb_from_local(self):
         global selected_chains
@@ -218,8 +235,14 @@ class MainWindow(QMainWindow):
                 self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
         except Exception as instance:
-            pass
-            # QMessageBox.critical(self, 'An error occurred while loading files.', repr(instance))
+            PDB_load_msgbox = QMessageBox(QMessageBox.Critical, repr(instance),
+                                           'An Error Occurred While Loading The File.')
+            PDB_load_msgbox.setInformativeText(repr(instance))
+            PDB_load_msgbox.setIcon(QMessageBox.Critical)
+            PDB_load_msgbox.addButton(QMessageBox.Ok)
+            PDB_load_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+            PDB_load_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            PDB_load_msgbox.exec_()
 
     def output_folder_browse(self):
         Functions.output_file(self)
@@ -311,7 +334,6 @@ class MainWindow(QMainWindow):
     ## ==> END ##
 
 
-
 # SPLASH SCREEN
 class SplashScreen(QMainWindow):
 
@@ -363,8 +385,7 @@ class SplashScreen(QMainWindow):
 
         # Change Texts
         QtCore.QTimer.singleShot(100, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
-        QtCore.QTimer.singleShot(200,
-                                 lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
+        QtCore.QTimer.singleShot(200, lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
 
         ## SHOW ==> MAIN WINDOW
         ########################################################################

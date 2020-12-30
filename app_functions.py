@@ -60,7 +60,9 @@ class Functions(MainWindow):
             output_file = QFileDialog.getExistingDirectory(options=options)
             self.Output_Folder_textEdit.setText(output_file)
             return True
-        except:
+
+        except Exception as ins:
+            print(ins)
             return False
 
     def browse_pdbFile(self):
@@ -83,6 +85,7 @@ class Functions(MainWindow):
         elif self.pdb_filename[1] != "":
             QMessageBox.critical(self, "Error", "this is not a pdb file")
 
+    @staticmethod
     def PDB_ID_lineEdit(self):
         """
              The function provides enable or disable of Upload Button according to the entry of user
@@ -97,6 +100,7 @@ class Functions(MainWindow):
             self.upload_pdb_textEdit.setEnabled(False)
             self.label_32.setEnabled(False)
 
+    @staticmethod
     def Fetch_PDB_File(self):
         global selected_chains
         try:
@@ -137,10 +141,24 @@ class Functions(MainWindow):
                     InputFile(fetch_result)
 
             if len(fetch_pdb_ID) != 4:
-                QMessageBox.critical(self, 'Wrong pdb id', 'PDB ID should be provided as 4 letters')
+                print("burada")
+                PDB_fetch_wrong_letter_msgbox = QMessageBox(QMessageBox.Information, 'Wrong pdb id',
+                                                            'PDB ID should be provided as 4 letters')
+                PDB_fetch_wrong_letter_msgbox.setIcon(QMessageBox.Information)
+                PDB_fetch_wrong_letter_msgbox.addButton(QMessageBox.Ok)
+                PDB_fetch_wrong_letter_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+                PDB_fetch_wrong_letter_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint |
+                                                             QtCore.Qt.WindowStaysOnTopHint)
+                PDB_fetch_wrong_letter_msgbox.exec_()
 
         except Exception as instance:
-            QMessageBox.critical(self, 'An error occurred while fetching the pdb file.', repr(instance))
+            PDB_fetch_msgbox = QMessageBox(QMessageBox.Critical,
+                                           'An error occurred while fetching the pdb file.', repr(instance))
+            PDB_fetch_msgbox.setIcon(QMessageBox.Critical)
+            PDB_fetch_msgbox.addButton(QMessageBox.Ok)
+            PDB_fetch_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+            PDB_fetch_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            PDB_fetch_msgbox.exec_()
 
     def Stochastic_changed(self):
         """
@@ -157,12 +175,14 @@ class Functions(MainWindow):
             self.Additional_Integrators_checkBox.setChecked(False)
             self.Additional_Integrators_checkBox.setEnabled(False)
 
+    @staticmethod
     def minimize_Step_isVisible(self):
         if not self.minimize_checkBox.isChecked():
             self.Max_minimize_iter_textEdit.setEnabled(False)
         else:
             self.Max_minimize_iter_textEdit.setEnabled(True)
 
+    @staticmethod
     def DCD_Reporter_Changed(self):
         if not self.DCD_Reporter_checkBox.isChecked():
             self.DCD_Reporter_Options_groupBox.setEnabled(False)
@@ -170,6 +190,7 @@ class Functions(MainWindow):
         if self.DCD_Reporter_checkBox.isChecked():
             self.DCD_Reporter_Options_groupBox.setEnabled(True)
 
+    @staticmethod
     def XTC_Reporter_Changed(self):
         if not self.XTC_Reporter_checkBox.isChecked():
             self.XTC_Reporter_Options_groupBox.setEnabled(False)
@@ -177,6 +198,7 @@ class Functions(MainWindow):
         if self.XTC_Reporter_checkBox.isChecked():
             self.XTC_Reporter_Options_groupBox.setEnabled(True)
 
+    @staticmethod
     def State_Data_Reporter_Changed(self):
         if not self.State_Data_Reporter_checkBox.isChecked():
             self.State_Data_Reporter_Options_groupBox.setEnabled(False)
@@ -184,6 +206,7 @@ class Functions(MainWindow):
         if self.State_Data_Reporter_checkBox.isChecked():
             self.State_Data_Reporter_Options_groupBox.setEnabled(True)
 
+    @staticmethod
     def Send_Available_Platforms_to_GUI(self):
         self.platforms = Helper_Functions.available_platforms(self)
         self.platform_list_on_the_program = [self.platform_comboBox.itemText(i) for i in
@@ -195,6 +218,7 @@ class Functions(MainWindow):
                 self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
                 self.platform_comboBox.setCurrentIndex(item_no + 1)
 
+    @staticmethod
     def platform_comboBox_Changed(self):
         if self.platform_comboBox.currentText() in ["CPU", "Reference"]:
             self.Device_Number_comboBox.setEnabled(False)
@@ -264,7 +288,9 @@ class pdb_Tools:
             return fetched_pdb_file
 
         except Exception as instance:
-            QMessageBox.critical(self, 'An error occurred while fetching the pdb file.', repr(instance))
+            PDB_fetch_msgbox = QMessageBox.critical(self, 'An error occurred while fetching the pdb file.', repr(instance))
+            PDB_fetch_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+            PDB_fetch_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
             return False
 
     def fetched_pdb_fix(self, file_pathway, output_path=None, ph=7, chains_to_remove=None):

@@ -20,6 +20,7 @@ count = 1
 from app_functions import *
 from PyMolWidget import PymolQtWidget
 
+
 class UIFunctions(MainWindow):
     ## ==> GLOBALS
     GLOBAL_STATE = 0
@@ -28,6 +29,14 @@ class UIFunctions(MainWindow):
     ########################################################################
     ## START - GUI FUNCTIONS
     ########################################################################
+
+    ## ==> CLOSE APPLICATION
+    @staticmethod
+    def close_application(self):
+        try:
+            self.close()
+        except Exception as inst:
+            print(inst)
 
     ## ==> MAXIMIZE/RESTORE
     ########################################################################
@@ -222,7 +231,6 @@ class UIFunctions(MainWindow):
         # self.frame_main.setGraphicsEffect(self.shadow)
         ## DROP SHADOW EFFECT
 
-
         ## ==> RESIZE WINDOW
         self.sizegrip = QSizeGrip(self.frame_size_grip)
         self.sizegrip.setStyleSheet("width: 20px; height: 20px; margin 0px; padding: 0px;")
@@ -267,6 +275,7 @@ class UIFunctions(MainWindow):
                 QMessageBox.critical(self, 'Visualize Problem!.', repr(instance) +
                                      "\n\nAn error occurred while loading the pdb file."
                                      "\n\nPlease select a pdb file for visualize by PyMol")
+
             else:
                 QMessageBox.critical(self, 'PyMol can''be initialized', repr(instance) +
                                      "\n\nPyMol widget could not be initialized. "

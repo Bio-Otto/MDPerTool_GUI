@@ -109,3 +109,30 @@ class Style:
 
 
         """
+
+    MessageBox_critical_stylesheet = """
+
+                QWidget
+                {
+                    color: white;
+                    background-color: #323232;
+                    selection-background-color:#323232;
+                    selection-color: black;
+                    background-clip: border;
+                    border-image: none;
+                    border: 0px transparent black;
+                    outline: 0;
+
+                    border-radius: 12px;
+                    border: 1.5px solid;
+                    padding: 6px;
+
+                }
+
+                QLabel
+                {
+                    font: bold 12px;
+                    border: none;
+                }
+
+            """
