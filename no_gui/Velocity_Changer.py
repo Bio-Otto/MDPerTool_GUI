@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import mdtraj as md
 from simtk import openmm
 import xml.etree.ElementTree as ET
+import os
 
 # path = 'last.pdb'
 
@@ -39,9 +40,9 @@ def change_velocity(xml_file, r_factor, modify_atoms):
             type_tag.set('y', str(float(type_tag.get('y')) * r_factor).strip())
             type_tag.set('z', str(float(type_tag.get('z')) * r_factor).strip())
 
-
-    tree.write('out_x%s.xml' % r_factor, encoding="UTF-8")
-    return 'out_x%s.xml' % r_factor
+    save_directory = os.path.join(os.path.dirname(xml_file), 'out_x%s.xml' % r_factor)
+    tree.write(save_directory, encoding="UTF-8")
+    return save_directory
 
 
 def read_xml_file(filename):

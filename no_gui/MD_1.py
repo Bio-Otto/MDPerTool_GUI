@@ -14,7 +14,7 @@ class Dissipation_MD_Engine:
                  nonbondedCutoff=12.0, switching_distance= 10.0, Device_Index=False, Device_Index_Number=1,
                  dissipation_total_Steps=1000, platform_name='OpenCL', properties=None, precision='single',
                  CPU_Threads=2, report_interval=1, write_to_dcd=True, dcd_write_period=1, write_to_xtc=False,
-                 xtc_write_period=1, dissipated_traj_name='dissipated_traj'):
+                 xtc_write_period=1, dissipated_traj_name='dissipated_traj', output_directory=None):
 
         print("Simulation parameters preparing for the start ...")
         self.Device_Index = Device_Index
@@ -79,6 +79,7 @@ class Dissipation_MD_Engine:
         self.dcd_write_period = dcd_write_period
         self.write_to_xtc = write_to_xtc
         self.xtc_write_period = xtc_write_period
+        self.output_directory = output_directory
 
 
         # we'll just take the topology from here...
@@ -120,11 +121,13 @@ class Dissipation_MD_Engine:
 
         if self.write_to_dcd:
             print("Saving DCD File for every %s period" % self.dcd_write_period)
-            simulation.reporters.append(app.DCDReporter('%s.dcd' % dissipated_traj_name, self.dcd_write_period))
+            DCD_file_path = os.path.join(self.output_directory, '%s.dcd' % dissipated_traj_name)
+            simulation.reporters.append(app.DCDReporter(DCD_file_path, self.dcd_write_period))
 
         if self.write_to_xtc:
             print("Saving XTC File for every %s period" % self.xtc_write_period)
-            simulation.reporters.append(XTCReporter('%s.xtc' % dissipated_traj_name, self.xtc_write_period))
+            XTC_file_path = os.path.join(self.output_directory, '%s.xtc' % dissipated_traj_name)
+            simulation.reporters.append(XTCReporter(XTC_file_path, self.xtc_write_period))
 
         simulation.reporters.append(app.StateDataReporter(stdout, self.report_interval, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
