@@ -10,6 +10,7 @@ from simtk import unit
 from simtk.openmm import *
 import time
 from no_gui.write_outputs import *
+from logging.config import dictConfig
 
 if __name__ == '__main__':
     import argparse
@@ -24,6 +25,7 @@ if __name__ == '__main__':
     dissipation_traj_file_for_pos = str
     OUTPUT_DIRECTORY = str
     created_file_for_work = str
+    OUTPUT_FOLDER_NAME = str
 
     ### PARSER
     parser = argparse.ArgumentParser(description='The Program applying Energy Dissipation Concept using powerfull '
@@ -175,9 +177,46 @@ if __name__ == '__main__':
 
     if parsed.output is None:
         OUTPUT_DIRECTORY = os.getcwd()
-        created_file_for_work = write_folder(OUTPUT_DIRECTORY)
-        print("The output directory is %s" % created_file_for_work)
-    print(parsed.write_dcd)
+        created_file_for_work, OUTPUT_FOLDER_NAME = write_folder(OUTPUT_DIRECTORY)
+
+    ### LOG FILE
+    logging_config = lof_file_settings(file_name=OUTPUT_FOLDER_NAME)
+    dictConfig(logging_config)
+    api_logger = logging.getLogger('api_logger')
+    batch_process_logger = logging.getLogger('batch_process_logger')
+
+    ### LOG FILE CREATION
+    api_logger.info("Topology File:\t%s" % parsed.topology)
+    api_logger.info("Protein Forcefield:\t%s" % parsed.protein_ff)
+    api_logger.info("Water Forcefield:\t%s" % parsed.water_ff)
+    api_logger.info("First MD Time Step (fs):\t%s" % parsed.long_md_time_step)
+    api_logger.info("Nonbonded Cutoff (Angstrom):\t%s" % parsed.nonbonded_cutoff)
+    api_logger.info("Switching Distance (Angstrom):\t%s" % parsed.switch_distance)
+    api_logger.info("Water Box Padding (Angstrom):\t%s" % parsed.water_padding)
+    api_logger.info("GPU Utilization Condition (For OpenCL or CUDA platforms):\t%s" % parsed.use_device_index)
+    api_logger.info("GPU Device Index:\t%s" % parsed.device_index)
+    api_logger.info("First MD Total Step:\t%s" % parsed.long_md_total_step)
+    api_logger.info("Temperature:\t%s" % parsed.temperature)
+    api_logger.info("Platform:\t%s" % parsed.platform)
+    api_logger.info("Precision:\t%s" % parsed.plt_precision)
+    api_logger.info("Friction Cofficient:\t%s" % parsed.friction_coff)
+    api_logger.info("Minimization Condition:\t%s" % parsed.minimize)
+    api_logger.info("Maximum Minimization Step:\t%s" % parsed.minimize_step)
+    api_logger.info("Number of CPU Threads:\t%s" % parsed.cpu_thread)
+    api_logger.info("Equilibrate Condition:\t%s" % parsed.equilibrate)
+    api_logger.info("Equilibrate Step:\t%s" % parsed.equilibrate_step)
+    api_logger.info("Report Interval:\t%s" % parsed.report_interval)
+    api_logger.info("Write to DCD Condition:\t%s" % parsed.write_dcd)
+    api_logger.info("DCD Writing Period:\t%s" % parsed.dcd_period)
+    api_logger.info("Write to XTC Condition:\t%s" % parsed.write_xtc)
+    api_logger.info("XTC Writing Period:\t%s" % parsed.xtc_period)
+    api_logger.info("Output Destination:\t%s" % created_file_for_work)
+    api_logger.info("Perturbed Residue(s):\t%s" % parsed.perturbed_residues)
+    api_logger.info("Speed Factor:\t%s" % parsed.velocity_speed_factor)
+    api_logger.info("Perturbation Total Step:\t%s" % parsed.perturbation_total_step)
+    api_logger.info("Perturbation Time Step:\t%s" % parsed.perturbation_time_step)
+    api_logger.info("Dissipation Simulation Report Interval:\t%s" % parsed.perturbation_report_interval)
+
     Classic_MD_Engine(pdb_path=parsed.topology, protein_ff=parsed.protein_ff, water_ff=parsed.water_ff,
                       time_step=parsed.long_md_time_step, nonbondedCutoff=parsed.nonbonded_cutoff,
                       switching_distance=parsed.switch_distance, water_padding=parsed.water_padding,
@@ -200,15 +239,17 @@ if __name__ == '__main__':
     if not parsed.write_dcd and not parsed.write_xtc:
         parsed.write_dcd = True
 
-    Dissipation_MD_Engine(pdb_path=last_pdb_file_path, state_file=name_of_changed_state_xml, protein_ff=parsed.protein_ff,
-                          water_ff=parsed.water_ff, time_step=parsed.perturbation_time_step,
-                          nonbondedCutoff=parsed.nonbonded_cutoff, switching_distance=parsed.switch_distance,
-                          Device_Index=parsed.use_device_index, Device_Index_Number=parsed.device_index,
+    Dissipation_MD_Engine(pdb_path=last_pdb_file_path, state_file=name_of_changed_state_xml,
+                          protein_ff=parsed.protein_ff, water_ff=parsed.water_ff,
+                          time_step=parsed.perturbation_time_step, nonbondedCutoff=parsed.nonbonded_cutoff,
+                          switching_distance=parsed.switch_distance, Device_Index=parsed.use_device_index,
+                          Device_Index_Number=parsed.device_index,
                           dissipation_total_Steps=parsed.perturbation_total_step,
                           platform_name=parsed.platform, precision=parsed.plt_precision,
                           CPU_Threads=parsed.cpu_thread, report_interval=parsed.perturbation_report_interval,
                           write_to_dcd=parsed.write_dcd, dcd_write_period=1, write_to_xtc=parsed.write_xtc,
-                          xtc_write_period=1, dissipated_traj_name=dissipated_trajectory_name, output_directory=created_file_for_work)
+                          xtc_write_period=1, dissipated_traj_name=dissipated_trajectory_name,
+                          output_directory=created_file_for_work)
 
     Reference_MD_Engine(pdb_path=last_pdb_file_path, state_file=state_file_path, protein_ff=parsed.protein_ff,
                         water_ff=parsed.water_ff, time_step=parsed.perturbation_time_step,
