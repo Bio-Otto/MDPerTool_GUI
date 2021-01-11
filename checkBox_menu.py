@@ -177,7 +177,7 @@ class ChecklistDialog(QtWidgets.QDialog):
         self.listView.setModel(self.model)
 
         self.okButton = QtWidgets.QPushButton('OK')
-        self.cancelButton = QtWidgets.QPushButton('Cancel')
+        self.cancelButton = QtWidgets.QPushButton('Don\'t Fix')
         self.selectButton = QtWidgets.QPushButton('Select All')
         self.unselectButton = QtWidgets.QPushButton('Unselect All')
 

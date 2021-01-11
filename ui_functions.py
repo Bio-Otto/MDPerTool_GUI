@@ -34,7 +34,26 @@ class UIFunctions(MainWindow):
     @staticmethod
     def close_application(self):
         try:
-            self.close()
+            """Close Application Question Message Box."""
+            close_program_msgbox = QMessageBox(QMessageBox.Question, "Be carefull !",
+                                               "Do you really want to close program?")
+
+            close_program_msgbox.setIcon(QMessageBox.Question)
+            close_program_msgbox.addButton(QMessageBox.Yes)
+            close_program_msgbox.addButton(QMessageBox.No)
+            close_program_msgbox.setDefaultButton(QMessageBox.No)
+            # msgbox.setCheckBox(cb)
+            # msg.setWindowIcon(QIcon(ICON_PATH))
+            close_program_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+            close_program_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            close_answer = close_program_msgbox.exec_()
+
+            if close_answer == QMessageBox.Yes:
+                self.close()
+
+            if close_answer == QMessageBox.No:
+                pass
+
         except Exception as inst:
             print(inst)
 

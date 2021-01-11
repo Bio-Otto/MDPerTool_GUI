@@ -118,26 +118,47 @@ class Functions(MainWindow):
 
                     checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
                                                    checked=True)
-                    if checked_list.exec_() == QtWidgets.QDialog.Accepted:
+
+                    pdb_fix_dialog_answer = checked_list.exec_()
+
+                    if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
                         selected_chains = [str(s) for s in checked_list.choices]
 
-                    delete_chains = list(set(chains) - set(selected_chains))
+                        delete_chains = list(set(chains) - set(selected_chains))
 
-                    fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
-                                                            self.Output_Folder_textEdit.toPlainText(), ph=7,
-                                                            chains_to_remove=delete_chains)
-                    print(delete_chains)
-                    print("fetched pdb: %s" % fetched_pdb)
+                        fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                                self.Output_Folder_textEdit.toPlainText(), ph=7,
+                                                                chains_to_remove=delete_chains)
+                        print(delete_chains)
+                        print("fetched pdb: %s" % fetched_pdb)
 
-                    self.upload_pdb_textEdit.setText(fetched_pdb)
-                    self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
-                    for i in self.combobox:
-                        self.res1_comboBox.addItem(str(i))
-                        self.res2_comboBox.addItem(str(i))
-                    self.res1_comboBox.clear()  # delete all items from comboBox
-                    self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    self.res2_comboBox.clear()  # delete all items from comboBox
-                    self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                        self.upload_pdb_textEdit.setText(fetched_pdb)
+                        self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
+                        for i in self.combobox:
+                            self.res1_comboBox.addItem(str(i))
+                            self.res2_comboBox.addItem(str(i))
+                        self.res1_comboBox.clear()  # delete all items from comboBox
+                        self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                        self.res2_comboBox.clear()  # delete all items from comboBox
+                        self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                        # InputFile(fetch_result)
+
+                    elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                        modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                                 self.Output_Folder_textEdit.toPlainText(),
+                                                                 ph=7, chains_to_remove=None)
+
+                        self.upload_pdb_textEdit.setText(modified_pdb)
+
+                        self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                        for i in self.combobox:
+                            self.res1_comboBox.addItem(str(i))
+                            self.res2_comboBox.addItem(str(i))
+                        self.res1_comboBox.clear()  # delete all items from comboBox
+                        self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                        self.res2_comboBox.clear()  # delete all items from comboBox
+                        self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+
                     InputFile(fetch_result)
 
             if len(fetch_pdb_ID) != 4:
