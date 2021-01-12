@@ -141,4 +141,3 @@ class MainWindow(QtWidgets.QMainWindow):
 # if __name__ == '__main__':
 #     main()
 
-

@@ -47,6 +47,7 @@ class MainWindow(QMainWindow):
         print('System: ' + platform.system())
         print('Version: ' + platform.release())
 
+
         ########################################################################
         ## START - WINDOW ATTRIBUTES
         ########################################################################
@@ -436,5 +437,6 @@ class SplashScreen(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyleSheet(Style.QToolTip_stylesheet)
     window = SplashScreen()
     sys.exit(app.exec_())

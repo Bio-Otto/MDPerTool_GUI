@@ -136,3 +136,14 @@ class Style:
                 }
 
             """
+
+    QToolTip_stylesheet = """
+    
+                QToolTip 
+                { 
+                    background-color: black; 
+                    color: white; 
+                    border: black solid 1px
+                }
+    
+            """

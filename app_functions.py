@@ -47,8 +47,14 @@ class Helper_Functions():
             :return: The function will return available platforms on your system for OpenMM Engine
         """
         import simtk.openmm
-        return [simtk.openmm.Platform.getPlatform(index).getName() for index in
-                range(simtk.openmm.Platform.getNumPlatforms())]
+        avail_plt_and_speed = dict()
+
+        for index in range(simtk.openmm.Platform.getNumPlatforms()):
+            avail_plt_and_speed[
+                (simtk.openmm.Platform.getPlatform(index).getName())] = simtk.openmm.Platform.getPlatform(
+                index).getSpeed()
+
+        return avail_plt_and_speed.keys(), avail_plt_and_speed
 
 
 class Functions(MainWindow):
@@ -229,7 +235,7 @@ class Functions(MainWindow):
 
     @staticmethod
     def Send_Available_Platforms_to_GUI(self):
-        self.platforms = Helper_Functions.available_platforms(self)
+        self.platforms, self.plt_speeds = Helper_Functions.available_platforms(self)
         self.platform_list_on_the_program = [self.platform_comboBox.itemText(i) for i in
                                              range(self.platform_comboBox.count())]
 
@@ -238,6 +244,10 @@ class Functions(MainWindow):
                 print(item_no)
                 self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
                 self.platform_comboBox.setCurrentIndex(item_no + 1)
+
+            if i in self.platforms:
+                self.platform_comboBox.setItemData(item_no, str("Estimated Speed For This Devices Is "
+                                                                + str(self.plt_speeds[i])), QtCore.Qt.ToolTipRole)
 
     @staticmethod
     def platform_comboBox_Changed(self):
@@ -309,7 +319,8 @@ class pdb_Tools:
             return fetched_pdb_file
 
         except Exception as instance:
-            PDB_fetch_msgbox = QMessageBox.critical(self, 'An error occurred while fetching the pdb file.', repr(instance))
+            PDB_fetch_msgbox = QMessageBox.critical(self, 'An error occurred while fetching the pdb file.',
+                                                    repr(instance))
             PDB_fetch_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
             PDB_fetch_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
             return False
