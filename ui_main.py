@@ -28,7 +28,6 @@ from builder import *
 from omm_runner import *
 from pdbfixer import PDBFixer
 
-
 # from app_functions import *
 # from browse_menu import browse_file
 # from omm_runner import *
@@ -46,7 +45,6 @@ class MainWindow(QMainWindow):
         ## PRINT ==> SYSTEM
         print('System: ' + platform.system())
         print('Version: ' + platform.release())
-
 
         ########################################################################
         ## START - WINDOW ATTRIBUTES
@@ -254,7 +252,7 @@ class MainWindow(QMainWindow):
 
         except Exception as instance:
             PDB_load_msgbox = QMessageBox(QMessageBox.Critical, repr(instance),
-                                           'An Error Occurred While Loading The File.')
+                                          'An Error Occurred While Loading The File.')
             PDB_load_msgbox.setInformativeText(repr(instance))
             PDB_load_msgbox.setIcon(QMessageBox.Critical)
             PDB_load_msgbox.addButton(QMessageBox.Ok)

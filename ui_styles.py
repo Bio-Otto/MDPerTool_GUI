@@ -143,7 +143,17 @@ class Style:
                 { 
                     background-color: black; 
                     color: white; 
-                    border: black solid 1px
+                    background-clip: border;
+                    border-image: none;
+                    border: 0px transparent black;
+                    outline: 0;
+                    border: black solid 1px;
+                    padding: 4px;
+                    border-radius: 6px;
+                    border: 1px solid;
+                    font: bold 10px;
+                    border-color: yellow;
+
                 }
     
             """

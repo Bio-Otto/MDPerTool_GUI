@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>1599</width>
-    <height>982</height>
+    <height>1000</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,7 @@
   <property name="minimumSize">
    <size>
     <width>720</width>
-    <height>965</height>
+    <height>1000</height>
    </size>
   </property>
   <property name="palette">
@@ -541,6 +541,12 @@
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
    <property name="styleSheet">
     <string notr="true">background: transparent;
 color: rgb(210, 210, 210);</string>
@@ -563,6 +569,18 @@ color: rgb(210, 210, 210);</string>
     </property>
     <item>
      <widget class="QFrame" name="frame_main">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="styleSheet">
        <string notr="true"/>
       </property>
@@ -687,6 +705,18 @@ QPushButton:pressed {
           </item>
           <item>
            <widget class="QFrame" name="frame_top_right">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>8</pointsize>
@@ -722,16 +752,22 @@ QPushButton:pressed {
              </property>
              <item>
               <widget class="QFrame" name="frame_top_btns">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>23</height>
+                 <height>25</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>35</height>
+                 <height>16777215</height>
                 </size>
                </property>
                <property name="styleSheet">
@@ -762,20 +798,27 @@ QPushButton:pressed {
                 </property>
                 <item>
                  <widget class="QFrame" name="frame_label_top_btns">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>25</height>
+                    <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
                     <width>16777215</width>
-                    <height>20</height>
+                    <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">border-color: rgb(0, 0, 0);</string>
+                   <string notr="true">border-color: rgb(0, 0, 0);
+</string>
                   </property>
                   <property name="frameShape">
                    <enum>QFrame::NoFrame</enum>
@@ -804,7 +847,7 @@ QPushButton:pressed {
                      <property name="maximumSize">
                       <size>
                        <width>30</width>
-                       <height>30</height>
+                       <height>23</height>
                       </size>
                      </property>
                      <property name="styleSheet">
@@ -823,6 +866,18 @@ background-repeat: no-repeat;</string>
                    </item>
                    <item>
                     <widget class="QLabel" name="label_title_bar_top">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>0</height>
+                      </size>
+                     </property>
                      <property name="font">
                       <font>
                        <family>Segoe UI</family>
@@ -832,7 +887,8 @@ background-repeat: no-repeat;</string>
                       </font>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">background: transparent;
+                      <string notr="true">background:  transparent;
+
 margin-left: 5px;
 </string>
                      </property>
@@ -846,10 +902,16 @@ margin-left: 5px;
                 </item>
                 <item>
                  <widget class="QFrame" name="frame_btns_right">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>23</height>
+                    <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -993,7 +1055,7 @@ QPushButton:pressed {
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>35</height>
+                 <height>20</height>
                 </size>
                </property>
                <property name="styleSheet">
@@ -1080,6 +1142,12 @@ background-color: rgb(68, 72, 76);</string>
        </item>
        <item>
         <widget class="QFrame" name="frame_center">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(40, 44, 52);</string>
          </property>
@@ -1112,6 +1180,12 @@ background-color: rgb(68, 72, 76);</string>
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="maximumSize">
              <size>
@@ -1253,6 +1327,12 @@ background-color: rgb(68, 72, 76);</string>
           </item>
           <item>
            <widget class="QFrame" name="frame_content_right">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(44, 49, 60);</string>
             </property>
@@ -1280,6 +1360,18 @@ background-color: rgb(68, 72, 76);</string>
              </property>
              <item>
               <widget class="QFrame" name="frame_content">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>820</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
                </property>
@@ -1304,6 +1396,12 @@ background-color: rgb(68, 72, 76);</string>
                 </property>
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background: transparent;</string>
                   </property>
@@ -3070,10 +3168,13 @@ QCheckBox::indicator:checked {
                               <property name="orientation">
                                <enum>Qt::Vertical</enum>
                               </property>
+                              <property name="sizeType">
+                               <enum>QSizePolicy::Minimum</enum>
+                              </property>
                               <property name="sizeHint" stdset="0">
                                <size>
                                 <width>20</width>
-                                <height>40</height>
+                                <height>70</height>
                                </size>
                               </property>
                              </spacer>
@@ -6839,6 +6940,12 @@ QCheckBox::indicator:checked {
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>0</height>
+                         </size>
                         </property>
                         <property name="styleSheet">
                          <string notr="true">QFrame
