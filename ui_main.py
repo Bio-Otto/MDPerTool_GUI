@@ -192,13 +192,10 @@ class MainWindow(QMainWindow):
     def stop_button_clicked(self):
         self.__stop = True
         try:
-            print("burada fakat boş")
             self.Real_Time_Graphs.stop_th()
+
         except Exception as ins:
-            print("#######")
-            print("problem var")
-            print(ins)
-            print("#######")
+            QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))
 
     def show_simulation_monitoring(self):
         self.stackedWidget.setCurrentIndex(1)

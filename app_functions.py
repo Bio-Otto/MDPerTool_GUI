@@ -1,14 +1,5 @@
 from PyQt5.QtWidgets import QFileDialog, QWidget
 from PyQt5.QtWidgets import QMessageBox
-
-# from PyQt5.QtWidgets import *
-# from PyQt5 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-#                           QSize, QTime, QUrl, Qt, QEvent)
-# from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-#                          QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-#
-
 import gzip
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
@@ -16,7 +7,6 @@ from PyQt5.QtWidgets import QMessageBox
 from pdbfixer import PDBFixer
 from simtk.openmm import *
 from simtk.openmm.app import *
-
 from checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
@@ -75,21 +65,24 @@ class Functions(MainWindow):
         """
             The function provides Main GUI / Upload button activity for select pdb file indicated by the user
         """
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
+                                                               "pdb Files (*.pdb)", str(options))
 
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        self.pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", "", "pdb Files (*.pdb)",
-                                                           str(options))
-        self.pdb_path = self.pdb_filename
+            self.pdb_path = self.pdb_filename
+            self.pdb_filename = os.path.splitext(os.path.basename(self.pdb_filename))
 
-        self.pdb_filename = os.path.basename(self.pdb_filename)
-        self.pdb_filename = os.path.splitext(self.pdb_filename)
+            if self.pdb_filename[1] == '.pdb':
+                # self.upload_pdb_textEdit.setText(self.pdb_path)
+                return True, self.pdb_path
+            elif self.pdb_filename[1] != "":
+                QMessageBox.critical(self, "Error", "this is not a pdb file")
 
-        if self.pdb_filename[1] == '.pdb':
-            # self.upload_pdb_textEdit.setText(self.pdb_path)
-            return True, self.pdb_path
-        elif self.pdb_filename[1] != "":
-            QMessageBox.critical(self, "Error", "this is not a pdb file")
+        except Exception as exp:
+            QMessageBox.warning(self, "Fatal Error", str(exp))
+
 
     @staticmethod
     def PDB_ID_lineEdit(self):
@@ -129,9 +122,7 @@ class Functions(MainWindow):
 
                     if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
                         selected_chains = [str(s) for s in checked_list.choices]
-
                         delete_chains = list(set(chains) - set(selected_chains))
-
                         fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
                                                                 self.Output_Folder_textEdit.toPlainText(), ph=7,
                                                                 chains_to_remove=delete_chains)
