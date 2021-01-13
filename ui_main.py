@@ -162,6 +162,9 @@ class MainWindow(QMainWindow):
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
 
+        self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
+        self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
+
         self.Run.clicked.connect(self.run_btn_clicked)
 
         ########################################################################

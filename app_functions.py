@@ -259,6 +259,21 @@ class Functions(MainWindow):
             self.Device_Number_comboBox.setEnabled(True)
             self.Device_ID_checkBox.setEnabled(True)
 
+    def add_residue_toList(self):
+        if str(self.res1_comboBox.currentText()) != "":
+            items = []
+            for x in range(self.selected_residues_listWidget.count()):
+                items.append(self.selected_residues_listWidget.item(x).text())
+            if str(self.res1_comboBox.currentText()) not in items:
+                self.selected_residues_listWidget.addItem(str(self.res1_comboBox.currentText()))
+
+    def discard_residue_fromList(self):
+        listItems = self.selected_residues_listWidget.selectedItems()
+        if not listItems:
+            return
+        for item in listItems:
+            self.selected_residues_listWidget.takeItem(self.selected_residues_listWidget.row(item))
+
 
 class InputFile:
     fetch_result = False

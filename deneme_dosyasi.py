@@ -4,7 +4,7 @@ import pyqtgraph as pg
 import sys  # We need sys so that we can pass argv to QApplication
 import os
 import numpy as np
-from PyQt5.QtCore import QTimer,QDateTime
+from PyQt5.QtCore import QTimer, QDateTime
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -16,25 +16,25 @@ class MainWindow(QtWidgets.QMainWindow):
         # Load the UI Page
         uic.loadUi('MAIN_GUI.ui', self)
 
-    #     self.graphWidget.setTitle("Temperature / Time", color="b", size="20pt") # Graph Title
-    #
-    #     self.pen = pg.mkPen(color=(0, 255, 0))  # plot line color
-    #
-    #
-    #
-    #     ## AXIS LABELS
-    #     self.graphWidget.setLabel('left', "<span style=\"color:red;font-size:20px\">Temperature (°C)</span>")
-    #     self.graphWidget.setLabel('bottom', "<span style=\"color:red;font-size:20px\">Hour (H)</span>")
-    #
-    #     self.plot([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [30, 32, 34, 32, 33, 31, 29, 32, 35, 45], self.pen,
-    #               symbol='+')  # symbol='+'
-    #     self.graphWidget.setBackground((100, 50, 255, 25))  # RGBA (A = alpha opacity) (100, 50, 255, 25)
-    #
-    # def plot(self, hour, temperature, pen, symbol=None, symbolBrush='b', symbol_size=20):
-    #     self.graphWidget.plot(hour, temperature, pen=pen, symbol=symbol, symbolBrush=symbolBrush, symbolSize=symbol_size)
-    #     # self.graphWidget.setXRange(290,320)
-    #     # self.graphWidget.setYRange(290,320)
-    # -*- coding: utf-8 -*-
+        #     self.graphWidget.setTitle("Temperature / Time", color="b", size="20pt") # Graph Title
+        #
+        #     self.pen = pg.mkPen(color=(0, 255, 0))  # plot line color
+        #
+        #
+        #
+        #     ## AXIS LABELS
+        #     self.graphWidget.setLabel('left', "<span style=\"color:red;font-size:20px\">Temperature (°C)</span>")
+        #     self.graphWidget.setLabel('bottom', "<span style=\"color:red;font-size:20px\">Hour (H)</span>")
+        #
+        #     self.plot([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [30, 32, 34, 32, 33, 31, 29, 32, 35, 45], self.pen,
+        #               symbol='+')  # symbol='+'
+        #     self.graphWidget.setBackground((100, 50, 255, 25))  # RGBA (A = alpha opacity) (100, 50, 255, 25)
+        #
+        # def plot(self, hour, temperature, pen, symbol=None, symbolBrush='b', symbol_size=20):
+        #     self.graphWidget.plot(hour, temperature, pen=pen, symbol=symbol, symbolBrush=symbolBrush, symbolSize=symbol_size)
+        #     # self.graphWidget.setXRange(290,320)
+        #     # self.graphWidget.setYRange(290,320)
+        # -*- coding: utf-8 -*-
         """
         This example demonstrates many of the 2D plotting capabilities
         in pyqtgraph. All of the plots may be panned/scaled by dragging with 
@@ -85,7 +85,6 @@ class MainWindow(QtWidgets.QMainWindow):
         ptr = 0
 
         def update():
-
             nonlocal ptr
             print("geldi")
 
@@ -141,3 +140,120 @@ class MainWindow(QtWidgets.QMainWindow):
 # if __name__ == '__main__':
 #     main()
 
+from PyQt5.QtWidgets import QPushButton, QApplication, QVBoxLayout, QWidget, QGroupBox, QHBoxLayout, QListWidget, \
+    QFileDialog, QSizePolicy, QSpacerItem
+
+
+class MyApp(object):
+    def __init__(self):
+        super(MyApp, self).__init__()
+        self.mainWidget = QWidget()
+        self.mainLayout = QVBoxLayout()
+        self.mainWidget.setLayout(self.mainLayout)
+
+        self.hLayout = QHBoxLayout()
+        self.mainLayout.insertLayout(0, self.hLayout)
+        self.listA = QListWidget()
+        for i in range(3):
+            self.listA.addItem('Item ' + str(i))
+        self.hLayout.addWidget(self.listA)
+
+        self.buttonGroupbox = QGroupBox()
+        self.buttonlayout = QVBoxLayout()
+        self.buttonGroupbox.setLayout(self.buttonlayout)
+
+        okButton = QPushButton('Remove Selected')
+        okButton.clicked.connect(self.removeSel)
+        self.buttonlayout.addWidget(okButton)
+
+        self.mainLayout.addWidget(self.buttonGroupbox)
+        self.mainWidget.show()
+        sys.exit(app.exec_())
+
+    def removeSel(self):
+        listItems = self.listA.selectedItems()
+        if not listItems: return
+        for item in listItems:
+            self.listA.takeItem(self.listA.row(item))
+
+    def add_item(self, res_num):
+        self.listA.addItem(str(res_num))
+
+
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     MyApp()
+
+
+# This is the example code for loading files and content inside the file to QtGui.QListWidget
+# It is PyQt4, but you can try with PyQt5 with small changes.
+# If your are not expecting this answer, sorry.
+
+
+class Window(QWidget):
+    def __init__(self, parent=None):
+
+        super(Window, self).__init__(parent)
+
+        self.verticalLayout = QVBoxLayout(self)
+        self.verticalLayout.setObjectName('verticalLayout')
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName('horizontalLayout')
+
+        self.listWidget = QListWidget(self)
+        self.listWidget.setObjectName('listView')
+        self.listWidget.setAlternatingRowColors(True)
+        self.horizontalLayout.addWidget(self.listWidget)
+
+        self.verticalLayout1 = QVBoxLayout()
+        self.verticalLayout1.setSpacing(10)
+        self.verticalLayout1.setObjectName('verticalLayout')
+
+        self.pushButton = QPushButton(self)
+        self.pushButton.setObjectName('pushButton')
+        self.pushButton.setText('Load File Content')
+
+        self.pushButton_2 = QPushButton(self)
+        self.pushButton_2.setObjectName('pushButton_2')
+        self.pushButton_2.setText('Load File')
+
+        self.verticalLayout1.addWidget(self.pushButton)
+        self.verticalLayout1.addWidget(self.pushButton_2)
+        spacerItem = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalLayout1.addItem(spacerItem)
+
+        self.horizontalLayout.addLayout(self.verticalLayout1)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.pushButton.clicked.connect(self.loadFileContent)
+        self.pushButton_2.clicked.connect(self.loadFiles)
+
+    def loadFileContent(self):
+        openFiles = QFileDialog.getOpenFileName(self, 'Open File', 'c:/', 'txt (*.txt)')
+        if openFiles:
+            data = open(str(openFiles), 'r')
+            dataList = data.readlines()
+            self.listWidget.clear()
+
+            for eachLine in dataList:
+                if len(eachLine.strip()) != 0:
+                    self.listWidget.addItem(eachLine.strip())
+
+    def loadFiles(self):
+        getDirectory = QFileDialog.getExistingDirectory(self, 'Browse', 'C:/')
+
+        if getDirectory:
+            fileList = os.listdir(str(getDirectory))
+
+            if fileList:
+                self.listWidget.clear()
+                for eachFile in fileList:
+                    self.listWidget.addItem(eachFile)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    w = Window()
+    w.show()
+    sys.exit(app.exec_())

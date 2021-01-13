@@ -152,7 +152,7 @@ class Style:
                     border-radius: 6px;
                     border: 1px solid;
                     font: bold 10px;
-                    border-color: yellow;
+                    border-color:  rgb(157, 90, 198);
 
                 }
     
