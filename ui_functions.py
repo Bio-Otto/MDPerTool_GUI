@@ -25,6 +25,7 @@ class UIFunctions(MainWindow):
     ## ==> GLOBALS
     GLOBAL_STATE = 0
     GLOBAL_TITLE_BAR = True
+    ProteinView = False
 
     ########################################################################
     ## START - GUI FUNCTIONS
@@ -302,6 +303,23 @@ class UIFunctions(MainWindow):
                                      "however the rest of the UI will be functional. "
                                      "Upgrading your graphics card drivers or reinstalling PyMol"
                                      "may solve this issue.")
+
+    def load_pdb_to_pymol(self, pdb_file):
+        print("ui de load pymol")
+        self.ProteinView.reinitialize()
+        self.ProteinView.loadMolFile(pdb_file)
+        self.ProteinView.update()
+        self.ProteinView.show()
+
+    def show_residue_labels(self):
+
+        itemsTextList = self.selected_residues_listWidget.currentItem().text()
+            # [str(self.selected_residues_listWidget.item(i).text()) for i in
+            #              range(self.selected_residues_listWidget.count())]
+
+        self.ProteinView.selection_color(itemsTextList)
+        self.ProteinView.update()
+        # self.ProteinView.show()
 
     def deleteLayout(self, verticalLayoutProteinView):
         if verticalLayoutProteinView is not None:

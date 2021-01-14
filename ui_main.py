@@ -165,6 +165,8 @@ class MainWindow(QMainWindow):
         self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
         self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
 
+        self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
+
         self.Run.clicked.connect(self.run_btn_clicked)
 
         ########################################################################
@@ -249,6 +251,8 @@ class MainWindow(QMainWindow):
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
                     self.res2_comboBox.clear()  # delete all items from comboBox
                     self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+
+                UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
         except Exception as instance:
             PDB_load_msgbox = QMessageBox(QMessageBox.Critical, repr(instance),

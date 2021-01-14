@@ -15,7 +15,8 @@ buttonMap = {
 }
 path = os.getcwd()
 print(path)
-demo_pdb_path = path+'/Download/1aki.pdb'
+demo_pdb_path = path + '/Download/1aki.pdb'
+
 
 class PymolQtWidget(QGLWidget):
 
@@ -70,6 +71,8 @@ class PymolQtWidget(QGLWidget):
         self._pymolProcess()
 
     def loadMolFile(self, mol_file):
+        print("geldi")
+
         self._pymol.cmd.load(str(mol_file))
         # self._pymol.cmd.bg_color('grey')
 
@@ -93,19 +96,22 @@ class PymolQtWidget(QGLWidget):
         # self._pymol.cmd.full_screen('on')
 
     def selection_color(self, selection):
-        self._pymol.cmd.color('red', selection)
+
+            # self._pymol.cmd.color('red', 'resi %s' %s[3])
+        print(selection[3:-1])
+        self.resicolor('resi %s' % selection[3:-1])
+
 
     def resicolor(self, selection):
 
         try:
-            self._pymol.cmd.full_screen('on')
+            # self._pymol.cmd.full_screen('on')
+
             self._pymol.cmd.do('color green')
             self._pymol.cmd.select(selection)
             self._pymol.cmd.do('color red, ' + selection)
-
             self._pymol.cmd.hide('all')
             self._pymol.cmd.show('cartoon')
-
             label_selection = '%s and name ca' % selection
             self._pymol.cmd.set('label_color', 'blue', label_selection)
             self._pymol.cmd.label(label_selection, '"%s-%s" % (resn, resi)')
@@ -158,6 +164,3 @@ class PymolQtWidget(QGLWidget):
     def get_png_figure(self):
         # self._pymol.cmd.full_screen('on')
         self._pymol.cmd.png("figure.png", width=1200, height=1200, dpi=300, ray=1)
-
-
-
