@@ -70,59 +70,6 @@ class PymolQtWidget(QGLWidget):
         self._pymol.reshape(w, h, True)
         self._pymolProcess()
 
-    def loadMolFile(self, mol_file):
-        print("geldi")
-
-        self._pymol.cmd.load(str(mol_file))
-        # self._pymol.cmd.bg_color('grey')
-
-    def initial_pymol_visual(self):
-        cgo = []
-        axes = [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
-        pos = [0.0, 0.0, 0.0]
-        # wire_text(cgo, plain, pos, 'MDPerTool', axes)
-        cyl_text(cgo, plain, pos, 'MDPerTool', 0.20, [1.0, 0.1, 0.1], axes=axes)
-
-        pos = [0.0, -3.0, 0.0]
-        wire_text(cgo, plain, pos, 'Version v0.1', axes)
-        self._pymol.cmd.bg_color('0x2C313C')
-        self._pymol.cmd.set("cgo_line_radius", 0.05)
-        self._pymol.cmd.load_cgo(cgo, 'txt')
-        self._pymol.cmd.zoom("all", -10.0)
-        self.loadMolFile(demo_pdb_path)
-        self._pymol.cmd.center("all", 0)
-        # self._pymol.cmd.cgo.COLOR([0.2,0.3,0.4])
-        # self._pymol.cmd.cgo.color(0.2, 0.3, 0.4)
-        # self._pymol.cmd.full_screen('on')
-
-    def selection_color(self, selection):
-
-            # self._pymol.cmd.color('red', 'resi %s' %s[3])
-        print(selection[3:-1])
-        self.resicolor('resi %s' % selection[3:-1])
-
-
-    def resicolor(self, selection):
-
-        try:
-            # self._pymol.cmd.full_screen('on')
-
-            self._pymol.cmd.do('color green')
-            self._pymol.cmd.select(selection)
-            self._pymol.cmd.do('color red, ' + selection)
-            self._pymol.cmd.hide('all')
-            self._pymol.cmd.show('cartoon')
-            label_selection = '%s and name ca' % selection
-            self._pymol.cmd.set('label_color', 'blue', label_selection)
-            self._pymol.cmd.label(label_selection, '"%s-%s" % (resn, resi)')
-            self._pymol.cmd.set('label_position', '(3, 2, 1)')
-            self._pymol.cmd.set('label_size', '20')
-        except:
-            print("problemm")
-
-    def clear_all_labels(self):
-        self._pymol.cmd.label('all', '')
-
     def _pymolProcess(self):
         self._doIdle()
         self.update()
@@ -164,3 +111,77 @@ class PymolQtWidget(QGLWidget):
     def get_png_figure(self):
         # self._pymol.cmd.full_screen('on')
         self._pymol.cmd.png("figure.png", width=1200, height=1200, dpi=300, ray=1)
+
+    def loadMolFile(self, mol_file):
+        print("geldi")
+
+        self._pymol.cmd.load(str(mol_file))
+        # self._pymol.cmd.bg_color('grey')
+
+    def initial_pymol_visual(self):
+        cgo = []
+        axes = [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+        pos = [1.0, 1.0, -10.0]
+        # wire_text(cgo, plain, pos, 'MDPerTool', axes)
+        cyl_text(cgo, plain, pos, 'MDPerTool', 0.20, [1.0, 0.1, 0.1], axes=axes)
+
+        pos = [0.0, -2.0, -15.0]
+        wire_text(cgo, plain, pos, 'Version v0.1', axes)
+        self._pymol.cmd.bg_color('0x2C313C')
+        self._pymol.cmd.set("cgo_line_radius", 0.05)
+        self._pymol.cmd.load_cgo(cgo, 'txt')
+        self._pymol.cmd.zoom()
+
+        # self._pymol.cmd.center("all", 0)
+        self.loadMolFile(demo_pdb_path)
+        # self._pymol.cmd.cgo.COLOR([0.2,0.3,0.4])
+        # self._pymol.cmd.cgo.color(0.2, 0.3, 0.4)
+        # self._pymol.cmd.full_screen('on')
+        self._pymol.cmd.center()
+        self._pymol.cmd.zoom()
+
+    def selection_color(self, selection):
+
+        # self._pymol.cmd.color('red', 'resi %s' %s[3])
+        print(selection[3:-1])
+        self.resicolor('resi %s' % selection[3:-1])
+
+    def resicolor(self, selection):
+
+        try:
+            # self._pymol.cmd.full_screen('on')
+            self._pymol.cmd.do('color green')
+            self._pymol.cmd.select(selection)
+            self._pymol.cmd.do('color red, ' + selection)
+            self._pymol.cmd.hide('all')
+            self._pymol.cmd.show('cartoon')
+            label_selection = '%s and name ca' % selection
+            self._pymol.cmd.set('label_color', 'blue', label_selection)
+            self._pymol.cmd.label(label_selection, '"%s-%s" % (resn, resi)')
+            self._pymol.cmd.set('label_position', '(3, 2, 1)')
+            self._pymol.cmd.set('label_size', '20')
+
+        except Exception as expression:
+            print(expression)
+
+    def clear_all_labels(self):
+        self._pymol.cmd.label('all', '')
+        self._pymol.cmd.do('color green')
+
+    def activate_navigation_tool(self):
+        self._pymol.cmd.set("internal_gui", 1)
+        self._pymol.cmd.set("internal_feedback", 1)
+        self._pymol.cmd.button("double_left", "None", "None")
+        self._pymol.cmd.button("single_right", "None", "None")
+        self._pymol.reshape(self.width(), self.height())
+        self.resizeGL(self.width(), self.height())
+        self._pymolProcess()
+
+    def deactivate_navigation_tool(self):
+        self._pymol.cmd.set("internal_gui", 0)
+        self._pymol.cmd.set("internal_feedback", 0)
+        self._pymol.cmd.button("double_left", "None", "None")
+        self._pymol.cmd.button("single_right", "None", "None")
+        self._pymol.reshape(self.width(), self.height())
+        self.resizeGL(self.width(), self.height())
+        self._pymolProcess()

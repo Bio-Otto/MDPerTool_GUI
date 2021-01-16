@@ -321,6 +321,23 @@ class UIFunctions(MainWindow):
         self.ProteinView.update()
         # self.ProteinView.show()
 
+    def clear_residue_labels(self):
+        self.ProteinView.clear_all_labels()
+        self.ProteinView.update()
+
+    def activate_navigation_on_Pymol(self):
+
+        self.ProteinView.activate_navigation_tool()
+        self.ProteinView.paintGL()
+        self.ProteinView.update()
+        self.ProteinView.show()
+
+    def deactivate_navigation_on_Pymol(self):
+        self.ProteinView.deactivate_navigation_tool()
+        self.ProteinView.paintGL()
+        self.ProteinView.update()
+        self.ProteinView.show()
+
     def deleteLayout(self, verticalLayoutProteinView):
         if verticalLayoutProteinView is not None:
             sip.delete(verticalLayoutProteinView)

@@ -133,11 +133,8 @@ class Functions(MainWindow):
                         self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
                         for i in self.combobox:
                             self.res1_comboBox.addItem(str(i))
-                            self.res2_comboBox.addItem(str(i))
                         self.res1_comboBox.clear()  # delete all items from comboBox
                         self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                        self.res2_comboBox.clear()  # delete all items from comboBox
-                        self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
                         # InputFile(fetch_result)
 
                     elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
@@ -150,11 +147,8 @@ class Functions(MainWindow):
                         self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
                         for i in self.combobox:
                             self.res1_comboBox.addItem(str(i))
-                            self.res2_comboBox.addItem(str(i))
                         self.res1_comboBox.clear()  # delete all items from comboBox
                         self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                        self.res2_comboBox.clear()  # delete all items from comboBox
-                        self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                     InputFile(fetch_result)
 

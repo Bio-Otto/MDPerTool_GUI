@@ -166,9 +166,13 @@ class MainWindow(QMainWindow):
         self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
 
         self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
+        self.refresh_pushButton.clicked.connect(lambda: UIFunctions.clear_residue_labels(self))
 
         self.Run.clicked.connect(self.run_btn_clicked)
-
+        self.activate_pymol_navigation.clicked.connect(lambda: UIFunctions.activate_navigation_on_Pymol(self))
+        self.deactivate_pymol_navigation.clicked.connect(lambda: UIFunctions.deactivate_navigation_on_Pymol(self))
+        self.visualization_Handel_buttons_changing()
+        self.Handel_Buttons()
         ########################################################################
         #
         ## END --------------- WIDGETS FUNCTIONS/PARAMETERS ----------------- ##
@@ -177,7 +181,6 @@ class MainWindow(QMainWindow):
 
         ## SHOW ==> MAIN WINDOW
         ########################################################################
-
         ## ==> END ##
 
     def run_btn_clicked(self):
@@ -231,11 +234,8 @@ class MainWindow(QMainWindow):
                     self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.combobox:
                         self.res1_comboBox.addItem(str(i))
-                        self.res2_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    self.res2_comboBox.clear()  # delete all items from comboBox
-                    self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
@@ -246,11 +246,8 @@ class MainWindow(QMainWindow):
                     self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.combobox:
                         self.res1_comboBox.addItem(str(i))
-                        self.res2_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    self.res2_comboBox.clear()  # delete all items from comboBox
-                    self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                 UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
@@ -352,7 +349,28 @@ class MainWindow(QMainWindow):
 
     def resizeFunction(self):
         print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
+
     ## ==> END ##
+
+    ## ==> START ---------- PYMOL NAVIGATION TOOLBAR ---------- START <== ##
+    def visualization_Handel_buttons_changing(self):
+        self.hide_visualization_settings()
+
+    def Handel_Buttons(self):
+        self.show_navigation.clicked.connect(self.show_visualization_settings)
+        self.hide_navigation.clicked.connect(self.hide_visualization_settings)
+
+    def show_visualization_settings(self):
+        self.visualization_settings_groupBox.show()
+        self.show_navigation.hide()
+        self.hide_navigation.show()
+
+    def hide_visualization_settings(self):
+        self.visualization_settings_groupBox.hide()
+        self.show_navigation.show()
+        self.hide_navigation.hide()
+
+    ## ==> END ---------- PYMOL NAVIGATION TOOLBAR ---------- END <== ##
 
 
 # SPLASH SCREEN
