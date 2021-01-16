@@ -268,16 +268,9 @@ class UIFunctions(MainWindow):
     ## END - GUI DEFINITIONS
     ########################################################################
 
-    ########################################################################
-    ## == > OPEN SOURCE PYMOL 2.4 INTEGRATION START
-    # def start_pymol(self):
-    #     self.ProteinView = PymolQtWidget(self)
-    #
-    #     layout = QVBoxLayout(self.Pymol_Widget)
-    #     layout.addWidget(self.ProteinView)
-    #     self.ProteinView.initial_pymol_visual()
-    #     self.ProteinView.show()
-
+    ##################################################################################################################
+                            ### == > START OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
+    ##################################################################################################################
     def start_pymol(self):
         # Creating the PyMolWidget
         try:
@@ -338,8 +331,15 @@ class UIFunctions(MainWindow):
         self.ProteinView.update()
         self.ProteinView.show()
 
+    def show_beatiful_in_Pymol(self):
+        self.ProteinView.set_ss_figure()
+        self.ProteinView.update()
+
     def deleteLayout(self, verticalLayoutProteinView):
         if verticalLayoutProteinView is not None:
             sip.delete(verticalLayoutProteinView)
-    ## == > OPEN SOURCE PYMOL 2.4 INTEGRATION START
-    ########################################################################
+
+
+    ##################################################################################################################
+                            ### == > END OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
+    ##################################################################################################################

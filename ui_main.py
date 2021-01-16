@@ -143,10 +143,8 @@ class MainWindow(QMainWindow):
 
         ########################################################################
         #                                                                      #
-        ## START -------------- WIDGETS FUNCTIONS/PARAMETERS ---------------- ##
-        #                                                                      #
-        ## ==> USER CODES BELLOW                                              ##
-        ########################################################################
+        ############################## START OF WIDGETS FUNCTIONS/PARAMETERS ##############################
+
         self.quit_pushButton.clicked.connect(lambda: UIFunctions.close_application(self))
         self.stop_pushButton.clicked.connect(self.stop_button_clicked)
         self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
@@ -162,22 +160,21 @@ class MainWindow(QMainWindow):
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
 
+        self.Run.clicked.connect(self.run_btn_clicked)
+        ############################## END OF WIDGETS FUNCTIONS/PARAMETERS ##############################
+
+
+        ###################################  PYMOL RELEATED BUTTONS  --> START
         self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
         self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
-
         self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
         self.refresh_pushButton.clicked.connect(lambda: UIFunctions.clear_residue_labels(self))
-
-        self.Run.clicked.connect(self.run_btn_clicked)
         self.activate_pymol_navigation.clicked.connect(lambda: UIFunctions.activate_navigation_on_Pymol(self))
         self.deactivate_pymol_navigation.clicked.connect(lambda: UIFunctions.deactivate_navigation_on_Pymol(self))
         self.visualization_Handel_buttons_changing()
         self.Handel_Buttons()
-        ########################################################################
-        #
-        ## END --------------- WIDGETS FUNCTIONS/PARAMETERS ----------------- ##
-        #                                                                      #
-        ############################## ---/--/--- ##############################
+        self.ss_beatiful_snapshoot.clicked.connect(lambda: UIFunctions.show_beatiful_in_Pymol(self))
+        ###################################  PYMOL RELEATED BUTTONS  --> END
 
         ## SHOW ==> MAIN WINDOW
         ########################################################################
@@ -352,7 +349,9 @@ class MainWindow(QMainWindow):
 
     ## ==> END ##
 
-    ## ==> START ---------- PYMOL NAVIGATION TOOLBAR ---------- START <== ##
+    ##################################################################################################################
+                                    ### == > START OF PYMOL NAVIGATION TOOLBAR < == ###
+    ##################################################################################################################
     def visualization_Handel_buttons_changing(self):
         self.hide_visualization_settings()
 
@@ -370,8 +369,9 @@ class MainWindow(QMainWindow):
         self.show_navigation.show()
         self.hide_navigation.hide()
 
-    ## ==> END ---------- PYMOL NAVIGATION TOOLBAR ---------- END <== ##
-
+    ##################################################################################################################
+                                    ### == > END OF PYMOL NAVIGATION TOOLBAR < == ###
+    ##################################################################################################################
 
 # SPLASH SCREEN
 class SplashScreen(QMainWindow):

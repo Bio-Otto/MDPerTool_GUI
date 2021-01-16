@@ -7205,7 +7205,7 @@ QPushButton:pressed
                        <widget class="QGroupBox" name="visualization_settings_groupBox">
                         <property name="minimumSize">
                          <size>
-                          <width>140</width>
+                          <width>150</width>
                           <height>0</height>
                          </size>
                         </property>
@@ -7237,9 +7237,9 @@ QPushButton:pressed
                         <widget class="QWidget" name="gridLayoutWidget_6">
                          <property name="geometry">
                           <rect>
-                           <x>12</x>
+                           <x>11</x>
                            <y>50</y>
-                           <width>121</width>
+                           <width>131</width>
                            <height>821</height>
                           </rect>
                          </property>
@@ -7255,13 +7255,13 @@ QPushButton:pressed
                             <property name="minimumSize">
                              <size>
                               <width>110</width>
-                              <height>45</height>
+                              <height>33</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
                               <width>110</width>
-                              <height>45</height>
+                              <height>33</height>
                              </size>
                             </property>
                             <property name="font">
@@ -7297,74 +7297,11 @@ QPushButton:pressed
             }</string>
                             </property>
                             <property name="text">
-                             <string>  Activate 
-  Navigation</string>
+                             <string>Activate</string>
                             </property>
                             <property name="icon">
                              <iconset resource="icons_path.qrc">
                               <normaloff>:/24x24/icons/24x24/cil-cursor.png</normaloff>:/24x24/icons/24x24/cil-cursor.png</iconset>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QPushButton" name="deactivate_pymol_navigation">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="minimumSize">
-                             <size>
-                              <width>110</width>
-                              <height>45</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>110</width>
-                              <height>45</height>
-                             </size>
-                            </property>
-                            <property name="font">
-                             <font>
-                              <family>Segoe UI</family>
-                              <pointsize>9</pointsize>
-                             </font>
-                            </property>
-                            <property name="styleSheet">
-                             <string notr="true">            QPushButton 
-            {
-                color: white; 
-                border: 2px solid rgb(52, 59, 72); 
-                border-radius: 5px; 
-                background-color:  rgb(22, 200, 244); 
-                margin-top:1px; 
-                margin-bottom: 1px; 
-                border-width: 1px; 
-                padding: 5px; 
-                outline: none;
-            }
-
-            QPushButton:hover 
-            { 
-                background-color: rgb(255, 17, 100); 
-                border: 2px solid rgb(61, 70, 86);
-            }
-
-            QPushButton:pressed 
-            { 
-                background-color:  rgb(15, 133, 163); 
-                border: 2px solid rgb(43, 50, 61);
-            }</string>
-                            </property>
-                            <property name="text">
-                             <string>  Deactivate 
-  Navigation</string>
-                            </property>
-                            <property name="icon">
-                             <iconset resource="icons_path.qrc">
-                              <normaloff>:/20x20/icons/20x20/cil-x.png</normaloff>:/20x20/icons/20x20/cil-x.png</iconset>
                             </property>
                            </widget>
                           </item>
@@ -7379,13 +7316,13 @@ QPushButton:pressed
                             <property name="minimumSize">
                              <size>
                               <width>0</width>
-                              <height>45</height>
+                              <height>33</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
                               <width>110</width>
-                              <height>45</height>
+                              <height>33</height>
                              </size>
                             </property>
                             <property name="font">
@@ -7421,11 +7358,133 @@ QPushButton:pressed
             }</string>
                             </property>
                             <property name="text">
-                             <string>  Refresh</string>
+                             <string>Refresh</string>
                             </property>
                             <property name="icon">
                              <iconset resource="icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-reload.png</normaloff>:/16x16/icons/16x16/cil-reload.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="0">
+                           <widget class="QPushButton" name="deactivate_pymol_navigation">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Deactivate</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/20x20/icons/20x20/cil-x.png</normaloff>:/20x20/icons/20x20/cil-x.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="0">
+                           <widget class="QPushButton" name="ss_beatiful_snapshoot">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Beatiful Snap</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/16x16/icons/16x16/cil-camera.png</normaloff>:/16x16/icons/16x16/cil-camera.png</iconset>
                             </property>
                            </widget>
                           </item>
