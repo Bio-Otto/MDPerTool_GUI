@@ -174,6 +174,10 @@ class MainWindow(QMainWindow):
         self.visualization_Handel_buttons_changing()
         self.Handel_Buttons()
         self.ss_beatiful_snapshoot.clicked.connect(lambda: UIFunctions.show_beatiful_in_Pymol(self))
+        self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
+
+        self.Handel_Save_Figure_Options_Changed()
+        self.Handel_Save_Figure_Options()
         ###################################  PYMOL RELEATED BUTTONS  --> END
 
         ## SHOW ==> MAIN WINDOW
@@ -368,6 +372,36 @@ class MainWindow(QMainWindow):
         self.visualization_settings_groupBox.hide()
         self.show_navigation.show()
         self.hide_navigation.hide()
+
+    ######   ------------------------------------------------------------   #####
+    def Handel_Save_Figure_Options_Changed(self):
+        self.hide_figure_options()
+
+    def Handel_Save_Figure_Options(self):
+        self.save_as_png_pushButton.clicked.connect(self.show_figure_options)
+        self.hide_figure_settings_pushButton.clicked.connect(self.hide_figure_options)
+        self.width_horizontalSlider.valueChanged.connect(self.figure_width_label)
+        self.height_horizontalSlider.valueChanged.connect(self.figure_height_label)
+        self.dpi_horizontalSlider.valueChanged.connect(self.figure_dpi_label)
+        self.ray_horizontalSlider.valueChanged.connect(self.figure_ray_label)
+
+    def show_figure_options(self):
+        self.figure_settings_groupBox.show()
+
+    def hide_figure_options(self):
+        self.figure_settings_groupBox.hide()
+
+    def figure_width_label(self):
+        self.pymol_width_label.setText("Width: " + str(self.width_horizontalSlider.value()))
+
+    def figure_height_label(self):
+        self.pymol_height_label.setText("Height: " + str(self.height_horizontalSlider.value()))
+
+    def figure_dpi_label(self):
+        self.pymol_dpi_label.setText("Dpi: " + str(self.dpi_horizontalSlider.value()))
+
+    def figure_ray_label(self):
+        self.pymol_ray_label.setText("Ray: " + str(self.ray_horizontalSlider.value()))
 
     ##################################################################################################################
                                     ### == > END OF PYMOL NAVIGATION TOOLBAR < == ###

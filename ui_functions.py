@@ -269,7 +269,7 @@ class UIFunctions(MainWindow):
     ########################################################################
 
     ##################################################################################################################
-                            ### == > START OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
+    ### == > START OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
     ##################################################################################################################
     def start_pymol(self):
         # Creating the PyMolWidget
@@ -305,21 +305,18 @@ class UIFunctions(MainWindow):
         self.ProteinView.show()
 
     def show_residue_labels(self):
-
         itemsTextList = self.selected_residues_listWidget.currentItem().text()
-            # [str(self.selected_residues_listWidget.item(i).text()) for i in
-            #              range(self.selected_residues_listWidget.count())]
+        # [str(self.selected_residues_listWidget.item(i).text()) for i in
+        #              range(self.selected_residues_listWidget.count())]
 
         self.ProteinView.selection_color(itemsTextList)
         self.ProteinView.update()
-        # self.ProteinView.show()
 
     def clear_residue_labels(self):
         self.ProteinView.clear_all_labels()
         self.ProteinView.update()
 
     def activate_navigation_on_Pymol(self):
-
         self.ProteinView.activate_navigation_tool()
         self.ProteinView.paintGL()
         self.ProteinView.update()
@@ -334,12 +331,17 @@ class UIFunctions(MainWindow):
     def show_beatiful_in_Pymol(self):
         self.ProteinView.set_ss_figure()
         self.ProteinView.update()
+        self.ProteinView.show()
+
+    def save_as_png_Pymol(self):
+        self.ProteinView.get_png_figure(self.width_horizontalSlider.value(), self.height_horizontalSlider.value(),
+                                        self.dpi_horizontalSlider.value(), self.ray_horizontalSlider.value())
+        self.ProteinView.update()
 
     def deleteLayout(self, verticalLayoutProteinView):
         if verticalLayoutProteinView is not None:
             sip.delete(verticalLayoutProteinView)
 
-
     ##################################################################################################################
-                            ### == > END OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
+    ### == > END OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
     ##################################################################################################################
