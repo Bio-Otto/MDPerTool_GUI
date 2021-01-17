@@ -3432,8 +3432,8 @@ QGroupBox::indicator {
 }
 
 QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
  	border-radius: 5px;
+	background: #007AA5;
 }</string>
                                   </property>
                                   <property name="value">
@@ -3473,10 +3473,11 @@ QProgressBar::chunk {
 	text-align: center;
 }
 
-QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
+QProgressBar::chunk 
+{
  	border-radius: 5px;
- 
+	background: #007AA5;
+
 }</string>
                                   </property>
                                   <property name="value">
@@ -3516,10 +3517,10 @@ QProgressBar::chunk {
 	text-align: center;
 }
 
-QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
+QProgressBar::chunk 
+{
   	border-radius: 5px;
-
+	background: #007AA5;
 }</string>
                                   </property>
                                   <property name="value">
@@ -3559,10 +3560,10 @@ QProgressBar::chunk {
 	text-align: center;
 }
 
-QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
+QProgressBar::chunk 
+{
   	border-radius: 5px;
-
+	background: #007AA5;
 }</string>
                                   </property>
                                   <property name="value">
@@ -7103,7 +7104,9 @@ QCheckBox::indicator:checked {
         border-radius: 5px; 
         background-color:  rgb(255, 17, 100); 
         border-width: 1px; 
-        outline: none;
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
 		}
 
 QPushButton:hover 
@@ -7179,7 +7182,9 @@ QPushButton:pressed
         border-radius: 5px; 
         background-color:  rgb(255, 17, 100); 
         border-width: 1px; 
-        outline: none;
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
 		}
 
 QPushButton:hover 
@@ -7192,7 +7197,7 @@ QPushButton:pressed
         { 
          background-color:  rgb(15, 133, 163); 
          border: 2px solid rgb(43, 50, 61);
-         }      </string>
+         }     </string>
                         </property>
                         <property name="text">
                          <string/>
@@ -7559,7 +7564,7 @@ QPushButton:pressed
                            <x>-1</x>
                            <y>300</y>
                            <width>171</width>
-                           <height>371</height>
+                           <height>401</height>
                           </rect>
                          </property>
                          <property name="title">
@@ -7601,7 +7606,6 @@ QPushButton:pressed
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
     padding: 1px 1px 1px 1px;
-	
 	border-bottom-color: rgb(157, 90, 198);
 }
 
@@ -7626,13 +7630,7 @@ QLabel:hover{
                               </sizepolicy>
                              </property>
                              <property name="styleSheet">
-                              <string notr="true">QSlider::groove:horizontal 
-	{
-    border: 1px solid;
-    height: 10px;
-    margin: 0px;
-	border-radius: 5px;
-    }
+                              <string notr="true">
 
 QSlider::handle:horizontal 
 	{
@@ -7642,7 +7640,35 @@ QSlider::handle:horizontal
     margin: -15px 0px;
     }
 
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
 
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
 </string>
                              </property>
                              <property name="minimum">
@@ -7728,21 +7754,43 @@ QLabel:hover{
                               </sizepolicy>
                              </property>
                              <property name="styleSheet">
-                              <string notr="true">QSlider::groove:horizontal 
-	{
-    border: 1px solid;
-    height: 10px;
-    margin: 0px;
-	border-radius: 5px;
-    }
-
-QSlider::handle:horizontal 
+                              <string notr="true">QSlider::handle:horizontal 
 	{
     background-color:  rgb(255, 17, 100);
     border: 2px solid;
     width: 8px;
     margin: -15px 0px;
     }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
 </string>
                              </property>
                              <property name="minimum">
@@ -7819,21 +7867,43 @@ QLabel:hover{
                               </sizepolicy>
                              </property>
                              <property name="styleSheet">
-                              <string notr="true">QSlider::groove:horizontal 
-	{
-    border: 1px solid;
-    height: 10px;
-    margin: 0px;
-	border-radius: 5px;
-    }
-
-QSlider::handle:horizontal 
+                              <string notr="true">QSlider::handle:horizontal 
 	{
     background-color:  rgb(255, 17, 100);
     border: 2px solid;
     width: 8px;
     margin: -15px 0px;
     }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
 </string>
                              </property>
                              <property name="minimum">
@@ -7910,21 +7980,43 @@ QLabel:hover{
                               </sizepolicy>
                              </property>
                              <property name="styleSheet">
-                              <string notr="true">QSlider::groove:horizontal 
-	{
-    border: 1px solid;
-    height: 10px;
-    margin: 0px;
-	border-radius: 5px;
-    }
-
-QSlider::handle:horizontal 
+                              <string notr="true">QSlider::handle:horizontal 
 	{
     background-color:  rgb(255, 17, 100);
     border: 2px solid;
     width: 8px;
     margin: -15px 0px;
     }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
 </string>
                              </property>
                              <property name="minimum">
@@ -7992,38 +8084,54 @@ QPushButton:pressed
                              </property>
                             </widget>
                            </item>
-                           <item>
-                            <widget class="QPushButton" name="hide_figure_settings_pushButton">
-                             <property name="enabled">
-                              <bool>true</bool>
-                             </property>
-                             <property name="sizePolicy">
-                              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                               <horstretch>0</horstretch>
-                               <verstretch>0</verstretch>
-                              </sizepolicy>
-                             </property>
-                             <property name="minimumSize">
-                              <size>
-                               <width>61</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                             <property name="maximumSize">
-                              <size>
-                               <width>61</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                             <property name="styleSheet">
-                              <string notr="true"> QPushButton 
+                          </layout>
+                         </widget>
+                         <widget class="QPushButton" name="hide_figure_settings_pushButton">
+                          <property name="enabled">
+                           <bool>true</bool>
+                          </property>
+                          <property name="geometry">
+                           <rect>
+                            <x>55</x>
+                            <y>370</y>
+                            <width>65</width>
+                            <height>20</height>
+                           </rect>
+                          </property>
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>65</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>65</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                          <property name="font">
+                           <font>
+                            <weight>50</weight>
+                            <bold>false</bold>
+                           </font>
+                          </property>
+                          <property name="styleSheet">
+                           <string notr="true"> QPushButton 
 		{
  		color: white; 
         border: 2px solid rgb(52, 59, 72); 
         border-radius: 5px; 
         background-color:  rgb(255, 17, 100); 
         border-width: 1px; 
-        outline: none;
+        outline: none;	
+		background-color: rgb(110, 105, 225);
 		}
 
 QPushButton:hover 
@@ -8036,18 +8144,18 @@ QPushButton:pressed
         { 
          background-color:  rgb(15, 133, 163); 
          border: 2px solid rgb(43, 50, 61);
-         }      </string>
-                             </property>
-                             <property name="text">
-                              <string/>
-                             </property>
-                             <property name="icon">
-                              <iconset resource="icons_path.qrc">
-                               <normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</iconset>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
+         }     </string>
+                          </property>
+                          <property name="text">
+                           <string/>
+                          </property>
+                          <property name="icon">
+                           <iconset resource="icons_path.qrc">
+                            <normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</iconset>
+                          </property>
+                          <property name="flat">
+                           <bool>false</bool>
+                          </property>
                          </widget>
                         </widget>
                        </widget>
