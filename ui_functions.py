@@ -22,16 +22,16 @@ from PyMolWidget import PymolQtWidget
 
 
 class UIFunctions(MainWindow):
-    ## ==> GLOBALS
+    # ----- > GLOBALS
     GLOBAL_STATE = 0
     GLOBAL_TITLE_BAR = True
     ProteinView = False
 
-    ########################################################################
-    ## START - GUI FUNCTIONS
-    ########################################################################
+    ####################################################################################################################
+    #                                       == > START - GUI FUNCTIONS < ==                                           #
+    ####################################################################################################################
 
-    ## ==> CLOSE APPLICATION
+    # ----- > Close Application
     @staticmethod
     def close_application(self):
         try:
@@ -58,8 +58,7 @@ class UIFunctions(MainWindow):
         except Exception as inst:
             print(inst)
 
-    ## ==> MAXIMIZE/RESTORE
-    ########################################################################
+    # ----- > Maximize / Restore
     def maximize_restore(self):
         global GLOBAL_STATE
         status = GLOBAL_STATE
@@ -81,27 +80,25 @@ class UIFunctions(MainWindow):
             self.frame_top_btns.setStyleSheet("background-color: rgba(27, 29, 35, 200)")
             self.frame_size_grip.show()
 
-    ## ==> RETURN STATUS
+    # ----- > Return Status
     @staticmethod
     def returStatus():
         return GLOBAL_STATE
 
-    ## ==> SET STATUS
+    # ----- > Set Status
     @staticmethod
     def setStatus(status):
         global GLOBAL_STATE
         GLOBAL_STATE = status
 
-    ## ==> ENABLE MAXIMUM SIZE
-    ########################################################################
+    # ----- > Enable Maximum Size
     def enableMaximumSize(self, width, height):
         if width != '' and height != '':
             self.setMaximumSize(QSize(width, height))
             self.frame_size_grip.hide()
             self.btn_maximize_restore.hide()
 
-    ## ==> TOGGLE MENU
-    ########################################################################
+    # ----- > Toggle Menu
     def toggleMenu(self, maxWidth, enable):
         if enable:
             # GET WIDTH
@@ -123,24 +120,21 @@ class UIFunctions(MainWindow):
             self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
             self.animation.start()
 
-    ## ==> SET TITLE BAR
-    ########################################################################
+    # ----- > Set Title Bar
     def removeTitleBar(self):
         global GLOBAL_TITLE_BAR
         GLOBAL_TITLE_BAR = self
 
-    ## ==> HEADER TEXTS
-    ########################################################################
-    # LABEL TITLE
+    # ----- > Header Texts
+    # ==> LABEL TITLE
     def labelTitle(self, text):
         self.label_title_bar_top.setText(text)
 
-    # LABEL DESCRIPTION
+    # ==> LABEL DESCRIPTION
     def labelDescription(self, text):
         self.label_top_info_1.setText(text)
 
-    ## ==> DYNAMIC MENUS
-    ########################################################################
+    # ----- > Dynamic Menus
     def addNewMenu(self, name, objName, icon, isTopMenu):
         font = QFont()
         font.setFamily(u"Segoe UI")
@@ -164,37 +158,35 @@ class UIFunctions(MainWindow):
         else:
             self.layout_menu_bottom.addWidget(button)
 
-    ## ==> SELECT/DESELECT MENU
-    ########################################################################
-    ## ==> SELECT
+    # ----- > Select / Deselect Menu
+    # ==> SELECT
     def selectMenu(getStyle):
         select = getStyle + ("QPushButton { border-right: 7px solid rgb(44, 49, 60); }")
         return select
 
-    ## ==> DESELECT
+    # ==> DESELECT
     def deselectMenu(getStyle):
         deselect = getStyle.replace("QPushButton { border-right: 7px solid rgb(44, 49, 60); }", "")
         return deselect
 
-    ## ==> START SELECTION
+    # ----- > Start Selection
     def selectStandardMenu(self, widget):
         for w in self.frame_left_menu.findChildren(QPushButton):
             if w.objectName() == widget:
                 w.setStyleSheet(UIFunctions.selectMenu(w.styleSheet()))
 
-    ## ==> RESET SELECTION
+    # ----- > Reset Selection
     def resetStyle(self, widget):
         for w in self.frame_left_menu.findChildren(QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(UIFunctions.deselectMenu(w.styleSheet()))
 
-    ## ==> CHANGE PAGE LABEL TEXT
+    # ----- > Change Page Label Text
     def labelPage(self, text):
         newText = '| ' + text.upper()
         self.label_top_info_2.setText(newText)
 
-    ## ==> USER ICON
-    ########################################################################
+    # ----- > User Icon
     def userIcon(self, initialsTooltip, icon, showHide):
         if showHide:
             # SET TEXT
@@ -210,23 +202,21 @@ class UIFunctions(MainWindow):
         else:
             self.label_user_icon.hide()
 
-    ########################################################################
-    ## END - GUI FUNCTIONS
-    ########################################################################
+    ####################################################################################################################
+    #                                       == > END - GUI FUNCTIONS < ==                                           #
+    ####################################################################################################################
+    ####################################################################################################################
+    #                                       == > START - GUI DEFINITIONS < ==                                          #
+    ####################################################################################################################
 
-    ########################################################################
-    ## START - GUI DEFINITIONS
-    ########################################################################
-
-    ## ==> UI DEFINITIONS
-    ########################################################################
+    # ----- > UI Definitions
     def uiDefinitions(self):
         def dobleClickMaximizeRestore(event):
             # IF DOUBLE CLICK CHANGE STATUS
             if event.type() == QtCore.QEvent.MouseButtonDblClick:
                 QtCore.QTimer.singleShot(250, lambda: UIFunctions.maximize_restore(self))
 
-        ## REMOVE ==> STANDARD TITLE BAR
+        # REMOVE ==> STANDARD TITLE BAR
         if GLOBAL_TITLE_BAR:
             self.setStyleSheet("background:rgb(27, 29, 35);")
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
@@ -264,13 +254,12 @@ class UIFunctions(MainWindow):
         ## SHOW ==> CLOSE APPLICATION
         self.btn_close.clicked.connect(lambda: self.close())
 
-    ########################################################################
-    ## END - GUI DEFINITIONS
-    ########################################################################
-
-    ##################################################################################################################
-    ### == > START OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
-    ##################################################################################################################
+    ####################################################################################################################
+    #                                         == > END - GUI DEFINITIONS < ==                                          #
+    ####################################################################################################################
+    ####################################################################################################################
+    #                             == > START - OPEN SOURCE PYMOL 2.4 INTEGRATION < ==                                  #
+    ####################################################################################################################
     def start_pymol(self):
         # Creating the PyMolWidget
         try:
@@ -281,7 +270,6 @@ class UIFunctions(MainWindow):
             self.ProteinView.update()
             self.ProteinView.show()
             verticalLayoutProteinView.setContentsMargins(0, 0, 0, 0)
-            # self.deleteLayout(verticalLayoutProteinView)
             self.ProteinView.initial_pymol_visual()
         except Exception as instance:
             if self.Pymol_Widget.isVisible():
@@ -342,6 +330,6 @@ class UIFunctions(MainWindow):
         if verticalLayoutProteinView is not None:
             sip.delete(verticalLayoutProteinView)
 
-    ##################################################################################################################
-    ### == > END OF OPEN SOURCE PYMOL 2.4 INTEGRATION < == ###
-    ##################################################################################################################
+    ####################################################################################################################
+    #                               == > END - OPEN SOURCE PYMOL 2.4 INTEGRATION < ==                                  #
+    ####################################################################################################################
