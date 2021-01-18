@@ -42,116 +42,89 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent=parent)
         uic.loadUi('MAIN_GUI.ui', self)
 
-        ## PRINT ==> SYSTEM
+        ################################################################################################################
+        #                                       ==> START OF WINDOW ATTRIBUTES <==                                     #
+        ################################################################################################################
         print('System: ' + platform.system())
         print('Version: ' + platform.release())
 
-        ########################################################################
-        ## START - WINDOW ATTRIBUTES
-        ########################################################################
-
-        ## START - SIMULATION MONITORING
+        # ------------------------------------ > START OF SIMULATION MONITORING < ------------------------------------ #
         self.created_script = None
         self.Real_Time_Graphs = Graphs()
         self.verticalLayout_16.addWidget(self.Real_Time_Graphs.win)
         self.setLayout(self.verticalLayout_16)
-        ## END - SIMULATION MONITORING
+        # ------------------------------------- > END OF SIMULATION MONITORING < ------------------------------------- #
 
-        ## REMOVE ==> STANDARD TITLE BAR
-
-        UIFunctions.start_pymol(self)
+        # ----- > Remove Standart Title Bar
         UIFunctions.removeTitleBar(True)
-
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
-        ## ==> END ##
-
-        ## SET ==> WINDOW TITLE
+        # ----- > Set Window Title
         self.setWindowTitle('MDPerTool v0.1')
         # self.setWindowIcon(QIcon('%s/icons/MDPerTool.ico' % os.getcwd()))
         UIFunctions.labelTitle(self, 'MDPerTool - %s %s' % (platform.system(), platform.release()))
         UIFunctions.labelDescription(self, str(os.getcwd()))
-        ## ==> END ##
 
-        ## MOVE TO THE SCREEN CENTER
+        # ----- > Move The Screen To Center
         qtRectangle = self.frameGeometry()
         centerPoint = QDesktopWidget().availableGeometry().center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
-        ## ==> END ##
 
-        ## REMOVE ==> STANDARD TITLE BAR
+        # ----- > Start With Standart Size
         startSize = QSize(1600, 940)
         self.resize(startSize)
         self.setMinimumSize(startSize)
         # UIFunctions.enableMaximumSize(self, 500, 720)
-        ## ==> END ##
 
-        ## ==> CREATE MENUS
-        ########################################################################
-
-        ## ==> TOGGLE MENU SIZE
+        # --------------------------------------------- > CREATE MENUS < --------------------------------------------- #
+        # ----- > Toggle Menu Size
         self.btn_toggle_menu.clicked.connect(lambda: UIFunctions.toggleMenu(self, 220, True))
-        ## ==> END ##
 
-        ## ==> ADD CUSTOM MENUS
+        # ----- > Add Custom Menus
         self.stackedWidget.setMinimumWidth(20)
         UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation", "url(:/20x20/icons/20x20/chemical_20x20.png)",
                                True)
         UIFunctions.addNewMenu(self, "Settings", "btn_settings", "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
         UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
-        ## ==> END ##
 
-        # START MENU => SELECTION
+        # ----- > Start Menu Selection
         UIFunctions.selectStandardMenu(self, "btn_home")
-        ## ==> END ##
 
-        ## ==> START PAGE
+        # ----- > Start Page
         self.stackedWidget.setCurrentWidget(self.page_home)
-        ## ==> END ##
 
-        ## USER ICON ==> SHOW HIDE
+        # ----- > Show / Hide User Icon
         UIFunctions.userIcon(self, "HIO", "", True)
 
-        ## ==> END ##
-
-        ## ==> MOVE WINDOW / MAXIMIZE / RESTORE
-        ########################################################################
+        # ----- > Move Window / Maximize / Restore
         def moveWindow(event):
-            # IF MAXIMIZED CHANGE TO NORMAL
+            # ----- > If Maximized Change to Normal
             if UIFunctions.returStatus() == 1:
                 UIFunctions.maximize_restore(self)
-
-            # MOVE WINDOW
+            # ----- > Move Window
             if event.buttons() == Qt.LeftButton:
                 self.move(self.pos() + event.globalPos() - self.dragPos)
                 self.dragPos = event.globalPos()
                 event.accept()
 
-        # WIDGET TO MOVE
+        # ----- > Widget to Move
         self.frame_label_top_btns.mouseMoveEvent = moveWindow
-        ## ==> END ##
 
-        ## ==> LOAD DEFINITIONS
-        ########################################################################
+        # ----- > Load Definitions
         UIFunctions.uiDefinitions(self)
-        ## ==> END ##
 
-        ########################################################################
-        ## END - WINDOW ATTRIBUTES
-        ############################## ---/--/--- ##############################
+        ################################################################################################################
+        #                                        ==> END OF WINDOW ATTRIBUTES <==                                      #
+        ################################################################################################################
 
-        ########################################################################
-        #                                                                      #
-        ############################## START OF WIDGETS FUNCTIONS/PARAMETERS ##############################
-
+        # ------------------------------- > MAINWINDOW WIDGETS FUNCTIONS/PARAMETERS < -------------------------------- #
         self.quit_pushButton.clicked.connect(lambda: UIFunctions.close_application(self))
         self.stop_pushButton.clicked.connect(self.stop_button_clicked)
         self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
         self.PDB_ID_lineEdit.textChanged.connect(lambda: Functions.PDB_ID_lineEdit(self))
         self.fetch_pdb_Button.clicked.connect(lambda: Functions.Fetch_PDB_File(self))
-
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         Functions.Send_Available_Platforms_to_GUI(self)
         self.platform_comboBox.currentTextChanged.connect(lambda: Functions.platform_comboBox_Changed(self))
@@ -159,12 +132,10 @@ class MainWindow(QMainWindow):
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
-
         self.Run.clicked.connect(self.run_btn_clicked)
-        ############################## END OF WIDGETS FUNCTIONS/PARAMETERS ##############################
 
-
-        ###################################  PYMOL RELEATED BUTTONS  --> START
+        # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
+        UIFunctions.start_pymol(self)
         self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
         self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
         self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
@@ -175,14 +146,8 @@ class MainWindow(QMainWindow):
         self.Handel_Buttons()
         self.ss_beatiful_snapshoot.clicked.connect(lambda: UIFunctions.show_beatiful_in_Pymol(self))
         self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
-
         self.Handel_Save_Figure_Options_Changed()
         self.Handel_Save_Figure_Options()
-        ###################################  PYMOL RELEATED BUTTONS  --> END
-
-        ## SHOW ==> MAIN WINDOW
-        ########################################################################
-        ## ==> END ##
 
     def run_btn_clicked(self):
         self.Run.setEnabled(False)
@@ -268,12 +233,11 @@ class MainWindow(QMainWindow):
     def Stocasthic_Changed(self):
         Functions.Stochastic_changed(self)
 
-    ########################################################################
-    ## MENUS ==> DYNAMIC MENUS FUNCTIONS
-    ########################################################################
+    ####################################################################################################################
+    #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
+    ####################################################################################################################
     def Button(self):
         # GET BT CLICKED
-
         btnWidget = self.sender()
 
         # PAGE HOME
@@ -304,22 +268,19 @@ class MainWindow(QMainWindow):
             UIFunctions.labelPage(self, "ABOUT & CONTACT")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-    ## ==> END ##
+    ####################################################################################################################
+    #                                     == > END OF DYNAMIC MENUS FUNCTIONS < ==                                     #
+    ####################################################################################################################
+    ####################################################################################################################
+    #                                          == > START OF APP EVENTS < ==                                           #
+    ####################################################################################################################
 
-    ########################################################################
-    ## START ==> APP EVENTS
-    ########################################################################
-
-    ## EVENT ==> MOUSE DOUBLE CLICK
-    ########################################################################
+    # ----- > Mouse Double Click
     def eventFilter(self, watched, event):
         if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
             print("pos: ", event.pos())
 
-    ## ==> END ##
-
-    ## EVENT ==> MOUSE CLICK
-    ########################################################################
+    # ----- > Mouse Click Event
     def mousePressEvent(self, event):
         self.dragPos = event.globalPos()
         if event.buttons() == Qt.LeftButton:
@@ -331,15 +292,11 @@ class MainWindow(QMainWindow):
 
     ## ==> END ##
 
-    ## EVENT ==> KEY PRESSED
-    ########################################################################
+    # ----- > Key Pressed
     def keyPressEvent(self, event):
         print('Key: ' + str(event.key()) + ' | Text Press: ' + str(event.text()))
 
-    ## ==> END ##
-
-    ## EVENT ==> RESIZE EVENT
-    ########################################################################
+    # ----- > Resize Event
     def resizeEvent(self, event):
         self.resizeFunction()
         path = QPainterPath()
@@ -348,13 +305,15 @@ class MainWindow(QMainWindow):
         self.setMask(reg)
         return super(MainWindow, self).resizeEvent(event)
 
+    # ----- > When Resize The Frame It's Height and Width Will Print
     def resizeFunction(self):
         print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
 
-    ## ==> END ##
-
     ##################################################################################################################
-                                    ### == > START OF PYMOL NAVIGATION TOOLBAR < == ###
+    #                                           == > END OF APP EVENTS < ==                                          #
+    ##################################################################################################################
+    ##################################################################################################################
+    #                                   == > START OF PYMOL NAVIGATION TOOLBAR < ==                                  #
     ##################################################################################################################
     def visualization_Handel_buttons_changing(self):
         self.hide_visualization_settings()
@@ -373,7 +332,7 @@ class MainWindow(QMainWindow):
         self.show_navigation.show()
         self.hide_navigation.hide()
 
-    ######   ------------------------------------------------------------   #####
+    # ----------------------------------------- > FIGURE OPTIONS IN PYMOL < ------------------------------------------ #
     def Handel_Save_Figure_Options_Changed(self):
         self.hide_figure_options()
 
@@ -403,19 +362,22 @@ class MainWindow(QMainWindow):
     def figure_ray_label(self):
         self.pymol_ray_label.setText("Ray: " + str(self.ray_horizontalSlider.value()))
 
-    ##################################################################################################################
-                                    ### == > END OF PYMOL NAVIGATION TOOLBAR < == ###
-    ##################################################################################################################
+    ####################################################################################################################
+    #                                   == > END OF PYMOL NAVIGATION TOOLBAR < ==                                      #
+    ####################################################################################################################
+    ####################################################################################################################
+    #                                       == > START OF SPLASH SCREEN < ==                                           #
+    ####################################################################################################################
 
-# SPLASH SCREEN
+
 class SplashScreen(QMainWindow):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None, *args, **kwargs):
+        super().__init__(parent=parent, *args, **kwargs)
+
         uic.loadUi('splash_screen.ui', self)
 
-        ## UI ==> INTERFACE CODES
-        # set app icon
+        # ----- > Set App Icon
         app_icon = QtGui.QIcon()
         app_icon.addFile('%s/icons/big_icons/style_icon_48x48.png' % os.getcwd())
         # app_icon.addFile('gui/icons/24x24.png', QtCore.QSize(24, 24))
@@ -423,20 +385,18 @@ class SplashScreen(QMainWindow):
         # app_icon.addFile('gui/icons/48x48.png', QtCore.QSize(48, 48))
         # app_icon.addFile('gui/icons/256x256.png', QtCore.QSize(256, 256))
 
-        ## MOVE TO THE SCREEN CENTER
+        # ----- > Move to The Screen Center
         qtRectangle = self.frameGeometry()
         centerPoint = QDesktopWidget().availableGeometry().center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
-        ## ==> END ##
 
-        ########################################################################
+        # ----- > Remove Background and Give icon to The Program
         self.setWindowIcon(QIcon(app_icon))
-        ## REMOVE TITLE BAR
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
-        ## DROP SHADOW EFFECT
+        # ----- > Drop Shadow Effect
         self.shadow = QGraphicsDropShadowEffect(self)
         self.shadow.setBlurRadius(20)
         self.shadow.setXOffset(0)
@@ -444,49 +404,41 @@ class SplashScreen(QMainWindow):
         self.shadow.setColor(QColor(0, 0, 0, 60))
         self.dropShadowFrame.setGraphicsEffect(self.shadow)
 
-        ## QTIMER ==> START
+        # ----- > Qtimer For Change Description on Splash Screen
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.progress)
-        # TIMER IN MILLISECONDS
-        self.timer.start(5)
+        self.timer.start(15)
 
-        # CHANGE DESCRIPTION
+        # ----- > Change Description on Splash Screen
         self.label_title.setText("MDPerTool v0.1")
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
-        # Initial Text
+
+        # ----- > Initial Text on Splash Screen
         self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")
 
-        # Change Texts
-        QtCore.QTimer.singleShot(100, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
-        QtCore.QTimer.singleShot(200, lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
+        # ----- > CHANGE TEXT ON SPLASH SCREEN
+        QtCore.QTimer.singleShot(300, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
+        QtCore.QTimer.singleShot(250, lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
 
-        ## SHOW ==> MAIN WINDOW
-        ########################################################################
         self.show()
-        ## ==> END ##
 
-    ## ==> APP FUNCTIONS
-    ########################################################################
+    # ------------------------------------------ > START OF APP FUNCTIONS < ------------------------------------------ #
     def progress(self):
+        """
+            Splash Screen Progress Bar
+        :return: There is no returm
+        """
         global counter
 
-        # SET VALUE TO PROGRESS BAR
         self.progressBar.setValue(counter)
-
-        # CLOSE SPLASH SCREE AND OPEN APP
         if counter > 100:
-            # STOP TIMER
             self.timer.stop()
-
-            # SHOW MAIN WINDOW
             self.main = MainWindow()
             self.main.show()
-
-            # CLOSE SPLASH SCREEN
             self.close()
 
-        # INCREASE COUNTER
         counter += 1
+    # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
 
 if __name__ == "__main__":
