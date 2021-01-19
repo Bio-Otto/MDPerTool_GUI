@@ -158,13 +158,12 @@ class UIFunctions(MainWindow):
         else:
             self.layout_menu_bottom.addWidget(button)
 
-    # ----- > Select / Deselect Menu
-    # ==> SELECT
+    # ----- > Select Menu
     def selectMenu(getStyle):
         select = getStyle + ("QPushButton { border-right: 7px solid rgb(44, 49, 60); }")
         return select
 
-    # ==> DESELECT
+    # ----- > Deselect Menu
     def deselectMenu(getStyle):
         deselect = getStyle.replace("QPushButton { border-right: 7px solid rgb(44, 49, 60); }", "")
         return deselect
