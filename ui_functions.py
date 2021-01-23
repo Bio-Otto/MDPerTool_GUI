@@ -36,27 +36,17 @@ class UIFunctions(MainWindow):
     def close_application(self):
         try:
             """Close Application Question Message Box."""
-            close_program_msgbox = QMessageBox(QMessageBox.Question, "Be carefull !",
-                                               "Do you really want to close program?")
-
-            close_program_msgbox.setIcon(QMessageBox.Question)
-            close_program_msgbox.addButton(QMessageBox.Yes)
-            close_program_msgbox.addButton(QMessageBox.No)
-            close_program_msgbox.setDefaultButton(QMessageBox.No)
-            # msgbox.setCheckBox(cb)
-            # msg.setWindowIcon(QIcon(ICON_PATH))
-            close_program_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
-            close_program_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-            close_answer = close_program_msgbox.exec_()
+            close_answer = Message_Boxes.Question_message(self, "Be carefull!", "Do you really want to close the "
+                                                                                "program?", Style.MessageBox_stylesheet)
 
             if close_answer == QMessageBox.Yes:
                 self.close()
-
             if close_answer == QMessageBox.No:
                 pass
 
         except Exception as inst:
-            print(inst)
+            Message_Boxes.Critical_message(self, 'An unexpected error has occurred!', str(inst),
+                                           Style.MessageBox_stylesheet)
 
     # ----- > Maximize / Restore
     def maximize_restore(self):
@@ -285,7 +275,6 @@ class UIFunctions(MainWindow):
                                      "may solve this issue.")
 
     def load_pdb_to_pymol(self, pdb_file):
-        print("ui de load pymol")
         self.ProteinView.reinitialize()
         self.ProteinView.loadMolFile(pdb_file)
         self.ProteinView.update()
@@ -321,9 +310,30 @@ class UIFunctions(MainWindow):
         self.ProteinView.show()
 
     def save_as_png_Pymol(self):
-        self.ProteinView.get_png_figure(self.width_horizontalSlider.value(), self.height_horizontalSlider.value(),
-                                        self.dpi_horizontalSlider.value(), self.ray_horizontalSlider.value())
-        self.ProteinView.update()
+        filedialog = QFileDialog(self)
+        filedialog.setDefaultSuffix("png")
+        filedialog.setNameFilter("PNG Files (*.png);;All files (*.*)")
+        filedialog.setAcceptMode(QFileDialog.AcceptSave)
+        selected = filedialog.exec()
+
+        if selected:
+            filename = filedialog.selectedFiles()[0]
+        else:
+            return
+        if filename == "":
+            Message_Boxes.Warning_message(self, 'png save failed!', "No file name selected.",
+                                          Style.MessageBox_stylesheet)
+            return
+
+        try:
+            self.ProteinView.get_png_figure(filename, width=self.width_horizontalSlider.value(),
+                                            height=self.height_horizontalSlider.value(),
+                                            dpi=self.dpi_horizontalSlider.value(),
+                                            ray=self.ray_horizontalSlider.value())
+            self.ProteinView.update()
+
+        except Exception as save_err:
+            Message_Boxes.Critical_message(self, 'png save failed!', str(save_err), Style.MessageBox_stylesheet)
 
     def deleteLayout(self, verticalLayoutProteinView):
         if verticalLayoutProteinView is not None:

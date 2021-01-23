@@ -71,6 +71,7 @@ class Style:
                 border-radius: 12px;
                 border: 1.5px solid;
                 padding: 6px;
+                border-color: rgb(255, 170, 0);
 
             }
             
@@ -157,3 +158,4 @@ class Style:
                 }
     
             """
+

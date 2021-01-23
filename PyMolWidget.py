@@ -100,8 +100,8 @@ class PymolQtWidget(QGLWidget):
         self._pymol.cmd.color('yellow', 'ss s')
         self._pymol.cmd.set('ray_trace_mode', 3)
 
-    def get_png_figure(self, width=1200, height=1200, dpi=150, ray=1):
-        self._pymol.cmd.png("figure.png", width=width, height=height, dpi=dpi, ray=ray)
+    def get_png_figure(self, figure_name, width=1200, height=1200, dpi=150, ray=1):
+        self._pymol.cmd.png(figure_name, width=width, height=height, dpi=dpi, ray=ray)
 
     def loadMolFile(self, mol_file):
         self._pymol.cmd.load(str(mol_file))

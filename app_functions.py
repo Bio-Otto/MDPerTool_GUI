@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QFileDialog, QWidget
-from PyQt5.QtWidgets import QMessageBox
 import gzip
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
@@ -12,6 +11,7 @@ from os import path
 from urllib.request import urlretrieve
 from checkBox_menu import *
 from ui_main import *
+from message import Message_Boxes
 
 
 class Helper_Functions():
@@ -75,13 +75,13 @@ class Functions(MainWindow):
             self.pdb_filename = os.path.splitext(os.path.basename(self.pdb_filename))
 
             if self.pdb_filename[1] == '.pdb':
-                # self.upload_pdb_textEdit.setText(self.pdb_path)
                 return True, self.pdb_path
+
             elif self.pdb_filename[1] != "":
-                QMessageBox.critical(self, "Error", "this is not a pdb file")
+                Message_Boxes.Critical_message(self, "Error", "this is not a pdb file", Style.MessageBox_stylesheet)
 
         except Exception as exp:
-            QMessageBox.warning(self, "Fatal Error", str(exp))
+            Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
 
 
     @staticmethod
@@ -153,24 +153,12 @@ class Functions(MainWindow):
                     InputFile(fetch_result)
 
             if len(fetch_pdb_ID) != 4:
-                print("burada")
-                PDB_fetch_wrong_letter_msgbox = QMessageBox(QMessageBox.Information, 'Wrong pdb id',
-                                                            'PDB ID should be provided as 4 letters')
-                PDB_fetch_wrong_letter_msgbox.setIcon(QMessageBox.Information)
-                PDB_fetch_wrong_letter_msgbox.addButton(QMessageBox.Ok)
-                PDB_fetch_wrong_letter_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
-                PDB_fetch_wrong_letter_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint |
-                                                             QtCore.Qt.WindowStaysOnTopHint)
-                PDB_fetch_wrong_letter_msgbox.exec_()
+                Message_Boxes.Information_message(self, 'Wrong pdb id', 'PDB ID should be provided as 4 letters',
+                                                  Style.MessageBox_stylesheet)
 
         except Exception as instance:
-            PDB_fetch_msgbox = QMessageBox(QMessageBox.Critical,
-                                           'An error occurred while fetching the pdb file.', repr(instance))
-            PDB_fetch_msgbox.setIcon(QMessageBox.Critical)
-            PDB_fetch_msgbox.addButton(QMessageBox.Ok)
-            PDB_fetch_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
-            PDB_fetch_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-            PDB_fetch_msgbox.exec_()
+            Message_Boxes.Critical_message(self, 'An error occurred while fetching the pdb file.', repr(instance),
+                                           Style.MessageBox_stylesheet)
 
     def Stochastic_changed(self):
         """
@@ -319,10 +307,8 @@ class pdb_Tools:
             return fetched_pdb_file
 
         except Exception as instance:
-            PDB_fetch_msgbox = QMessageBox.critical(self, 'An error occurred while fetching the pdb file.',
-                                                    repr(instance))
-            PDB_fetch_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
-            PDB_fetch_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            Message_Boxes.Critical_message(self, 'An error occurred while fetching the pdb file.', repr(instance),
+                                           Style.MessageBox_stylesheet)
             return False
 
     def fetched_pdb_fix(self, file_pathway, output_path=None, ph=7, chains_to_remove=None):

@@ -217,15 +217,8 @@ class MainWindow(QMainWindow):
 
                 UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
-        except Exception as instance:
-            PDB_load_msgbox = QMessageBox(QMessageBox.Critical, repr(instance),
-                                          'An Error Occurred While Loading The File.')
-            PDB_load_msgbox.setInformativeText(repr(instance))
-            PDB_load_msgbox.setIcon(QMessageBox.Critical)
-            PDB_load_msgbox.addButton(QMessageBox.Ok)
-            PDB_load_msgbox.setStyleSheet(Style.MessageBox_stylesheet)
-            PDB_load_msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-            PDB_load_msgbox.exec_()
+        except TypeError:
+            pass
 
     def output_folder_browse(self):
         Functions.output_file(self)
