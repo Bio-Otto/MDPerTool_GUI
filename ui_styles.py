@@ -1,18 +1,8 @@
-################################################################################
-##
-## BY: WANDERSON M.PIMENTA
-## PROJECT MADE WITH: Qt Designer and PySide2
-## V: 1.0.0
-##
-## This project can be used freely for all uses, as long as they maintain the
-## respective credits only in the Python scripts, any information in the visual
-## interface (GUI) can be modified without any implication.
-##
-## There are limitations on Qt licenses if you want to use your products
-## commercially, I recommend reading them on the official website:
-## https://doc.qt.io/qtforpython/licenses.html
-##
-################################################################################
+########################################################################################################################
+# BY: HALIL IBRAHIM OZDEMIR
+# PROJECT MADE WITH: Qt Designer and PyQt5
+# V: 0.1
+########################################################################################################################
 
 class Style:
 
@@ -50,5 +40,112 @@ class Style:
         background-color: rgb(85, 170, 255);
         border-left: 28px solid rgb(85, 170, 255);
     }
+    
+    
     """
     )
+
+    MessageBox_stylesheet = """
+
+            QWidget
+            {
+                color: white;
+                background-color: #323232;
+                selection-background-color:#323232;
+                selection-color: black;
+                background-clip: border;
+                border-image: none;
+                border: 0px transparent black;
+                outline: 0;
+                
+                border-radius: 12px;
+                border: 1.5px solid;
+                padding: 6px;
+                border-color: rgb(255, 170, 0);
+
+            }
+            
+            QLabel
+            {
+                font: bold 12px;
+                border: none;
+            }
+
+            QPushButton 
+            {
+                color: white; 
+                font-weight: bold; 
+                font-size: 10px; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }
+
+
+        """
+
+    MessageBox_critical_stylesheet = """
+
+                QWidget
+                {
+                    color: white;
+                    background-color: #323232;
+                    selection-background-color:#323232;
+                    selection-color: black;
+                    background-clip: border;
+                    border-image: none;
+                    border: 0px transparent black;
+                    outline: 0;
+
+                    border-radius: 12px;
+                    border: 1.5px solid;
+                    padding: 6px;
+
+                }
+
+                QLabel
+                {
+                    font: bold 12px;
+                    border: none;
+                }
+
+            """
+
+    QToolTip_stylesheet = """
+    
+                QToolTip 
+                { 
+                    background-color: black; 
+                    color: white; 
+                    background-clip: border;
+                    border-image: none;
+                    border: 0px transparent black;
+                    outline: 0;
+                    border: black solid 1px;
+                    padding: 4px;
+                    border-radius: 6px;
+                    border: 1px solid;
+                    font: bold 10px;
+                    border-color:  rgb(157, 90, 198);
+
+                }
+    
+            """
+

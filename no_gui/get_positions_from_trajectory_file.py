@@ -3,7 +3,7 @@ import MDAnalysis
 from simtk.openmm import Vec3
 from simtk.unit import nanometer
 import mdtraj as md
-
+import os
 from simtk.openmm import app
 import simtk.openmm as mm
 from simtk import unit
@@ -19,6 +19,8 @@ def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein'
     global first_snapshot_name
     positions = []
     All_Positions = {}
+
+    save_directory = os.path.dirname(ref_traj)
 
     # set the universe object
     u = MDAnalysis.Universe(top, ref_traj, modif_traj)
@@ -43,24 +45,23 @@ def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein'
 
     if write_dcd:
         if start and stop is not None:
-            with MDAnalysis.Writer('%s_%s_%s.dcd' % (ref_traj, start, stop), len(wanted_atoms.atoms)) as V:
+            with MDAnalysis.Writer(os.path.join(save_directory, '%s_%s_%s.dcd' % (ref_traj, start, stop)), len(wanted_atoms.atoms)) as V:
                 for ts in u.trajectory[start:stop]:
                     V.write(wanted_atoms)
 
         if start is None and stop is not None:
             start = 0
-            with MDAnalysis.Writer('%s_%s_%s.dcd' % (ref_traj, start, stop), len(wanted_atoms.atoms)) as V:
-
+            with MDAnalysis.Writer(os.path.join(save_directory, '%s_%s_%s.dcd' % (ref_traj, start, stop)), len(wanted_atoms.atoms)) as V:
                 for ts in u.trajectory[start:stop]:
                     V.write(wanted_atoms)
-        if start is not None and stop is None:
-            with MDAnalysis.Writer('%s_%s_all.dcd' % (ref_traj, start), len(wanted_atoms.atoms)) as V:
 
+        if start is not None and stop is None:
+            with MDAnalysis.Writer(os.path.join(save_directory, '%s_%s_all.dcd' % (ref_traj, start)), len(wanted_atoms.atoms)) as V:
                 for ts in u.trajectory[start:]:
                     V.write(wanted_atoms)
 
     if write_pdb_for_selection:
-        first_snapshot_name = '%s_first_snapshot.pdb' % selected_atoms
+        first_snapshot_name = os.path.join(save_directory, '%s_first_snapshot.pdb' % selected_atoms)
         wanted_atoms.write(first_snapshot_name)
 
     return All_Positions, first_snapshot_name

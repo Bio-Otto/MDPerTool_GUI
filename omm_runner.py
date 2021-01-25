@@ -1,8 +1,10 @@
 from simtk.openmm.app import StateDataReporter
 from io import StringIO
 import time
+import ctypes
 import queue
 import threading
+import multiprocessing
 import tokenize
 import pystache
 import numpy as np
@@ -11,6 +13,7 @@ from pyqtgraph import PlotWidget, plot, dockarea
 import pyqtgraph as pg
 from PyQt5.QtCore import QTimer, QDateTime, pyqtSlot
 import subprocess
+import continuous_threading
 import os
 import sys
 from PyQt5 import QtCore
@@ -76,26 +79,49 @@ def queue_reporter_factory(queue):
 class Communicate(QtCore.QObject):
     dataSignal = QtCore.pyqtSignal(dict)
     main_signal = QtCore.pyqtSignal(dict)
+    thread_id_keeper = QtCore.pyqtSignal(int)
 
 
 class OpenMMScriptRunner(QtCore.QObject):
     plots_created = bool
     openmm_script_code = str
     status = str
+    pid_idents = []
+    Signals = Communicate()
+    global _stop_running
 
     def __init__(self, script):
         super(OpenMMScriptRunner, self).__init__()
         self.plotdata = dict
         self.plots_created = False
+
+        global _stop_running
+
+        _stop_running = False
+
         self.openmm_script_code = script
         q = queue.Queue()
 
-        t1 = threading.Thread(target=self.run_openmm_script, args=(self.openmm_script_code, q), daemon=True)
-        t2 = threading.Thread(target=self.queue_consumer, args=(q,), daemon=True)
-        t1.start()
-        t2.start()
+        self.t1 = threading.Thread(target=self.run_openmm_script, args=(self.openmm_script_code, q), daemon=True)
+        self.t2 = threading.Thread(target=self.queue_consumer, args=(q,), daemon=True)
 
-    Signals = Communicate()
+        self.t1.start()
+        self.t2.start()
+
+        #
+
+    def stop_threads(self):
+
+        # global _stop_running
+        # _stop_running = True
+        """
+        T = self.t1.is_running()
+        print(T)
+        self.t1.stop()
+        """
+
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(threading.get_ident(), ctypes.py_object(SystemExit))
+
 
     def run_openmm_script(self, code, queue):
         def fix_code():
@@ -113,19 +139,24 @@ class OpenMMScriptRunner(QtCore.QObject):
             code = fix_code()
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
-        # try:
+
         exec(code, {'__queue': queue, '__queue_reporter_factory': queue_reporter_factory})
 
     def queue_consumer(self, q):
         self.status = 'Running...'
+
         while True:
             try:
+                if _stop_running:
+                    break
                 msg = q.get_nowait()
                 if msg is None:
                     break
+
                 self.update_plot(msg)
             except queue.Empty:
                 time.sleep(0.1)
+
         self.status = 'Done'
 
     def create_plots(self, keys):
@@ -146,7 +177,6 @@ class OpenMMScriptRunner(QtCore.QObject):
 
 
 # ###########################################################################
-
 
 class Graphs(QWidget):
     # global curve, data, p6
@@ -207,6 +237,9 @@ class Graphs(QWidget):
         """Format the speed (ns/day) as pretty"""
 
         speed_style = ins_speed.split(':')
+        if ins_speed == '':
+            return self.real_speed.append(float(0))
+
         if len(speed_style) == 1:
             if speed_style[0] == '--':
                 return self.real_speed.append(float(0))
@@ -221,6 +254,8 @@ class Graphs(QWidget):
         """Format the time as minute"""
 
         time_style = t_remaining.split(':')
+        if t_remaining == '':
+            return self.real_time_as_minute.append(float(0))
 
         if len(time_style) == 1:
             if time_style[0] == '--':
@@ -287,8 +322,11 @@ class Graphs(QWidget):
 
     def run_script(self, contents):
         self.contents = contents
-        runner = OpenMMScriptRunner(self.contents)
-        runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
+        self.runner = OpenMMScriptRunner(self.contents)
+        self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
+
+    def stop_th(self):
+        self.runner.stop_threads()
 
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)
