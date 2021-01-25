@@ -101,60 +101,69 @@ class Functions(MainWindow):
 
     @staticmethod
     def Fetch_PDB_File(self):
-        global selected_chains
+        global selected_chains, fetched_pdb
         try:
             fetch_pdb_ID = self.PDB_ID_lineEdit.text()
             if len(fetch_pdb_ID) == 4:
 
                 fetch_result = pdb_Tools.fetch_pdb(self, fetch_pdb_ID)
+                if fetch_result != False:
 
-                if path.exists(fetch_result):
-                    fixer = PDBFixer(fetch_result)
-                    fixer.removeHeterogens(keepWater=False)
+                    if path.exists(fetch_result):
+                        fixer = PDBFixer(fetch_result)
+                        fixer.removeHeterogens(keepWater=False)
 
-                    modeller = Modeller(fixer.topology, fixer.positions)
-                    chains = [r.id for r in modeller.topology.chains()]
+                        modeller = Modeller(fixer.topology, fixer.positions)
+                        chains = [r.id for r in modeller.topology.chains()]
 
-                    checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                                   checked=True)
+                        checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
+                                                       checked=True)
 
-                    pdb_fix_dialog_answer = checked_list.exec_()
+                        pdb_fix_dialog_answer = checked_list.exec_()
 
-                    if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
-                        selected_chains = [str(s) for s in checked_list.choices]
-                        delete_chains = list(set(chains) - set(selected_chains))
-                        fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
-                                                                self.Output_Folder_textEdit.toPlainText(), ph=7,
-                                                                chains_to_remove=delete_chains)
-                        print(delete_chains)
-                        print("fetched pdb: %s" % fetched_pdb)
+                        if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
+                            selected_chains = [str(s) for s in checked_list.choices]
+                            delete_chains = list(set(chains) - set(selected_chains))
+                            fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                                    self.Output_Folder_textEdit.toPlainText(), ph=7,
+                                                                    chains_to_remove=delete_chains)
+                            print(delete_chains)
+                            print("fetched pdb: %s" % fetched_pdb)
 
-                        self.upload_pdb_textEdit.setText(fetched_pdb)
-                        self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
-                        for i in self.combobox:
-                            self.res1_comboBox.addItem(str(i))
-                        self.res1_comboBox.clear()  # delete all items from comboBox
-                        self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                        # InputFile(fetch_result)
+                            self.upload_pdb_textEdit.setText(fetched_pdb)
+                            self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
+                            for i in self.combobox:
+                                self.res1_comboBox.addItem(str(i))
+                            self.res1_comboBox.clear()  # delete all items from comboBox
+                            self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                            InputFile(fetch_result)
+                            return fetched_pdb
 
-                    elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                        modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
-                                                                 self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=None)
+                        elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                            modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                                     self.Output_Folder_textEdit.toPlainText(),
+                                                                     ph=7, chains_to_remove=None)
 
-                        self.upload_pdb_textEdit.setText(modified_pdb)
+                            self.upload_pdb_textEdit.setText(modified_pdb)
 
-                        self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
-                        for i in self.combobox:
-                            self.res1_comboBox.addItem(str(i))
-                        self.res1_comboBox.clear()  # delete all items from comboBox
-                        self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                            self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                            for i in self.combobox:
+                                self.res1_comboBox.addItem(str(i))
+                            self.res1_comboBox.clear()  # delete all items from comboBox
+                            self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
-                    InputFile(fetch_result)
+                            InputFile(modified_pdb)
+                            return modified_pdb
+
+                        return None
+
+                else:
+                    return None
 
             if len(fetch_pdb_ID) != 4:
                 Message_Boxes.Information_message(self, 'Wrong pdb id', 'PDB ID should be provided as 4 letters',
                                                   Style.MessageBox_stylesheet)
+                return False
 
         except Exception as instance:
             Message_Boxes.Critical_message(self, 'An error occurred while fetching the pdb file.', repr(instance),

@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
         self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
         self.PDB_ID_lineEdit.textChanged.connect(lambda: Functions.PDB_ID_lineEdit(self))
-        self.fetch_pdb_Button.clicked.connect(lambda: Functions.Fetch_PDB_File(self))
+        self.fetch_pdb_Button.clicked.connect(lambda: self.fetch_and_load_pdbfile())
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         Functions.Send_Available_Platforms_to_GUI(self)
         self.platform_comboBox.currentTextChanged.connect(lambda: Functions.platform_comboBox_Changed(self))
@@ -171,6 +171,21 @@ class MainWindow(QMainWindow):
     def show_simulation_monitoring(self):
         self.stackedWidget.setCurrentIndex(1)
         self.Real_Time_Graphs.run_script(self.created_script)
+
+    def fetch_and_load_pdbfile(self):
+        """
+        Fetch action for getting crystal structure from pdb databank
+        :return: path of downloaded pdb file or None conditions will return
+        """
+        fetched_and_modified_pdb = Functions.Fetch_PDB_File(self)
+
+        if fetched_and_modified_pdb:
+            UIFunctions.load_pdb_to_pymol(self, fetched_and_modified_pdb)
+
+        if fetched_and_modified_pdb is None:
+            Message_Boxes.Information_message(self, 'Wrong pdb id "%s"' % self.PDB_ID_lineEdit.text(),
+                                              'There is no protein crystal structure in this expression.',
+                                              Style.MessageBox_stylesheet)
 
     def upload_pdb_from_local(self):
         global selected_chains
@@ -282,8 +297,6 @@ class MainWindow(QMainWindow):
             print('Mouse click: RIGHT CLICK')
         if event.buttons() == Qt.MidButton:
             print('Mouse click: MIDDLE BUTTON')
-
-    ## ==> END ##
 
     # ----- > Key Pressed
     def keyPressEvent(self, event):
