@@ -386,10 +386,6 @@ class SplashScreen(QMainWindow):
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
         app_icon.addFile('%s/icons/big_icons/style_icon_48x48.png' % os.getcwd())
-        # app_icon.addFile('gui/icons/24x24.png', QtCore.QSize(24, 24))
-        # app_icon.addFile('gui/icons/32x32.png', QtCore.QSize(32, 32))
-        # app_icon.addFile('gui/icons/48x48.png', QtCore.QSize(48, 48))
-        # app_icon.addFile('gui/icons/256x256.png', QtCore.QSize(256, 256))
 
         # ----- > Move to The Screen Center
         qtRectangle = self.frameGeometry()
