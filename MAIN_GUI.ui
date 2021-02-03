@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1599</width>
-    <height>967</height>
+    <width>1637</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,7 @@
   <property name="minimumSize">
    <size>
     <width>720</width>
-    <height>0</height>
+    <height>1000</height>
    </size>
   </property>
   <property name="palette">
@@ -541,6 +541,12 @@
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
    <property name="styleSheet">
     <string notr="true">background: transparent;
 color: rgb(210, 210, 210);</string>
@@ -563,6 +569,18 @@ color: rgb(210, 210, 210);</string>
     </property>
     <item>
      <widget class="QFrame" name="frame_main">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="styleSheet">
        <string notr="true"/>
       </property>
@@ -687,6 +705,18 @@ QPushButton:pressed {
           </item>
           <item>
            <widget class="QFrame" name="frame_top_right">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>8</pointsize>
@@ -722,16 +752,22 @@ QPushButton:pressed {
              </property>
              <item>
               <widget class="QFrame" name="frame_top_btns">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>23</height>
+                 <height>25</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>35</height>
+                 <height>16777215</height>
                 </size>
                </property>
                <property name="styleSheet">
@@ -762,20 +798,27 @@ QPushButton:pressed {
                 </property>
                 <item>
                  <widget class="QFrame" name="frame_label_top_btns">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>25</height>
+                    <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
                     <width>16777215</width>
-                    <height>20</height>
+                    <height>16777215</height>
                    </size>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">border-color: rgb(0, 0, 0);</string>
+                   <string notr="true">border-color: rgb(0, 0, 0);
+</string>
                   </property>
                   <property name="frameShape">
                    <enum>QFrame::NoFrame</enum>
@@ -804,7 +847,7 @@ QPushButton:pressed {
                      <property name="maximumSize">
                       <size>
                        <width>30</width>
-                       <height>30</height>
+                       <height>23</height>
                       </size>
                      </property>
                      <property name="styleSheet">
@@ -823,6 +866,18 @@ background-repeat: no-repeat;</string>
                    </item>
                    <item>
                     <widget class="QLabel" name="label_title_bar_top">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>0</height>
+                      </size>
+                     </property>
                      <property name="font">
                       <font>
                        <family>Segoe UI</family>
@@ -832,7 +887,8 @@ background-repeat: no-repeat;</string>
                       </font>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">background: transparent;
+                      <string notr="true">background:  transparent;
+
 margin-left: 5px;
 </string>
                      </property>
@@ -846,10 +902,16 @@ margin-left: 5px;
                 </item>
                 <item>
                  <widget class="QFrame" name="frame_btns_right">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>23</height>
+                    <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -993,7 +1055,7 @@ QPushButton:pressed {
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>35</height>
+                 <height>20</height>
                 </size>
                </property>
                <property name="styleSheet">
@@ -1080,6 +1142,12 @@ background-color: rgb(68, 72, 76);</string>
        </item>
        <item>
         <widget class="QFrame" name="frame_center">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(40, 44, 52);</string>
          </property>
@@ -1112,6 +1180,12 @@ background-color: rgb(68, 72, 76);</string>
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="maximumSize">
              <size>
@@ -1253,6 +1327,12 @@ background-color: rgb(68, 72, 76);</string>
           </item>
           <item>
            <widget class="QFrame" name="frame_content_right">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(44, 49, 60);</string>
             </property>
@@ -1280,6 +1360,18 @@ background-color: rgb(68, 72, 76);</string>
              </property>
              <item>
               <widget class="QFrame" name="frame_content">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>820</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
                </property>
@@ -1304,6 +1396,12 @@ background-color: rgb(68, 72, 76);</string>
                 </property>
                 <item>
                  <widget class="QStackedWidget" name="stackedWidget">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">background: transparent;</string>
                   </property>
@@ -1707,7 +1805,7 @@ QPushButton:pressed {
                                    </font>
                                   </property>
                                   <property name="text">
-                                   <string>or</string>
+                                   <string>Or</string>
                                   </property>
                                   <property name="alignment">
                                    <set>Qt::AlignCenter</set>
@@ -2059,7 +2157,7 @@ QGroupBox::indicator {
                                 <rect>
                                  <x>10</x>
                                  <y>30</y>
-                                 <width>451</width>
+                                 <width>411</width>
                                  <height>81</height>
                                 </rect>
                                </property>
@@ -2296,7 +2394,7 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                   </property>
                                   <property name="minimumSize">
                                    <size>
-                                    <width>0</width>
+                                    <width>171</width>
                                     <height>0</height>
                                    </size>
                                   </property>
@@ -2455,7 +2553,7 @@ QGroupBox::indicator {
                                 <rect>
                                  <x>10</x>
                                  <y>30</y>
-                                 <width>451</width>
+                                 <width>411</width>
                                  <height>171</height>
                                 </rect>
                                </property>
@@ -2472,8 +2570,14 @@ QGroupBox::indicator {
                                 <property name="bottomMargin">
                                  <number>4</number>
                                 </property>
-                                <item row="1" column="0">
-                                 <widget class="QLabel" name="label_3">
+                                <item row="0" column="0">
+                                 <widget class="QLabel" name="label_5">
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>0</width>
+                                    <height>0</height>
+                                   </size>
+                                  </property>
                                   <property name="maximumSize">
                                    <size>
                                     <width>16777215</width>
@@ -2483,66 +2587,15 @@ QGroupBox::indicator {
                                   <property name="font">
                                    <font>
                                     <pointsize>10</pointsize>
+                                    <weight>50</weight>
+                                    <bold>false</bold>
                                    </font>
                                   </property>
                                   <property name="text">
-                                   <string>Run Duration: </string>
+                                   <string>Residue: </string>
                                   </property>
                                   <property name="alignment">
                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                  </property>
-                                 </widget>
-                                </item>
-                                <item row="1" column="1">
-                                 <widget class="QSpinBox" name="run_duration_spinBox">
-                                  <property name="sizePolicy">
-                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                   </sizepolicy>
-                                  </property>
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>0</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>16777215</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <family>Segoe UI</family>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="layoutDirection">
-                                   <enum>Qt::RightToLeft</enum>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QSpinBox{
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	border: 2px solid rgb(27, 29, 35);
-	padding: 5px;
-	padding-left: 5px;
-}
-QSpinBox:hover{
-	border: 2px solid rgb(64, 71, 88);
-}
-
-QSpinBox QAbstractItemView {
-	color: rgb(85, 170, 255);	
-	background-color: rgb(27, 29, 35);
-	padding: 5px;
-	selection-background-color: rgb(39, 44, 54);
-}</string>
-                                  </property>
-                                  <property name="maximum">
-                                   <number>10000000</number>
                                   </property>
                                  </widget>
                                 </item>
@@ -2633,323 +2686,6 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 
 </string>
                                   </property>
-                                 </widget>
-                                </item>
-                                <item row="0" column="2">
-                                 <widget class="QComboBox" name="res2_comboBox">
-                                  <property name="sizePolicy">
-                                   <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                   </sizepolicy>
-                                  </property>
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>110</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>16777215</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QComboBox {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	border: 2px solid rgb(27, 29, 35);
-    padding: 1px 18px 1px 3px;
-	padding-left: 10px;
-    min-width: 6em;
-	
-	selection-background-color: rgb(127, 5, 64);
-	
-	selection-color: rgb(255, 255, 255);
-}
-
-QComboBox:hover{
-	border: 2px solid rgb(64, 71, 88);
-}
-
-QComboBox QAbstractItemView{
-	
-	selection-background-color: rgb(200, 5, 100);
-	selection-color: rgb(193, 125, 17);
-}
-
-QComboBox:editable {
-   	
-	selection-color: rgb(193, 125, 17);
-}
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 3px;
-    padding-left: 4px;
-	text-align: center;
-}
-
-
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 2px;
-    padding-left: 3px;
-}
-
-QComboBox::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 20px;
-
-    border-left-width: 2px;
-    border-left-color: darkgray;
-    border-left-style: solid; /* just a single line */
-    border-top-right-radius: 3px; /* same radius as the QComboBox */
-    border-bottom-right-radius: 3px;
-}
-
-QComboBox::down-arrow {
-image: url(:/16x16/icons/16x16/cil-arrow-bottom.png);
-}
-
-QComboBox::down-arrow:on { /* shift the arrow when popup is open */
-    top: 1px;
-    left: 1px;
-}
-
-</string>
-                                  </property>
-                                 </widget>
-                                </item>
-                                <item row="2" column="0">
-                                 <widget class="QLabel" name="label_4">
-                                  <property name="sizePolicy">
-                                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                   </sizepolicy>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>16777215</width>
-                                    <height>16777215</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QLabel{
-margin-right: 20px;
-}</string>
-                                  </property>
-                                  <property name="text">
-                                   <string>R Factor: </string>
-                                  </property>
-                                  <property name="alignment">
-                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                  </property>
-                                 </widget>
-                                </item>
-                                <item row="0" column="0">
-                                 <widget class="QLabel" name="label_5">
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>0</width>
-                                    <height>0</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>16777215</width>
-                                    <height>16777215</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <pointsize>10</pointsize>
-                                    <weight>50</weight>
-                                    <bold>false</bold>
-                                   </font>
-                                  </property>
-                                  <property name="text">
-                                   <string>Residue: </string>
-                                  </property>
-                                  <property name="alignment">
-                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                  </property>
-                                 </widget>
-                                </item>
-                                <item row="2" column="1">
-                                 <widget class="QSpinBox" name="R_factor_spinBox">
-                                  <property name="sizePolicy">
-                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                   </sizepolicy>
-                                  </property>
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>0</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>16777215</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <family>Segoe UI</family>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="layoutDirection">
-                                   <enum>Qt::RightToLeft</enum>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QSpinBox{
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	border: 2px solid rgb(27, 29, 35);
-	padding: 5px;
-	padding-left: 5px;
-}
-QSpinBox:hover{
-	border: 2px solid rgb(64, 71, 88);
-}
-QSpinBox QAbstractItemView {
-	color: rgb(85, 170, 255);	
-	background-color: rgb(27, 29, 35);
-	padding: 5px;
-	selection-background-color: rgb(39, 44, 54);
-}</string>
-                                  </property>
-                                  <property name="alignment">
-                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                  </property>
-                                  <property name="buttonSymbols">
-                                   <enum>QAbstractSpinBox::UpDownArrows</enum>
-                                  </property>
-                                  <property name="specialValueText">
-                                   <string/>
-                                  </property>
-                                  <property name="accelerated">
-                                   <bool>false</bool>
-                                  </property>
-                                  <property name="correctionMode">
-                                   <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-                                  </property>
-                                  <property name="minimum">
-                                   <number>1</number>
-                                  </property>
-                                  <property name="maximum">
-                                   <number>100</number>
-                                  </property>
-                                 </widget>
-                                </item>
-                                <item row="1" column="2">
-                                 <widget class="QComboBox" name="simulation_time_unit_comboBox">
-                                  <property name="sizePolicy">
-                                   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                   </sizepolicy>
-                                  </property>
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>110</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>16777215</width>
-                                    <height>33</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <family>Segoe UI</family>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QComboBox {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	border: 2px solid rgb(27, 29, 35);
-    padding: 1px 18px 1px 3px;
-	padding-left: 10px;
-    min-width: 6em;
-}
-QComboBox:hover{
-	border: 2px solid rgb(64, 71, 88);
-}
-
-QComboBox QAbstractItemView{
-	
-	selection-background-color: rgb(200, 5, 100);
-	
-
-}
-
-QComboBox:editable {
-
-	background: rgb(0, 180, 95);
-}
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 3px;
-    padding-left: 4px;
-	text-align: center;
-}
-
-
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 2px;
-    padding-left: 3px;
-}
-
-QComboBox::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 20px;
-
-    border-left-width: 2px;
-    border-left-color: darkgray;
-    border-left-style: solid; /* just a single line */
-    border-top-right-radius: 3px; /* same radius as the QComboBox */
-    border-bottom-right-radius: 3px;
-}
-
-QComboBox::down-arrow {
-image: url(:/16x16/icons/16x16/cil-arrow-bottom.png);
-}
-
-QComboBox::down-arrow:on { /* shift the arrow when popup is open */
-    top: 1px;
-    left: 1px;
-}
-
-</string>
-                                  </property>
-                                  <item>
-                                   <property name="text">
-                                    <string>step</string>
-                                   </property>
-                                  </item>
                                  </widget>
                                 </item>
                                 <item row="3" column="0">
@@ -3061,6 +2797,511 @@ QCheckBox::indicator:checked {
                                   </property>
                                  </widget>
                                 </item>
+                                <item row="0" column="2">
+                                 <layout class="QHBoxLayout" name="horizontalLayout_13">
+                                  <property name="spacing">
+                                   <number>15</number>
+                                  </property>
+                                  <property name="leftMargin">
+                                   <number>2</number>
+                                  </property>
+                                  <property name="rightMargin">
+                                   <number>1</number>
+                                  </property>
+                                  <item>
+                                   <widget class="QPushButton" name="discard_residue_pushButton">
+                                    <property name="sizePolicy">
+                                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                                      <horstretch>0</horstretch>
+                                      <verstretch>0</verstretch>
+                                     </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                     <size>
+                                      <width>33</width>
+                                      <height>25</height>
+                                     </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                     <size>
+                                      <width>60</width>
+                                      <height>25</height>
+                                     </size>
+                                    </property>
+                                    <property name="font">
+                                     <font>
+                                      <family>Segoe UI</family>
+                                      <pointsize>9</pointsize>
+                                     </font>
+                                    </property>
+                                    <property name="styleSheet">
+                                     <string notr="true">QPushButton {
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(0, 180, 95);
+}
+QPushButton:hover {
+	background-color: rgb(0, 152, 84);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(220, 5, 100);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+                                    </property>
+                                    <property name="text">
+                                     <string/>
+                                    </property>
+                                    <property name="icon">
+                                     <iconset resource="icons_path.qrc">
+                                      <normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</iconset>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                  <item>
+                                   <widget class="QPushButton" name="add_residue_pushButton">
+                                    <property name="minimumSize">
+                                     <size>
+                                      <width>33</width>
+                                      <height>25</height>
+                                     </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                     <size>
+                                      <width>60</width>
+                                      <height>25</height>
+                                     </size>
+                                    </property>
+                                    <property name="font">
+                                     <font>
+                                      <family>Segoe UI</family>
+                                      <pointsize>9</pointsize>
+                                     </font>
+                                    </property>
+                                    <property name="styleSheet">
+                                     <string notr="true">QPushButton {
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(0, 180, 95);
+}
+QPushButton:hover {
+	background-color: rgb(0, 152, 84);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(220, 5, 100);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+                                    </property>
+                                    <property name="text">
+                                     <string/>
+                                    </property>
+                                    <property name="icon">
+                                     <iconset resource="icons_path.qrc">
+                                      <normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</iconset>
+                                    </property>
+                                   </widget>
+                                  </item>
+                                 </layout>
+                                </item>
+                                <item row="1" column="1">
+                                 <widget class="QSpinBox" name="R_factor_spinBox">
+                                  <property name="sizePolicy">
+                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                   </sizepolicy>
+                                  </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>0</width>
+                                    <height>33</height>
+                                   </size>
+                                  </property>
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>16777215</width>
+                                    <height>33</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <family>Segoe UI</family>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="layoutDirection">
+                                   <enum>Qt::RightToLeft</enum>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QSpinBox{
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+	padding: 5px;
+	padding-left: 5px;
+}
+QSpinBox:hover{
+	border: 2px solid rgb(64, 71, 88);
+}
+QSpinBox QAbstractItemView {
+	color: rgb(85, 170, 255);	
+	background-color: rgb(27, 29, 35);
+	padding: 5px;
+	selection-background-color: rgb(39, 44, 54);
+}</string>
+                                  </property>
+                                  <property name="alignment">
+                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                  </property>
+                                  <property name="buttonSymbols">
+                                   <enum>QAbstractSpinBox::UpDownArrows</enum>
+                                  </property>
+                                  <property name="specialValueText">
+                                   <string/>
+                                  </property>
+                                  <property name="accelerated">
+                                   <bool>false</bool>
+                                  </property>
+                                  <property name="correctionMode">
+                                   <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+                                  </property>
+                                  <property name="minimum">
+                                   <number>1</number>
+                                  </property>
+                                  <property name="maximum">
+                                   <number>100</number>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="2" column="1">
+                                 <widget class="QSpinBox" name="run_duration_spinBox">
+                                  <property name="sizePolicy">
+                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                   </sizepolicy>
+                                  </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>0</width>
+                                    <height>33</height>
+                                   </size>
+                                  </property>
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>16777215</width>
+                                    <height>33</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <family>Segoe UI</family>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="layoutDirection">
+                                   <enum>Qt::RightToLeft</enum>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QSpinBox{
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+	padding: 5px;
+	padding-left: 5px;
+}
+QSpinBox:hover{
+	border: 2px solid rgb(64, 71, 88);
+}
+
+QSpinBox QAbstractItemView {
+	color: rgb(85, 170, 255);	
+	background-color: rgb(27, 29, 35);
+	padding: 5px;
+	selection-background-color: rgb(39, 44, 54);
+}</string>
+                                  </property>
+                                  <property name="maximum">
+                                   <number>10000000</number>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="2" column="2">
+                                 <widget class="QComboBox" name="simulation_time_unit_comboBox">
+                                  <property name="sizePolicy">
+                                   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                   </sizepolicy>
+                                  </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>110</width>
+                                    <height>33</height>
+                                   </size>
+                                  </property>
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>16777215</width>
+                                    <height>33</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <family>Segoe UI</family>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QComboBox {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 18px 1px 3px;
+	padding-left: 10px;
+    min-width: 6em;
+}
+QComboBox:hover{
+	border: 2px solid rgb(64, 71, 88);
+}
+
+QComboBox QAbstractItemView{
+	
+	selection-background-color: rgb(200, 5, 100);
+	
+
+}
+
+QComboBox:editable {
+
+	background: rgb(0, 180, 95);
+}
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+	text-align: center;
+}
+
+
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 2px;
+    padding-left: 3px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+
+    border-left-width: 2px;
+    border-left-color: darkgray;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox::down-arrow {
+image: url(:/16x16/icons/16x16/cil-arrow-bottom.png);
+}
+
+QComboBox::down-arrow:on { /* shift the arrow when popup is open */
+    top: 1px;
+    left: 1px;
+}
+
+</string>
+                                  </property>
+                                  <item>
+                                   <property name="text">
+                                    <string>step</string>
+                                   </property>
+                                  </item>
+                                 </widget>
+                                </item>
+                                <item row="1" column="0">
+                                 <widget class="QLabel" name="label_4">
+                                  <property name="sizePolicy">
+                                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                   </sizepolicy>
+                                  </property>
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>16777215</width>
+                                    <height>16777215</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QLabel{
+margin-right: 20px;
+}</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>R Factor: </string>
+                                  </property>
+                                  <property name="alignment">
+                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="2" column="0">
+                                 <widget class="QLabel" name="label_3">
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>16777215</width>
+                                    <height>16777215</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="text">
+                                   <string>Run Duration: </string>
+                                  </property>
+                                  <property name="alignment">
+                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                  </property>
+                                 </widget>
+                                </item>
+                               </layout>
+                              </widget>
+                              <widget class="QWidget" name="verticalLayoutWidget">
+                               <property name="geometry">
+                                <rect>
+                                 <x>438</x>
+                                 <y>30</y>
+                                 <width>132</width>
+                                 <height>171</height>
+                                </rect>
+                               </property>
+                               <layout class="QVBoxLayout" name="verticalLayout_17">
+                                <property name="spacing">
+                                 <number>8</number>
+                                </property>
+                                <property name="leftMargin">
+                                 <number>3</number>
+                                </property>
+                                <property name="topMargin">
+                                 <number>4</number>
+                                </property>
+                                <property name="rightMargin">
+                                 <number>3</number>
+                                </property>
+                                <property name="bottomMargin">
+                                 <number>8</number>
+                                </property>
+                                <item>
+                                 <widget class="QLabel" name="label_7">
+                                  <property name="font">
+                                   <font>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QLabel {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 1px 1px 1px;
+	
+	border-bottom-color: rgb(157, 90, 198);
+}
+
+
+QLabel:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>Selected Residue(s)</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QListWidget" name="selected_residues_listWidget">
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>0</width>
+                                    <height>125</height>
+                                   </size>
+                                  </property>
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>130</width>
+                                    <height>16777215</height>
+                                   </size>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QListWidget {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 18px 1px 3px;
+	padding-left: 10px;
+	selection-background-color: rgb(127, 5, 64);
+	selection-color: rgb(255, 255, 255);
+	font-size: 13px;
+}
+
+QListWidget:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}
+
+ QScrollBar:vertical
+        {
+            background-color: #323232;
+            width: 15px;
+            margin: 15px 3px 15px 3px;
+            border: 1px transparent #2A2929;
+			margin-right: 5px;
+        }
+        
+        QScrollBar::handle:vertical
+        {
+            background-color: rgb(255, 17, 100);
+            min-height: 5px;
+            border-radius: 3px;
+            
+        }
+        
+        QScrollBar::sub-line:vertical
+        {
+            border: none;
+            background: none;
+            color: none;
+        }
+        
+        QScrollBar::add-line:vertical
+        {
+            border: none;
+            background: none;
+            color: none;
+        }
+        
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+        {
+            background: none;
+        }
+
+</string>
+                                  </property>
+                                 </widget>
+                                </item>
                                </layout>
                               </widget>
                              </widget>
@@ -3070,10 +3311,13 @@ QCheckBox::indicator:checked {
                               <property name="orientation">
                                <enum>Qt::Vertical</enum>
                               </property>
+                              <property name="sizeType">
+                               <enum>QSizePolicy::Minimum</enum>
+                              </property>
                               <property name="sizeHint" stdset="0">
                                <size>
                                 <width>20</width>
-                                <height>40</height>
+                                <height>60</height>
                                </size>
                               </property>
                              </spacer>
@@ -3143,13 +3387,13 @@ QGroupBox::indicator {
                                </property>
                                <layout class="QFormLayout" name="formLayout_7">
                                 <property name="leftMargin">
-                                 <number>6</number>
+                                 <number>1</number>
                                 </property>
                                 <property name="topMargin">
                                  <number>3</number>
                                 </property>
                                 <property name="rightMargin">
-                                 <number>3</number>
+                                 <number>1</number>
                                 </property>
                                 <property name="bottomMargin">
                                  <number>3</number>
@@ -3188,8 +3432,8 @@ QGroupBox::indicator {
 }
 
 QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
  	border-radius: 5px;
+	background: #007AA5;
 }</string>
                                   </property>
                                   <property name="value">
@@ -3229,10 +3473,11 @@ QProgressBar::chunk {
 	text-align: center;
 }
 
-QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
+QProgressBar::chunk 
+{
  	border-radius: 5px;
- 
+	background: #007AA5;
+
 }</string>
                                   </property>
                                   <property name="value">
@@ -3272,10 +3517,10 @@ QProgressBar::chunk {
 	text-align: center;
 }
 
-QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
+QProgressBar::chunk 
+{
   	border-radius: 5px;
-
+	background: #007AA5;
 }</string>
                                   </property>
                                   <property name="value">
@@ -3315,10 +3560,10 @@ QProgressBar::chunk {
 	text-align: center;
 }
 
-QProgressBar::chunk {
-	background-color: rgb(15, 133, 163);
+QProgressBar::chunk 
+{
   	border-radius: 5px;
-
+	background: #007AA5;
 }</string>
                                   </property>
                                   <property name="value">
@@ -3366,7 +3611,7 @@ QProgressBar::chunk {
                                </property>
                                <layout class="QHBoxLayout" name="horizontalLayout_16">
                                 <item>
-                                 <widget class="QPushButton" name="pushButton_3">
+                                 <widget class="QPushButton" name="quit_pushButton">
                                   <property name="minimumSize">
                                    <size>
                                     <width>0</width>
@@ -3404,7 +3649,7 @@ QPushButton:pressed {
                                  </widget>
                                 </item>
                                 <item>
-                                 <widget class="QPushButton" name="pushButton_4">
+                                 <widget class="QPushButton" name="stop_pushButton">
                                   <property name="minimumSize">
                                    <size>
                                     <width>0</width>
@@ -3500,13 +3745,15 @@ QPushButton:pressed {
 	background-color: rgb(0, 180, 95);
 }
 QPushButton:hover {
-	background-color: rgb(0, 152, 84);
+	background-color: rgb(255, 170, 0);
 	border: 2px solid rgb(61, 70, 86);
 }
 QPushButton:pressed {	
 	background-color: rgb(220, 5, 100);
 	border: 2px solid rgb(43, 50, 61);
-}</string>
+}
+
+</string>
                                   </property>
                                   <property name="text">
                                    <string>Run</string>
@@ -3664,7 +3911,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                            <enum>QTabWidget::Rounded</enum>
                           </property>
                           <property name="currentIndex">
-                           <number>2</number>
+                           <number>0</number>
                           </property>
                           <property name="movable">
                            <bool>true</bool>
@@ -6833,12 +7080,69 @@ QCheckBox::indicator:checked {
                        </widget>
                       </item>
                       <item>
+                       <widget class="QPushButton" name="show_navigation">
+                        <property name="enabled">
+                         <bool>true</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>20</width>
+                          <height>61</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true"> QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }      </string>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="icons_path.qrc">
+                          <normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
                        <widget class="QFrame" name="Pymol_Widget">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>0</height>
+                         </size>
                         </property>
                         <property name="styleSheet">
                          <string notr="true">QFrame
@@ -6860,6 +7164,1000 @@ QCheckBox::indicator:checked {
                         <property name="frameShadow">
                          <enum>QFrame::Raised</enum>
                         </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="hide_navigation">
+                        <property name="maximumSize">
+                         <size>
+                          <width>20</width>
+                          <height>61</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true"> QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }     </string>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="icons_path.qrc">
+                          <normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="visualization_settings_groupBox">
+                        <property name="minimumSize">
+                         <size>
+                          <width>170</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>170</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">QGroupBox
+{
+    border: 1px solid black;
+    border-radius: 5px;
+	border-top-color: rgb(157, 90, 198);
+	border-left-color: rgb(157, 90, 198);
+	border-bottom-color: rgb(157, 90, 198);
+	border-right-color: rgb(157, 90, 198);
+	margin-top: 25px
+ 
+}</string>
+                        </property>
+                        <property name="title">
+                         <string>Visualization Settings</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                        </property>
+                        <widget class="QWidget" name="gridLayoutWidget_6">
+                         <property name="geometry">
+                          <rect>
+                           <x>11</x>
+                           <y>50</y>
+                           <width>151</width>
+                           <height>251</height>
+                          </rect>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_19">
+                          <item>
+                           <widget class="QPushButton" name="activate_pymol_navigation">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>149</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Activate</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/24x24/icons/24x24/cil-cursor.png</normaloff>:/24x24/icons/24x24/cil-cursor.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="deactivate_pymol_navigation">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>149</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Deactivate</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/20x20/icons/20x20/cil-x.png</normaloff>:/20x20/icons/20x20/cil-x.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="refresh_pushButton">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>149</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Refresh</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/16x16/icons/16x16/cil-reload.png</normaloff>:/16x16/icons/16x16/cil-reload.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="ss_beatiful_snapshoot">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>149</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Beatiful Snap</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/16x16/icons/16x16/cil-camera.png</normaloff>:/16x16/icons/16x16/cil-camera.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="save_as_png_pushButton">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>149</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>110</width>
+                              <height>33</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>9</pointsize>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">            QPushButton 
+            {
+                color: white; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+            QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+            QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }</string>
+                            </property>
+                            <property name="text">
+                             <string>Save as png</string>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="icons_path.qrc">
+                              <normaloff>:/16x16/icons/16x16/cil-data-transfer-down.png</normaloff>:/16x16/icons/16x16/cil-data-transfer-down.png</iconset>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                        <widget class="QGroupBox" name="figure_settings_groupBox">
+                         <property name="geometry">
+                          <rect>
+                           <x>-1</x>
+                           <y>300</y>
+                           <width>171</width>
+                           <height>401</height>
+                          </rect>
+                         </property>
+                         <property name="title">
+                          <string>Figure Settings</string>
+                         </property>
+                         <widget class="QWidget" name="verticalLayoutWidget_2">
+                          <property name="geometry">
+                           <rect>
+                            <x>10</x>
+                            <y>54</y>
+                            <width>151</width>
+                            <height>311</height>
+                           </rect>
+                          </property>
+                          <layout class="QVBoxLayout" name="figure_settings_verticalLayout">
+                           <item>
+                            <widget class="QLabel" name="pymol_width_label">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="minimumSize">
+                              <size>
+                               <width>50</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="maximumSize">
+                              <size>
+                               <width>16777215</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QLabel {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 1px 1px 1px;
+	border-bottom-color: rgb(157, 90, 198);
+}
+
+
+QLabel:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}</string>
+                             </property>
+                             <property name="text">
+                              <string>Width: 1200</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QSlider" name="width_horizontalSlider">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">
+
+QSlider::handle:horizontal 
+	{
+    background-color:  rgb(255, 17, 100);
+    border: 2px solid;
+    width: 8px;
+    margin: -15px 0px;
+    }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
+</string>
+                             </property>
+                             <property name="minimum">
+                              <number>800</number>
+                             </property>
+                             <property name="maximum">
+                              <number>1920</number>
+                             </property>
+                             <property name="singleStep">
+                              <number>20</number>
+                             </property>
+                             <property name="pageStep">
+                              <number>20</number>
+                             </property>
+                             <property name="value">
+                              <number>1200</number>
+                             </property>
+                             <property name="orientation">
+                              <enum>Qt::Horizontal</enum>
+                             </property>
+                             <property name="invertedAppearance">
+                              <bool>false</bool>
+                             </property>
+                             <property name="invertedControls">
+                              <bool>false</bool>
+                             </property>
+                             <property name="tickPosition">
+                              <enum>QSlider::NoTicks</enum>
+                             </property>
+                             <property name="tickInterval">
+                              <number>20</number>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QLabel" name="pymol_height_label">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="minimumSize">
+                              <size>
+                               <width>50</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="maximumSize">
+                              <size>
+                               <width>16777215</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QLabel {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 1px 1px 1px;
+	
+	border-bottom-color: rgb(157, 90, 198);
+}
+
+
+QLabel:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}</string>
+                             </property>
+                             <property name="text">
+                              <string>Height: 1080</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QSlider" name="height_horizontalSlider">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QSlider::handle:horizontal 
+	{
+    background-color:  rgb(255, 17, 100);
+    border: 2px solid;
+    width: 8px;
+    margin: -15px 0px;
+    }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
+</string>
+                             </property>
+                             <property name="minimum">
+                              <number>600</number>
+                             </property>
+                             <property name="maximum">
+                              <number>1080</number>
+                             </property>
+                             <property name="singleStep">
+                              <number>20</number>
+                             </property>
+                             <property name="pageStep">
+                              <number>20</number>
+                             </property>
+                             <property name="value">
+                              <number>1080</number>
+                             </property>
+                             <property name="orientation">
+                              <enum>Qt::Horizontal</enum>
+                             </property>
+                             <property name="tickInterval">
+                              <number>20</number>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QLabel" name="pymol_dpi_label">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="minimumSize">
+                              <size>
+                               <width>50</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="maximumSize">
+                              <size>
+                               <width>16777215</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QLabel {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 1px 1px 1px;
+	
+	border-bottom-color: rgb(157, 90, 198);
+}
+
+
+QLabel:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}</string>
+                             </property>
+                             <property name="text">
+                              <string>Dpi: 150</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QSlider" name="dpi_horizontalSlider">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QSlider::handle:horizontal 
+	{
+    background-color:  rgb(255, 17, 100);
+    border: 2px solid;
+    width: 8px;
+    margin: -15px 0px;
+    }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
+</string>
+                             </property>
+                             <property name="minimum">
+                              <number>100</number>
+                             </property>
+                             <property name="maximum">
+                              <number>300</number>
+                             </property>
+                             <property name="singleStep">
+                              <number>50</number>
+                             </property>
+                             <property name="pageStep">
+                              <number>50</number>
+                             </property>
+                             <property name="value">
+                              <number>150</number>
+                             </property>
+                             <property name="orientation">
+                              <enum>Qt::Horizontal</enum>
+                             </property>
+                             <property name="tickInterval">
+                              <number>50</number>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QLabel" name="pymol_ray_label">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="minimumSize">
+                              <size>
+                               <width>0</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="maximumSize">
+                              <size>
+                               <width>16777215</width>
+                               <height>22</height>
+                              </size>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QLabel {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 1px 1px 1px;
+	
+	border-bottom-color: rgb(157, 90, 198);
+}
+
+
+QLabel:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}</string>
+                             </property>
+                             <property name="text">
+                              <string>Ray: 1</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QSlider" name="ray_horizontalSlider">
+                             <property name="sizePolicy">
+                              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                               <horstretch>0</horstretch>
+                               <verstretch>0</verstretch>
+                              </sizepolicy>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QSlider::handle:horizontal 
+	{
+    background-color:  rgb(255, 17, 100);
+    border: 2px solid;
+    width: 8px;
+    margin: -15px 0px;
+    }
+
+QSlider:horizontal 
+{
+    min-height: 20px;
+}
+
+QSlider::groove:horizontal 
+{
+    height: 1px;
+	background-color: rgb(110, 105, 225);
+    border: 1px solid;
+    height: 5px;
+    margin: 0px;
+	border-radius: 5px;
+}
+
+QSlider::handle:horizontal 
+{
+    width: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    border-radius: 5px;
+    background-color: rgb(255, 17, 100);
+    border: 2px solid;
+}
+
+QSlider::handle:horizontal:hover
+{
+	background-color: rgb(22, 200, 244);
+}
+</string>
+                             </property>
+                             <property name="minimum">
+                              <number>1</number>
+                             </property>
+                             <property name="maximum">
+                              <number>5</number>
+                             </property>
+                             <property name="pageStep">
+                              <number>1</number>
+                             </property>
+                             <property name="value">
+                              <number>1</number>
+                             </property>
+                             <property name="orientation">
+                              <enum>Qt::Horizontal</enum>
+                             </property>
+                             <property name="tickInterval">
+                              <number>1</number>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QPushButton" name="get_figure_pushButton">
+                             <property name="minimumSize">
+                              <size>
+                               <width>0</width>
+                               <height>33</height>
+                              </size>
+                             </property>
+                             <property name="font">
+                              <font>
+                               <family>Segoe UI</family>
+                               <pointsize>9</pointsize>
+                              </font>
+                             </property>
+                             <property name="styleSheet">
+                              <string notr="true">QPushButton 
+{
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;		
+	background-color: rgb(202, 116, 220);
+	
+	background-color: rgb(253, 1, 136);
+}
+
+QPushButton:hover 
+{
+	
+	background-color: rgb(22, 200, 244); 
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed 
+{	
+	background-color: rgb(255, 170, 0);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+                             </property>
+                             <property name="text">
+                              <string>Get Figure</string>
+                             </property>
+                             <property name="icon">
+                              <iconset resource="icons_path.qrc">
+                               <normaloff>:/16x16/icons/16x16/cil-image-plus.png</normaloff>:/16x16/icons/16x16/cil-image-plus.png</iconset>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </widget>
+                         <widget class="QPushButton" name="hide_figure_settings_pushButton">
+                          <property name="enabled">
+                           <bool>true</bool>
+                          </property>
+                          <property name="geometry">
+                           <rect>
+                            <x>55</x>
+                            <y>370</y>
+                            <width>65</width>
+                            <height>20</height>
+                           </rect>
+                          </property>
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>65</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>65</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                          <property name="font">
+                           <font>
+                            <weight>50</weight>
+                            <bold>false</bold>
+                           </font>
+                          </property>
+                          <property name="styleSheet">
+                           <string notr="true"> QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }     </string>
+                          </property>
+                          <property name="text">
+                           <string/>
+                          </property>
+                          <property name="icon">
+                           <iconset resource="icons_path.qrc">
+                            <normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</iconset>
+                          </property>
+                          <property name="flat">
+                           <bool>false</bool>
+                          </property>
+                         </widget>
+                        </widget>
                        </widget>
                       </item>
                      </layout>

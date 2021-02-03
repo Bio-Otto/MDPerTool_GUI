@@ -1,14 +1,4 @@
 from PyQt5.QtWidgets import QFileDialog, QWidget
-from PyQt5.QtWidgets import QMessageBox
-
-# from PyQt5.QtWidgets import *
-# from PyQt5 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-#                           QSize, QTime, QUrl, Qt, QEvent)
-# from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-#                          QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-#
-
 import gzip
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
@@ -16,12 +6,12 @@ from PyQt5.QtWidgets import QMessageBox
 from pdbfixer import PDBFixer
 from simtk.openmm import *
 from simtk.openmm.app import *
-
 from checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
 from checkBox_menu import *
 from ui_main import *
+from message import Message_Boxes
 
 
 class Helper_Functions():
@@ -47,8 +37,14 @@ class Helper_Functions():
             :return: The function will return available platforms on your system for OpenMM Engine
         """
         import simtk.openmm
-        return [simtk.openmm.Platform.getPlatform(index).getName() for index in
-                range(simtk.openmm.Platform.getNumPlatforms())]
+        avail_plt_and_speed = dict()
+
+        for index in range(simtk.openmm.Platform.getNumPlatforms()):
+            avail_plt_and_speed[
+                (simtk.openmm.Platform.getPlatform(index).getName())] = simtk.openmm.Platform.getPlatform(
+                index).getSpeed()
+
+        return avail_plt_and_speed.keys(), avail_plt_and_speed
 
 
 class Functions(MainWindow):
@@ -60,29 +56,35 @@ class Functions(MainWindow):
             output_file = QFileDialog.getExistingDirectory(options=options)
             self.Output_Folder_textEdit.setText(output_file)
             return True
-        except:
+
+        except Exception as ins:
+            print(ins)
             return False
 
     def browse_pdbFile(self):
         """
             The function provides Main GUI / Upload button activity for select pdb file indicated by the user
         """
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
+                                                               "pdb Files (*.pdb)", str(options))
 
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        self.pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", "", "pdb Files (*.pdb)",
-                                                           str(options))
-        self.pdb_path = self.pdb_filename
+            self.pdb_path = self.pdb_filename
+            self.pdb_filename = os.path.splitext(os.path.basename(self.pdb_filename))
 
-        self.pdb_filename = os.path.basename(self.pdb_filename)
-        self.pdb_filename = os.path.splitext(self.pdb_filename)
+            if self.pdb_filename[1] == '.pdb':
+                return True, self.pdb_path
 
-        if self.pdb_filename[1] == '.pdb':
-            # self.upload_pdb_textEdit.setText(self.pdb_path)
-            return True, self.pdb_path
-        elif self.pdb_filename[1] != "":
-            QMessageBox.critical(self, "Error", "this is not a pdb file")
+            elif self.pdb_filename[1] != "":
+                Message_Boxes.Critical_message(self, "Error", "this is not a pdb file", Style.MessageBox_stylesheet)
 
+        except Exception as exp:
+            Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
+
+
+    @staticmethod
     def PDB_ID_lineEdit(self):
         """
              The function provides enable or disable of Upload Button according to the entry of user
@@ -97,50 +99,75 @@ class Functions(MainWindow):
             self.upload_pdb_textEdit.setEnabled(False)
             self.label_32.setEnabled(False)
 
+    @staticmethod
     def Fetch_PDB_File(self):
-        global selected_chains
+        global selected_chains, fetched_pdb
         try:
             fetch_pdb_ID = self.PDB_ID_lineEdit.text()
             if len(fetch_pdb_ID) == 4:
 
                 fetch_result = pdb_Tools.fetch_pdb(self, fetch_pdb_ID)
+                if fetch_result != False:
 
-                if path.exists(fetch_result):
-                    fixer = PDBFixer(fetch_result)
-                    fixer.removeHeterogens(keepWater=False)
+                    if path.exists(fetch_result):
+                        fixer = PDBFixer(fetch_result)
+                        fixer.removeHeterogens(keepWater=False)
 
-                    modeller = Modeller(fixer.topology, fixer.positions)
-                    chains = [r.id for r in modeller.topology.chains()]
+                        modeller = Modeller(fixer.topology, fixer.positions)
+                        chains = [r.id for r in modeller.topology.chains()]
 
-                    checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                                   checked=True)
-                    if checked_list.exec_() == QtWidgets.QDialog.Accepted:
-                        selected_chains = [str(s) for s in checked_list.choices]
+                        checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
+                                                       checked=True)
 
-                    delete_chains = list(set(chains) - set(selected_chains))
+                        pdb_fix_dialog_answer = checked_list.exec_()
 
-                    fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
-                                                            self.Output_Folder_textEdit.toPlainText(), ph=7,
-                                                            chains_to_remove=delete_chains)
-                    print(delete_chains)
-                    print("fetched pdb: %s" % fetched_pdb)
+                        if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
+                            selected_chains = [str(s) for s in checked_list.choices]
+                            delete_chains = list(set(chains) - set(selected_chains))
+                            fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                                    self.Output_Folder_textEdit.toPlainText(), ph=7,
+                                                                    chains_to_remove=delete_chains)
+                            print(delete_chains)
+                            print("fetched pdb: %s" % fetched_pdb)
 
-                    self.upload_pdb_textEdit.setText(fetched_pdb)
-                    self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
-                    for i in self.combobox:
-                        self.res1_comboBox.addItem(str(i))
-                        self.res2_comboBox.addItem(str(i))
-                    self.res1_comboBox.clear()  # delete all items from comboBox
-                    self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    self.res2_comboBox.clear()  # delete all items from comboBox
-                    self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    InputFile(fetch_result)
+                            self.upload_pdb_textEdit.setText(fetched_pdb)
+                            self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
+                            for i in self.combobox:
+                                self.res1_comboBox.addItem(str(i))
+                            self.res1_comboBox.clear()  # delete all items from comboBox
+                            self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                            InputFile(fetch_result)
+                            return fetched_pdb
+
+                        elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                            modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
+                                                                     self.Output_Folder_textEdit.toPlainText(),
+                                                                     ph=7, chains_to_remove=None)
+
+                            self.upload_pdb_textEdit.setText(modified_pdb)
+
+                            self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                            for i in self.combobox:
+                                self.res1_comboBox.addItem(str(i))
+                            self.res1_comboBox.clear()  # delete all items from comboBox
+                            self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+
+                            InputFile(modified_pdb)
+                            return modified_pdb
+
+                        return None
+
+                else:
+                    return None
 
             if len(fetch_pdb_ID) != 4:
-                QMessageBox.critical(self, 'Wrong pdb id', 'PDB ID should be provided as 4 letters')
+                Message_Boxes.Information_message(self, 'Wrong pdb id', 'PDB ID should be provided as 4 letters',
+                                                  Style.MessageBox_stylesheet)
+                return False
 
         except Exception as instance:
-            QMessageBox.critical(self, 'An error occurred while fetching the pdb file.', repr(instance))
+            Message_Boxes.Critical_message(self, 'An error occurred while fetching the pdb file.', repr(instance),
+                                           Style.MessageBox_stylesheet)
 
     def Stochastic_changed(self):
         """
@@ -157,12 +184,14 @@ class Functions(MainWindow):
             self.Additional_Integrators_checkBox.setChecked(False)
             self.Additional_Integrators_checkBox.setEnabled(False)
 
+    @staticmethod
     def minimize_Step_isVisible(self):
         if not self.minimize_checkBox.isChecked():
             self.Max_minimize_iter_textEdit.setEnabled(False)
         else:
             self.Max_minimize_iter_textEdit.setEnabled(True)
 
+    @staticmethod
     def DCD_Reporter_Changed(self):
         if not self.DCD_Reporter_checkBox.isChecked():
             self.DCD_Reporter_Options_groupBox.setEnabled(False)
@@ -170,6 +199,7 @@ class Functions(MainWindow):
         if self.DCD_Reporter_checkBox.isChecked():
             self.DCD_Reporter_Options_groupBox.setEnabled(True)
 
+    @staticmethod
     def XTC_Reporter_Changed(self):
         if not self.XTC_Reporter_checkBox.isChecked():
             self.XTC_Reporter_Options_groupBox.setEnabled(False)
@@ -177,6 +207,7 @@ class Functions(MainWindow):
         if self.XTC_Reporter_checkBox.isChecked():
             self.XTC_Reporter_Options_groupBox.setEnabled(True)
 
+    @staticmethod
     def State_Data_Reporter_Changed(self):
         if not self.State_Data_Reporter_checkBox.isChecked():
             self.State_Data_Reporter_Options_groupBox.setEnabled(False)
@@ -184,8 +215,9 @@ class Functions(MainWindow):
         if self.State_Data_Reporter_checkBox.isChecked():
             self.State_Data_Reporter_Options_groupBox.setEnabled(True)
 
+    @staticmethod
     def Send_Available_Platforms_to_GUI(self):
-        self.platforms = Helper_Functions.available_platforms(self)
+        self.platforms, self.plt_speeds = Helper_Functions.available_platforms(self)
         self.platform_list_on_the_program = [self.platform_comboBox.itemText(i) for i in
                                              range(self.platform_comboBox.count())]
 
@@ -195,6 +227,11 @@ class Functions(MainWindow):
                 self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
                 self.platform_comboBox.setCurrentIndex(item_no + 1)
 
+            if i in self.platforms:
+                self.platform_comboBox.setItemData(item_no, str("Estimated Speed For This Devices Is "
+                                                                + str(self.plt_speeds[i])), QtCore.Qt.ToolTipRole)
+
+    @staticmethod
     def platform_comboBox_Changed(self):
         if self.platform_comboBox.currentText() in ["CPU", "Reference"]:
             self.Device_Number_comboBox.setEnabled(False)
@@ -203,6 +240,21 @@ class Functions(MainWindow):
         else:
             self.Device_Number_comboBox.setEnabled(True)
             self.Device_ID_checkBox.setEnabled(True)
+
+    def add_residue_toList(self):
+        if str(self.res1_comboBox.currentText()) != "":
+            items = []
+            for x in range(self.selected_residues_listWidget.count()):
+                items.append(self.selected_residues_listWidget.item(x).text())
+            if str(self.res1_comboBox.currentText()) not in items:
+                self.selected_residues_listWidget.addItem(str(self.res1_comboBox.currentText()))
+
+    def discard_residue_fromList(self):
+        listItems = self.selected_residues_listWidget.selectedItems()
+        if not listItems:
+            return
+        for item in listItems:
+            self.selected_residues_listWidget.takeItem(self.selected_residues_listWidget.row(item))
 
 
 class InputFile:
@@ -264,7 +316,8 @@ class pdb_Tools:
             return fetched_pdb_file
 
         except Exception as instance:
-            QMessageBox.critical(self, 'An error occurred while fetching the pdb file.', repr(instance))
+            Message_Boxes.Critical_message(self, 'An error occurred while fetching the pdb file.', repr(instance),
+                                           Style.MessageBox_stylesheet)
             return False
 
     def fetched_pdb_fix(self, file_pathway, output_path=None, ph=7, chains_to_remove=None):

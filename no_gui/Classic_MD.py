@@ -11,12 +11,12 @@ from mdtraj.reporters import XTCReporter
 
 class Classic_MD_Engine:
     def __init__(self, pdb_path, protein_ff='amber96', water_ff='tip3p', time_step=2.0, nonbondedCutoff=12.0,
-                 switching_distance = 10.0, water_padding=15, Device_Index=False, Device_Index_Number=1,
+                 switching_distance=10.0, water_padding=15, Device_Index=False, Device_Index_Number=1,
                  total_Steps=300000, temp=310, platform_name='OpenCL', properties=None, precision='single',
                  friction_cofficient=1.0, minimize=True, minimize_steps=5000, CPU_Threads=2, equilibrate=True,
                  equilibration_step=500, report_interval=500, write_system_xml=False, system_file_name='system.xml',
                  state_file_name='state.xml', last_pdb_filename='last.pdb', write_to_dcd=False, dcd_write_period=50,
-                 write_to_xtc=False, xtc_write_period=50):
+                 write_to_xtc=False, xtc_write_period=50, output_directory=None):
 
         print("Simulation parameters preparing for the start ...")
         self.Device_Index = Device_Index
@@ -55,7 +55,6 @@ class Classic_MD_Engine:
             print("Protein FF: %s" % self.protein_ff)
             print("Water FF: %s" % self.water_ff)
 
-
         self.time_step = time_step * femtosecond
         self.nonbondedCutoff = nonbondedCutoff * angstrom
         self.switching_distance = switching_distance * angstrom
@@ -79,7 +78,7 @@ class Classic_MD_Engine:
         self.dcd_write_period = dcd_write_period
         self.write_to_xtc = write_to_xtc
         self.xtc_write_period = xtc_write_period
-
+        self.output_directory = output_directory
 
         ## SOLUTION WATER MODEL
         if len((self.water_ff.split('/')[-1]).split('.')[0]) <= 5:
@@ -96,7 +95,7 @@ class Classic_MD_Engine:
 
         ## FIXING PDB
         print('pdb file fixing and preparing for simulation ...')
-        fixed_pdb_name = fix_pdb(self.pdb_path)
+        fixed_pdb_name = fix_pdb(self.pdb_path, self.output_directory)
 
         print('Loading pdb to simulation engine ...')
         pdb = app.PDBFile(fixed_pdb_name)
@@ -124,7 +123,7 @@ class Classic_MD_Engine:
 
         # self.system.addForce(mm.AndersenThermostat(310 * unit.kelvin, self.friction_cofficient))
 
-        self.system.addForce(mm.MonteCarloBarostat(1 * atmospheres, self.temp, 25))
+        self.system.addForce(mm.MonteCarloBarostat(1.0 * atmospheres, self.temp, 25))
 
         nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
@@ -143,11 +142,13 @@ class Classic_MD_Engine:
 
         if minimize:
             print('Minimizing...')
+            minimize_pdb_path = os.path.join(self.output_directory, 'minimized.pdb')
             simulation.minimizeEnergy(maxIterations=self.minimize_steps)
             print("Minimization done, the energy is", simulation.context.getState(getEnergy=True).getPotentialEnergy())
             positions = simulation.context.getState(getPositions=True).getPositions()
             print("Minimized geometry is written to 'minimized.pdb'")
-            app.PDBFile.writeModel(modeller.topology, positions, open('minimized.pdb', 'w'), keepIds=True)
+
+            app.PDBFile.writeModel(modeller.topology, positions, open(minimize_pdb_path, 'w'), keepIds=True)
 
         simulation.context.setVelocitiesToTemperature(self.temp)
 
@@ -155,18 +156,22 @@ class Classic_MD_Engine:
             print('Equilibrating...')
             simulation.step(self.equilibration_step)
 
+        simulation.context.setTime(0)
+
         if self.report_interval > self.total_Steps:
             self.report_interval = int(self.total_Steps / 2)
             print("The number of report steps has been adjusted to %s, because the number of report steps exceeds "
                   "the total number of steps." % self.report_interval)
 
         if self.write_to_dcd:
+            DCD_file_path = os.path.join(self.output_directory, 'trajectory.dcd')
             print("Saving DCD File for every %s period" % self.dcd_write_period)
-            simulation.reporters.append(app.DCDReporter('trajectory.dcd', self.dcd_write_period))
+            simulation.reporters.append(app.DCDReporter(DCD_file_path, self.dcd_write_period))
 
         if self.write_to_xtc:
+            XTC_file_path = os.path.join(self.output_directory, 'trajectory.xtc')
             print("Saving XTC File for every %s period" % self.xtc_write_period)
-            simulation.reporters.append(XTCReporter('trajectory.xtc', self.xtc_write_period))
+            simulation.reporters.append(XTCReporter(XTC_file_path, self.xtc_write_period))
 
         simulation.reporters.append(app.StateDataReporter(stdout, self.report_interval, step=True,
                                                           time=True, potentialEnergy=True, kineticEnergy=True,
@@ -175,9 +180,10 @@ class Classic_MD_Engine:
                                                           totalSteps=self.total_Steps, separator='\t'))
 
         if self.write_system_xml:
+            System_XML_file_path = os.path.join(self.output_directory, 'equilubrate_system.xml')
             print("Serializing the system")
             serial = mm.XmlSerializer.serializeSystem(self.system)
-            with open('equilubrate_system.xml', 'w') as f:
+            with open(System_XML_file_path, 'w') as f:
                 f.write(serial)
 
             # Print out information about the platform if we wan
@@ -187,8 +193,8 @@ class Classic_MD_Engine:
         print('Done!')
 
         lastpositions = simulation.context.getState(getPositions=True).getPositions()
-
-        self.last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open(self.last_pdb_filename, 'w'),
+        last_pdb_file_path = os.path.join(self.output_directory, self.last_pdb_filename)
+        self.last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open(last_pdb_file_path, 'w'),
                                               keepIds=True)
 
         print("###################################")
@@ -199,20 +205,22 @@ class Classic_MD_Engine:
         self.state = simulation.context.getState(getPositions=True, getVelocities=True)
 
         # system.xml contains all of the force field parameters
-
-        with open(self.system_file_name, 'w') as f:
+        self.system_file_path = os.path.join(self.output_directory, self.system_file_name)
+        with open(self.system_file_path, 'w') as f:
             system_xml = mm.XmlSerializer.serialize(self.system)
             f.write(system_xml)
+
         # integrator.xml contains the confiruation for the integrator, RNG seed
-        with open('integrator.xml', 'w') as f:
+        self.integrator_file_path = os.path.join(self.output_directory, 'integrator.xml')
+        with open(self.integrator_file_path, 'w') as f:
             integrator_xml = mm.XmlSerializer.serialize(integrator)
             f.write(integrator_xml)
-            # state.xml contains positions, velocities, forces, the barostat
-        with open(self.state_file_name, 'w') as f:
+
+        # state.xml contains positions, velocities, forces, the barostat
+        self.state_file_path = os.path.join(self.output_directory, self.state_file_name)
+        with open(self.state_file_path, 'w') as f:
             f.write(mm.XmlSerializer.serialize(self.state))
 
         simulation.context.setTime(0)
-
-        
 
 # Reference_MD_Engine('2j0w.pdb', minimize=True, minimize_steps=50, platform_name='OpenCL', water_padding=10)
