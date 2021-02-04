@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+''' # -*- coding: utf-8 -*-
 
 ################################################################################
 ## Form generated from reading UI file 'splash_screenXBSmkq.ui'
@@ -106,3 +106,4 @@ class Ui_SplashScreen(object):
         self.label_credits.setText(QCoreApplication.translate("SplashScreen", u"<strong>Created</strong>: Wanderson M. Pimenta", None))
     # retranslateUi
 
+ '''

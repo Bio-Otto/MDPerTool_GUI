@@ -2,20 +2,20 @@ import os
 import sys
 import platform
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, Qt, QEvent, QRectF)
-from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QRegion)
+#from PyQt5.QtCore import (QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+#                          QSize, QTime, QUrl, Qt, QEvent, QRectF)
+#from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+#                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QRegion)
 from PyQt5.QtWidgets import *
 import os
 import sys
 from platform import system, release
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, Qt, QEvent)
-from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                         QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
-
+#from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+#                          QSize, QTime, QUrl, Qt, QEvent)
+# from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+#                          QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
+# from PyQt5.QtGui import QPainterPath, QRegion
 ## ==> MAIN WINDOW
 # import app_modules
 from PyQt5 import uic
@@ -36,7 +36,7 @@ counter = 0
 
 
 # YOUR APPLICATION
-class MainWindow(QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.created_script = None
         self.Real_Time_Graphs = Graphs()
         self.verticalLayout_16.addWidget(self.Real_Time_Graphs.win)
-        self.setLayout(self.verticalLayout_16)
+        # self.setLayout(self.verticalLayout_16)
         # ------------------------------------- > END OF SIMULATION MONITORING < ------------------------------------- #
 
         # ----- > Remove Standart Title Bar
@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
 
         # ----- > Start Menu Selection
-        UIFunctions.selectStandardMenu(self, "btn_home")
+        UIFunctions.selectStandardMenu(self, "btn_perturbation")
 
         # ----- > Start Page
         self.stackedWidget.setCurrentWidget(self.page_home)
@@ -305,9 +305,9 @@ class MainWindow(QMainWindow):
     # ----- > Resize Event
     def resizeEvent(self, event):
         self.resizeFunction()
-        path = QPainterPath()
-        path.addRoundedRect(QRectF(self.rect()), 5, 5)
-        reg = QRegion(path.toFillPolygon().toPolygon())
+        path = QtGui.QPainterPath()
+        path.addRoundedRect(QtCore.QRectF(self.rect()), 5, 5)
+        reg = QtGui.QRegion(path.toFillPolygon().toPolygon())
         self.setMask(reg)
         return super(MainWindow, self).resizeEvent(event)
 
@@ -444,7 +444,7 @@ class SplashScreen(QMainWindow):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)
     window = SplashScreen()
     sys.exit(app.exec_())

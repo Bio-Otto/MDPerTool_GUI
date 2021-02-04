@@ -252,8 +252,9 @@ class Window(QWidget):
                     self.listWidget.addItem(eachFile)
 
 
-if __name__ == '__main__':
+''' if __name__ == '__main__':
     app = QApplication(sys.argv)
     w = Window()
     w.show()
     sys.exit(app.exec_())
+ '''

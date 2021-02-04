@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import QFileDialog, QWidget
+from PyQt5.QtWidgets import QFileDialog, QWidget, QMessageBox
 import gzip
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMessageBox
 from pdbfixer import PDBFixer
 from simtk.openmm import *
 from simtk.openmm.app import *
