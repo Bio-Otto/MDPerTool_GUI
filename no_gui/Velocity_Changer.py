@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import mdtraj as md
-from simtk import openmm
+import openmm as mm
 import xml.etree.ElementTree as ET
 import os
 
@@ -48,7 +48,7 @@ def change_velocity(xml_file, r_factor, modify_atoms):
 def read_xml_file(filename):
     """Read serialized object from XML file."""
     with open(filename, 'rt') as infile:
-        return openmm.XmlSerializer.deserialize(infile.read())
+        return mm.XmlSerializer.deserialize(infile.read())
 
 # modify_atoms = convert_res_to_atoms(path, 'SER345', 'CA')
 # print(modify_atoms)

@@ -6,10 +6,19 @@ import sys
 import logging
 
 
-def write_folder(directory):
-    # Build string for directory to hold files
-    # Output Configuration
-    folder_name = datetime.now().strftime("%Y-%m-%d_%I-%M-%S_%p")
+def write_folder(directory, top, res, ff, just_min_or_md):
+    # Build folder name and its directory to hold files
+    #folder_name = datetime.now().strftime("%Y-%m-%d_%I-%M-%S_%p")
+
+    folder_name = None
+    if just_min_or_md:
+        folder_name = os.path.basename(top).split('.')[
+                          0] + '_' + res + '_' + ff + '_' + 'JM' + '_' + datetime.now().strftime("%I-%M-%S_%p")
+
+    if not just_min_or_md:
+        folder_name = os.path.basename(top).split('.')[
+                          0] + '_' + res + '_' + ff + '_' + 'MD' + '_' + datetime.now().strftime("%I-%M-%S_%p")
+
     created_file_path = os.path.join(directory, folder_name)
 
     # IF no such folder exists, create one automatically

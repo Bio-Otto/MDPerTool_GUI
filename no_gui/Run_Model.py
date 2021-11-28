@@ -3,7 +3,7 @@ from MD_2 import *
 from Classic_MD import *
 from Velocity_Changer import *
 from get_positions_from_trajectory_file import *
-from Energy_decomposition_from_pdb_trajectory import *
+from energy_decomposition_from_trajectory import *
 from response_time_creator import *
 from simtk import unit
 from simtk.openmm import *

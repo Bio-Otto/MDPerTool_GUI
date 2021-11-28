@@ -1,46 +1,85 @@
 ##########################################################################
 # IMPORTS
-from simtk.openmm import app
-import simtk.openmm as mm
-from simtk.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
+from openmm import app
+import openmm as mm
+from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
 from sys import stdout
 from .apply_pdbfixer import fix_pdb
-from simtk.openmm import *
+from openmm import *
 from mdtraj.reporters import XTCReporter
+from .optimizepme import *
 
 
 class Classic_MD_Engine:
-    def __init__(self, pdb_path, protein_ff='amber96', water_ff='tip3p', time_step=2.0, nonbondedCutoff=12.0,
-                 switching_distance=10.0, water_padding=15, Device_Index=False, Device_Index_Number=1,
-                 total_Steps=300000, temp=310, platform_name='OpenCL', properties=None, precision='single',
-                 friction_cofficient=1.0, minimize=True, minimize_steps=5000, CPU_Threads=2, equilibrate=True,
-                 equilibration_step=500, report_interval=500, write_system_xml=False, system_file_name='system.xml',
-                 state_file_name='state.xml', last_pdb_filename='last.pdb', write_to_dcd=False, dcd_write_period=50,
-                 write_to_xtc=False, xtc_write_period=50, output_directory=None):
+    def __init__(self, pdb_path, protein_ff=None, water_ff=None, time_step=2.0, nonbondedCutoff=12.0,
+                 use_switching_distance=True,
+                 switching_distance=10.0, water_padding=None, Device_Index=False, Device_Index_Number=None,
+                 total_Steps=300000, temp=310, platform_name=None, properties=None, precision=None,
+                 friction_cofficient=91.0, minimize=True, minimize_steps=5000, just_minimize=False, CPU_Threads=None,
+                 equilibrate=True, equilibration_step=500, report_interval=500, write_system_xml=False,
+                 system_file_name='system.xml', state_file_name='state.xml', last_pdb_filename='last.pdb',
+                 write_to_dcd=False, dcd_write_period=50, write_to_xtc=False, xtc_write_period=50,
+                 output_directory=None, user_selected_res=None):
 
         print("Simulation parameters preparing for the start ...")
         self.Device_Index = Device_Index
         self.Device_Index_Number = Device_Index_Number
 
         if properties is None:
-            if platform_name == 'OpenCL' and self.Device_Index == True:
-                properties = {'OpenCLPrecision': '%s' % precision, 'OpenCLDeviceIndex': '%s' % self.Device_Index_Number}
-            if platform_name == 'OpenCL' and self.Device_Index == False:
+            # --> PROPERTIES SETTINGS FOR OPENCL PLATFORM
+            if platform_name == 'OpenCL' and self.Device_Index is True and self.Device_Index_Number is not None:
+                if len(self.Device_Index_Number) == 1:
+                    properties = {'OpenCLPrecision': '%s' % precision,
+                                  'OpenCLDeviceIndex': '%s' % self.Device_Index_Number[0]}
+                    print(properties)
+
+                elif len(self.Device_Index_Number) == 2:
+                    properties = {'OpenCLPrecision': '%s' % precision,
+                                  'OpenCLDeviceIndex': '%s,%s' % (self.Device_Index_Number[0],
+                                                                  self.Device_Index_Number[1])}
+                    print(properties)
+                else:
+                    print("Please Control your specified argument for #properties# in OpenCL device")
+
+            if platform_name == 'OpenCL' and self.Device_Index is False:
                 properties = {'OpenCLPrecision': '%s' % precision}
+                print(properties)
 
-            if platform_name == 'CUDA' and self.Device_Index == True:
-                properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
+            # --> PROPERTIES SETTINGS FOR CUDA PLATFORM
+            if platform_name == 'CUDA' and self.Device_Index == True and self.Device_Index_Number is not None:
+                if len(self.Device_Index_Number) == 1:
+                    properties = {'CudaPrecision': '%s' % precision,
+                                  'CudaDeviceIndex': '%s' % self.Device_Index_Number[0], 'DeterministicForces': 'True'}
 
+                    print(properties)
+
+                elif len(self.Device_Index_Number) == 2:
+                    properties = {'CudaPrecision': '%s' % precision,
+                                  'CudaDeviceIndex': '%s,%s' % (self.Device_Index_Number[0],
+                                                                self.Device_Index_Number[1]),
+                                  'DeterministicForces': 'True'}
+
+                    print(properties)
+                else:
+                    print("Please Control your specified argument for #properties# in Cuda device")
+
+            if platform_name == 'CUDA' and self.Device_Index is False:
+                properties = {'CudaPrecision': '%s' % precision, 'DeterministicForces': 'True'}
+                print(properties)
+
+            # --> PROPERTIES SETTINGS FOR CPU PLATFORM
             if platform_name == 'CPU':
                 print("The CPU platform always uses 'mixed' precision.")
                 print("Simulation process will use %s Thread(s)" % CPU_Threads)
                 properties = {'CpuThreads': '%s' % CPU_Threads}
                 precision = 'mixed'
 
+            # --> PROPERTIES SETTINGS FOR REFERENCE PLATFORM
             if platform_name == 'Reference':
                 print("The Reference platform always uses 'double' precision.")
                 properties = None
                 precision = 'double'
+
         print("System will use '%s' Platform with '%s' Precision" % (platform_name, precision))
 
         self.pdb_path = pdb_path
@@ -57,6 +96,7 @@ class Classic_MD_Engine:
 
         self.time_step = time_step * femtosecond
         self.nonbondedCutoff = nonbondedCutoff * angstrom
+        self.use_switching_distance = use_switching_distance
         self.switching_distance = switching_distance * angstrom
         self.water_padding = water_padding * angstrom
         self.total_Steps = total_Steps
@@ -66,6 +106,7 @@ class Classic_MD_Engine:
         self.friction_cofficient = friction_cofficient / picosecond
         self.minimize = minimize
         self.minimize_steps = minimize_steps
+        self.just_minimize = just_minimize
         self.equilibrate = equilibrate
         self.equilibration_step = equilibration_step
         self.report_interval = report_interval
@@ -100,6 +141,30 @@ class Classic_MD_Engine:
         print('Loading pdb to simulation engine ...')
         pdb = app.PDBFile(fixed_pdb_name)
 
+        print("Perturbed Residue that you chose is controlling")
+        residue_control = [r for r in pdb.topology.residues()]  # build a list of residues
+
+        # print(residue_control)
+        pert_res_len = len(user_selected_res)
+        pert_len_must = 0
+        for index in range(len(residue_control)):
+            ind = residue_control[index].id
+            nm = residue_control[index].name
+            resi = str(nm) + str(ind)
+            if resi in user_selected_res:
+                print("TOPOLOGY INCLUDING RESIDUE %s" % resi)
+                pert_len_must += 1
+
+        if pert_res_len != pert_len_must:
+            print("OHH NO! YOUR SELECTED RESIDUES NOT IN TOPOLOGY")
+            import shutil
+            try:
+                shutil.rmtree(output_directory)
+            except OSError as e:
+                print("Error: %s : %s" % (output_directory, e.strerror))
+
+            sys.exit(0)
+
         box = pdb.topology.getUnitCellDimensions()
 
         print('Modeller of pdb file is preparing ...')
@@ -118,17 +183,19 @@ class Classic_MD_Engine:
         print('Constructing an OpenMM System')
         self.system = forcefield.createSystem(modeller.topology, nonbondedMethod=app.PME,
                                               nonbondedCutoff=self.nonbondedCutoff, constraints=None,
-                                              rigidWater=True,
-                                              ewaldErrorTolerance=0.005)
+                                              rigidWater=None,
+                                              ewaldErrorTolerance=0.00001)
 
         # self.system.addForce(mm.AndersenThermostat(310 * unit.kelvin, self.friction_cofficient))
 
         self.system.addForce(mm.MonteCarloBarostat(1.0 * atmospheres, self.temp, 25))
 
-        nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
-        nonbonded.setUseSwitchingFunction(use=True)
-        nonbonded.setSwitchingDistance(self.switching_distance)
-        nonbonded.setUseDispersionCorrection(True)
+        if self.use_switching_distance:
+            print("System will use Switching Distance")
+            nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
+            nonbonded.setUseSwitchingFunction(use=True)
+            nonbonded.setSwitchingDistance(self.switching_distance)
+            nonbonded.setUseDispersionCorrection(False)
 
         print('Creating a LangevinIntegrator.')
         integrator = mm.LangevinIntegrator(self.temp, self.friction_cofficient, self.time_step)
@@ -152,75 +219,92 @@ class Classic_MD_Engine:
 
         simulation.context.setVelocitiesToTemperature(self.temp)
 
-        if self.equilibrate:
-            print('Equilibrating...')
-            simulation.step(self.equilibration_step)
+        if not self.just_minimize:
+            if self.equilibrate:
+                print('Equilibrating...')
+                simulation.step(self.equilibration_step)
 
-        simulation.context.setTime(0)
+            simulation.context.setTime(0)
 
-        if self.report_interval > self.total_Steps:
-            self.report_interval = int(self.total_Steps / 2)
-            print("The number of report steps has been adjusted to %s, because the number of report steps exceeds "
-                  "the total number of steps." % self.report_interval)
+            if self.report_interval > self.total_Steps:
+                self.report_interval = int(self.total_Steps / 2)
+                print("The number of report steps has been adjusted to %s, because the number of report steps exceeds "
+                      "the total number of steps." % self.report_interval)
 
-        if self.write_to_dcd:
-            DCD_file_path = os.path.join(self.output_directory, 'trajectory.dcd')
-            print("Saving DCD File for every %s period" % self.dcd_write_period)
-            simulation.reporters.append(app.DCDReporter(DCD_file_path, self.dcd_write_period))
+            if self.write_to_dcd:
+                DCD_file_path = os.path.join(self.output_directory, 'trajectory.dcd')
+                print("Saving DCD File for every %s period" % self.dcd_write_period)
+                simulation.reporters.append(app.DCDReporter(DCD_file_path, self.dcd_write_period))
 
-        if self.write_to_xtc:
-            XTC_file_path = os.path.join(self.output_directory, 'trajectory.xtc')
-            print("Saving XTC File for every %s period" % self.xtc_write_period)
-            simulation.reporters.append(XTCReporter(XTC_file_path, self.xtc_write_period))
+            if self.write_to_xtc:
+                XTC_file_path = os.path.join(self.output_directory, 'trajectory.xtc')
+                print("Saving XTC File for every %s period" % self.xtc_write_period)
+                simulation.reporters.append(XTCReporter(XTC_file_path, self.xtc_write_period))
 
-        simulation.reporters.append(app.StateDataReporter(stdout, self.report_interval, step=True,
-                                                          time=True, potentialEnergy=True, kineticEnergy=True,
-                                                          totalEnergy=True, temperature=True, progress=True,
-                                                          remainingTime=True, speed=True, volume=True, density=True,
-                                                          totalSteps=self.total_Steps, separator='\t'))
+            simulation.reporters.append(app.StateDataReporter(stdout, self.report_interval, step=True,
+                                                              time=True, potentialEnergy=True, kineticEnergy=True,
+                                                              totalEnergy=True, temperature=True, progress=True,
+                                                              remainingTime=True, speed=True, volume=True, density=True,
+                                                              totalSteps=self.total_Steps, separator='\t'))
 
-        if self.write_system_xml:
-            System_XML_file_path = os.path.join(self.output_directory, 'equilubrate_system.xml')
-            print("Serializing the system")
-            serial = mm.XmlSerializer.serializeSystem(self.system)
-            with open(System_XML_file_path, 'w') as f:
-                f.write(serial)
+            if self.write_system_xml:
+                System_XML_file_path = os.path.join(self.output_directory, 'equilubrate_system.xml')
+                print("Serializing the system")
+                serial = mm.XmlSerializer.serializeSystem(self.system)
+                with open(System_XML_file_path, 'w') as f:
+                    f.write(serial)
 
-            # Print out information about the platform if we wan
+                # Print out information about the platform if we wan
 
-        print('Running Production...')
-        simulation.step(self.total_Steps)  # 300000
-        print('Done!')
+            print('Running Production...')
+            simulation.step(self.total_Steps)  # 300000
+            print('Done!')
 
-        lastpositions = simulation.context.getState(getPositions=True).getPositions()
-        last_pdb_file_path = os.path.join(self.output_directory, self.last_pdb_filename)
-        self.last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open(last_pdb_file_path, 'w'),
-                                              keepIds=True)
+            lastpositions = simulation.context.getState(getPositions=True).getPositions()
+            last_pdb_file_path = os.path.join(self.output_directory, self.last_pdb_filename)
+            self.last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open(last_pdb_file_path, 'w'),
+                                                  keepIds=True)
 
-        print("###################################")
-        # Now we will save a serialization of this simulation into OpenMM's native XML format
-        # We can re-initialize the system later for further simulations without all of the bothersome set-up by
-        # loading these files!
+            print("###################################")
+            # Now we will save a serialization of this simulation into OpenMM's native XML format
+            # We can re-initialize the system later for further simulations without all of the bothersome set-up by
+            # loading these files!
 
-        self.state = simulation.context.getState(getPositions=True, getVelocities=True)
+            self.state = simulation.context.getState(getPositions=True, getVelocities=True)
 
-        # system.xml contains all of the force field parameters
-        self.system_file_path = os.path.join(self.output_directory, self.system_file_name)
-        with open(self.system_file_path, 'w') as f:
-            system_xml = mm.XmlSerializer.serialize(self.system)
-            f.write(system_xml)
+            # system.xml contains all of the force field parameters
+            self.system_file_path = os.path.join(self.output_directory, self.system_file_name)
+            with open(self.system_file_path, 'w') as f:
+                system_xml = mm.XmlSerializer.serialize(self.system)
+                f.write(system_xml)
 
-        # integrator.xml contains the confiruation for the integrator, RNG seed
-        self.integrator_file_path = os.path.join(self.output_directory, 'integrator.xml')
-        with open(self.integrator_file_path, 'w') as f:
-            integrator_xml = mm.XmlSerializer.serialize(integrator)
-            f.write(integrator_xml)
+            # integrator.xml contains the confiruation for the integrator, RNG seed
+            self.integrator_file_path = os.path.join(self.output_directory, 'integrator.xml')
+            with open(self.integrator_file_path, 'w') as f:
+                integrator_xml = mm.XmlSerializer.serialize(integrator)
+                f.write(integrator_xml)
 
-        # state.xml contains positions, velocities, forces, the barostat
-        self.state_file_path = os.path.join(self.output_directory, self.state_file_name)
-        with open(self.state_file_path, 'w') as f:
-            f.write(mm.XmlSerializer.serialize(self.state))
+            # state.xml contains positions, velocities, forces, the barostat
+            self.state_file_path = os.path.join(self.output_directory, self.state_file_name)
+            with open(self.state_file_path, 'w') as f:
+                f.write(mm.XmlSerializer.serialize(self.state))
 
-        simulation.context.setTime(0)
+            simulation.context.setTime(0)
+        else:
+            lastpositions = simulation.context.getState(getPositions=True, getVelocities=True, enforcePeriodicBox=False,
+                                                        getForces=True, getEnergy=True, getIntegratorParameters=True,
+                                                        getParameterDerivatives=True).getPositions()
+            last_pdb_file_path = os.path.join(self.output_directory, self.last_pdb_filename)
+            self.last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open(last_pdb_file_path, 'w'),
+                                                  keepIds=True)
+            print("Simulation Just Minimized ...")
+
+            self.state = simulation.context.getState(getPositions=True, getVelocities=True, enforcePeriodicBox=False,
+                                                     getForces=True, getEnergy=True,
+                                                     getIntegratorParameters=True, getParameterDerivatives=True)
+
+            self.state_file_path = os.path.join(self.output_directory, self.state_file_name)
+            with open(self.state_file_path, 'w') as f:
+                f.write(mm.XmlSerializer.serialize(self.state))
 
 # Reference_MD_Engine('2j0w.pdb', minimize=True, minimize_steps=50, platform_name='OpenCL', water_padding=10)

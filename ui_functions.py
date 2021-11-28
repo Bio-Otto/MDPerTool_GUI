@@ -1,5 +1,7 @@
 # from PyQt5.QtWidgets import *
-from PyQt5 import QtCore, QtGui, QtWidgets
+import os
+
+from PySide2 import QtCore, QtGui, QtWidgets
 
 # from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
 #                           QSize, QTime, QUrl, Qt, QEvent)
@@ -11,7 +13,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 # from ui_main import *
 # IMPORT QSS CUSTOM
 from ui_styles import Style
-import sip
+
+# import sip
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0
@@ -19,8 +22,11 @@ GLOBAL_TITLE_BAR = True
 
 ## ==> COUT INITIAL MENU
 count = 1
+import networkx as nx
 from app_functions import *
 from PyMolWidget import PymolQtWidget
+from analysis import VisJS_Widget
+
 
 
 class UIFunctions(MainWindow):
@@ -60,25 +66,25 @@ class UIFunctions(MainWindow):
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
             self.btn_maximize_restore.setToolTip("Restore")
             self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-restore.png"))
-            self.frame_top_btns.setStyleSheet("background-color: rgb(27, 29, 35)")
+            # self.frame_top_btns.setStyleSheet("background-color: rgb(27, 29, 35)")
             self.frame_size_grip.hide()
         else:
             GLOBAL_STATE = 0
             self.showNormal()
-            self.resize(self.width() + 1, self.height() + 1)
-            self.horizontalLayout.setContentsMargins(10, 10, 10, 10)
+            # self.resize(self.width() + 1, self.height() + 1)
+            print(self.width())
+            # self.horizontalLayout.setContentsMargins(10, 10, 10, 10)
             self.btn_maximize_restore.setToolTip("Maximize")
             self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-maximize.png"))
-            self.frame_top_btns.setStyleSheet("background-color: rgba(27, 29, 35, 200)")
+            # self.frame_top_btns.setStyleSheet("background-color: rgba(27, 29, 35, 200)")
             self.frame_size_grip.show()
 
     # ----- > Return Status
-    @staticmethod
     def returStatus():
         return GLOBAL_STATE
 
     # ----- > Set Status
-    @staticmethod
+
     def setStatus(status):
         global GLOBAL_STATE
         GLOBAL_STATE = status
@@ -212,7 +218,7 @@ class UIFunctions(MainWindow):
             self.setStyleSheet("background:rgb(27, 29, 35);")
             self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
             self.frame_main.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-            # self.centralwidget.setAttribute(QtCore.Qt.WA_NoSystemBackground)
+            self.centralwidget.setAttribute(QtCore.Qt.WA_NoSystemBackground)
             # self.setStyleSheet("background:rgb(27, 29, 35);")
             self.frame_label_top_btns.mouseDoubleClickEvent = dobleClickMaximizeRestore
         else:
@@ -223,14 +229,14 @@ class UIFunctions(MainWindow):
             self.frame_btns_right.hide()
             self.frame_size_grip.hide()
 
-        ## SHOW ==> DROP SHADOW
+        # SHOW ==> DROP SHADOW
         # self.shadow = QGraphicsDropShadowEffect(self)
-        # self.shadow.setBlurRadius(17)
+        # self.shadow.setBlurRadius(0)
         # self.shadow.setXOffset(0)
         # self.shadow.setYOffset(0)
         # self.shadow.setColor(QColor(0, 0, 0, 50))
         # self.frame_main.setGraphicsEffect(self.shadow)
-        ## DROP SHADOW EFFECT
+        # DROP SHADOW EFFECT
 
         ## ==> RESIZE WINDOW
         self.sizegrip = QSizeGrip(self.frame_size_grip)
@@ -243,7 +249,7 @@ class UIFunctions(MainWindow):
         self.btn_maximize_restore.clicked.connect(lambda: UIFunctions.maximize_restore(self))
 
         ## SHOW ==> CLOSE APPLICATION
-        self.btn_close.clicked.connect(lambda: self.close())
+        self.btn_close.clicked.connect(lambda: UIFunctions.close_application(self))
 
     ####################################################################################################################
     #                                         == > END - GUI DEFINITIONS < ==                                          #
@@ -262,6 +268,16 @@ class UIFunctions(MainWindow):
             self.ProteinView.show()
             verticalLayoutProteinView.setContentsMargins(0, 0, 0, 0)
             self.ProteinView.initial_pymol_visual()
+
+            self.Protein3DNetworkView = PymolQtWidget(self)
+            verticalLayoutProteinNetworkView = QVBoxLayout(self.PyMOL_3D_network_Widget)
+            verticalLayoutProteinNetworkView.addWidget(self.Protein3DNetworkView)
+            self.setLayout(verticalLayoutProteinNetworkView)
+            self.Protein3DNetworkView.update()
+            self.Protein3DNetworkView.show()
+            verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
+            # self.Protein3DNetworkView.initial_pymol_visual()
+
         except Exception as instance:
             if self.Pymol_Widget.isVisible():
                 QMessageBox.critical(self, 'Visualize Problem!.', repr(instance) +
@@ -275,6 +291,22 @@ class UIFunctions(MainWindow):
                                      "however the rest of the UI will be functional. "
                                      "Upgrading your graphics card drivers or reinstalling PyMol"
                                      "may solve this issue.")
+
+    def load_pdb_to_3DNetwork(self, pdb_file):
+        self.Protein3DNetworkView.reinitialize()
+        self.Protein3DNetworkView.loadMolFile(pdb_file)
+        self.Protein3DNetworkView.update()
+        self.Protein3DNetworkView.show()
+
+    def start_VisJS_2D_Network(self, intersection_graph='2d_network.html', gml_file='example.gml'):
+        initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
+        initial_2d_network_html_path = os.path.join(initial_2d_network_html_directory, intersection_graph)
+        print(os.path.join(initial_2d_network_html_directory, gml_file))
+        gml_graph = nx.read_gml(os.path.join(initial_2d_network_html_directory, gml_file))
+
+        self.visjs_engine = VisJS_Widget.VisJS_QtWidget(network=gml_graph, html_file=initial_2d_network_html_path)
+        self.Network_2D_verticalLayout.addWidget(self.visjs_engine)
+        self.visjs_engine()
 
     def load_pdb_to_pymol(self, pdb_file):
         self.ProteinView.reinitialize()
@@ -337,10 +369,11 @@ class UIFunctions(MainWindow):
         except Exception as save_err:
             Message_Boxes.Critical_message(self, 'png save failed!', str(save_err), Style.MessageBox_stylesheet)
 
+    """
     def deleteLayout(self, verticalLayoutProteinView):
         if verticalLayoutProteinView is not None:
             sip.delete(verticalLayoutProteinView)
-
+    """
     ####################################################################################################################
     #                               == > END - OPEN SOURCE PYMOL 2.4 INTEGRATION < ==                                  #
     ####################################################################################################################

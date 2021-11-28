@@ -1,0 +1,1 @@
+python no_gui.py -p pdb/1QMT.pdb -pff charmm36 -wff tip5p -lts 2 -ts 2000000 -minim True -pert_res PHE76 -speed_factor 3 4 5 1 -wp 10 -plt CUDA -dnx-use False -dnx 1 -temp 310 -wdcd False -wxtc False -nbc 12 -swd-use True -swd 10 -ri 1000 -pts 1000 -precision double -just_minim False -per_ri 100 -minim_step 5000

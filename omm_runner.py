@@ -8,20 +8,20 @@ import multiprocessing
 import tokenize
 import pystache
 import numpy as np
-from PyQt5 import QtWidgets, uic, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore, QtGui
 from pyqtgraph import PlotWidget, plot, dockarea
 import pyqtgraph as pg
-from PyQt5.QtCore import QTimer, QDateTime, pyqtSlot
+from PySide2.QtCore import QTimer, QDateTime, Slot
 import subprocess
-import continuous_threading
+# import continuous_threading
 import os
 import sys
-from PyQt5 import QtCore
-from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+from PySide2 import QtCore
+from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                           QSize, QTime, QUrl, Qt, QEvent)
-from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
                          QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-from PyQt5.QtWidgets import *
+from PySide2.QtWidgets import *
 
 
 # ##############################################################################
@@ -77,9 +77,9 @@ def queue_reporter_factory(queue):
 ##############################################################################
 
 class Communicate(QtCore.QObject):
-    dataSignal = QtCore.pyqtSignal(dict)
-    main_signal = QtCore.pyqtSignal(dict)
-    thread_id_keeper = QtCore.pyqtSignal(int)
+    dataSignal = QtCore.Signal(dict)
+    main_signal = QtCore.Signal(dict)
+    thread_id_keeper = QtCore.Signal(int)
 
 
 class OpenMMScriptRunner(QtCore.QObject):
@@ -121,7 +121,6 @@ class OpenMMScriptRunner(QtCore.QObject):
         """
 
         ctypes.pythonapi.PyThreadState_SetAsyncExc(threading.get_ident(), ctypes.py_object(SystemExit))
-
 
     def run_openmm_script(self, code, queue):
         def fix_code():
@@ -189,7 +188,7 @@ class Graphs(QWidget):
         self.real_speed = []
         pg.setConfigOption('background', None)
         pg.setConfigOption('foreground', (197, 198, 199))
-        self.win = pg.GraphicsWindow(show=True, title="Basic plotting examples")
+        self.win = pg.GraphicsWindow(show=False, title="Basic plotting examples")
         # setting style sheet to the plot window
         self.win.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
         self.win.setWindowTitle('Real Time Simulation Monitoring')
@@ -220,7 +219,7 @@ class Graphs(QWidget):
         self.energy_graph.addLegend()
 
         self.win.nextRow()
-        self.simulation_speed_and_time_graph = self.win.addPlot(title="Speed")
+        self.simulation_speed_and_time_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
         self.simulation_speed_and_time_graph.addLegend()
 
         self.simulation_speed_graph = self.simulation_speed_and_time_graph.plot()
@@ -235,7 +234,6 @@ class Graphs(QWidget):
 
     def pretty_speed(self, ins_speed):
         """Format the speed (ns/day) as pretty"""
-
         speed_style = ins_speed.split(':')
         if ins_speed == '':
             return self.real_speed.append(float(0))
@@ -252,7 +250,6 @@ class Graphs(QWidget):
 
     def pretty_time(self, t_remaining):
         """Format the time as minute"""
-
         time_style = t_remaining.split(':')
         if t_remaining == '':
             return self.real_time_as_minute.append(float(0))

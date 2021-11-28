@@ -1,16 +1,18 @@
-from PyQt5.QtWidgets import QFileDialog, QWidget, QMessageBox
+from PySide2.QtWidgets import QFileDialog, QWidget, QMessageBox
 import gzip
-from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSlot
+from PySide2 import QtCore, QtWidgets
+from PySide2.QtCore import Slot
 from pdbfixer import PDBFixer
-from simtk.openmm import *
-from simtk.openmm.app import *
+from openmm import *
+from openmm.app import *
 from checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
 from checkBox_menu import *
 from ui_main import *
 from message import Message_Boxes
+
+from analysis.pdbsum_conservation_puller import get_conservation_scores
 
 
 class Helper_Functions():
@@ -47,7 +49,91 @@ class Helper_Functions():
 
 
 class Functions(MainWindow):
+    # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
+    def get_conservation_scores(self):
+        try:
+            conserv_pdb_id = self.conservation_PDB_ID_lineEdit.text()
+            conser_pdb_chain_id = self.conservation_pdb_chain_id_lineedit.text()
 
+            res_IDs, con_scores = get_conservation_scores(pdb_id=conserv_pdb_id,
+                                                          chain_id=conser_pdb_chain_id,
+                                                          cutoff=self.conserv_score_doubleSpinBox.value(),
+                                                          bound_pdb=self.boundForm_pdb_lineedit.text())
+
+            numrows = len(res_IDs)  # 6 rows in your example
+            numcols = 2  # 3 columns in your example
+            # Set colums and rows in QTableWidget
+            self.residues_conservation_tableWidget.setColumnCount(numcols)
+            self.residues_conservation_tableWidget.setRowCount(numrows)
+
+            # Loops to add values into QTableWidget
+            for row in range(numrows):
+                    self.residues_conservation_tableWidget.setItem(row, 0, QTableWidgetItem((res_IDs[row])))
+                    self.residues_conservation_tableWidget.setItem(row, 1, QTableWidgetItem((str(con_scores[row]))))
+        except Exception as Err:
+            print("Conservation Score Listing Problem \n", Err)
+
+    def browse_responseTimeFile(self):
+        """
+            The function provides Main GUI / Upload button activity for select response time file indicated by the user
+        """
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.response_filename, _ = QFileDialog.getOpenFileName(self, "Select The *.csv File", str(os.getcwd()),
+                                                                    "Response_Time_Files (*.csv)", str(options))
+
+            self.response_time_file_path = self.response_filename
+            self.response_filename = os.path.splitext(os.path.basename(self.response_filename))
+
+            if self.response_filename[1] == '.csv':
+                self.response_time_lineEdit.setText(self.response_time_file_path)
+                return True, self.response_time_file_path
+
+            elif self.response_filename[1] != "":
+                Message_Boxes.Critical_message(self, "Error", "this is not a valid response time file",
+                                               Style.MessageBox_stylesheet)
+
+        except Exception as exp:
+            Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
+
+    def browse_bound_form_pdbFile(self):
+        """
+            The function provides Main GUI / Upload button activity for select pdb file indicated by the user
+        """
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.boundForm_pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
+                                                                         "pdb Files (*.pdb)", str(options))
+
+            self.boundForm_pdb_path = self.boundForm_pdb_filename
+            self.boundForm_pdb_filename = os.path.splitext(os.path.basename(self.boundForm_pdb_filename))
+
+            if self.boundForm_pdb_filename[1] == '.pdb':
+                self.boundForm_pdb_lineedit.setText(self.boundForm_pdb_path)
+                return True, self.boundForm_pdb_path
+
+            elif self.boundForm_pdb_filename[1] != "":
+                Message_Boxes.Critical_message(self, "Error", "this is not a pdb file", Style.MessageBox_stylesheet)
+
+        except Exception as exp:
+            Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
+
+    def analysis_output_directory(self):
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            output_file = QFileDialog.getExistingDirectory(options=options)
+            self.output_directory_lineedit.setText(output_file)
+            return True
+
+        except Exception as ins:
+            return False
+
+    # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
+
+    # ######################################### PERTURBATION WINDOW FUNCTIONS ##########################################
     def output_file(self):
         try:
             options = QFileDialog.Options()
@@ -81,7 +167,6 @@ class Functions(MainWindow):
 
         except Exception as exp:
             Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
-
 
     @staticmethod
     def PDB_ID_lineEdit(self):
@@ -254,6 +339,21 @@ class Functions(MainWindow):
             return
         for item in listItems:
             self.selected_residues_listWidget.takeItem(self.selected_residues_listWidget.row(item))
+
+    def add_residue_to_target_List(self):
+        if str(self.target_res_comboBox.currentText()) != "":
+            items = []
+            for x in range(self.selected_target_residues_listWidget.count()):
+                items.append(self.selected_target_residues_listWidget.item(x).text())
+            if str(self.target_res_comboBox.currentText()) not in items:
+                self.selected_target_residues_listWidget.addItem(str(self.target_res_comboBox.currentText()))
+
+    def discard_residue_from_target_List(self):
+        listItems = self.selected_target_residues_listWidget.selectedItems()
+        if not listItems:
+            return
+        for item in listItems:
+            self.selected_target_residues_listWidget.takeItem(self.selected_target_residues_listWidget.row(item))
 
 
 class InputFile:

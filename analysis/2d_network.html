@@ -1,0 +1,123 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 70%;
+            height: 100%;
+            background-color: #2c313c;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+        #config {
+            float: left;
+            width: 400px;
+            height: 600px;
+        }
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<div id = "config"></div>
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"font": {"color": "white"}, "id": "ASN5", "label": "ASN5", "posx": "24.065001", "posy": "1.754000", "posz": "2.955000", "retime": "1.800000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "TRP6", "label": "TRP6", "posx": "27.059000", "posy": "3.458000", "posz": "4.555000", "retime": "2.100000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ASP83", "label": "ASP83", "posx": "25.240999", "posy": "11.520000", "posz": "7.175000", "retime": "4.000000000000000000e+00", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "CYS86", "label": "CYS86", "posx": "30.191999", "posy": "10.511000", "posz": "4.166000", "retime": "3.000000000000000000e+00", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "GLN7", "label": "GLN7", "posx": "30.836000", "posy": "3.181000", "posz": "4.251000", "retime": "1.500000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "PRO8", "label": "PRO8", "posx": "32.868000", "posy": "1.915000", "posz": "7.249000", "retime": "1.390000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ALA76", "label": "ALA76", "posx": "16.035999", "posy": "10.947000", "posz": "2.549000", "retime": "9.200000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "MET78", "label": "MET78", "posx": "17.229000", "posy": "9.816000", "posz": "7.847000", "retime": "9.800000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "SER79", "label": "SER79", "posx": "20.202000", "posy": "9.834000", "posz": "5.438000", "retime": "3.100000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ARG80", "label": "ARG80", "posx": "20.823999", "posy": "13.498000", "posz": "6.102000", "retime": "4.100000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "LEU81", "label": "LEU81", "posx": "20.427999", "posy": "13.038000", "posz": "9.861000", "retime": "8.200000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "PHE82", "label": "PHE82", "posx": "23.014999", "posy": "10.242000", "posz": "9.974000", "retime": "7.700000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "GLY109", "label": "GLY109", "posx": "22.153999", "posy": "16.462999", "posz": "10.637000", "retime": "7.000000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "CYS110", "label": "CYS110", "posx": "18.406000", "posy": "16.789000", "posz": "11.081000", "retime": "4.900000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "GLN229", "label": "GLN229", "posx": "24.813999", "posy": "19.662001", "posz": "6.772000", "retime": "7.900000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "GLN85", "label": "GLN85", "posx": "26.990999", "posy": "9.903000", "posz": "2.249000", "retime": "0.000000000000000000e+00", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ASN87", "label": "ASN87", "posx": "33.416000", "posy": "9.051000", "posz": "2.854000", "retime": "1.000000000000000000e+01", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "GLN89", "label": "GLN89", "posx": "38.707001", "posy": "7.707000", "posz": "4.136000", "retime": "1.120000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "VAL91", "label": "VAL91", "posx": "37.742001", "posy": "13.174000", "posz": "5.434000", "retime": "1.520000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ASN92", "label": "ASN92", "posx": "40.220001", "posy": "11.416000", "posz": "7.732000", "retime": "1.000000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ALA94", "label": "ALA94", "posx": "42.592999", "posy": "15.405000", "posz": "4.886000", "retime": "1.730000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "TRP260", "label": "TRP260", "posx": "41.037998", "posy": "22.106001", "posz": "8.232000", "retime": "2.340000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "LYS261", "label": "LYS261", "posx": "39.355999", "posy": "23.497000", "posz": "5.134000", "retime": "2.520000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "PRO262", "label": "PRO262", "posx": "37.299999", "posy": "22.289000", "posz": "3.392000", "retime": "1.840000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "ARG259", "label": "ARG259", "posx": "43.903999", "posy": "24.635000", "posz": "8.259000", "retime": "1.900000000000000000e+02", "shape": "dot", "size": 10}, {"font": {"color": "white"}, "id": "SER265", "label": "SER265", "posx": "32.469002", "posy": "20.962999", "posz": "10.176000", "retime": "4.700000000000000000e+01", "shape": "dot", "size": 10}]);
+        edges = new vis.DataSet([{"arrows": "to", "from": "ASN5", "to": "TRP6", "weight": 1}, {"arrows": "to", "from": "TRP6", "to": "ASP83", "weight": 1}, {"arrows": "to", "from": "TRP6", "to": "CYS86", "weight": 1}, {"arrows": "to", "from": "GLN7", "to": "ASN5", "weight": 1}, {"arrows": "to", "from": "GLN7", "to": "TRP6", "weight": 1}, {"arrows": "to", "from": "GLN7", "to": "CYS86", "weight": 1}, {"arrows": "to", "from": "PRO8", "to": "TRP6", "weight": 1}, {"arrows": "to", "from": "PRO8", "to": "GLN7", "weight": 1}, {"arrows": "to", "from": "ALA76", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "ALA76", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "ARG80", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "PHE82", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "ASP83", "weight": 1}, {"arrows": "to", "from": "SER79", "to": "GLY109", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "ALA76", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "PHE82", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "GLY109", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "CYS110", "weight": 1}, {"arrows": "to", "from": "ARG80", "to": "GLN229", "weight": 1}, {"arrows": "to", "from": "LEU81", "to": "ALA76", "weight": 1}, {"arrows": "to", "from": "LEU81", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "PHE82", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "PHE82", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "ASP83", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "ASP83", "to": "ARG80", "weight": 1}, {"arrows": "to", "from": "ASP83", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "ASP83", "to": "PHE82", "weight": 1}, {"arrows": "to", "from": "ASP83", "to": "GLY109", "weight": 1}, {"arrows": "to", "from": "ASP83", "to": "GLN229", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "ASN5", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "TRP6", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "GLN7", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "SER79", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "ARG80", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "PHE82", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "ASP83", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "CYS86", "weight": 1}, {"arrows": "to", "from": "GLN85", "to": "ASN87", "weight": 1}, {"arrows": "to", "from": "CYS86", "to": "ASP83", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "TRP6", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "GLN7", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "PRO8", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "CYS86", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "GLN89", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "VAL91", "weight": 1}, {"arrows": "to", "from": "ASN87", "to": "ASN92", "weight": 1}, {"arrows": "to", "from": "GLN89", "to": "PRO8", "weight": 1}, {"arrows": "to", "from": "GLN89", "to": "CYS86", "weight": 1}, {"arrows": "to", "from": "GLN89", "to": "VAL91", "weight": 1}, {"arrows": "to", "from": "GLN89", "to": "ALA94", "weight": 1}, {"arrows": "to", "from": "VAL91", "to": "CYS86", "weight": 1}, {"arrows": "to", "from": "VAL91", "to": "ALA94", "weight": 1}, {"arrows": "to", "from": "ASN92", "to": "GLN89", "weight": 1}, {"arrows": "to", "from": "ASN92", "to": "VAL91", "weight": 1}, {"arrows": "to", "from": "ASN92", "to": "ALA94", "weight": 1}, {"arrows": "to", "from": "ALA94", "to": "TRP260", "weight": 1}, {"arrows": "to", "from": "ALA94", "to": "LYS261", "weight": 1}, {"arrows": "to", "from": "ALA94", "to": "PRO262", "weight": 1}, {"arrows": "to", "from": "GLY109", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "GLY109", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "GLY109", "to": "PHE82", "weight": 1}, {"arrows": "to", "from": "GLY109", "to": "GLN229", "weight": 1}, {"arrows": "to", "from": "CYS110", "to": "MET78", "weight": 1}, {"arrows": "to", "from": "CYS110", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "CYS110", "to": "PHE82", "weight": 1}, {"arrows": "to", "from": "CYS110", "to": "GLY109", "weight": 1}, {"arrows": "to", "from": "CYS110", "to": "GLN229", "weight": 1}, {"arrows": "to", "from": "GLN229", "to": "LEU81", "weight": 1}, {"arrows": "to", "from": "ARG259", "to": "TRP260", "weight": 1}, {"arrows": "to", "from": "ARG259", "to": "LYS261", "weight": 1}, {"arrows": "to", "from": "TRP260", "to": "LYS261", "weight": 1}, {"arrows": "to", "from": "TRP260", "to": "SER265", "weight": 1}, {"arrows": "to", "from": "LYS261", "to": "SER265", "weight": 1}, {"arrows": "to", "from": "PRO262", "to": "ARG259", "weight": 1}, {"arrows": "to", "from": "PRO262", "to": "TRP260", "weight": 1}, {"arrows": "to", "from": "PRO262", "to": "LYS261", "weight": 1}, {"arrows": "to", "from": "PRO262", "to": "SER265", "weight": 1}, {"arrows": "to", "from": "SER265", "to": "GLN229", "weight": 1}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+        // if this network requires displaying the configure window,
+        // put it in its div
+        options.configure["container"] = document.getElementById("config");
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtCore import Qt
+from PySide2.QtWidgets import QMessageBox
+from PySide2.QtCore import Qt
 
 
 class Message_Boxes:

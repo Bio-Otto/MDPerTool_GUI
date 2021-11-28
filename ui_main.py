@@ -1,24 +1,36 @@
 import os
 import sys
 import platform
-from PyQt5 import QtCore, QtGui, QtWidgets
-#from PyQt5.QtCore import (QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+
+from PySide2.QtCore import QSize
+from src.pyside_dynamic import loadUi
+from PySide2 import QtXml, QtCore, QtGui, QtWidgets
+from PySide2.QtUiTools import QUiLoader
+from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+                            QSize, QTime, QUrl, Qt, QEvent, QRegExp)
+from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+                           QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QIntValidator,
+                           QRegExpValidator)
+from PySide2.QtWidgets import *
+
+from PySide2 import QtCore, QtGui, QtWidgets
+# from PyQt5.QtCore import (QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
 #                          QSize, QTime, QUrl, Qt, QEvent, QRectF)
-#from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+# from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
 #                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QRegion)
-from PyQt5.QtWidgets import *
+from PySide2.QtWidgets import *
 import os
 import sys
 from platform import system, release
-from PyQt5 import QtCore, QtGui, QtWidgets
-#from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
+from PySide2 import QtCore, QtGui, QtWidgets
+# from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
 #                          QSize, QTime, QUrl, Qt, QEvent)
 # from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
 #                          QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
 # from PyQt5.QtGui import QPainterPath, QRegion
 ## ==> MAIN WINDOW
 # import app_modules
-from PyQt5 import uic
+# from PySide2 import uic
 from icons import *
 import pyqtgraph as pg
 # IMPORT FUNCTIONS
@@ -35,12 +47,24 @@ from pdbfixer import PDBFixer
 counter = 0
 
 
+def center_window(widget):
+    window = widget.window()
+    window.setGeometry(
+        QtWidgets.QStyle.alignedRect(
+            QtCore.Qt.LeftToRight,
+            QtCore.Qt.AlignCenter,
+            window.size(),
+            QtGui.QGuiApplication.primaryScreen().availableGeometry(),
+        ),
+    )
+
+
 # YOUR APPLICATION
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
-        uic.loadUi('MAIN_GUI.ui', self)
+        self.ui = loadUi('MAIN_GUI.ui', self)
 
         ################################################################################################################
         #                                       ==> START OF WINDOW ATTRIBUTES <==                                     #
@@ -65,14 +89,14 @@ class MainWindow(QtWidgets.QMainWindow):
         UIFunctions.labelTitle(self, 'MDPerTool - %s %s' % (platform.system(), platform.release()))
         UIFunctions.labelDescription(self, str(os.getcwd()))
 
-        # ----- > Move The Screen To Center
-        qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
-        qtRectangle.moveCenter(centerPoint)
-        self.move(qtRectangle.topLeft())
+        # # ----- > Move The Screen To Center
+        # qtRectangle = self.frameGeometry()
+        # centerPoint = QDesktopWidget().availableGeometry().center()
+        # qtRectangle.moveCenter(centerPoint)
+        # self.move(qtRectangle.topLeft())
 
         # ----- > Start With Standart Size
-        startSize = QSize(1600, 940)
+        startSize = QSize(1600, 960)
         self.resize(startSize)
         self.setMinimumSize(startSize)
         # UIFunctions.enableMaximumSize(self, 500, 720)
@@ -85,6 +109,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setMinimumWidth(20)
         UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation", "url(:/20x20/icons/20x20/chemical_20x20.png)",
                                True)
+        UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring", "url(:/20x20/icons/20x20/cil-monitor.png)", True)
+        UIFunctions.addNewMenu(self, "Analysis", "btn_analysis", "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
         UIFunctions.addNewMenu(self, "Settings", "btn_settings", "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
         UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
 
@@ -97,19 +123,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ----- > Show / Hide User Icon
         UIFunctions.userIcon(self, "HIO", "", True)
 
-        # ----- > Move Window / Maximize / Restore
-        def moveWindow(event):
-            # ----- > If Maximized Change to Normal
-            if UIFunctions.returStatus() == 1:
-                UIFunctions.maximize_restore(self)
-            # ----- > Move Window
-            if event.buttons() == Qt.LeftButton:
-                self.move(self.pos() + event.globalPos() - self.dragPos)
-                self.dragPos = event.globalPos()
-                event.accept()
-
-        # ----- > Widget to Move
-        self.frame_label_top_btns.mouseMoveEvent = moveWindow
+        # self.frame_label_top_btns.mouseMoveEvent = self.moveWindow
 
         # ----- > Load Definitions
         UIFunctions.uiDefinitions(self)
@@ -133,6 +147,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
+
+        # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
+        self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
+        self.output_directory_button.clicked.connect(lambda: Functions.analysis_output_directory(self))
+        self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local())
+        self.add_residue_to_targets_pushButton.clicked.connect(lambda: Functions.add_residue_to_target_List(self))
+        self.discard_residue_from_targets_pushButton.clicked.connect(
+            lambda: Functions.discard_residue_from_target_List(self))
+        self.get_conserv_score_pushButton.clicked.connect(lambda: Functions.get_conservation_scores(self))
+        self.show_2d_network_pushButton.clicked.connect(lambda: UIFunctions.start_VisJS_2D_Network(self))
 
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
         UIFunctions.start_pymol(self)
@@ -235,6 +259,63 @@ class MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
 
+    def upload_boundForm_pdb_from_local(self):
+        global selected_chains
+        try:
+            upload_condition, pdb_path = Functions.browse_bound_form_pdbFile(self)
+
+            if os.path.exists(pdb_path):
+                fixer = PDBFixer(pdb_path)
+                fixer.removeHeterogens(keepWater=False)
+
+                modeller = Modeller(fixer.topology, fixer.positions)
+                chains = [r.id for r in modeller.topology.chains()]
+
+                checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
+                                               checked=True)
+                pdb_fix_dialog_answer = checked_list.exec_()
+                if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
+                    selected_chains = [str(s) for s in checked_list.choices]
+
+                    delete_chains = list(set(chains) - set(selected_chains))
+
+                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                                                             ph=7, chains_to_remove=delete_chains)
+
+                    self.boundForm_pdb_lineedit.setText(modified_pdb)
+
+                    self.target_combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+
+                    for i in self.target_combobox:
+                        self.target_res_comboBox.addItem(str(i))
+                        self.source_res_comboBox.addItem(str(i))
+
+                    self.target_res_comboBox.clear()  # delete all items from comboBox
+                    self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                    self.source_res_comboBox.clear()  # delete all items from comboBox
+                    self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+
+                elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                                                             ph=7, chains_to_remove=None)
+
+                    self.boundForm_pdb_lineedit.setText(modified_pdb)
+
+                    self.target_combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                    for i in self.target_combobox:
+                        self.target_res_comboBox.addItem(str(i))
+                        self.source_res_comboBox.addItem(str(i))
+
+                    self.target_res_comboBox.clear()  # delete all items from comboBox
+                    self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                    self.source_res_comboBox.clear()  # delete all items from comboBox
+                    self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+
+                UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
+
+        except TypeError:
+            pass
+
     def output_folder_browse(self):
         Functions.output_file(self)
 
@@ -262,6 +343,20 @@ class MainWindow(QtWidgets.QMainWindow):
             UIFunctions.labelPage(self, "Perturbation User Interface")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
+        # PAGE MONITORING
+        if btnWidget.objectName() == "btn_monitoring":
+            self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
+            UIFunctions.resetStyle(self, "btn_monitoring")
+            UIFunctions.labelPage(self, "MONITORING THE PROCESS")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+
+        # PAGE ANALYSIS
+        if btnWidget.objectName() == "btn_analysis":
+            self.stackedWidget.setCurrentWidget(self.Analysis)
+            UIFunctions.resetStyle(self, "btn_analysis")
+            UIFunctions.labelPage(self, "ENERGY DISSIPATION ANALYSIS")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+
         # PAGE WIDGETS
         if btnWidget.objectName() == "btn_settings":
             self.stackedWidget.setCurrentWidget(self.page_settings)
@@ -283,6 +378,35 @@ class MainWindow(QtWidgets.QMainWindow):
     #                                          == > START OF APP EVENTS < ==                                           #
     ####################################################################################################################
 
+    def moveEvent(self, e):
+        super(MainWindow, self).moveEvent(e)
+
+    # ----- > Move Window / Maximize / Restore
+    @staticmethod
+    def moveWindow(self, event):
+        # ----- > If Maximized Change to Normal
+        if UIFunctions.returStatus() == 1:
+            UIFunctions.maximize_restore(self)
+        # ----- > Move Window
+        if event.buttons() == Qt.LeftButton:
+            self.move(self.pos() + event.globalPos() - self.dragPos)
+            self.dragPos = event.globalPos()
+            event.accept()
+
+    # ----- > Widget to Move
+    # ---> Mouse Click Event - Start
+    def mouseMoveEvent(self, event):
+        if UIFunctions.returStatus() == 1:
+            UIFunctions.maximize_restore(self)
+        # ---> Move Window
+        if event.buttons() == Qt.LeftButton:
+            widget = self.childAt(event.pos())
+            if widget is not None:
+                if widget.objectName() == 'label_title_bar_top':
+                    self.move(self.pos() + event.globalPos() - self.dragPos)
+                    self.dragPos = event.globalPos()
+                    event.accept()
+
     # ----- > Mouse Double Click
     def eventFilter(self, watched, event):
         if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
@@ -297,6 +421,12 @@ class MainWindow(QtWidgets.QMainWindow):
             print('Mouse click: RIGHT CLICK')
         if event.buttons() == Qt.MidButton:
             print('Mouse click: MIDDLE BUTTON')
+
+    def mouseDoubleClickEvent(self, event):
+        widget = self.childAt(event.pos())
+        if widget is not None:
+            if widget.objectName() == 'label_title_bar_top':
+                UIFunctions.maximize_restore(self)
 
     # ----- > Key Pressed
     def keyPressEvent(self, event):
@@ -378,20 +508,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class SplashScreen(QMainWindow):
 
-    def __init__(self, parent=None, *args, **kwargs):
-        super().__init__(parent=parent, *args, **kwargs)
-
-        uic.loadUi('splash_screen.ui', self)
+    def __init__(self):
+        QMainWindow.__init__(self)
+        self.ui = loadUi('splash_screen.ui', self)
 
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
         app_icon.addFile('%s/icons/big_icons/style_icon_48x48.png' % os.getcwd())
-
-        # ----- > Move to The Screen Center
-        qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
-        qtRectangle.moveCenter(centerPoint)
-        self.move(qtRectangle.topLeft())
 
         # ----- > Remove Background and Give icon to The Program
         self.setWindowIcon(QIcon(app_icon))
@@ -409,7 +532,7 @@ class SplashScreen(QMainWindow):
         # ----- > Qtimer For Change Description on Splash Screen
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.progress)
-        self.timer.start(15)
+        self.timer.start(8)
 
         # ----- > Change Description on Splash Screen
         self.label_title.setText("MDPerTool v0.1")
@@ -419,8 +542,9 @@ class SplashScreen(QMainWindow):
         self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")
 
         # ----- > CHANGE TEXT ON SPLASH SCREEN
-        QtCore.QTimer.singleShot(300, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
-        QtCore.QTimer.singleShot(250, lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
+        QtCore.QTimer.singleShot(900, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
+        QtCore.QTimer.singleShot(1500,
+                                 lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
 
         self.show()
 
@@ -436,10 +560,12 @@ class SplashScreen(QMainWindow):
         if counter > 100:
             self.timer.stop()
             self.main = MainWindow()
+            QtCore.QTimer.singleShot(0, lambda: center_window(self.main))
             self.main.show()
             self.close()
 
         counter += 1
+
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
 
@@ -447,4 +573,5 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)
     window = SplashScreen()
+    QtCore.QTimer.singleShot(0, lambda: center_window(window))
     sys.exit(app.exec_())

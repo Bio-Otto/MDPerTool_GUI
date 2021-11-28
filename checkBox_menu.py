@@ -1,8 +1,8 @@
 
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtGui import QIcon,QFont,QPixmap,QPalette
-from PyQt5.QtCore import QCoreApplication, Qt,QBasicTimer, QPoint
-from PyQt5.QtWidgets import QDesktopWidget
+from PySide2 import QtCore, QtWidgets, QtGui
+from PySide2.QtGui import QIcon,QFont,QPixmap,QPalette
+from PySide2.QtCore import QCoreApplication, Qt,QBasicTimer, QPoint
+from PySide2.QtWidgets import QDesktopWidget
 
 stylesheet = """
 

@@ -1,13 +1,15 @@
-from pylab import *
-from PyQt5.QtOpenGL import *
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.Qt import Qt
+# from pylab import *
+# from PySide2.QtOpenGL import *
+import os.path
+from PySide2 import QtCore, QtWidgets
+from PySide2.QtCore import Qt
 from OpenGL.GL import *
 import pymol2
-from PyQt5.QtOpenGL import QGLFormat
+from PySide2.QtOpenGL import QGLFormat, QGLWidget
 from pymol.cgo import *
 from pymol.vfont import plain
 
+os.environ['QT_API'] = 'pyside2'
 buttonMap = {
     Qt.LeftButton: 0,
     Qt.MidButton: 1,
@@ -35,6 +37,9 @@ class PymolQtWidget(QGLWidget):
         self._timer = QtCore.QTimer()
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._pymolProcess)
+        # self._pymol.cmd.fragment("his")
+
+        self.mol_name = None
 
     def initializeGL(self):
         """
@@ -42,6 +47,7 @@ class PymolQtWidget(QGLWidget):
         Instance PyMOL _only_ when we're sure there's an OGL context up and running
         (i.e. in this method :-)
         """
+        print(path)
         if not self._enableUi:
             self._pymol.cmd.set("internal_gui", 0)
             self._pymol.cmd.set("internal_feedback", 0)
@@ -104,7 +110,11 @@ class PymolQtWidget(QGLWidget):
         self._pymol.cmd.png(figure_name, width=width, height=height, dpi=dpi, ray=ray)
 
     def loadMolFile(self, mol_file):
-        self._pymol.cmd.load(str(mol_file))
+        try:
+            self._pymol.cmd.load(str(mol_file))
+            self.mol_name = os.path.basename(mol_file).split('.')[0]
+        except Exception as loadingError:
+            print("An error occurred while loading the structure file :(\n", loadingError)
 
     def initial_pymol_visual(self):
         cgo = []
@@ -117,7 +127,13 @@ class PymolQtWidget(QGLWidget):
         self._pymol.cmd.set("cgo_line_radius", 0.05)
         self._pymol.cmd.load_cgo(cgo, 'txt')
         self._pymol.cmd.zoom()
-        self.loadMolFile(demo_pdb_path)
+
+        try:
+            self.loadMolFile(demo_pdb_path)
+            self.mol_name = os.path.basename(demo_pdb_path).split('.')[0]
+        except:
+            self._pymol.cmd.fragment("phe")
+
         self._pymol.cmd.center()
         self._pymol.cmd.zoom()
 
@@ -164,3 +180,61 @@ class PymolQtWidget(QGLWidget):
         self._pymol.reshape(self.width(), self.height())
         self.resizeGL(self.width(), self.height())
         self._pymolProcess()
+
+    def show_energy_dissipation(self, response_time_file_path, spectrum='white_blue', mol=None,
+                                display_color_ramp=True):
+
+        """
+        :param self:
+        :param response_time_file_path: Response Time csv file that include residue responses
+        :param mol: Structure file path that will be display on
+        :param display_color_ramp: Color bar will appear on screen
+        :param spectrum: Transition colors in the structure
+        :return:
+        """
+
+        # load the protein
+        print(self.mol_name)
+        if mol is None:
+            mol = self.mol_name
+
+        else:
+            self.mol_name = mol
+        # open the file of new values (just 1 column of numbers, one for each alpha carbon)
+        inFile = open(response_time_file_path, 'r')
+
+        # create the global, stored array
+        stored = []
+
+        # read the new B factors from file
+        for line in inFile.readlines():
+            stored.append(float(line))
+
+        # close the input file
+        inFile.close()
+
+        # clear out the old B Factors
+        self._pymol.cmd.alter('all', 'b=0.0')
+
+        # ---> obj = self._pymol.cmd.get_object_list(mol)[0]
+
+        counter = 0
+        for line in stored:
+            bfact = float(line)
+
+            self._pymol.cmd.alter("%s and resi %s and n. CA" % (str(self.mol_name), counter), "b=%s" % bfact)
+            counter = counter + 1
+
+        self._pymol.cmd.spectrum('b', spectrum, minimum=0, maximum=len(stored))
+        self._pymol.cmd.recolor()
+
+        if display_color_ramp:
+            self._pymol.cmd.ramp_new("count", self.mol_name, [0, len(stored)], color=[[1.0, 1.0, 1.0], 'blue'])
+
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication()
+#     window = PymolQtWidget()
+#     window.show()
+#     app.exec_()
+#     window = PymolQtWidget()
+#     window.show()
