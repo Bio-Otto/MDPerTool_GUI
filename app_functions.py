@@ -68,8 +68,8 @@ class Functions(MainWindow):
 
             # Loops to add values into QTableWidget
             for row in range(numrows):
-                    self.residues_conservation_tableWidget.setItem(row, 0, QTableWidgetItem((res_IDs[row])))
-                    self.residues_conservation_tableWidget.setItem(row, 1, QTableWidgetItem((str(con_scores[row]))))
+                self.residues_conservation_tableWidget.setItem(row, 0, QTableWidgetItem((res_IDs[row])))
+                self.residues_conservation_tableWidget.setItem(row, 1, QTableWidgetItem((str(con_scores[row]))))
         except Exception as Err:
             print("Conservation Score Listing Problem \n", Err)
 
@@ -354,6 +354,35 @@ class Functions(MainWindow):
             return
         for item in listItems:
             self.selected_target_residues_listWidget.takeItem(self.selected_target_residues_listWidget.row(item))
+
+    def number_of_steps_changed_from_quick(self):
+        global new_step
+
+        current_step = self.run_duration_doubleSpinBox.value()
+        current_time_unit = self.long_simulation_time_unit.currentText()
+        current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())
+
+        if current_time_unit == 'nanosecond':
+            new_step = int((current_step / current_integrator_time_step_value) * 1000000)
+
+        if current_time_unit == 'picosecond':
+            new_step = int((current_step / current_integrator_time_step_value) * 1000)
+
+        self.Number_of_steps_spinBox.setValue(new_step)
+
+    def number_of_steps_changed_from_advanced(self):
+        global new_time
+        current_step = int(self.Number_of_steps_spinBox.value())  # 1 ns
+        current_time_unit = self.long_simulation_time_unit.currentText() # ns
+        current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())  # 2 fs
+
+        if current_time_unit == 'nanosecond':
+            new_time = float((current_step * current_integrator_time_step_value) / 1000000)
+
+        if current_time_unit == 'picosecond':
+            new_time = float((current_step * current_integrator_time_step_value) / 1000)
+
+        self.run_duration_doubleSpinBox.setValue(new_time)
 
 
 class InputFile:

@@ -148,6 +148,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
 
+        # --> RUN TIME SETTINGS
+        self.run_duration_doubleSpinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
+        self.long_simulation_time_unit.currentTextChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
+        self.integrator_time_step.textChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
+        self.Number_of_steps_spinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_advanced(self))
+        # self.Number_of_steps_spinBox.installEventFilter(self)
+
+
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
         self.output_directory_button.clicked.connect(lambda: Functions.analysis_output_directory(self))
@@ -172,6 +180,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
         self.Handel_Save_Figure_Options_Changed()
         self.Handel_Save_Figure_Options()
+    """
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and obj is self.Number_of_steps_spinBox:
+            if event.key() == QtCore.Qt.Key_Return and self.Number_of_steps_spinBox.hasFocus():
+                print('Enter pressed')
+        return super().eventFilter(obj, event)
+    """
 
     def run_btn_clicked(self):
         self.Run.setEnabled(False)
@@ -322,6 +337,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def Stocasthic_Changed(self):
         Functions.Stochastic_changed(self)
 
+
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################
@@ -408,10 +424,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     event.accept()
 
     # ----- > Mouse Double Click
+    """
     def eventFilter(self, watched, event):
         if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
             print("pos: ", event.pos())
-
+    """
     # ----- > Mouse Click Event
     def mousePressEvent(self, event):
         self.dragPos = event.globalPos()

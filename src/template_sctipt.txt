@@ -67,8 +67,8 @@ nonbonded.setSwitchingDistance({{switching_distance}})
 nonbonded.setUseDispersionCorrection(True)
 {{/use_switching_distance}}
 
-print('Creating a LangevinIntegrator.')
-integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}})
+print('Creating a %sIntegrator with %s %s .' %('{{integrator_kind}}', {{integrator_time_step}}, '{{integrator_time_step_unit}}'))
+integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}}*{{integrator_time_step_unit}})
 
 if {{cuda_active}}:
     platform = mm.Platform.getPlatformByName('{{platform}}')
@@ -84,20 +84,21 @@ simulation.context.setPositions(modeller.positions)
 simulation.context.computeVirtualSites()
 
 {{#Minimize}}
-print('Minimizing...')
-simulation.minimizeEnergy({{#no_minimize_value}}maxIterations={{Max_minimization_iteration}}{{/no_minimize_value}})
+print('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
+simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}})
 print("Minimization done, the energy is", simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 print("Minimized geometry is written to 'minimized.pdb'")
 app.PDBFile.writeModel(modeller.topology, positions, open('{{output_folder}}/minimized.pdb', 'w'), keepIds=True){{/Minimize}}
 
-simulation.currentStep = simulation_last_time
+#simulation.currentStep = simulation_last_time
 
 simulation.context.setVelocitiesToTemperature({{Temperature}})
 
 {{#Equilubrate}}
-print('Equilibrating...')
-simulation.step({{Equilubrate_steps}}){{/Equilubrate}}
+print('Equilibrating for %s steps ...' % {{Equilubrate_steps}})
+simulation.step(int({{Equilubrate_steps}}))
+{{/Equilubrate}}
 
 {{#DCDReporter}}
 print('The trajectories will be saved in DCD file format.')
@@ -252,175 +253,174 @@ for i in range(len({{speed_factor}})):
 
         simulation_last_step = ref_simulation.currentStep
 
-        ################################################################################################################
-        ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
-        ################################################################################################################
+    ################################################################################################################
+    ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
+    ################################################################################################################
 
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
+        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+        precision = 'double'
 
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-            properties = {'OpenCLPrecision': 'double'}
-            precision = 'double'
+    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
+        properties = {'OpenCLPrecision': 'double'}
+        precision = 'double'
 
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
+        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
+        precision = 'double'
 
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-            properties = {'CudaPrecision': 'double'}
-            precision = 'double'
+    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
+        properties = {'CudaPrecision': 'double'}
+        precision = 'double'
 
-        if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
-            print("The CPU platform always uses 'mixed' precision.")
-            print("Simulation process will use %s Thread(s)" % CPU_Threads)
-            properties = {'CpuThreads': '{{Number_of_CPU}}'}
-            precision = 'mixed'
+    if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
+        print("The CPU platform always uses 'mixed' precision.")
+        print("Simulation process will use %s Thread(s)" % CPU_Threads)
+        properties = {'CpuThreads': '{{Number_of_CPU}}'}
+        precision = 'mixed'
 
-        if '{{platform}}' == 'Reference':
-            print("The Reference platform always uses 'double' precision.")
-            properties = None
-            precision= 'double'
+    if '{{platform}}' == 'Reference':
+        print("The Reference platform always uses 'double' precision.")
+        properties = None
+        precision= 'double'
 
-        print("System will use %s Platform with %s Precision" % ('{{platform}}', precision))
+    print("System will use %s Platform with %s Precision" % ('{{platform}}', precision))
 
-        # we'll just take the topology from here...
-        pdb = app.PDBFile(last_pdb_file_path)
-        topology = pdb.topology
+    # we'll just take the topology from here...
+    pdb = app.PDBFile(last_pdb_file_path)
+    topology = pdb.topology
 
-        print('Forcefield parameters loading to the simulation system ...')
-        forcefield = app.ForceField('{{protein_ff}}', '{{water_ff}}')
+    print('Forcefield parameters loading to the simulation system ...')
+    forcefield = app.ForceField('{{protein_ff}}', '{{water_ff}}')
 
-        print('Constructing an OpenMM System')
-        perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
-                                                   constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
+    print('Constructing an OpenMM System')
+    perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
+                                               constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
 
-        if {{use_switching_distance}}:
-            print("System will use Switching Distance")
-            nonbonded = [f for f in perturbed_system.getForces() if isinstance(f, NonbondedForce)][0]
-            nonbonded.setUseSwitchingFunction(use=True)
-            nonbonded.setSwitchingDistance({{switching_distance}})
+    if {{use_switching_distance}}:
+        print("System will use Switching Distance")
+        nonbonded = [f for f in perturbed_system.getForces() if isinstance(f, NonbondedForce)][0]
+        nonbonded.setUseSwitchingFunction(use=True)
+        nonbonded.setSwitchingDistance({{switching_distance}})
 
-        integrator = VerletIntegrator(1.0*femtosecond)
-        integrator.setConstraintTolerance(1e-8)
+    integrator = VerletIntegrator(1.0*femtosecond)
+    integrator.setConstraintTolerance(1e-8)
 
-        # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('{{platform}}')
+    # let's specify our simulation platform again
+    platform = mm.Platform.getPlatformByName('{{platform}}')
 
-        # ok now let's do some simulation using this restraint
-        if properties is None:
-            simulation = app.Simulation(topology, perturbed_system, integrator, platform)
+    # ok now let's do some simulation using this restraint
+    if properties is None:
+        simulation = app.Simulation(topology, perturbed_system, integrator, platform)
 
-        if properties is not None:
-            simulation = app.Simulation(topology, perturbed_system, integrator, platform, properties)
+    if properties is not None:
+        simulation = app.Simulation(topology, perturbed_system, integrator, platform, properties)
 
-        simulation.loadState(name_of_changed_state_xml)
-        final_state = simulation.context.getState(getVelocities=True, getPositions=True)
-        positions = final_state.getPositions()
-        velocities = final_state.getVelocities()
-        simulation.context.setPositions(positions)
-        simulation.context.computeVirtualSites()
-        simulation.context.setVelocities(velocities)
-        print("USES OR NOT: %s" % perturbed_system.usesPeriodicBoundaryConditions())
+    simulation.loadState(name_of_changed_state_xml)
+    final_state = simulation.context.getState(getVelocities=True, getPositions=True)
+    positions = final_state.getPositions()
+    velocities = final_state.getVelocities()
+    simulation.context.setPositions(positions)
+    simulation.context.computeVirtualSites()
+    simulation.context.setVelocities(velocities)
+    print("USES OR NOT: %s" % perturbed_system.usesPeriodicBoundaryConditions())
 
-        simulation.currentStep = simulation_last_step
+    simulation.currentStep = simulation_last_step
 
-        if pl.system() == 'Windows':
+    if pl.system() == 'Windows':
+        print("Saving XTC File for every 1 period")
+        XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
+        simulation.reporters.append(XTCReporter(XTC_file_path, 1))
+
+    else:
+        if not {{DCDReporter}} and not {{XTCReporter}}:
+            print("Saving DCD File for every 1 period")
+            DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
+            simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
+
+        if {{DCDReporter}}:
+            print("Saving DCD File for every 1 period")
+            DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
+            simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
+
+        if {{XTCReporter}}:
             print("Saving XTC File for every 1 period")
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
             simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
-        else:
-            if not {{DCDReporter}} and not {{XTCReporter}}:
-                print("Saving DCD File for every 1 period")
-                DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
-                simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
+    {{#State_Data_Reporter}}
+    print('State Report will tell you.')
+    simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
+                              kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
+                              density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}}))
+    {{/State_Data_Reporter}}
 
-            if {{DCDReporter}}:
-                print("Saving DCD File for every 1 period")
-                DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
-                simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
+    simulation.step({{perturb_simulation_time}})
 
-            if {{XTCReporter}}:
-                print("Saving XTC File for every 1 period")
-                XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
-                simulation.reporters.append(XTCReporter(XTC_file_path, 1))
+    simulation_last_step = simulation.currentStep
 
-        {{#State_Data_Reporter}}
-        print('State Report will tell you.')
-        simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
-                                  kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                  density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}}))
-        {{/State_Data_Reporter}}
+    ################################################################################################################
+    ############################# PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ##############################
+    ################################################################################################################
+    if pl.system() == 'Windows':
+        print("Decompose started using XTC File ...")
+        reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
+        dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
 
-        simulation.step({{perturb_simulation_time}})
+    else:
+        if not {{DCDReporter}} and not {{XTCReporter}}:
+            print("Decompose started using DCD File")
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
 
-        simulation_last_step = simulation.currentStep
+        if {{DCDReporter}}:
+            print("Decompose started using DCD File")
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
 
-        ################################################################################################################
-        ############################# PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ##############################
-        ################################################################################################################
-        if pl.system() == 'Windows':
-            print("Decompose started using XTC File ...")
+        if {{XTCReporter}}:
+            print("Decompose started using XTC File")
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
 
-        else:
-            if not {{DCDReporter}} and not {{XTCReporter}}:
-                print("Decompose started using DCD File")
-                reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
-                dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
-
-            if {{DCDReporter}}:
-                print("Decompose started using DCD File")
-                reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
-                dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
-
-            if {{XTCReporter}}:
-                print("Decompose started using XTC File")
-                reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
-                dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
 
 
+    if i == 0:
+        position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+                                                                         ref_traj=reference_traj_file_for_pos,
+                                                                         modif_traj=dissipation_traj_file_for_pos)
 
-        if i == 0:
-            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                             ref_traj=reference_traj_file_for_pos,
-                                                                             modif_traj=dissipation_traj_file_for_pos)
 
-
-        if i != 0:
-            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                     ref_traj=None,
-                                                                     modif_traj=dissipation_traj_file_for_pos)
+    if i != 0:
+        position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+                                                                 ref_traj=None,
+                                                                 modif_traj=dissipation_traj_file_for_pos)
 
 
 
 
 
 
-         # --> RESIDUE BASED DECOMPOSITION
-        if i == 0:
-            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                        output_directory=OUTPUT_DIRECTORY,
-                                        ref_energy_name='reference_energy_file.csv',
-                                        modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
-                                        origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}')
-        if i != 0:
-            # --> RESIDUE BASED DECOMPOSITION
-            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                        output_directory=OUTPUT_DIRECTORY,
-                                        ref_energy_name=None,
-                                        modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
-                                        origin_last_pdb=last_pdb_file_path,
-                                        ff='{{protein_ff}}')
-        # --> RESPONSE TIME CSV EXPORTER
-        getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
-                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
-                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
+     # --> RESIDUE BASED DECOMPOSITION
+    if i == 0:
+        residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+                                    output_directory=OUTPUT_DIRECTORY,
+                                    ref_energy_name='reference_energy_file.csv',
+                                    modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
+                                    origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}')
+    if i != 0:
+        # --> RESIDUE BASED DECOMPOSITION
+        residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+                                    output_directory=OUTPUT_DIRECTORY,
+                                    ref_energy_name=None,
+                                    modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
+                                    origin_last_pdb=last_pdb_file_path,
+                                    ff='{{protein_ff}}')
+    # --> RESPONSE TIME CSV EXPORTER
+    getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
+                            os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
+                            outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
 
-    print("\n--- %s seconds ---" % (time.time() - start_time))
 
 
 

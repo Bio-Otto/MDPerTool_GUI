@@ -26,9 +26,9 @@ class Advanced(QtCore.QThread):
     @Slot()
     def send_arg_to_Engine(self):
         # self.stackedWidget.setCurrentIndex(1)
+        global platform_name
         pdb_pfile = os.path.abspath(self.upload_pdb_textEdit.toPlainText().strip()).replace('\\', '/')
 
-        print(pdb_pfile)
         rigid_water = True
         minimize = True
         equilubrate = True
@@ -45,7 +45,7 @@ class Advanced(QtCore.QThread):
         precision = 'single'
         water_active = False
         equilubrate_steps = self.Max_equilubrate_steps_textEdit.toPlainText()
-        StateData_freq = self.StateData_frequency_textEdit.toPlainText()
+        StateData_freq = int(self.StateData_frequency_textEdit.toPlainText())
         # global selected_platform
 
         print("Simulation parameters preparing for the start ...")
@@ -168,14 +168,14 @@ class Advanced(QtCore.QThread):
             ## STATE DATA FREQUENCY
             if StateData_freq == "" and State_Data_Reporter:
                 StateData_freq = 100
-                if StateData_freq > self.Number_of_steps_textEdit.toPlainText():
-                    StateData_freq = int(self.Number_of_steps_textEdit.toPlainText() / 2)
+                if StateData_freq > self.Number_of_steps_spinBox.value():
+                    StateData_freq = int(self.Number_of_steps_spinBox.value() / 2)
                     print("You did not enter the stateData frequency. Therefore it will be automatically set to %s."
                           % StateData_freq)
 
             elif StateData_freq != "" and State_Data_Reporter:
-                if StateData_freq > self.Number_of_steps_textEdit.toPlainText():
-                    StateData_freq = int(int(self.Number_of_steps_textEdit.toPlainText()) / 2)
+                if StateData_freq > self.Number_of_steps_spinBox.value():
+                    StateData_freq = int(int(self.Number_of_steps_spinBox.value()) / 2)
                     print("You entered the stateData frequency bigger than total steps. Therefore it will be "
                           "automatically set to half of the total steps which is equal to %s. "
                           % StateData_freq)
@@ -196,12 +196,12 @@ class Advanced(QtCore.QThread):
             if self.Device_ID_checkBox.isChecked():
                 Device_ID_active = True
 
-            platform, properties, precision = Advanced_Helper_Functions.selected_platform(self,
+            platform_name, properties, precision = Advanced_Helper_Functions.selected_platform(self,
                                                                                           self.platform_comboBox.currentText(),
                                                                                           Device_ID_active, precision)
             cuda_precision_prefix = None
             cuda_active = False
-            if platform == 'CUDA':
+            if platform_name == 'CUDA':
                 cuda_precision_prefix = 'Cuda'
                 cuda_active = True
 
@@ -211,15 +211,17 @@ class Advanced(QtCore.QThread):
             print(exc_type, fname, exc_tb.tb_lineno)
 
         print("Parameters Sending to Runner...")
+
+
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
 
-                                long_simulation_time=self.run_duration_spinBox_2.value(),
+                                long_simulation_time=self.Number_of_steps_spinBox.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
 
                                 Number_of_CPU=self.Number_CPU_spinBox_2.value(),
                                 all_cpu=self.All_CPU_checkBox.isChecked(),
-                                platform=platform, properties=properties, precision=precision, cuda_active=cuda_active,
+                                platform=platform_name, properties=properties, precision=precision, cuda_active=cuda_active,
                                 cuda_precision_prefix=cuda_precision_prefix,
                                 properties_active=properties_active, CPU_properties_active=CPU_properties_active,
                                 Device_ID_active=Device_ID_active,
@@ -237,6 +239,7 @@ class Advanced(QtCore.QThread):
 
                                 integrator_kind=self.integrator_kind_comboBox.currentText(),  # INTEGRATOR
                                 integrator_time_step=self.integrator_time_step.toPlainText(),  # INTEGRATOR
+                                integrator_time_step_unit=self.integrator_time_step_unit.currentText(),  # INTEGRATOR
                                 friction=self.friction_textEdit.toPlainText(),  # ADDITIONAL INTEGRATOR
                                 Temperature=self.temperature_textEdit.toPlainText(),  # ADDITIONAL INTEGRATOR
                                 Additional_Integrator=Additional_Integrator,
@@ -249,7 +252,7 @@ class Advanced(QtCore.QThread):
                                 use_switching_distance=use_switching_distance,
                                 switching_distance=self.switching_distance_textEdit.toPlainText(),
 
-                                Number_of_steps=self.Number_of_steps_textEdit.toPlainText(),
+                                Number_of_steps=self.Number_of_steps_spinBox.value(),
                                 Minimize=minimize,
                                 no_minimize_value=no_minimize_value,
                                 Max_minimization_iteration=self.Max_minimize_iter_textEdit.toPlainText(),

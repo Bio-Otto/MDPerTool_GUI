@@ -289,25 +289,28 @@ class Graphs(QWidget):
         self.pretty_time(y_time_remaining)
 
         if x.shape == y_temp.shape:
-            self.temperature_graph.plot(x=x, y=y_temp, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
-                                        name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
-            self.temperature_graph.autoRange()
+            try:
+                self.temperature_graph.plot(x=x, y=y_temp, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
+                                            name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
+                self.temperature_graph.autoRange()
 
-            self.potential_energy_graph.setData(x=x, y=y_potential, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
-                                                name="Potential")
+                self.potential_energy_graph.setData(x=x, y=y_potential, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
+                                                    name="Potential")
 
-            self.kinetic_energy_graph.setData(x=x, y=y_kinetic, clear=True, pen=pg.mkPen((0, 255, 0), width=3),
-                                              name="Kinetic")
+                self.kinetic_energy_graph.setData(x=x, y=y_kinetic, clear=True, pen=pg.mkPen((0, 255, 0), width=3),
+                                                  name="Kinetic")
 
-            self.total_energy_graph.setData(x=x, y=y_total, clear=True, pen=pg.mkPen((0, 0, 255), width=3),
-                                            fillLevel=0.0, brush=(150, 150, 50, 10), name="Total")
+                self.total_energy_graph.setData(x=x, y=y_total, clear=True, pen=pg.mkPen((0, 0, 255), width=3),
+                                                fillLevel=0.0, brush=(150, 150, 50, 10), name="Total")
 
-            self.simulation_time_graph.setData(x=x, y=self.real_time_as_minute, pen=pg.mkPen((0, 0, 255), width=3),
-                                               fillLevel=0.0, name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
+                self.simulation_time_graph.setData(x=x, y=self.real_time_as_minute, pen=pg.mkPen((0, 0, 255), width=3),
+                                                   fillLevel=0.0, name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
 
-            self.simulation_speed_graph.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
-                                                symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0, name="Speed",
-                                                brush=(150, 150, 50, 30))
+                self.simulation_speed_graph.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
+                                                    symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0, name="Speed",
+                                                    brush=(150, 150, 50, 30))
+            except Exception as err:
+                print(err)
 
             # if self.first_entrance == 1:
             #     ay = self.simulation_speed_and_time_graph.getAxis('left')
