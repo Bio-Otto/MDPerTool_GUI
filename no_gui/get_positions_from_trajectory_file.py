@@ -90,7 +90,6 @@ def get_openmm_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_ato
     trajectory_collector = object
     if ref_traj is not None:
         traj1 = md.join(md.iterload(ref_traj, chunk=100, stride=stride, atom_indices=None, top=top))
-        print("yeeee")
         traj2 = md.join(md.iterload(modif_traj, chunk=100, stride=stride, atom_indices=None, top=top))
         trajectory_collector = traj1 + traj2
 

@@ -1,5 +1,6 @@
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QIcon
 
 
 class Message_Boxes:
@@ -23,6 +24,18 @@ class Message_Boxes:
     def Warning_message(self, title, message, style):
         warning_msgbox = QMessageBox(QMessageBox.Warning, title, title + "\n\n" + message)
         warning_msgbox.setIcon(QMessageBox.Warning)
+        warning_msgbox.addButton(QMessageBox.Ok)
+        warning_msgbox.setStyleSheet(style)
+        warning_msgbox.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        warning_msgbox.exec_()
+
+    def Succesfully_message(self, title, message, style):
+        warning_msgbox = QMessageBox(QMessageBox.Warning, title, title + "\n\n" + message)
+        warning_msgbox.setIcon(QMessageBox.Information)
+
+        warning_msgbox.setWindowModality(Qt.NonModal)
+        warning_msgbox.setWindowOpacity(.8)
+
         warning_msgbox.addButton(QMessageBox.Ok)
         warning_msgbox.setStyleSheet(style)
         warning_msgbox.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)

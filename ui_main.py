@@ -71,7 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ################################################################################################################
         print('System: ' + platform.system())
         print('Version: ' + platform.release())
-
+        self.r_factor_count = 0
         # ------------------------------------ > START OF SIMULATION MONITORING < ------------------------------------ #
         self.created_script = None
         self.Real_Time_Graphs = Graphs()
@@ -157,6 +157,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.run = OpenMMScriptRunner
         self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0]+1)*100)/decomp_data[1]))
+        self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
@@ -192,9 +193,12 @@ class MainWindow(QtWidgets.QMainWindow):
     """
 
     def run_btn_clicked(self):
+        self.r_factor_count = 0
         self.Run.setEnabled(False)
         self.start_monitoring = False
         self.start_monitoring = Advanced.send_arg_to_Engine(self)
+
+        self.run.plotdata = {}
 
         if self.start_monitoring:
             self.show_simulation_monitoring()
@@ -211,7 +215,14 @@ class MainWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))
 
     def show_simulation_monitoring(self):
-        self.stackedWidget.setCurrentIndex(1)
+        # self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
+
+        UIFunctions.resetStyle(self, "btn_monitoring")
+        UIFunctions.labelPage(self, "MONITORING THE PROCESS")
+        widget = self.findChild(QPushButton, "btn_monitoring")
+        widget.setStyleSheet(UIFunctions.selectMenu(widget.styleSheet()))
+
         self.Real_Time_Graphs.run_script(self.created_script)
 
     def fetch_and_load_pdbfile(self):
@@ -297,7 +308,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.output_directory_lineedit.text(),
                                                              ph=7, chains_to_remove=delete_chains)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
@@ -339,6 +350,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Stocasthic_Changed(self):
         Functions.Stochastic_changed(self)
+
+    def finish_message(self, alert_message):
+        self.r_factor_count += 1
+        if self.r_factor_count == len(str(self.R_factor_lineEdit.text()).split(',')):
+            Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
+            self.Run.setEnabled(True)
 
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #

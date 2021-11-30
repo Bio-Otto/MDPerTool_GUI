@@ -62,7 +62,6 @@ def queue_reporter_factory(queue):
                 self._headers = [e.strip('#"\'') for e in headers]
             else:
                 line = self._out.getvalue()
-
             t = [e.strip('%"\'') for e in line.strip().split(',')]
             # split the line based on whatever separator we know that the parent was using, and then cast to float
 
@@ -81,6 +80,7 @@ class Communicate(QtCore.QObject):
     main_signal = QtCore.Signal(dict)
     thread_id_keeper = QtCore.Signal(int)
     decomp_process = QtCore.Signal(list)
+    finish_alert = QtCore.Signal(str)
 
 
 class OpenMMScriptRunner(QtCore.QObject):
@@ -89,11 +89,12 @@ class OpenMMScriptRunner(QtCore.QObject):
     status = str
     pid_idents = []
     Signals = Communicate()
+    plotdata = dict
     global _stop_running
 
     def __init__(self, script):
         super(OpenMMScriptRunner, self).__init__()
-        self.plotdata = dict
+        # self.plotdata = dict
         self.plots_created = False
         self.decomp_data = []
 
@@ -140,7 +141,7 @@ class OpenMMScriptRunner(QtCore.QObject):
             code = fix_code()
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
-        print(code)
+
         exec(code, {'__queue': queue, '__queue_reporter_factory': queue_reporter_factory})
 
     def queue_consumer(self, q):
@@ -184,6 +185,9 @@ class OpenMMScriptRunner(QtCore.QObject):
 
         if type(msg) == list:
             self.Signals.decomp_process.emit(msg)
+
+        if type(msg) == str:
+            self.Signals.finish_alert.emit(msg)
 
 
 class Graphs(QWidget):
@@ -323,12 +327,15 @@ class Graphs(QWidget):
                 self.total_energy_graph.setData(x=x, y=y_total, clear=True, pen=pg.mkPen((0, 0, 255), width=3),
                                                 fillLevel=0.0, brush=(150, 150, 50, 10), name="Total")
 
-                self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute, pen=pg.mkPen((0, 0, 255), width=3),
-                                                   fillLevel=0.0, name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
+                self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute,
+                                                        pen=pg.mkPen((0, 0, 255), width=3),
+                                                        fillLevel=0.0, name="Rime Remaining (sec)",
+                                                        brush=(150, 150, 50, 10))
 
                 self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
-                                                    symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0, name="Speed",
-                                                    brush=(150, 150, 50, 30))
+                                                         symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0,
+                                                         name="Speed",
+                                                         brush=(150, 150, 50, 30))
 
             except Exception as err:
                 print("========================\n", err)

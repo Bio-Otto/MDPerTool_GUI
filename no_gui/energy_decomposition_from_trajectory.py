@@ -323,6 +323,8 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
         reference_df.to_csv(os.path.join(output_directory, ref_energy_name), index=False)
         modified_df.to_csv(os.path.join(output_directory, modif_energy_name), index=False)
 
+    if que is not None:
+        que.put("Progress Finished Succesfully :)")  # res_num = current residue  -  res_number = all residues number
 # from get_positions_from_trajectory_file import get_openmm_pos_from_traj_with_mdtraj
 #
 # position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(

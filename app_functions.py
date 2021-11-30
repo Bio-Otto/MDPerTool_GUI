@@ -509,7 +509,7 @@ class pdb_Tools:
                 open(os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph)),
                      "w"),
                 keepIds=True)
-            return output_path
+            return os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
 
         if output_path == "":
             new_outpath_dir = os.path.dirname(file_pathway)

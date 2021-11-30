@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>2</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -8347,7 +8347,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                       </property>
                       <property name="currentIndex">
-                       <number>1</number>
+                       <number>0</number>
                       </property>
                       <widget class="QWidget" name="Perturb_Quick_3">
                        <attribute name="title">
