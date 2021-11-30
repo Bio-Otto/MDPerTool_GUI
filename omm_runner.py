@@ -9,7 +9,7 @@ import tokenize
 import pystache
 import numpy as np
 from PySide2 import QtWidgets, QtCore, QtGui
-from pyqtgraph import PlotWidget, plot, dockarea
+from pyqtgraph import PlotWidget, plot, dockarea, ProgressDialog
 import pyqtgraph as pg
 from PySide2.QtCore import QTimer, QDateTime, Slot
 import subprocess
@@ -18,9 +18,9 @@ import os
 import sys
 from PySide2 import QtCore
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                          QSize, QTime, QUrl, Qt, QEvent)
+                            QSize, QTime, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
+                           QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
 
@@ -55,7 +55,7 @@ def queue_reporter_factory(queue):
 
             if not was_initialized:
                 # the first report has two lines on it -- we want to look at the first, as it contains the headers
-                print(self._out.getvalue())
+                # print(self._out.getvalue())
                 initial, line = self._out.getvalue().split('\n', 1)
                 headers = initial.strip().split(',')
                 # filter out some extra quotation marks and comment characters
@@ -80,6 +80,7 @@ class Communicate(QtCore.QObject):
     dataSignal = QtCore.Signal(dict)
     main_signal = QtCore.Signal(dict)
     thread_id_keeper = QtCore.Signal(int)
+    decomp_process = QtCore.Signal(list)
 
 
 class OpenMMScriptRunner(QtCore.QObject):
@@ -94,6 +95,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         super(OpenMMScriptRunner, self).__init__()
         self.plotdata = dict
         self.plots_created = False
+        self.decomp_data = []
 
         global _stop_running
 
@@ -108,8 +110,6 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.t1.start()
         self.t2.start()
 
-        #
-
     def stop_threads(self):
 
         # global _stop_running
@@ -123,6 +123,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         ctypes.pythonapi.PyThreadState_SetAsyncExc(threading.get_ident(), ctypes.py_object(SystemExit))
 
     def run_openmm_script(self, code, queue):
+
         def fix_code():
             itoks = tokenize.generate_tokens(StringIO(code).readline)
 
@@ -130,6 +131,7 @@ class OpenMMScriptRunner(QtCore.QObject):
                 for toktype, toktext, (srow, scol), (erow, ecol), line in itoks:
                     if toktext == 'StateDataReporter':
                         toktext = '__queue_reporter_factory(__queue)'
+
                     yield toktype, toktext, (srow, scol), (erow, ecol), line
 
             return tokenize.untokenize(run()) + '__queue.put(None)'
@@ -138,7 +140,7 @@ class OpenMMScriptRunner(QtCore.QObject):
             code = fix_code()
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
-
+        print(code)
         exec(code, {'__queue': queue, '__queue_reporter_factory': queue_reporter_factory})
 
     def queue_consumer(self, q):
@@ -151,8 +153,8 @@ class OpenMMScriptRunner(QtCore.QObject):
                 msg = q.get_nowait()
                 if msg is None:
                     break
-
                 self.update_plot(msg)
+
             except queue.Empty:
                 time.sleep(0.1)
 
@@ -164,18 +166,25 @@ class OpenMMScriptRunner(QtCore.QObject):
         if 'Step' not in keys:
             raise ValueError('The reporter has not step information, so there is no x-axis to plot graphs!')
 
+    def decomp_progress(self, data):
+        self.decomp_data.append(data)
+
     def update_plot(self, msg):
         if not self.plots_created:
             self.create_plots(msg.keys())
             self.plots_created = True
 
-        for k, v in msg.items():
-            current = self.plotdata.get(k)
-            self.plotdata.update({k: np.concatenate((current, v), axis=None)})
-        self.Signals.dataSignal.emit(self.plotdata)
+        if type(msg) == dict:
 
+            for k, v in msg.items():
+                current = self.plotdata.get(k)
+                self.plotdata.update({k: np.concatenate((current, v), axis=None)})
 
-# ###########################################################################
+            self.Signals.dataSignal.emit(self.plotdata)
+
+        if type(msg) == list:
+            self.Signals.decomp_process.emit(msg)
+
 
 class Graphs(QWidget):
     # global curve, data, p6
@@ -192,43 +201,52 @@ class Graphs(QWidget):
         # setting style sheet to the plot window
         self.win.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
         self.win.setWindowTitle('Real Time Simulation Monitoring')
-        # self.verticalLayout_16.addWidget(self.win)
 
         self.temperature_graph = self.win.addPlot(title="Temperature")
         self.temperature_graph.addLegend()
-        # self.temperature_graph.showLabel('bottom', show=True)
         self.temperature_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.temperature_graph.setLabel('left', "Temperature", units='K')
         self.temperature_graph.setLabel('bottom', "Step")
         # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
         self.temperature_graph.setYRange(200, 400, padding=0)
         self.temperature_graph.showGrid(x=True, y=True)
+        self.temperature_graph_plot = self.temperature_graph.plot(name='Temperature')
 
         # self.win.nextRow()
         self.energy_graph = self.win.addPlot(title="Energy")
-
+        self.energy_graph.addLegend()
         self.energy_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.energy_graph.setLabel('left', "Energy", units='kJ/mole')
         self.energy_graph.setLabel('bottom', "Step")
         # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
         self.energy_graph.showGrid(x=True, y=True)
 
-        self.potential_energy_graph = self.energy_graph.plot()
-        self.kinetic_energy_graph = self.energy_graph.plot()
-        self.total_energy_graph = self.energy_graph.plot()
-        self.energy_graph.addLegend()
+        self.potential_energy_graph = self.energy_graph.plot(name='Potential')
+        self.kinetic_energy_graph = self.energy_graph.plot(name='Kinetic')
+        self.total_energy_graph = self.energy_graph.plot(name='Total')
+        # self.energy_graph.addLegend()
 
         self.win.nextRow()
-        self.simulation_speed_and_time_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
-        self.simulation_speed_and_time_graph.addLegend()
+        self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
+        self.simulation_speed_graph.addLegend()
+        self.simulation_speed_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
+        self.simulation_speed_graph.setLabel('left', "Speed", units='ns/day')
+        self.simulation_speed_graph.setLabel('bottom', "Step")
+        self.simulation_speed_graph.showGrid(x=True, y=True)
 
-        self.simulation_speed_graph = self.simulation_speed_and_time_graph.plot()
-        self.simulation_time_graph = self.simulation_speed_and_time_graph.plot()
+        self.simulation_speed_graph_plot = self.simulation_speed_graph.plot(name='Speed (ns/day)')
 
-        self.simulation_speed_and_time_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
-        self.simulation_speed_and_time_graph.setLabel('left', "Speed", units='ns/day')
-        self.simulation_speed_and_time_graph.setLabel('bottom', "Step")
-        self.simulation_speed_and_time_graph.showGrid(x=True, y=True)
+        self.win.nextRow()
+        self.simulation_time_graph = self.win.addPlot(title="Remaining Time", row=2, colspan=2)
+        self.simulation_time_graph.addLegend()
+        self.simulation_time_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
+        self.simulation_time_graph.setLabel('left', "Remaining Time", units='sec')
+        self.simulation_time_graph.setLabel('bottom', "Step")
+        self.simulation_time_graph.showGrid(x=True, y=True)
+
+        self.simulation_time_graph_plot = self.simulation_time_graph.plot(name='Remaining Time (sec)')
+        self.simulation_time_graph.setLogMode(x=False, y=False)  # logaritmik mode
+        self.simulation_time_graph.enableAutoRange(axis='y')
 
         self.first_entrance = 0
 
@@ -239,6 +257,7 @@ class Graphs(QWidget):
             return self.real_speed.append(float(0))
 
         if len(speed_style) == 1:
+
             if speed_style[0] == '--':
                 return self.real_speed.append(float(0))
             return self.real_speed.append(float(speed_style[0]))
@@ -251,6 +270,7 @@ class Graphs(QWidget):
     def pretty_time(self, t_remaining):
         """Format the time as minute"""
         time_style = t_remaining.split(':')
+        print(t_remaining)
         if t_remaining == '':
             return self.real_time_as_minute.append(float(0))
 
@@ -290,9 +310,9 @@ class Graphs(QWidget):
 
         if x.shape == y_temp.shape:
             try:
-                self.temperature_graph.plot(x=x, y=y_temp, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
-                                            name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
-                self.temperature_graph.autoRange()
+                self.temperature_graph_plot.setData(x=x, y=y_temp, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
+                                                    name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
+                # self.temperature_graph.autoRange()
 
                 self.potential_energy_graph.setData(x=x, y=y_potential, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
                                                     name="Potential")
@@ -303,27 +323,27 @@ class Graphs(QWidget):
                 self.total_energy_graph.setData(x=x, y=y_total, clear=True, pen=pg.mkPen((0, 0, 255), width=3),
                                                 fillLevel=0.0, brush=(150, 150, 50, 10), name="Total")
 
-                self.simulation_time_graph.setData(x=x, y=self.real_time_as_minute, pen=pg.mkPen((0, 0, 255), width=3),
+                self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute, pen=pg.mkPen((0, 0, 255), width=3),
                                                    fillLevel=0.0, name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
 
-                self.simulation_speed_graph.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
+                self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
                                                     symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0, name="Speed",
                                                     brush=(150, 150, 50, 30))
-            except Exception as err:
-                print(err)
 
-            # if self.first_entrance == 1:
-            #     ay = self.simulation_speed_and_time_graph.getAxis('left')
-            #     dy = [(value, '{:.3f}'.format(value)) for value in y_speed]
-            #     ay.setTicks([dy, []])
-            #     print(y_speed)
-            # QtCore.QCoreApplication.processEvents()
-            # p2.plot(np.random.normal(size=120) + 10, pen=(0, 0, 255), name="Blue curve")
+            except Exception as err:
+                print("========================\n", err)
+                print(x, "\n", self.real_speed)
+                print(y_speed)
+                print("\n========================")
+
+    def updating_decomposion(self, data_decomp):
+        print(data_decomp)
 
     def run_script(self, contents):
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
         self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
+        # self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
 
     def stop_th(self):
         self.runner.stop_threads()

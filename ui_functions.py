@@ -28,7 +28,6 @@ from PyMolWidget import PymolQtWidget
 from analysis import VisJS_Widget
 
 
-
 class UIFunctions(MainWindow):
     # ----- > GLOBALS
     GLOBAL_STATE = 0

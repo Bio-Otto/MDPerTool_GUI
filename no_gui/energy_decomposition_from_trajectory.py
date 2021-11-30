@@ -13,6 +13,8 @@ import numpy as np
 import time
 import os
 import pandas as pd
+from ui_main import *
+from builder import *
 
 # from .get_positions_from_trajectory_file import get_openmm_pos_from_traj
 # from .response_time_creator import getResidueResponseTimes
@@ -88,8 +90,9 @@ def get_residue_atoms():
 
 
 def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output_directory, ref_energy_name,
-                                modif_energy_name, origin_last_pdb, ff):
+                                modif_energy_name, origin_last_pdb, ff, que=None):
     global modeller, by_pass_bonds_index, simulation, by_pass_atoms, nonbonded_group_num, modified_df, reference_df
+
     print('Loading...')
 
     protein_ff = ff
@@ -183,7 +186,6 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
             print("CMAP Torsion Force deleted")
             system.removeForce(i)
 
-
     # for force in system.getForces():
     #     force.setForceGroup(0)  # all forces default to group 0
     #     if force.__class__.__name__ == 'NonbondedForce':
@@ -231,7 +233,6 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
         # --------------------------------------------- NOBONDED FORCE ----------------------------------------------- #
         if simulation.context.getPlatform().getName() in ['OpenCL', 'CUDA']:
-            print("OpenCL Kullanımda")
             for index in range(Nonbonded_F.getNumParticles()):
                 charge, sigma, epsilon = NonBonded_Parameters[index]
                 exclude = (index not in by_pass_atoms_index)
@@ -248,7 +249,6 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
             Nonbonded_F.updateParametersInContext(simulation.context)
 
         if simulation.context.getPlatform().getName() == 'CPU':
-            print("CPU Kullanımda")
             for index in range(Nonbonded_F.getNumParticles()):
                 charge, sigma, epsilon = NonBonded_Parameters[index]
                 exclude = (index not in by_pass_atoms_index)
@@ -292,6 +292,7 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
         Periodic_TF.updateParametersInContext(simulation.context)
         """
+
         for i in range(len(trj_pos_list)):
             simulation.context.setPositions(trj_pos_list[i])
 
@@ -308,9 +309,10 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
                 else:
                     modified_df.loc[i - int(len(trj_pos_list) / 2)][res_num] = float(st)
+        if que is not None:
+            que.put([res_num, res_number, st])  # res_num = current residue  -  res_number = all residues number
 
-        print("Nonbonded Energy: ", st)
-        print("#################### %s #####################" % res_num)
+        # print("#################### %s #####################" % res_num)
 
         del by_pass_atoms_index
 
@@ -320,7 +322,6 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
     if ref_energy_name is not None:
         reference_df.to_csv(os.path.join(output_directory, ref_energy_name), index=False)
         modified_df.to_csv(os.path.join(output_directory, modif_energy_name), index=False)
-
 
 # from get_positions_from_trajectory_file import get_openmm_pos_from_traj_with_mdtraj
 #

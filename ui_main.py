@@ -75,8 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ------------------------------------ > START OF SIMULATION MONITORING < ------------------------------------ #
         self.created_script = None
         self.Real_Time_Graphs = Graphs()
-        self.verticalLayout_16.addWidget(self.Real_Time_Graphs.win)
-        # self.setLayout(self.verticalLayout_16)
+        self.verticalLayout_22.addWidget(self.Real_Time_Graphs.win)
         # ------------------------------------- > END OF SIMULATION MONITORING < ------------------------------------- #
 
         # ----- > Remove Standart Title Bar
@@ -150,11 +149,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --> RUN TIME SETTINGS
         self.run_duration_doubleSpinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
-        self.long_simulation_time_unit.currentTextChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
+        self.long_simulation_time_unit.currentTextChanged.connect(
+            lambda: Functions.number_of_steps_changed_from_quick(self))
         self.integrator_time_step.textChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_advanced(self))
         # self.Number_of_steps_spinBox.installEventFilter(self)
 
+        self.run = OpenMMScriptRunner
+        self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0]+1)*100)/decomp_data[1]))
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
@@ -180,6 +182,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
         self.Handel_Save_Figure_Options_Changed()
         self.Handel_Save_Figure_Options()
+
     """
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj is self.Number_of_steps_spinBox:
@@ -337,7 +340,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def Stocasthic_Changed(self):
         Functions.Stochastic_changed(self)
 
-
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################
@@ -429,6 +431,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
             print("pos: ", event.pos())
     """
+
     # ----- > Mouse Click Event
     def mousePressEvent(self, event):
         self.dragPos = event.globalPos()

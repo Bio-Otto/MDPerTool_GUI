@@ -49,6 +49,7 @@ class Helper_Functions():
 
 
 class Functions(MainWindow):
+
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
     def get_conservation_scores(self):
         try:

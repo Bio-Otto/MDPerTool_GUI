@@ -1,5 +1,5 @@
 from PySide2 import QtCore
-from PySide2.QtCore import Slot
+from PySide2.QtCore import Slot, QThread
 from PySide2.QtWidgets import QMessageBox
 import os
 import pystache
@@ -11,16 +11,15 @@ import itertools
 import tokenize
 from omm_runner import *
 from ui_styles import Style
+from ui_main import *
 
-
-# from OpenMM_Runner import OpenMMScriptRunner
+from PySide2.QtCore import Signal
 
 
 class Advanced(QtCore.QThread):
 
     def __init__(self, parent=None):
         super(Advanced, self).__init__(parent)
-
         self.start_monitoring = False
 
     @Slot()
@@ -49,7 +48,6 @@ class Advanced(QtCore.QThread):
         # global selected_platform
 
         print("Simulation parameters preparing for the start ...")
-
         ## FORCEFIELD CONFIGURATIONS
         self.protein_ff = self.protein_forcefield_comboBox.currentText() + '.xml'
 
@@ -197,8 +195,9 @@ class Advanced(QtCore.QThread):
                 Device_ID_active = True
 
             platform_name, properties, precision = Advanced_Helper_Functions.selected_platform(self,
-                                                                                          self.platform_comboBox.currentText(),
-                                                                                          Device_ID_active, precision)
+                                                                                               self.platform_comboBox.currentText(),
+                                                                                               Device_ID_active,
+                                                                                               precision)
             cuda_precision_prefix = None
             cuda_active = False
             if platform_name == 'CUDA':
@@ -211,8 +210,6 @@ class Advanced(QtCore.QThread):
             print(exc_type, fname, exc_tb.tb_lineno)
 
         print("Parameters Sending to Runner...")
-
-
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
 
@@ -221,7 +218,8 @@ class Advanced(QtCore.QThread):
 
                                 Number_of_CPU=self.Number_CPU_spinBox_2.value(),
                                 all_cpu=self.All_CPU_checkBox.isChecked(),
-                                platform=platform_name, properties=properties, precision=precision, cuda_active=cuda_active,
+                                platform=platform_name, properties=properties, precision=precision,
+                                cuda_active=cuda_active,
                                 cuda_precision_prefix=cuda_precision_prefix,
                                 properties_active=properties_active, CPU_properties_active=CPU_properties_active,
                                 Device_ID_active=Device_ID_active,
@@ -232,8 +230,10 @@ class Advanced(QtCore.QThread):
                                 model_water=self.water_model,
                                 water_active=water_active,  # FORCEFIELD if protein include obc or gbvi
                                 water_padding=self.water_padding_lineEdit.text(),
-                                perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in range(self.selected_residues_listWidget.count())],
-                                speed_factor=[int(r) if r.isdigit() else r for r in self.R_factor_lineEdit.text().split(',')],
+                                perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in
+                                                    range(self.selected_residues_listWidget.count())],
+                                speed_factor=[int(r) if r.isdigit() else r for r in
+                                              self.R_factor_lineEdit.text().split(',')],
                                 perturb_simulation_time=self.run_duration_spinBox.value(),
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),
 

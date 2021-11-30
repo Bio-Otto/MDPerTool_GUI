@@ -275,7 +275,7 @@ for i in range(len({{speed_factor}})):
 
     if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
         print("The CPU platform always uses 'mixed' precision.")
-        print("Simulation process will use %s Thread(s)" % CPU_Threads)
+        print("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
         properties = {'CpuThreads': '{{Number_of_CPU}}'}
         precision = 'mixed'
 
@@ -397,30 +397,26 @@ for i in range(len({{speed_factor}})):
                                                                  modif_traj=dissipation_traj_file_for_pos)
 
 
-
-
-
-
      # --> RESIDUE BASED DECOMPOSITION
     if i == 0:
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY,
+                                    output_directory=OUTPUT_DIRECTORY, que=__queue,
                                     ref_energy_name='reference_energy_file.csv',
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}')
     if i != 0:
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY,
+                                    output_directory=OUTPUT_DIRECTORY, que=__queue,
                                     ref_energy_name=None,
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path,
                                     ff='{{protein_ff}}')
+
     # --> RESPONSE TIME CSV EXPORTER
     getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
                             os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
                             outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
-
 
 
 
