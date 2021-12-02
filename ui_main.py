@@ -29,8 +29,8 @@ from PySide2 import QtCore, QtGui, QtWidgets
 #                          QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
 # from PyQt5.QtGui import QPainterPath, QRegion
 ## ==> MAIN WINDOW
-# import app_modules
-# from PySide2 import uic
+from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
+from mplwidget import *
 from icons import *
 import pyqtgraph as pg
 # IMPORT FUNCTIONS
@@ -78,7 +78,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_22.addWidget(self.Real_Time_Graphs.win)
         # ------------------------------------- > END OF SIMULATION MONITORING < ------------------------------------- #
 
-        # ----- > Remove Standart Title Bar
+        # ############################################################################################################ #
+        # -------------------------------------- > START OF MATPLOTLIB WIDGET < -------------------------------------- #
+        self.matplotlib_widget()
+        # -------------------------------------- > END OF MATPLOTLIB WIDGET < ---------------------------------------- #
+        # ############################################################################################################ #
+
+        # -------------------------------------- > Remove Standart Title Bar < --------------------------------------- #
         UIFunctions.removeTitleBar(True)
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
@@ -161,6 +167,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
+        self.response_time_lineEdit.textChanged.connect(self.response_time_graph_path_changed)
+        self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
+
         self.output_directory_button.clicked.connect(lambda: Functions.analysis_output_directory(self))
         self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local())
         self.add_residue_to_targets_pushButton.clicked.connect(lambda: Functions.add_residue_to_target_List(self))
@@ -538,9 +547,25 @@ class MainWindow(QtWidgets.QMainWindow):
     ####################################################################################################################
     #                                   == > END OF PYMOL NAVIGATION TOOLBAR < ==                                      #
     ####################################################################################################################
+    def matplotlib_widget(self):
+        self.matplotlib_widget = WidgetPlot(self)
+        self.verticalLayout_23.addWidget(self.matplotlib_widget.toolbar)
+        self.verticalLayout_23.addWidget(self.matplotlib_widget.canvas)
+
     ####################################################################################################################
     #                                       == > START OF SPLASH SCREEN < ==                                           #
     ####################################################################################################################
+    def response_time_graph_path_changed(self):
+        possible_path = str(self.response_time_lineEdit.text())
+        if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
+            source_residue = self.source_res_comboBox.currentText()
+            row, col, Response_Count = getResponseTimeGraph(possible_path)
+
+            if source_residue == '':
+                self.matplotlib_widget.canvas.plot(Response_Count, source_residue=None)
+            if source_residue != '':
+                self.matplotlib_widget.canvas.plot(Response_Count, source_residue=source_residue)
+
 
 
 class SplashScreen(QMainWindow):
@@ -604,7 +629,6 @@ class SplashScreen(QMainWindow):
         counter += 1
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
-
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

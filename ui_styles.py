@@ -146,6 +146,58 @@ class Style:
                     border-color:  rgb(157, 90, 198);
 
                 }
+                
+                QMessageBox 
+            {
+                color: white;
+                background-color: #323232;
+                selection-background-color:#323232;
+                selection-color: black;
+                background-clip: border;
+                border-image: none;
+                border: 0px transparent black;
+                outline: 0;
+                
+                border-radius: 12px;
+                border: 1.5px solid;
+                padding: 6px;
+                border-color: rgb(255, 170, 0);
+
+            }
+            
+
+QMessageBox QLabel
+            {
+                font: bold 12px;
+                border: none;
+            }
+
+QMessageBox QPushButton 
+            {
+                color: white; 
+                font-weight: bold; 
+                font-size: 10px; 
+                border: 2px solid rgb(52, 59, 72); 
+                border-radius: 5px; 
+                background-color:  rgb(22, 200, 244); 
+                margin-top:1px; 
+                margin-bottom: 1px; 
+                border-width: 1px; 
+                padding: 5px; 
+                outline: none;
+            }
+
+QMessageBox QPushButton:hover 
+            { 
+                background-color: rgb(255, 17, 100); 
+                border: 2px solid rgb(61, 70, 86);
+            }
+
+QMessageBox QPushButton:pressed 
+            { 
+                background-color:  rgb(15, 133, 163); 
+                border: 2px solid rgb(43, 50, 61);
+            }
     
             """
 

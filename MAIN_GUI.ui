@@ -8347,7 +8347,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                       </property>
                       <property name="currentIndex">
-                       <number>0</number>
+                       <number>2</number>
                       </property>
                       <widget class="QWidget" name="Perturb_Quick_3">
                        <attribute name="title">
@@ -10903,6 +10903,11 @@ QPushButton:pressed {
                        <attribute name="title">
                         <string>Graphics</string>
                        </attribute>
+                       <layout class="QHBoxLayout" name="horizontalLayout_20">
+                        <item>
+                         <layout class="QVBoxLayout" name="verticalLayout_23"/>
+                        </item>
+                       </layout>
                       </widget>
                      </widget>
                     </item>
