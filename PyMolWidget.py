@@ -8,6 +8,10 @@ import pymol2
 from PySide2.QtOpenGL import QGLFormat, QGLWidget
 from pymol.cgo import *
 from pymol.vfont import plain
+from pymol.cgo import *
+from pymol.vfont import plain
+from pymol import cmd, cgo, CmdException, selector, stored
+from chempy import cpv
 
 os.environ['QT_API'] = 'pyside2'
 buttonMap = {
@@ -159,6 +163,20 @@ class PymolQtWidget(QGLWidget):
         except Exception as expression:
             print(expression)
 
+    def resi_label_add(self, selection):
+        try:
+            self._pymol.cmd.select(selection)
+            # self._pymol.cmd.do('color red, ' + selection)
+
+            label_selection = '%s and name ca' % selection
+            self._pymol.cmd.set('label_color', 'green', label_selection)
+            self._pymol.cmd.label(label_selection, '"%s-%s" % (resn, resi)')
+            self._pymol.cmd.set('label_position', '(1, 1, 6)')
+            self._pymol.cmd.set('label_size', '14')
+
+        except Exception as expression:
+            print(expression)
+
     def clear_all_labels(self):
         self._pymol.cmd.label('all', '')
         self._pymol.cmd.do('color green')
@@ -181,20 +199,141 @@ class PymolQtWidget(QGLWidget):
         self.resizeGL(self.width(), self.height())
         self._pymolProcess()
 
-    def show_energy_dissipation(self, response_time_file_path, spectrum='white_blue', mol=None,
+    # def show_energy_dissipation(self, response_time_file_path, spectrum='white_blue', mol=None,
+    #                             display_color_ramp=True):
+    #
+    #     """
+    #     :param self:
+    #     :param response_time_file_path: Response Time csv file that include residue responses
+    #     :param mol: Structure file path that will be display on
+    #     :param display_color_ramp: Color bar will appear on screen
+    #     :param spectrum: Transition colors in the structure
+    #     :return:
+    #     """
+    #
+    #     # load the protein
+    #     print(self.mol_name)
+    #     if mol is None:
+    #         mol = self.mol_name
+    #
+    #     else:
+    #         self.mol_name = mol
+    #     # open the file of new values (just 1 column of numbers, one for each alpha carbon)
+    #     inFile = open(response_time_file_path, 'r')
+    #
+    #     # create the global, stored array
+    #     stored = []
+    #
+    #     # read the new B factors from file
+    #     for line in inFile.readlines():
+    #         stored.append(float(line))
+    #
+    #     # close the input file
+    #     inFile.close()
+    #
+    #     # clear out the old B Factors
+    #     self._pymol.cmd.alter('all', 'b=0.0')
+    #
+    #     # ---> obj = self._pymol.cmd.get_object_list(mol)[0]
+    #
+    #     counter = 0
+    #     for line in stored:
+    #         bfact = float(line)
+    #
+    #         self._pymol.cmd.alter("%s and resi %s and n. CA" % (str(self.mol_name), counter), "b=%s" % bfact)
+    #         counter = counter + 1
+    #
+    #     self._pymol.cmd.spectrum('b', spectrum, minimum=0, maximum=len(stored))
+    #     self._pymol.cmd.recolor()
+    #
+    #     if display_color_ramp:
+    #         self._pymol.cmd.ramp_new("count", self.mol_name, [0, len(stored)], color=[[1.0, 1.0, 1.0], 'blue'])
+
+    # def create_directed_arrows(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
+    #                            color='red', name=''):
+    #
+    #     """
+    #         cgo_arrow [ atom1 [, atom2 [, radius [, gap [, hlength [, hradius [, color [, name ]]]]]]]]
+    #         cgo_arrow A/PNK`301/C13, A/PNK`301/C7, gap=1.0, radius=0.15, hradius=0.5, hlength=0.5
+    #         cgo_arrow A/TYR`7/C, A/ASN`2/N, color=red red, hradius=1.0, hlength=1.0, gap=1.0, radius=0.35
+    #         atom1 = string: single atom selection or list of 3 floats {default: pk1}
+    #         atom2 = string: single atom selection or list of 3 floats {default: pk2}
+    #         radius = float: arrow radius {default: 0.5}
+    #         gap = float: gap between arrow tips and the two atoms {default: 0.0}
+    #         hlength = float: length of head
+    #         hradius = float: radius of head
+    #         color = string: one or two color names {default: blue red}
+    #         name = string: name of CGO object
+    #     """
+    #
+    #     radius, gap = float(radius), float(gap)
+    #     hlength, hradius = float(hlength), float(hradius)
+    #
+    #     try:
+    #         color1, color2 = color.split()
+    #     except:
+    #         color1 = color2 = color
+    #     color1 = list(self._pymol.cmd.get_color_tuple(color1))
+    #     color2 = list(self._pymol.cmd.get_color_tuple(color2))
+    #
+    #     def get_coord(v):
+    #         if not isinstance(v, str):
+    #             return v
+    #         if v.startswith('['):
+    #             return cmd.safe_list_eval(v)
+    #         return cmd.get_atom_coords(v)
+    #
+    #     xyz1 = get_coord(atom1)
+    #     xyz2 = get_coord(atom2)
+    #     normal = cpv.normalize(cpv.sub(xyz1, xyz2))
+    #
+    #     if hlength < 0:
+    #         hlength = radius * 3.0
+    #     if hradius < 0:
+    #         hradius = hlength * 0.6
+    #
+    #     if gap:
+    #         diff = cpv.scale(normal, gap)
+    #         xyz1 = cpv.sub(xyz1, diff)
+    #         xyz2 = cpv.add(xyz2, diff)
+    #
+    #     xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
+    #
+    #     obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2 + \
+    #           [cgo.CONE] + xyz3 + xyz2 + [hradius, 0.0] + color2 + color2 + \
+    #           [1.0, 0.0]
+    #
+    #     if not name:
+    #         name = self._pymol.cmd.get_unused_name('arrow')
+    #
+    #     self._pymol.cmd.load_cgo(obj, name)
+    #     self._pymol.cmd.group("Arrows", name)
+
+    def MinMaxScaler(self, X, min, max, top):
+        return (X - min) / (max - min) * top
+
+    def show_energy_dissipation(self, response_time_file_path, spectrum='red_white', mol=None,
                                 display_color_ramp=True):
 
         """
-        :param self:
-        :param response_time_file_path: Response Time csv file that include residue responses
-        :param mol: Structure file path that will be display on
-        :param display_color_ramp: Color bar will appear on screen
-        :param spectrum: Transition colors in the structure
-        :return:
+            :param self:
+            :param response_time_file_path: Response Time csv file that include residue responses
+            :param mol: Structure file path that will be display on
+            :param display_color_ramp: Color bar will appear on screen
+            :param spectrum: Transition colors in the structure
+            :return:
         """
+        self._pymol.cmd.show('surface')
+        self._pymol.cmd.set('surface_quality', 1)
+        self._pymol.cmd.set('surface_color', "white")
+        self._pymol.cmd.set('transparency', 0.55)
+
+        self._pymol.stored.residues = []
+        self._pymol.cmd.iterate('name ca', 'stored.residues.append(resi)', _self=self._pymol.cmd)
+
+        start_res_number = [int(x) for x in self._pymol.stored.residues][0]
 
         # load the protein
-        print(self.mol_name)
         if mol is None:
             mol = self.mol_name
 
@@ -205,32 +344,113 @@ class PymolQtWidget(QGLWidget):
 
         # create the global, stored array
         stored = []
-
+        normalize_stored = []
         # read the new B factors from file
         for line in inFile.readlines():
             stored.append(float(line))
-
         # close the input file
         inFile.close()
+
+        MIN = min(stored)
+        MAX = max(stored)
+        # Max Min Scaler function
+
+        for i in stored:
+            norm_val = round(self.MinMaxScaler(i, MIN, MAX, top=len(stored)), 2)
+            normalize_stored.append(norm_val)
+
+        stored = normalize_stored
 
         # clear out the old B Factors
         self._pymol.cmd.alter('all', 'b=0.0')
 
         # ---> obj = self._pymol.cmd.get_object_list(mol)[0]
-
-        counter = 0
+        counter = start_res_number
         for line in stored:
             bfact = float(line)
-
             self._pymol.cmd.alter("%s and resi %s and n. CA" % (str(self.mol_name), counter), "b=%s" % bfact)
             counter = counter + 1
 
-        self._pymol.cmd.spectrum('b', spectrum, minimum=0, maximum=len(stored))
+        self._pymol.cmd.spectrum('b', spectrum, minimum=0, maximum=max(stored))
         self._pymol.cmd.recolor()
 
         if display_color_ramp:
-            self._pymol.cmd.ramp_new("count", self.mol_name, [0, len(stored)], color=[[1.0, 1.0, 1.0], 'blue'])
+            self._pymol.cmd.ramp_new("count", self.mol_name, [0, len(stored)], color=['red', 'white'])
 
+        # self._pymol.cmd.save("session.pse")
+        # self._pymol.cmd.save('aa.pdb')
+
+    def create_directed_arrows(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
+                               color='red', name=''):
+
+        """
+            cgo_arrow [ atom1 [, atom2 [, radius [, gap [, hlength [, hradius [, color [, name ]]]]]]]]
+            cgo_arrow A/PNK`301/C13, A/PNK`301/C7, gap=1.0, radius=0.15, hradius=0.5, hlength=0.5
+            cgo_arrow A/TYR`7/C, A/ASN`2/N, color=red red, hradius=1.0, hlength=1.0, gap=1.0, radius=0.35
+            atom1 = string: single atom selection or list of 3 floats {default: pk1}
+            atom2 = string: single atom selection or list of 3 floats {default: pk2}
+            radius = float: arrow radius {default: 0.5}
+            gap = float: gap between arrow tips and the two atoms {default: 0.0}
+            hlength = float: length of head
+            hradius = float: radius of head
+            color = string: one or two color names {default: blue red}
+            name = string: name of CGO object
+        """
+
+        radius, gap = float(radius), float(gap)
+        hlength, hradius = float(hlength), float(hradius)
+
+        try:
+            color1, color2 = color.split()
+        except:
+            color1 = color2 = color
+        color1 = list(self._pymol.cmd.get_color_tuple(color1))
+        color2 = list(self._pymol.cmd.get_color_tuple(color2))
+
+        def get_coord(v):
+            if not isinstance(v, str):
+                return v
+            if v.startswith('['):
+                return cmd.safe_list_eval(v)
+            return cmd.get_atom_coords(v)
+
+        xyz1 = get_coord(atom1)
+        xyz2 = get_coord(atom2)
+        normal = cpv.normalize(cpv.sub(xyz1, xyz2))
+
+        if hlength < 0:
+            hlength = radius * 3.0
+        if hradius < 0:
+            hradius = hlength * 0.6
+
+        if gap:
+            diff = cpv.scale(normal, gap)
+            xyz1 = cpv.sub(xyz1, diff)
+            xyz2 = cpv.add(xyz2, diff)
+
+        xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
+
+        obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2 + \
+              [cgo.CONE] + xyz3 + xyz2 + [hradius, 0.0] + color2 + color2 + \
+              [1.0, 0.0]
+
+        if not name:
+            name = self._pymol.cmd.get_unused_name('arrow')
+
+        self._pymol.cmd.load_cgo(obj, name)
+        self._pymol.cmd.group("Arrows", name)
+
+        # cmd.extend('cgo_arrow', cgo_arrow)
+
+    def show_ligand_polar_interactions(self):
+        self._pymol.preset.ligands(selection='all', _self=self._pymol.cmd)
+        self._pymol.cmd.show("labels", 'chin_ins_pose_1_pol_conts')
+
+        # objs = self._pymol.cmd.get_object_list('all')
+        # objs2 = self._pymol.cmd.get_names('objects', 0, selection='(all)')
+        # print(objs2)
+
+        # cmd.extend('cgo_arrow', cgo_arrow)
 # if __name__ == "__main__":
 #     app = QtWidgets.QApplication()
 #     window = PymolQtWidget()

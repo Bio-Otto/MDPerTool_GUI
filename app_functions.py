@@ -1,5 +1,7 @@
 from PySide2.QtWidgets import QFileDialog, QWidget, QMessageBox
 import gzip
+import csv
+from pathlib import Path
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Slot
 from pdbfixer import PDBFixer
@@ -11,8 +13,10 @@ from urllib.request import urlretrieve
 from checkBox_menu import *
 from ui_main import *
 from message import Message_Boxes
-
+import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
+from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
+                                     call_pymol_for_network_visualization)
 
 
 class Helper_Functions():
@@ -51,6 +55,132 @@ class Helper_Functions():
 class Functions(MainWindow):
 
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
+    def calculate_intersection_network(self):
+        global intersection_graph, output_folder_directory
+
+        try:
+
+            number_of_threads = self.Number_of_thread_for_network_spinBox.value()
+            pdb = self.boundForm_pdb_lineedit.text()  # PDB file path --> "BOUND FORM OF STRUCTURE"
+            cutoff = self.network_cutoff_spinBox.value()  # Add edges between nodes if they are within cutoff range
+            retime_file = self.response_time_lineEdit.text()  # Response time file path
+            outputFileName = self.PPI_Network_name_lineedit.text()  # Protein general graph according to cut off value
+            output_directory = self.net_output_directory_lineedit.text()
+            source = self.source_res_comboBox.currentText()[:-1]  # One of the perturbed residues
+            node_threshold = self.node_threshold_spinBox.value()  # None or an Integer
+            node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
+
+            if node_threshold_use_condition:
+                node_threshold = None
+
+            verbose_condition = True  # True or False
+            target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                               for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
+
+            use_conservation = self.use_conservation_checkBox.isChecked()
+
+            pdb_id = self.conservation_PDB_ID_lineEdit.text()  # FREE OR BOUND FORM OF PDB, like '2EB8'
+            chain = self.conservation_pdb_chain_id_lineedit.text()  # FOR PULLING CONSERVATION SCORES INDICATE CHAIN ID OF PDB
+            conservation_threshold = self.conserv_score_doubleSpinBox.value()
+            save_conservation_scores = False
+
+            visualize_on_PyMol = True  # Networkx Graph Visulization on PyMol
+            visualize_on_VisJS = True  # Networkx Graph Visulization on VisJS
+            create_output = True  # Supports True or False Conditions for creation of all networks (*.gml) on a folder
+            just_visualize = False  # If you have already calculated network you can directly visualize it.
+
+            general_output_folder = os.path.join(output_directory, 'network_outputs')
+            Path(general_output_folder).mkdir(parents=True, exist_ok=True)
+
+            folder_name = "output_%s" % source
+            output_folder_directory = os.path.join(general_output_folder, folder_name)
+            Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
+
+            pool = mp.Pool(number_of_threads)
+            engine = Multi_Task_Engine(pdb_file=pdb, cutoff=cutoff, reTimeFile=retime_file, source=source,
+                                       node_threshold=node_threshold, verbose=verbose_condition,
+                                       outputFileName=outputFileName, write_outputs=create_output,
+                                       output_directory=output_folder_directory)
+
+            if use_conservation:
+                res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
+                                                              cutoff=conservation_threshold, bound_pdb=pdb)
+                if save_conservation_scores:
+                    rows = zip(res_IDs, con_scores)
+                    with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
+                              newline='') as f:
+                        writer = csv.writer(f)
+                        for row in rows:
+                            writer.writerow(row)
+
+                intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
+
+                net, log = zip(*pool.map(engine, list(intersection_resIDs)))
+
+            if not use_conservation:
+                print("TARGET RES:", target_residues)
+                net, log = zip(*pool.map(engine, target_residues))
+
+            clean_graph_list = []
+            if node_threshold is not None:
+                for i in net:
+                    if len(i.nodes()) > node_threshold:
+                        clean_graph_list.append(i)
+
+            if node_threshold is None:
+                for i in net:
+                    clean_graph_list.append(i)
+
+            # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
+            if len(clean_graph_list) > 0:
+                intersection_graph = intersection_of_directed_networks(clean_graph_list)
+                if create_output:
+                    nx.write_gml(intersection_graph, os.path.join(output_folder_directory, 'intersection_graph.gml'))
+
+            else:
+                print("There is no suitable Graph for your search parameters")
+
+            try:
+                arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph, pdb_file=pdb)
+
+                # ----------------------> CALL PYMOL FOR VISUALIZATION / START <---------------------- #
+
+                self.Protein3DNetworkView.show_energy_dissipation(response_time_file_path=retime_file)
+
+                for arrow_coord in arrows_cordinates:
+                    self.Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1], radius=0.05,
+                                                  gap=0.4, hradius=0.4, hlength=0.8, color='green')
+
+                for node in intersection_node_list:
+                    resID_of_node = int(''.join(list(filter(str.isdigit, node))))
+                    self.Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
+
+                # MAKE PYMOL VISUALIZATION BETTER
+                self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
+                self.Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                self.Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+
+                self.Protein3DNetworkView.update()
+                self.Protein3DNetworkView.show()
+                # -----------------------> CALL PYMOL FOR VISUALIZATION / END <----------------------- #
+
+            except Exception as error:
+                print(error)
+
+            for j in log:
+                Message_Boxes.Information_message(self, "DONE !", j, Style.MessageBox_stylesheet)
+
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+
+        finally:
+            # CLOSE THE ALREADY OPENED POOL
+            pool.close()
+            pool.join()
+
     def get_conservation_scores(self):
         try:
             conserv_pdb_id = self.conservation_PDB_ID_lineEdit.text()
@@ -126,15 +256,25 @@ class Functions(MainWindow):
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             output_file = QFileDialog.getExistingDirectory(options=options)
-            self.output_directory_lineedit.setText(output_file)
+            self.net_output_directory_lineedit.setText(output_file)
             return True
 
         except Exception as ins:
             return False
 
+    def node_threshold_use(self):
+        if self.node_threshold_checkBox.isChecked():
+            self.node_threshold_spinBox.setEnabled(False)
+        else:
+            self.node_threshold_spinBox.setEnabled(True)
+
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
 
     # ######################################### PERTURBATION WINDOW FUNCTIONS ##########################################
+    def maximum_thread_of_system(self):
+        self.Number_CPU_spinBox.setMaximum(mp.cpu_count())
+        self.Number_of_thread_for_network_spinBox.setMaximum(mp.cpu_count())
+
     def output_file(self):
         try:
             options = QFileDialog.Options()
@@ -374,7 +514,7 @@ class Functions(MainWindow):
     def number_of_steps_changed_from_advanced(self):
         global new_time
         current_step = int(self.Number_of_steps_spinBox.value())  # 1 ns
-        current_time_unit = self.long_simulation_time_unit.currentText() # ns
+        current_time_unit = self.long_simulation_time_unit.currentText()  # ns
         current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())  # 2 fs
 
         if current_time_unit == 'nanosecond':

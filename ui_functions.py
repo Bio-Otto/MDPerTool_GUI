@@ -33,6 +33,7 @@ class UIFunctions(MainWindow):
     GLOBAL_STATE = 0
     GLOBAL_TITLE_BAR = True
     ProteinView = False
+    Protein3DNetworkView = False
 
     ####################################################################################################################
     #                                       == > START - GUI FUNCTIONS < ==                                           #

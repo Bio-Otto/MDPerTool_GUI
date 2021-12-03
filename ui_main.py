@@ -146,6 +146,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fetch_pdb_Button.clicked.connect(lambda: self.fetch_and_load_pdbfile())
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         Functions.Send_Available_Platforms_to_GUI(self)
+        Functions.maximum_thread_of_system(self)
+        self.node_threshold_checkBox.stateChanged.connect(lambda: Functions.node_threshold_use(self))
         self.platform_comboBox.currentTextChanged.connect(lambda: Functions.platform_comboBox_Changed(self))
         self.minimize_checkBox.stateChanged.connect(lambda: Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
@@ -162,7 +164,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.Number_of_steps_spinBox.installEventFilter(self)
 
         self.run = OpenMMScriptRunner
-        self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0]+1)*100)/decomp_data[1]))
+        self.run.Signals.decomp_process.connect(
+            lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0] + 1) * 100) / decomp_data[1]))
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
@@ -178,6 +181,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_conserv_score_pushButton.clicked.connect(lambda: Functions.get_conservation_scores(self))
         self.show_2d_network_pushButton.clicked.connect(lambda: UIFunctions.start_VisJS_2D_Network(self))
 
+        self.network_calculate_pushButton.clicked.connect(self.run_network_analysis)
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
         UIFunctions.start_pymol(self)
         self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
@@ -317,7 +321,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.output_directory_lineedit.text(),
+                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                              ph=7, chains_to_remove=delete_chains)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
@@ -552,9 +556,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_23.addWidget(self.matplotlib_widget.toolbar)
         self.verticalLayout_23.addWidget(self.matplotlib_widget.canvas)
 
-    ####################################################################################################################
-    #                                       == > START OF SPLASH SCREEN < ==                                           #
-    ####################################################################################################################
     def response_time_graph_path_changed(self):
         possible_path = str(self.response_time_lineEdit.text())
         if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
@@ -566,6 +567,51 @@ class MainWindow(QtWidgets.QMainWindow):
             if source_residue != '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=source_residue)
 
+    def run_network_analysis(self):
+
+        # try:
+        if os.path.exists(self.response_time_lineEdit.text()) and os.path.exists(self.boundForm_pdb_lineedit.text()):
+            output_directory_for_network = self.net_output_directory_lineedit.text()
+            if not os.path.exists(output_directory_for_network):
+                """Output Directory Help."""
+                msgbox = QMessageBox(QMessageBox.Question, "There is no specified output directory",
+                                     "There is no specified output directory\n\n"
+                                     "If you want to specify, please click the 'Yes' button, "
+                                     "otherwise the system will create an output folder named 'out_for_net_analysis'")
+
+                msgbox.setIcon(QMessageBox.Question)
+                msgbox.addButton(QMessageBox.Yes)
+                msgbox.addButton(QMessageBox.No)
+                msgbox.setDefaultButton(QMessageBox.Yes)
+                msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+                msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+                output_answer = msgbox.exec_()
+
+                if output_answer == QMessageBox.Yes:
+                    return False
+
+                if output_answer == QMessageBox.No:
+                    from pathlib import Path
+                    path_out = os.getcwd() + "/out_for_net_analysis"
+                    Path(path_out).mkdir(parents=True, exist_ok=True)
+
+                    output_directory_for_network = os.path.abspath(path_out.strip()).replace('\\', '/')
+                    self.net_output_directory_lineedit.setText(output_directory_for_network)
+            else:
+                output_directory_for_network = os.path.abspath(output_directory_for_network.strip()).replace('\\', '/')
+                self.net_output_directory_lineedit.setText(output_directory_for_network)
+
+            Functions.calculate_intersection_network(self)
+        # except:
+        #     exc_type, exc_obj, exc_tb = sys.exc_info()
+        #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #     print(exc_type, fname, exc_tb.tb_lineno)
+        #     QMessageBox(QMessageBox.Critical, "Error", "Problem\nnAn error occured while getting output directory")
+
+
+    ####################################################################################################################
+    #                                       == > START OF SPLASH SCREEN < ==                                           #
+    ####################################################################################################################
 
 
 class SplashScreen(QMainWindow):
@@ -630,7 +676,9 @@ class SplashScreen(QMainWindow):
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
+
 if __name__ == "__main__":
+    mp.freeze_support()
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)
     window = SplashScreen()

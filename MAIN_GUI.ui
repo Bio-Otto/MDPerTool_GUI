@@ -8347,7 +8347,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                       </property>
                       <property name="currentIndex">
-                       <number>2</number>
+                       <number>0</number>
                       </property>
                       <widget class="QWidget" name="Perturb_Quick_3">
                        <attribute name="title">
@@ -8461,7 +8461,7 @@ QPushButton:pressed {
                                 </widget>
                                </item>
                                <item>
-                                <widget class="QPushButton" name="Run_3">
+                                <widget class="QPushButton" name="network_calculate_pushButton">
                                  <property name="minimumSize">
                                   <size>
                                    <width>170</width>
@@ -8538,7 +8538,7 @@ QPushButton:pressed {
                                 </widget>
                                </item>
                                <item>
-                                <widget class="QSpinBox" name="Number_CPU_spinBox_7">
+                                <widget class="QSpinBox" name="Number_of_thread_for_network_spinBox">
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                    <horstretch>0</horstretch>
@@ -9267,7 +9267,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
                                 </layout>
                                </item>
                                <item row="4" column="0" colspan="2">
-                                <widget class="QCheckBox" name="checkBox_7">
+                                <widget class="QCheckBox" name="use_conservation_checkBox">
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                                    <horstretch>0</horstretch>
@@ -9532,7 +9532,10 @@ QPushButton:pressed {
                                 </layout>
                                </item>
                                <item row="3" column="1">
-                                <widget class="QSpinBox" name="Number_CPU_spinBox_6">
+                                <widget class="QSpinBox" name="node_threshold_spinBox">
+                                 <property name="enabled">
+                                  <bool>false</bool>
+                                 </property>
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                    <horstretch>0</horstretch>
@@ -9576,6 +9579,13 @@ QSpinBox QAbstractItemView {
 	background-color: rgb(27, 29, 35);
 	padding: 5px;
 	selection-background-color: rgb(39, 44, 54);
+}
+
+QSpinBox:disabled {
+  background-color: #19232D;
+  color: #787878;
+  selection-background-color: #14506E;
+  selection-color: #787878;
 }</string>
                                  </property>
                                  <property name="minimum">
@@ -9673,7 +9683,7 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                 </widget>
                                </item>
                                <item row="2" column="1">
-                                <widget class="QSpinBox" name="R_factor_spinBox_3">
+                                <widget class="QSpinBox" name="network_cutoff_spinBox">
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                    <horstretch>0</horstretch>
@@ -9781,7 +9791,7 @@ margin-right: 20px;
                                 </widget>
                                </item>
                                <item row="3" column="2">
-                                <widget class="QCheckBox" name="checkBox_4">
+                                <widget class="QCheckBox" name="node_threshold_checkBox">
                                  <property name="maximumSize">
                                   <size>
                                    <width>115</width>
@@ -9816,6 +9826,9 @@ QCheckBox::indicator:checked {
                                  </property>
                                  <property name="text">
                                   <string>None</string>
+                                 </property>
+                                 <property name="checked">
+                                  <bool>true</bool>
                                  </property>
                                 </widget>
                                </item>
@@ -10295,7 +10308,7 @@ QPushButton:pressed {
                                 </widget>
                                </item>
                                <item row="0" column="1">
-                                <widget class="QLineEdit" name="output_directory_lineedit">
+                                <widget class="QLineEdit" name="net_output_directory_lineedit">
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                    <horstretch>0</horstretch>
