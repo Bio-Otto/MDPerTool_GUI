@@ -2,10 +2,12 @@ import os
 import time
 import sys
 import csv
+import copy
 from pathlib import Path
 import networkx as nx
 from Bio.PDB.PDBParser import PDBParser
 # from Bio.PDB import Residue
+from PySide2.QtCore import QObject, Signal
 from prody import *
 # from collections import OrderedDict
 import math
@@ -19,6 +21,7 @@ from PyMolWidget import PymolQtWidget
 from .VisJS_Widget import VisJS_QtWidget
 import multiprocessing as mp
 from .pdbsum_conservation_puller import *
+from analysis.multiproc_net_calc import Calc_Net_Worker
 
 
 def check_dissipated_residues_coordinates(pdb_file, querry_res_list, atom_name='CA'):
@@ -170,7 +173,8 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_direc
     return network, residueList, resId_List
 
 
-def pairNetworks(network, source, target, pairNetworkName, write_out, out_directory, node_threshold=None, verbose=True):
+def pairNetworks(network, source, target, pairNetworkName, write_out, out_directory, progress_callback,
+                 node_threshold=None, verbose=True):
     sourceRetime = network.nodes['%s' % (source)]['retime']
     targetRetime = network.nodes['%s' % (target)]['retime']
 
@@ -189,7 +193,7 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
                 network.remove_node(x)
                 # print('Removing node %s' % x)
 
-    newNetwork = network.copy()
+    newNetwork = copy.deepcopy(network)
 
     while True:
         if target not in newNetwork.nodes().keys():
@@ -246,22 +250,24 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
 
     if node_threshold is None and len(newNetwork.nodes()) > 0:
         if verbose:
-            print("Source: %s  Target: %s" % (source, target))
-            print('Total node number of source-target pair network is : ', len(newNetwork.nodes()))
-            log = 'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (source, target, len(newNetwork.nodes()))
+            # print("Source: %s  Target: %s" % (source, target))
+            # print('Total node number of source-target pair network is : ', len(newNetwork.nodes()))
+            log = 'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
+                source, target, len(newNetwork.nodes()))
         if write_out:
             nx.write_gml(newNetwork, os.path.join(out_directory, pairNetworkName))
 
     if (node_threshold is not None) and (len(newNetwork.nodes()) > node_threshold):
         if verbose:
-            print("Source: %s  Target: %s" % (source, target))
-            print('Total node number of source-target pair network is : ', len(newNetwork.nodes()))
-            log = 'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (source, target, len(newNetwork.nodes()))
+            # print("Source: %s  Target: %s" % (source, target))
+            # print('Total node number of source-target pair network is : ', len(newNetwork.nodes()))
+            log = 'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
+                source, target, len(newNetwork.nodes()))
         if write_out:
             nx.write_gml(newNetwork, os.path.join(out_directory, pairNetworkName))
 
     # print('Done! Ready to Visualize')
-
+    progress_callback.emit([newNetwork, log])
     return newNetwork, str(log)
 
 
@@ -393,51 +399,12 @@ def main():
     args.func(args)
 
 
-# if __name__=='__main__':
-# 	main()
-
-# pdb = 'test/2VF5/2VF5.pdb'
-# cutoff = 6
-# retime_file = 'test/2VF5/P1/2VF4_VAL399_charmm36_tip5p_MD_09-43-11_PM/responseTimes_4.csv'
-# outputFileName = '111.gml'
-# source = 'VAL399'
-# target = 'ILE183'
-# # # PHE126, CYS127, SER128, GLY18, ARG148, ASN180, PRO228,
-# # # LYS229, ASP230, GLU231, ASN232, GLU165, ARG201
-# parser = PDBParser()
-# structure = parser.get_structure('prot', pdb)
-# # residue list in pdb
-# residueList = list(structure.get_residues())
-# resId_List = []
-# for res in residueList:
-#     ResId = res.get_id()[1]
-#     ResName = res.get_resname()
-#     resId_List.append(ResName + str(ResId))
-#
-# pairNetworkName = 'pairN.gml'
-#
-#
-# # --> JUST SOURCE AND TARGET
-# # runTest(pdb=pdb, cutoff=cutoff, reTimeFile=retime_file, outputFileName=outputFileName, source=source, target=target,
-# #         pairNetworkName=pairNetworkName)
-#
-# # --> SOURCE AND ALL POSSIBLE TARGETS
-# start_Time = time.time()
-# for i in resId_List[:10]:
-#     runTest(pdb=pdb, cutoff=cutoff, reTimeFile=retime_file, outputFileName=outputFileName, source=source, target=i,
-#             pairNetworkName=pairNetworkName)
-# print(time.time() - start_Time)
-
-
-# --> SOURCE AND ALL SPECIFIED TARGETS
-# for i in ['ASP237', 'GLU203', 'CYS110', 'THR197', 'TRP228', 'ASP232', 'ASP112', 'GLY42', 'THR157']:
-#     runTest(pdb=pdb, cutoff=cutoff, reTimeFile=retime_file, outputFileName=outputFileName, source=source, target=i,
-#             pairNetworkName=pairNetworkName)
-
-
 class Multi_Task_Engine(object):
+
     def __init__(self, pdb_file, cutoff, reTimeFile, source, write_outputs, output_directory, node_threshold=None,
                  verbose=True, outputFileName='111.gml', conserv_thresh=0.0, pdb_id=None):
+
+        self.Work = []
         self.pdb_file = pdb_file
         self.cutoff = cutoff
         self.reTimeFile = reTimeFile
@@ -452,11 +419,11 @@ class Multi_Task_Engine(object):
         self.conserv_thresh = conserv_thresh
         self.pdb_id = pdb_id
 
-    @property
     def calculate_general_network(self):
         try:
             self.network, residue_list, self.resId_List = createRNetwork(pdb=self.pdb_file, cutoff=self.cutoff,
-                                                                         reTimeFile=self.reTimeFile, verbose=self.verbose,
+                                                                         reTimeFile=self.reTimeFile,
+                                                                         verbose=self.verbose,
                                                                          outputFileName=self.outputFileName,
                                                                          write_out=self.write_outputs,
                                                                          out_directory=self.output_directory)
@@ -465,14 +432,25 @@ class Multi_Task_Engine(object):
         except Exception as Error:
             print(Error)
 
-    def __call__(self, target):
+    def run_pairNet_calc(self, target):
         try:
-            network, log = pairNetworks(network=self.calculate_general_network[0], source=self.source, target=target,
-                                   pairNetworkName='%s_%s.gml' % (self.source, target),
-                                   node_threshold=self.node_threshold,
-                                   verbose=self.verbose, write_out=self.write_outputs,
-                                   out_directory=self.output_directory)
-            return network, log
+
+            for i in target:
+
+                self.Work.append(
+                    Calc_Net_Worker(pairNetworks, network=copy.deepcopy(self.network), source=self.source,
+                                    target=i,
+                                    pairNetworkName='%s_%s.gml' % (self.source, target),
+                                    node_threshold=self.node_threshold,
+                                    verbose=self.verbose, write_out=self.write_outputs,
+                                    out_directory=self.output_directory))
+            # network, log = pairNetworks(network=self.calculate_general_network[0], source=self.source, target=target,
+            #                             pairNetworkName='%s_%s.gml' % (self.source, target),
+            #                             node_threshold=self.node_threshold,
+            #                             verbose=self.verbose, write_out=self.write_outputs,
+            #                             out_directory=self.output_directory)
+
+            # return network, log
         except IndexError as Err:
             print(Err)
 
@@ -481,7 +459,7 @@ def intersection_of_directed_networks(graphs_list):
     len_of_nodes_on_list = [len(graph.nodes()) for graph in graphs_list]
     smallest_network_and_indices = min([(v, i) for i, v in enumerate(len_of_nodes_on_list)])
 
-    R = graphs_list[smallest_network_and_indices[1]].copy()
+    R = copy.deepcopy(graphs_list[smallest_network_and_indices[1]])
 
     for cnt, graph_count in enumerate(graphs_list):
         if cnt != smallest_network_and_indices[1]:
@@ -546,6 +524,7 @@ def call_visJS_for_network_visualization(network):
     return w, app
 
     # sys.exit(app.exec_())
+
 
 """
 if __name__ == '__main__':  # PROTECT YOUR PROGRAM'S ENTRY POINT

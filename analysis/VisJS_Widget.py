@@ -5,14 +5,17 @@ from io import StringIO
 
 
 class VisJS_QtWidget(QtWidgets.QWidget):
-    def __init__(self, network, html_file='2d_network.html', parent=None):
+    def __init__(self, parent=None):
         super(VisJS_QtWidget, self).__init__(parent)
 
+        self.html_file = None
+        self.network = None
         self.m_output = QtWebEngineWidgets.QWebEngineView()
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.m_output)
         # self.resize(640, 480)
 
+    def load_network_component(self, network, html_file='2d_network.html'):
         self.network = network
         self.html_file = html_file
 
@@ -25,6 +28,5 @@ class VisJS_QtWidget(QtWidgets.QWidget):
 
         g.show(self.html_file)
         self.m_output.load(QtCore.QUrl().fromLocalFile(os.path.abspath(self.html_file)))
-
         # self.m_output.show()
 

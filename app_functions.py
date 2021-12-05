@@ -1,3 +1,5 @@
+import time
+
 from PySide2.QtWidgets import QFileDialog, QWidget, QMessageBox
 import gzip
 import csv
@@ -53,133 +55,200 @@ class Helper_Functions():
 
 
 class Functions(MainWindow):
+    global active_workers
 
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
+
+    @Slot()
+    def on_started(self):
+        if self.active_workers == 0:
+            self.active_workers += 1
+            self.progress = QProgressDialog('Work in progress...', None, 0, 0, self)
+            self.progress.setWindowTitle("Calculation")
+            self.progress.setWindowModality(QtCore.Qt.WindowModal)
+            self.progress.show()
+            self.progress.setValue(0)
+
+        else:
+            self.active_workers += 1
+
+    @Slot()
+    def progress_fn(self, progress_on_net_calc):
+        print(progress_on_net_calc, "IS DONE")
+        if self.active_workers == 0:
+            print("NOW FINISHED ON PROGRESS")
+
+    def thread_complete(self):
+        self.active_workers -= 1
+        if self.active_workers == 0 and len(self.network_holder) != 0:
+            self.plot_signal.plot_network.emit()
+            self.progress.cancel()
+
+    def print_output(self, s):
+        self.network_holder.append(s[0])
+        self.log_holder.append(s[1])
+
     def calculate_intersection_network(self):
-        global intersection_graph, output_folder_directory
+        global intersection_graph, output_folder_directory, network_holder
 
-        try:
+        # try:
+        self.active_workers = 0
+        self.network_holder = []
+        self.log_holder = []
 
-            number_of_threads = self.Number_of_thread_for_network_spinBox.value()
-            pdb = self.boundForm_pdb_lineedit.text()  # PDB file path --> "BOUND FORM OF STRUCTURE"
-            cutoff = self.network_cutoff_spinBox.value()  # Add edges between nodes if they are within cutoff range
-            retime_file = self.response_time_lineEdit.text()  # Response time file path
-            outputFileName = self.PPI_Network_name_lineedit.text()  # Protein general graph according to cut off value
-            output_directory = self.net_output_directory_lineedit.text()
-            source = self.source_res_comboBox.currentText()[:-1]  # One of the perturbed residues
-            node_threshold = self.node_threshold_spinBox.value()  # None or an Integer
-            node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
+        self.number_of_threads = self.Number_of_thread_for_network_spinBox.value()
+        self.pdb = self.boundForm_pdb_lineedit.text()  # PDB file path --> "BOUND FORM OF STRUCTURE"
+        self.cutoff = self.network_cutoff_spinBox.value()  # Add edges between nodes if they are within cutoff range
+        self.retime_file = self.response_time_lineEdit.text()  # Response time file path
+        self.outputFileName = self.PPI_Network_name_lineedit.text()  # Protein general graph according to cut off value
+        self.output_directory = self.net_output_directory_lineedit.text()
+        self.source = self.source_res_comboBox.currentText()[:-1]  # One of the perturbed residues
+        self.node_threshold = self.node_threshold_spinBox.value()  # None or an Integer
+        self.node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
 
-            if node_threshold_use_condition:
-                node_threshold = None
+        if self.node_threshold_use_condition:
+            self.node_threshold = None
 
-            verbose_condition = True  # True or False
-            target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
-                               for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
+        verbose_condition = True  # True or False
+        target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                           for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
 
-            use_conservation = self.use_conservation_checkBox.isChecked()
+        use_conservation = self.use_conservation_checkBox.isChecked()
 
-            pdb_id = self.conservation_PDB_ID_lineEdit.text()  # FREE OR BOUND FORM OF PDB, like '2EB8'
-            chain = self.conservation_pdb_chain_id_lineedit.text()  # FOR PULLING CONSERVATION SCORES INDICATE CHAIN ID OF PDB
-            conservation_threshold = self.conserv_score_doubleSpinBox.value()
-            save_conservation_scores = False
+        pdb_id = self.conservation_PDB_ID_lineEdit.text()  # FREE OR BOUND FORM OF PDB, like '2EB8'
+        chain = self.conservation_pdb_chain_id_lineedit.text()  # FOR PULLING CONS. SCORES INDICATE CHAIN ID OF PDB
+        conservation_threshold = self.conserv_score_doubleSpinBox.value()
+        save_conservation_scores = False
 
-            visualize_on_PyMol = True  # Networkx Graph Visulization on PyMol
-            visualize_on_VisJS = True  # Networkx Graph Visulization on VisJS
-            create_output = True  # Supports True or False Conditions for creation of all networks (*.gml) on a folder
-            just_visualize = False  # If you have already calculated network you can directly visualize it.
+        visualize_on_PyMol = True  # Networkx Graph Visulization on PyMol
+        visualize_on_VisJS = True  # Networkx Graph Visulization on VisJS
+        self.create_output = True  # Supports True or False Conditions for creation of all networks (*.gml) on a folder
+        just_visualize = False  # If you have already calculated network you can directly visualize it.
 
-            general_output_folder = os.path.join(output_directory, 'network_outputs')
-            Path(general_output_folder).mkdir(parents=True, exist_ok=True)
+        general_output_folder = os.path.join(self.output_directory, 'network_outputs')
+        Path(general_output_folder).mkdir(parents=True, exist_ok=True)
 
-            folder_name = "output_%s" % source
-            output_folder_directory = os.path.join(general_output_folder, folder_name)
-            Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
+        folder_name = "output_%s" % self.source
+        output_folder_directory = os.path.join(general_output_folder, folder_name)
+        Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
 
-            pool = mp.Pool(number_of_threads)
-            engine = Multi_Task_Engine(pdb_file=pdb, cutoff=cutoff, reTimeFile=retime_file, source=source,
-                                       node_threshold=node_threshold, verbose=verbose_condition,
-                                       outputFileName=outputFileName, write_outputs=create_output,
-                                       output_directory=output_folder_directory)
+        # pool = mp.Pool(number_of_threads)
+        engine = Multi_Task_Engine(pdb_file=self.pdb, cutoff=self.cutoff, reTimeFile=self.retime_file,
+                                   source=self.source,
+                                   node_threshold=self.node_threshold, verbose=verbose_condition,
+                                   outputFileName=self.outputFileName, write_outputs=self.create_output,
+                                   output_directory=output_folder_directory)
 
-            if use_conservation:
-                res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
-                                                              cutoff=conservation_threshold, bound_pdb=pdb)
-                if save_conservation_scores:
-                    rows = zip(res_IDs, con_scores)
-                    with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
-                              newline='') as f:
-                        writer = csv.writer(f)
-                        for row in rows:
-                            writer.writerow(row)
+        engine.calculate_general_network()
+        if use_conservation:
+            res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
+                                                          cutoff=conservation_threshold, bound_pdb=self.pdb)
+            if save_conservation_scores:
+                rows = zip(res_IDs, con_scores)
+                with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
+                          newline='') as f:
+                    writer = csv.writer(f)
+                    for row in rows:
+                        writer.writerow(row)
+            intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
 
-                intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
+            engine.run_pairNet_calc(intersection_resIDs)
+            for work in engine.Work:
+                work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
+                work.signals.work_started.connect(lambda: Functions.on_started(self))
+                work.signals.result.connect(lambda x: Functions.print_output(self, x))
+                work.signals.finished.connect(lambda: Functions.thread_complete(self))
+                self.threadpool.start(work)
 
-                net, log = zip(*pool.map(engine, list(intersection_resIDs)))
+        if not use_conservation:
+            engine.run_pairNet_calc(target_residues)
 
-            if not use_conservation:
-                print("TARGET RES:", target_residues)
-                net, log = zip(*pool.map(engine, target_residues))
+            for work in engine.Work:
+                work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
+                work.signals.work_started.connect(lambda: Functions.on_started(self))
+                work.signals.result.connect(lambda x: Functions.print_output(self, x))
+                work.signals.finished.connect(lambda: Functions.thread_complete(self))
+                self.threadpool.start(work)
 
-            clean_graph_list = []
-            if node_threshold is not None:
-                for i in net:
-                    if len(i.nodes()) > node_threshold:
-                        clean_graph_list.append(i)
+        del engine
 
-            if node_threshold is None:
-                for i in net:
+        # time.sleep(0.1)
+        # net, log = zip(*pool.map(engine, target_residues))  # ########################################
+
+    def plot_networks(self):
+        print(len(self.network_holder))
+
+        clean_graph_list = []
+        if self.node_threshold is not None:
+
+            for i in self.network_holder:
+                if len(i.nodes()) > self.node_threshold:
                     clean_graph_list.append(i)
 
-            # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
-            if len(clean_graph_list) > 0:
-                intersection_graph = intersection_of_directed_networks(clean_graph_list)
-                if create_output:
-                    nx.write_gml(intersection_graph, os.path.join(output_folder_directory, 'intersection_graph.gml'))
+        if self.node_threshold is None:
+            for i in self.network_holder:
+                clean_graph_list.append(i)
 
+        # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
+        if len(clean_graph_list) > 0:
+            intersection_graph = intersection_of_directed_networks(clean_graph_list)
+            if self.create_output:
+                nx.write_gml(intersection_graph, os.path.join(output_folder_directory, 'intersection_graph.gml'))
+
+        else:
+            print("There is no suitable Graph for your search parameters")
+
+        try:
+            if len(intersection_graph.nodes()) > 0:
+                try:
+
+                    arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph,
+                                                                                     pdb_file=self.pdb)
+
+                    # ----------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
+                    self.Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
+                    for arrow_coord in arrows_cordinates:
+                        self.Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                                                         radius=0.05,
+                                                                         gap=0.4, hradius=0.4, hlength=0.8, color='green')
+                    for node in intersection_node_list:
+                        resID_of_node = int(''.join(list(filter(str.isdigit, node))))
+                        self.Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
+
+                    # MAKE PYMOL VISUALIZATION BETTER
+                    self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                    self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
+                    self.Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                    self.Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+                    self.Protein3DNetworkView.update()
+                    self.Protein3DNetworkView.show()
+
+                    # ----------------------> 2D NETWORK VISUALIZATION USING visJS / START <---------------------- #
+                    self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
+
+                except Exception as error:
+                    print("Problem: ", error)
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    print(exc_type, fname, exc_tb.tb_lineno)
+
+                all = ''
+                for j in self.log_holder:
+                    all = all + '\n' + j
+                Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
+                del self.log_holder, self.network_holder
             else:
-                print("There is no suitable Graph for your search parameters")
-
-            try:
-                arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph, pdb_file=pdb)
-
-                # ----------------------> CALL PYMOL FOR VISUALIZATION / START <---------------------- #
-
-                self.Protein3DNetworkView.show_energy_dissipation(response_time_file_path=retime_file)
-
-                for arrow_coord in arrows_cordinates:
-                    self.Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1], radius=0.05,
-                                                  gap=0.4, hradius=0.4, hlength=0.8, color='green')
-
-                for node in intersection_node_list:
-                    resID_of_node = int(''.join(list(filter(str.isdigit, node))))
-                    self.Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
-
-                # MAKE PYMOL VISUALIZATION BETTER
-                self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
-                self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
-                self.Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
-                self.Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
-
-                self.Protein3DNetworkView.update()
-                self.Protein3DNetworkView.show()
-                # -----------------------> CALL PYMOL FOR VISUALIZATION / END <----------------------- #
-
-            except Exception as error:
-                print(error)
-
-            for j in log:
-                Message_Boxes.Information_message(self, "DONE !", j, Style.MessageBox_stylesheet)
-
+                Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(", Style.MessageBox_stylesheet)
         except Exception as e:
+            print("Problem: ", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
-
-        finally:
-            # CLOSE THE ALREADY OPENED POOL
-            pool.close()
-            pool.join()
+        #
+        # finally:
+        #     # CLOSE THE ALREADY OPENED POOL
+        #     pool.close()
+        #     pool.join()
 
     def get_conservation_scores(self):
         try:

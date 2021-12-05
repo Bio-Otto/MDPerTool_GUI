@@ -34,6 +34,7 @@ class UIFunctions(MainWindow):
     GLOBAL_TITLE_BAR = True
     ProteinView = False
     Protein3DNetworkView = False
+    VisJSEngineView = False
 
     ####################################################################################################################
     #                                       == > START - GUI FUNCTIONS < ==                                           #
@@ -84,7 +85,6 @@ class UIFunctions(MainWindow):
         return GLOBAL_STATE
 
     # ----- > Set Status
-
     def setStatus(status):
         global GLOBAL_STATE
         GLOBAL_STATE = status
@@ -298,15 +298,16 @@ class UIFunctions(MainWindow):
         self.Protein3DNetworkView.update()
         self.Protein3DNetworkView.show()
 
-    def start_VisJS_2D_Network(self, intersection_graph='2d_network.html', gml_file='example.gml'):
-        initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
-        initial_2d_network_html_path = os.path.join(initial_2d_network_html_directory, intersection_graph)
-        print(os.path.join(initial_2d_network_html_directory, gml_file))
-        gml_graph = nx.read_gml(os.path.join(initial_2d_network_html_directory, gml_file))
+    def start_VisJS_2D_Network(self):
+        self.VisJSEngineView = VisJS_Widget.VisJS_QtWidget()
+        self.Network_2D_verticalLayout.addWidget(self.VisJSEngineView)
 
-        self.visjs_engine = VisJS_Widget.VisJS_QtWidget(network=gml_graph, html_file=initial_2d_network_html_path)
-        self.Network_2D_verticalLayout.addWidget(self.visjs_engine)
-        self.visjs_engine()
+    # def load_nx_to_VisJS_2D_Network(self, intersection_graph='2d_network.html', gml_file='example.gml'):
+    #     initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
+    #     initial_2d_network_html_path = os.path.join(initial_2d_network_html_directory, intersection_graph)
+    #
+    #     gml_graph = nx.read_gml(os.path.join(initial_2d_network_html_directory, gml_file))
+    #     self.VisJSEngineView.load_network_component(network=gml_graph, html_file=initial_2d_network_html_path)
 
     def load_pdb_to_pymol(self, pdb_file):
         self.ProteinView.reinitialize()

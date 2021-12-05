@@ -38,6 +38,7 @@ def get_conservation_scores(pdb_id, chain_id, cutoff, bound_pdb):
     actual_res_IDs = []
     actual_scores = []
     url_root = "http://www.ebi.ac.uk/thornton-srv/databases/cgi-bin/pdbsum/GetText.pl?pdb="
+
     html_address = url_root + pdb_id.lower() + '&chain=' + chain_id
     file = request.urlopen(html_address)
 

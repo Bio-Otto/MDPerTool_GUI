@@ -9750,6 +9750,9 @@ QSpinBox QAbstractItemView {
                                  <property name="maximum">
                                   <number>100</number>
                                  </property>
+                                 <property name="value">
+                                  <number>7</number>
+                                 </property>
                                 </widget>
                                </item>
                                <item row="2" column="0">

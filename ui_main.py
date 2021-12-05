@@ -2,7 +2,8 @@ import os
 import sys
 import platform
 
-from PySide2.QtCore import QSize
+from PySide2.QtCore import QSize, QThreadPool
+
 from src.pyside_dynamic import loadUi
 from PySide2 import QtXml, QtCore, QtGui, QtWidgets
 from PySide2.QtUiTools import QUiLoader
@@ -59,8 +60,12 @@ def center_window(widget):
     )
 
 
+class PlotSignal(QObject):
+    plot_network = Signal()
+
 # YOUR APPLICATION
 class MainWindow(QtWidgets.QMainWindow):
+    global active_workers, network_holder, log_holder
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
@@ -81,6 +86,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # ############################################################################################################ #
         # -------------------------------------- > START OF MATPLOTLIB WIDGET < -------------------------------------- #
         self.matplotlib_widget()
+        self.plot_signal = PlotSignal()
+        self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
         # -------------------------------------- > END OF MATPLOTLIB WIDGET < ---------------------------------------- #
         # ############################################################################################################ #
 
@@ -179,11 +186,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.discard_residue_from_targets_pushButton.clicked.connect(
             lambda: Functions.discard_residue_from_target_List(self))
         self.get_conserv_score_pushButton.clicked.connect(lambda: Functions.get_conservation_scores(self))
-        self.show_2d_network_pushButton.clicked.connect(lambda: UIFunctions.start_VisJS_2D_Network(self))
+        # self.show_2d_network_pushButton.clicked.connect(lambda: UIFunctions.start_VisJS_2D_Network(self))
 
         self.network_calculate_pushButton.clicked.connect(self.run_network_analysis)
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
         UIFunctions.start_pymol(self)
+        UIFunctions.start_VisJS_2D_Network(self)
         self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
         self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
         self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
@@ -196,6 +204,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
         self.Handel_Save_Figure_Options_Changed()
         self.Handel_Save_Figure_Options()
+        self.threadpool = QThreadPool()
+        self.active_workers = 0
+        self.network_holder = []
+        self.log_holder = []
+        self.node_threshold = None
+        self.thread_main = QtCore.QThread()
+        self.thread_main.start()
 
     """
     def eventFilter(self, obj, event):
@@ -608,6 +623,32 @@ class MainWindow(QtWidgets.QMainWindow):
         #     print(exc_type, fname, exc_tb.tb_lineno)
         #     QMessageBox(QMessageBox.Critical, "Error", "Problem\nnAn error occured while getting output directory")
 
+    def network_calc_thread(self, x):
+
+        print('mycallback is called with {}'.format(x))
+        # progress = QProgressDialog("Downloading...", "Abort", 0, 0, parent=self)
+        # progress.setWindowModality(QtCore.Qt.WindowModal)
+        # progress.show()
+        # time.sleep(0.1)
+        # while thread_1.is_alive():
+        #     QApplication([]).processEvents()
+        #     # progress.setLabelText(thread.status())
+        #     if progress.wasCanceled():
+        #         sys.exit()
+
+        # progress.setValue(total)
+        # progress.setLabelText(thread.status())
+        # QtGui.QMessageBox.information(self, "Done", "Download is complete.")
+        # QMessageBox.information(self, "Done", "thread.status()")
+        # progress.close()
+        # return True
+
+    def load_nx_to_VisJS_2D_Network(self, intersection_graph_html='2d_network.html', intersection_gml_file=None):
+        initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
+        initial_2d_network_html_path = os.path.join(initial_2d_network_html_directory, intersection_graph_html)
+        self.VisJSEngineView.load_network_component(network=intersection_gml_file,
+                                                    html_file=initial_2d_network_html_path)
+        self.VisJSEngineView()
 
     ####################################################################################################################
     #                                       == > START OF SPLASH SCREEN < ==                                           #
