@@ -1,0 +1,36 @@
+{% set name = "mdpertool" %}
+{% set version = "0.1" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_url: https://github.com/Bio-Otto/MDPERTOOL_v01.git
+  sha256: 5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+    - openmm
+    - mdtraj
+    - pyqtgraph
+    - pdbfixer
+    - parmed
+
+test:
+  imports:
+    - ui_main
+
+about:
+  home: https://github.com/Bio-Otto/MDPERTOOL_v01
+  license: MIT
+  license_family: MIT
+  summary: Perturbation based Allosteric Pathway Finder 

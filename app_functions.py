@@ -1,17 +1,24 @@
-from PyQt5.QtWidgets import QFileDialog, QWidget
+import time
+
+from PySide2.QtWidgets import QFileDialog, QWidget, QMessageBox
 import gzip
-from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMessageBox
+import csv
+from pathlib import Path
+from PySide2 import QtCore, QtWidgets
+from PySide2.QtCore import Slot
 from pdbfixer import PDBFixer
-from simtk.openmm import *
-from simtk.openmm.app import *
+from openmm import *
+from openmm.app import *
 from checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
 from checkBox_menu import *
 from ui_main import *
 from message import Message_Boxes
+import multiprocessing as mp
+from analysis.pdbsum_conservation_puller import get_conservation_scores
+from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
+                                     call_pymol_for_network_visualization)
 
 
 class Helper_Functions():
@@ -48,6 +55,294 @@ class Helper_Functions():
 
 
 class Functions(MainWindow):
+    global active_workers
+
+    # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
+
+    @Slot()
+    def on_started(self):
+        if self.active_workers == 0:
+            self.active_workers += 1
+            self.progress = QProgressDialog('Work in progress...', None, 0, 0, self)
+            self.progress.setWindowTitle("Calculation")
+            self.progress.setWindowModality(QtCore.Qt.WindowModal)
+            self.progress.show()
+            self.progress.setValue(0)
+
+        else:
+            self.active_workers += 1
+
+    @Slot()
+    def progress_fn(self, progress_on_net_calc):
+        print(progress_on_net_calc, "IS DONE")
+        if self.active_workers == 0:
+            print("NOW FINISHED ON PROGRESS")
+
+    def thread_complete(self):
+        self.active_workers -= 1
+        if self.active_workers == 0 and len(self.network_holder) != 0:
+            self.plot_signal.plot_network.emit()
+            self.progress.cancel()
+
+    def print_output(self, s):
+        self.network_holder.append(s[0])
+        self.log_holder.append(s[1])
+
+    def calculate_intersection_network(self):
+        global intersection_graph, output_folder_directory, network_holder
+
+        # try:
+        self.active_workers = 0
+        self.network_holder = []
+        self.log_holder = []
+
+        self.number_of_threads = self.Number_of_thread_for_network_spinBox.value()
+        self.pdb = self.boundForm_pdb_lineedit.text()  # PDB file path --> "BOUND FORM OF STRUCTURE"
+        self.cutoff = self.network_cutoff_spinBox.value()  # Add edges between nodes if they are within cutoff range
+        self.retime_file = self.response_time_lineEdit.text()  # Response time file path
+        self.outputFileName = self.PPI_Network_name_lineedit.text()  # Protein general graph according to cut off value
+        self.output_directory = self.net_output_directory_lineedit.text()
+        self.source = self.source_res_comboBox.currentText()[:-1]  # One of the perturbed residues
+        self.node_threshold = self.node_threshold_spinBox.value()  # None or an Integer
+        self.node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
+
+        if self.node_threshold_use_condition:
+            self.node_threshold = None
+
+        verbose_condition = True  # True or False
+        target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                           for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
+
+        use_conservation = self.use_conservation_checkBox.isChecked()
+
+        pdb_id = self.conservation_PDB_ID_lineEdit.text()  # FREE OR BOUND FORM OF PDB, like '2EB8'
+        chain = self.conservation_pdb_chain_id_lineedit.text()  # FOR PULLING CONS. SCORES INDICATE CHAIN ID OF PDB
+        conservation_threshold = self.conserv_score_doubleSpinBox.value()
+        save_conservation_scores = False
+
+        visualize_on_PyMol = True  # Networkx Graph Visulization on PyMol
+        visualize_on_VisJS = True  # Networkx Graph Visulization on VisJS
+        self.create_output = True  # Supports True or False Conditions for creation of all networks (*.gml) on a folder
+        just_visualize = False  # If you have already calculated network you can directly visualize it.
+
+        general_output_folder = os.path.join(self.output_directory, 'network_outputs')
+        Path(general_output_folder).mkdir(parents=True, exist_ok=True)
+
+        folder_name = "output_%s" % self.source
+        output_folder_directory = os.path.join(general_output_folder, folder_name)
+        Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
+
+        # pool = mp.Pool(number_of_threads)
+        engine = Multi_Task_Engine(pdb_file=self.pdb, cutoff=self.cutoff, reTimeFile=self.retime_file,
+                                   source=self.source,
+                                   node_threshold=self.node_threshold, verbose=verbose_condition,
+                                   outputFileName=self.outputFileName, write_outputs=self.create_output,
+                                   output_directory=output_folder_directory)
+
+        engine.calculate_general_network()
+        if use_conservation:
+            res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
+                                                          cutoff=conservation_threshold, bound_pdb=self.pdb)
+            if save_conservation_scores:
+                rows = zip(res_IDs, con_scores)
+                with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
+                          newline='') as f:
+                    writer = csv.writer(f)
+                    for row in rows:
+                        writer.writerow(row)
+            intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
+
+            engine.run_pairNet_calc(intersection_resIDs)
+            for work in engine.Work:
+                work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
+                work.signals.work_started.connect(lambda: Functions.on_started(self))
+                work.signals.result.connect(lambda x: Functions.print_output(self, x))
+                work.signals.finished.connect(lambda: Functions.thread_complete(self))
+                self.threadpool.start(work)
+
+        if not use_conservation:
+            engine.run_pairNet_calc(target_residues)
+
+            for work in engine.Work:
+                work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
+                work.signals.work_started.connect(lambda: Functions.on_started(self))
+                work.signals.result.connect(lambda x: Functions.print_output(self, x))
+                work.signals.finished.connect(lambda: Functions.thread_complete(self))
+                self.threadpool.start(work)
+
+        del engine
+
+        # time.sleep(0.1)
+        # net, log = zip(*pool.map(engine, target_residues))  # ########################################
+
+    def plot_networks(self):
+        print(len(self.network_holder))
+
+        clean_graph_list = []
+        if self.node_threshold is not None:
+
+            for i in self.network_holder:
+                if len(i.nodes()) > self.node_threshold:
+                    clean_graph_list.append(i)
+
+        if self.node_threshold is None:
+            for i in self.network_holder:
+                clean_graph_list.append(i)
+
+        # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
+        if len(clean_graph_list) > 0:
+            intersection_graph = intersection_of_directed_networks(clean_graph_list)
+            if self.create_output:
+                nx.write_gml(intersection_graph, os.path.join(output_folder_directory, 'intersection_graph.gml'))
+
+        else:
+            print("There is no suitable Graph for your search parameters")
+
+        try:
+            if len(intersection_graph.nodes()) > 0:
+                try:
+
+                    arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph,
+                                                                                     pdb_file=self.pdb)
+
+                    # ----------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
+                    self.Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
+                    for arrow_coord in arrows_cordinates:
+                        self.Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                                                         radius=0.05,
+                                                                         gap=0.4, hradius=0.4, hlength=0.8, color='green')
+                    for node in intersection_node_list:
+                        resID_of_node = int(''.join(list(filter(str.isdigit, node))))
+                        self.Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
+
+                    # MAKE PYMOL VISUALIZATION BETTER
+                    self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                    self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
+                    self.Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                    self.Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+                    self.Protein3DNetworkView.update()
+                    self.Protein3DNetworkView.show()
+
+                    # ----------------------> 2D NETWORK VISUALIZATION USING visJS / START <---------------------- #
+                    self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
+
+                except Exception as error:
+                    print("Problem: ", error)
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    print(exc_type, fname, exc_tb.tb_lineno)
+
+                all = ''
+                for j in self.log_holder:
+                    all = all + '\n' + j
+                Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
+                del self.log_holder, self.network_holder
+            else:
+                Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(", Style.MessageBox_stylesheet)
+        except Exception as e:
+            print("Problem: ", e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+        #
+        # finally:
+        #     # CLOSE THE ALREADY OPENED POOL
+        #     pool.close()
+        #     pool.join()
+
+    def get_conservation_scores(self):
+        try:
+            conserv_pdb_id = self.conservation_PDB_ID_lineEdit.text()
+            conser_pdb_chain_id = self.conservation_pdb_chain_id_lineedit.text()
+
+            res_IDs, con_scores = get_conservation_scores(pdb_id=conserv_pdb_id,
+                                                          chain_id=conser_pdb_chain_id,
+                                                          cutoff=self.conserv_score_doubleSpinBox.value(),
+                                                          bound_pdb=self.boundForm_pdb_lineedit.text())
+
+            numrows = len(res_IDs)  # 6 rows in your example
+            numcols = 2  # 3 columns in your example
+            # Set colums and rows in QTableWidget
+            self.residues_conservation_tableWidget.setColumnCount(numcols)
+            self.residues_conservation_tableWidget.setRowCount(numrows)
+
+            # Loops to add values into QTableWidget
+            for row in range(numrows):
+                self.residues_conservation_tableWidget.setItem(row, 0, QTableWidgetItem((res_IDs[row])))
+                self.residues_conservation_tableWidget.setItem(row, 1, QTableWidgetItem((str(con_scores[row]))))
+        except Exception as Err:
+            print("Conservation Score Listing Problem \n", Err)
+
+    def browse_responseTimeFile(self):
+        """
+            The function provides Main GUI / Upload button activity for select response time file indicated by the user
+        """
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.response_filename, _ = QFileDialog.getOpenFileName(self, "Select The *.csv File", str(os.getcwd()),
+                                                                    "Response_Time_Files (*.csv)", str(options))
+
+            self.response_time_file_path = self.response_filename
+            self.response_filename = os.path.splitext(os.path.basename(self.response_filename))
+
+            if self.response_filename[1] == '.csv':
+                self.response_time_lineEdit.setText(self.response_time_file_path)
+                return True, self.response_time_file_path
+
+            elif self.response_filename[1] != "":
+                Message_Boxes.Critical_message(self, "Error", "this is not a valid response time file",
+                                               Style.MessageBox_stylesheet)
+
+        except Exception as exp:
+            Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
+
+    def browse_bound_form_pdbFile(self):
+        """
+            The function provides Main GUI / Upload button activity for select pdb file indicated by the user
+        """
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.boundForm_pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
+                                                                         "pdb Files (*.pdb)", str(options))
+
+            self.boundForm_pdb_path = self.boundForm_pdb_filename
+            self.boundForm_pdb_filename = os.path.splitext(os.path.basename(self.boundForm_pdb_filename))
+
+            if self.boundForm_pdb_filename[1] == '.pdb':
+                self.boundForm_pdb_lineedit.setText(self.boundForm_pdb_path)
+                return True, self.boundForm_pdb_path
+
+            elif self.boundForm_pdb_filename[1] != "":
+                Message_Boxes.Critical_message(self, "Error", "this is not a pdb file", Style.MessageBox_stylesheet)
+
+        except Exception as exp:
+            Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
+
+    def analysis_output_directory(self):
+        try:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            output_file = QFileDialog.getExistingDirectory(options=options)
+            self.net_output_directory_lineedit.setText(output_file)
+            return True
+
+        except Exception as ins:
+            return False
+
+    def node_threshold_use(self):
+        if self.node_threshold_checkBox.isChecked():
+            self.node_threshold_spinBox.setEnabled(False)
+        else:
+            self.node_threshold_spinBox.setEnabled(True)
+
+    # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
+
+    # ######################################### PERTURBATION WINDOW FUNCTIONS ##########################################
+    def maximum_thread_of_system(self):
+        self.Number_CPU_spinBox.setMaximum(mp.cpu_count())
+        self.Number_of_thread_for_network_spinBox.setMaximum(mp.cpu_count())
 
     def output_file(self):
         try:
@@ -82,7 +377,6 @@ class Functions(MainWindow):
 
         except Exception as exp:
             Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
-
 
     @staticmethod
     def PDB_ID_lineEdit(self):
@@ -256,6 +550,50 @@ class Functions(MainWindow):
         for item in listItems:
             self.selected_residues_listWidget.takeItem(self.selected_residues_listWidget.row(item))
 
+    def add_residue_to_target_List(self):
+        if str(self.target_res_comboBox.currentText()) != "":
+            items = []
+            for x in range(self.selected_target_residues_listWidget.count()):
+                items.append(self.selected_target_residues_listWidget.item(x).text())
+            if str(self.target_res_comboBox.currentText()) not in items:
+                self.selected_target_residues_listWidget.addItem(str(self.target_res_comboBox.currentText()))
+
+    def discard_residue_from_target_List(self):
+        listItems = self.selected_target_residues_listWidget.selectedItems()
+        if not listItems:
+            return
+        for item in listItems:
+            self.selected_target_residues_listWidget.takeItem(self.selected_target_residues_listWidget.row(item))
+
+    def number_of_steps_changed_from_quick(self):
+        global new_step
+
+        current_step = self.run_duration_doubleSpinBox.value()
+        current_time_unit = self.long_simulation_time_unit.currentText()
+        current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())
+
+        if current_time_unit == 'nanosecond':
+            new_step = int((current_step / current_integrator_time_step_value) * 1000000)
+
+        if current_time_unit == 'picosecond':
+            new_step = int((current_step / current_integrator_time_step_value) * 1000)
+
+        self.Number_of_steps_spinBox.setValue(new_step)
+
+    def number_of_steps_changed_from_advanced(self):
+        global new_time
+        current_step = int(self.Number_of_steps_spinBox.value())  # 1 ns
+        current_time_unit = self.long_simulation_time_unit.currentText()  # ns
+        current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())  # 2 fs
+
+        if current_time_unit == 'nanosecond':
+            new_time = float((current_step * current_integrator_time_step_value) / 1000000)
+
+        if current_time_unit == 'picosecond':
+            new_time = float((current_step * current_integrator_time_step_value) / 1000)
+
+        self.run_duration_doubleSpinBox.setValue(new_time)
+
 
 class InputFile:
     fetch_result = False
@@ -380,7 +718,7 @@ class pdb_Tools:
                 open(os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph)),
                      "w"),
                 keepIds=True)
-            return output_path
+            return os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
 
         if output_path == "":
             new_outpath_dir = os.path.dirname(file_pathway)

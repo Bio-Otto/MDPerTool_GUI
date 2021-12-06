@@ -1,21 +1,17 @@
-
-import MDAnalysis
-from simtk.openmm import Vec3
-from simtk.unit import nanometer
+# import MDAnalysis as md
+# from openmm import Vec3
+# from openmm.unit import nanometer
 import mdtraj as md
 import os
-from simtk.openmm import app
-import simtk.openmm as mm
-from simtk import unit
 from sys import stdout
-from simtk.unit import *
-from simtk.openmm import *
-from simtk.openmm import Context
 import numpy as np
+from pathlib import Path
+import sys
 
-def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein', write_dcd=True, write_pdb_for_selection=True,
-                             start=None, stop=None):
 
+"""
+def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein', write_dcd=True,
+                             write_pdb_for_selection=True, start=None, stop=None):
     global first_snapshot_name
     positions = []
     All_Positions = {}
@@ -23,12 +19,10 @@ def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein'
     save_directory = os.path.dirname(ref_traj)
 
     # set the universe object
-    u = MDAnalysis.Universe(top, ref_traj, modif_traj)
+    u = md.Universe(top, ref_traj, modif_traj)
 
     # set atom selection for all atoms of interest
     wanted_atoms = u.select_atoms(selected_atoms)
-
-
 
     # Writer object that spans the whole trajectory and
     # writes an abbreviated trajectory only including atoms described by atom selection
@@ -45,18 +39,21 @@ def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein'
 
     if write_dcd:
         if start and stop is not None:
-            with MDAnalysis.Writer(os.path.join(save_directory, '%s_%s_%s.dcd' % (ref_traj, start, stop)), len(wanted_atoms.atoms)) as V:
+            with md.Writer(os.path.join(save_directory, '%s_%s_%s.dcd' % (ref_traj, start, stop)),
+                                   len(wanted_atoms.atoms)) as V:
                 for ts in u.trajectory[start:stop]:
                     V.write(wanted_atoms)
 
         if start is None and stop is not None:
             start = 0
-            with MDAnalysis.Writer(os.path.join(save_directory, '%s_%s_%s.dcd' % (ref_traj, start, stop)), len(wanted_atoms.atoms)) as V:
+            with md.Writer(os.path.join(save_directory, '%s_%s_%s.dcd' % (ref_traj, start, stop)),
+                                   len(wanted_atoms.atoms)) as V:
                 for ts in u.trajectory[start:stop]:
                     V.write(wanted_atoms)
 
         if start is not None and stop is None:
-            with MDAnalysis.Writer(os.path.join(save_directory, '%s_%s_all.dcd' % (ref_traj, start)), len(wanted_atoms.atoms)) as V:
+            with md.Writer(os.path.join(save_directory, '%s_%s_all.dcd' % (ref_traj, start)),
+                                   len(wanted_atoms.atoms)) as V:
                 for ts in u.trajectory[start:]:
                     V.write(wanted_atoms)
 
@@ -65,6 +62,7 @@ def get_openmm_pos_from_traj(top, ref_traj, modif_traj, selected_atoms='protein'
         wanted_atoms.write(first_snapshot_name)
 
     return All_Positions, first_snapshot_name
+"""
 
 
 def create_restrained_atoms_topology(pdb_file):
@@ -75,21 +73,44 @@ def create_restrained_atoms_topology(pdb_file):
 
     box_dimension = file.openmm_boxes(0)
 
-
     all_atoms_indices = []
 
     for i in range(topology.n_residues):
-
         all_atoms_indices.append(topology.select("resid %s" % i))
 
     return all_atoms_indices, topology.to_openmm(), box_dimension
 
 
+def get_openmm_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_atoms='protein',
+                                         write_pdb_for_selection=True, start=None, stop=None, stride=1):
+    global first_snapshot_name
+    positions = []
+    save_directory = os.path.dirname(modif_traj)
 
+    trajectory_collector = object
+    if ref_traj is not None:
+        traj1 = md.join(md.iterload(ref_traj, chunk=100, stride=stride, atom_indices=None, top=top))
+        traj2 = md.join(md.iterload(modif_traj, chunk=100, stride=stride, atom_indices=None, top=top))
+        trajectory_collector = traj1 + traj2
+
+    if ref_traj is None:
+        trajectory_collector = md.join(md.iterload(modif_traj, chunk=100, stride=stride, atom_indices=None, top=top))
+
+    # set atom selection for all atoms of interest
+    wanted_atoms_traj = trajectory_collector.atom_slice(trajectory_collector.topology.select(selected_atoms))
+
+    print("Started to convert Traj positions for OpenMM..")
+    for i in range(wanted_atoms_traj.n_frames):
+        positions.append(wanted_atoms_traj.openmm_positions(i))
+
+    if write_pdb_for_selection:
+        first_snapshot_name = os.path.join(save_directory, '%s_first_snapshot.pdb' % selected_atoms)
+        wanted_atoms_traj[0].save_pdb(first_snapshot_name)
+
+    return positions, first_snapshot_name
 
 # traj = 'trajectory.dcd'
 # pdb_file = 'last_structure.pdb'
-
 
 
 # all_atoms_indices, new_topology, box_vectors = create_restrained_atoms_topology(pdb_file)

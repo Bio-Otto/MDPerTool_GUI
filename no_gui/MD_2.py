@@ -1,46 +1,80 @@
 ##########################################################################
 # IMPORTS
-from simtk.openmm import app
-import simtk.openmm as mm
-from simtk.unit import femtosecond, picosecond, nanometer, angstrom
+from openmm import app
+import openmm as mm
+from openmm.unit import femtosecond, picosecond, nanometer, angstrom
 from sys import stdout
-from simtk.openmm import *
+from openmm import *
 from mdtraj.reporters import XTCReporter
 
 
 class Reference_MD_Engine:
 
-    def __init__(self, pdb_path, state_file='state.xml', protein_ff='amber96', water_ff='tip3p', time_step=1.0,
-                 nonbondedCutoff=12.0, switching_distance= 10.0, Device_Index=False, Device_Index_Number=1,
-                 reference_total_Steps=1000, platform_name='OpenCL', properties=None, precision='single',
-                 CPU_Threads=2, report_interval=1, write_to_dcd=True, dcd_write_period=1, write_to_xtc=False,
-                 xtc_write_period=1, undissipated_traj_name='undissipated_traj', output_directory=None):
+    def __init__(self, pdb_path, state_file='state.xml', protein_ff=None, water_ff=None, time_step=None,
+                 nonbondedCutoff=None, use_switching_distance=False, switching_distance=None, Device_Index=False,
+                 Device_Index_Number=None, reference_total_Steps=None, platform_name=None, properties=None,
+                 precision=None, CPU_Threads=None, report_interval=1, write_to_dcd=True, dcd_write_period=1,
+                 write_to_xtc=False, xtc_write_period=1, undissipated_traj_name='undissipated_traj',
+                 output_directory=None):
 
         print("Simulation parameters preparing for the start ...")
+        self.use_switching_distance = use_switching_distance
         self.Device_Index = Device_Index
         self.Device_Index_Number = Device_Index_Number
 
         if properties is None:
-            if platform_name == 'OpenCL' and self.Device_Index == True:
-                properties = {'OpenCLPrecision': '%s' % precision, 'OpenCLDeviceIndex': '%s' % self.Device_Index_Number}
+            # --> PROPERTIES SETTINGS FOR OPENCL PLATFORM
+            if platform_name == 'OpenCL' and self.Device_Index is True and self.Device_Index_Number is not None:
+                if len(self.Device_Index_Number) == 1:
+                    properties = {'OpenCLPrecision': '%s' % precision,
+                                  'OpenCLDeviceIndex': '%s' % self.Device_Index_Number[0]}
+                    print(properties)
 
-            if platform_name == 'OpenCL' and self.Device_Index == False:
+                elif len(self.Device_Index_Number) == 2:
+                    properties = {'OpenCLPrecision': '%s' % precision,
+                                  'OpenCLDeviceIndex': '%s,%s' % (self.Device_Index_Number[0],
+                                                                  self.Device_Index_Number[1])}
+                    print(properties)
+                else:
+                    print("Please Control your specified argument for #properties# in OpenCL device")
+
+            if platform_name == 'OpenCL' and self.Device_Index is False:
                 properties = {'OpenCLPrecision': '%s' % precision}
+                print(properties)
 
-            if platform_name == 'CUDA' and self.Device_Index == True:
-                properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
+            # --> PROPERTIES SETTINGS FOR CUDA PLATFORM
+            if platform_name == 'CUDA' and self.Device_Index == True and self.Device_Index_Number is not None:
+                if len(self.Device_Index_Number) == 1:
+                    properties = {'CudaPrecision': '%s' % precision,  'DeterministicForces': 'true',
+                                  'CudaDeviceIndex': '%s' % self.Device_Index_Number[0]}
 
+                    print(properties)
+
+                elif len(self.Device_Index_Number) == 2:
+                    properties = {'CudaPrecision': '%s' % precision,  'DeterministicForces': 'true',
+                                  'CudaDeviceIndex': '%s,%s' % (self.Device_Index_Number[0],
+                                                                self.Device_Index_Number[1])}
+
+                    print(properties)
+                else:
+                    print("Please Control your specified argument for #properties# in Cuda device")
+
+            if platform_name == 'CUDA' and self.Device_Index is False:
+                properties = {'CudaPrecision': '%s' % precision,  'DeterministicForces': 'true'}
+                print(properties)
+
+            # --> PROPERTIES SETTINGS FOR CPU PLATFORM
             if platform_name == 'CPU':
                 print("The CPU platform always uses 'mixed' precision.")
                 print("Simulation process will use %s Thread(s)" % CPU_Threads)
                 properties = {'CpuThreads': '%s' % CPU_Threads}
                 precision = 'mixed'
 
+            # --> PROPERTIES SETTINGS FOR REFERENCE PLATFORM
             if platform_name == 'Reference':
                 print("The Reference platform always uses 'double' precision.")
                 properties = None
                 precision = 'double'
-        print("System will use '%s' Platform with '%s' Precision" % (platform_name, precision))
 
         self.pdb_path = pdb_path
         self.protein_ff = protein_ff + '.xml'
@@ -67,6 +101,7 @@ class Reference_MD_Engine:
             self.water_model = (self.water_ff.split('/')[-1]).split('.')[0][0:5]
             print("Water Model for Solution 3: %s" % self.water_model)
 
+        print(self.protein_ff, self.water_ff, self.water_model)
         self.switching_distance = switching_distance * angstrom
         self.state_file = state_file
         self.time_step = time_step * femtosecond
@@ -83,35 +118,46 @@ class Reference_MD_Engine:
 
         # we'll just take the topology from here...
         pdb = app.PDBFile(self.pdb_path)
-        topology = pdb.topology
+        modeller = app.Modeller(pdb.topology, pdb.positions)
+        topology = modeller.topology
 
         print('Forcefield parameters loading to the simulation system ...')
         # forcefield = app.ForceField('amber96.xml', 'tip3p.xml')
         forcefield = app.ForceField(self.protein_ff, self.water_ff)
 
         print('Constructing an OpenMM System')
-        self.system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedCutoff,
-                                              constraints=None, rigidWater=True, ewaldErrorTolerance=5e-5)
+        # self.system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff=self.nonbondedCutoff,
+        #                                       constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
+        self.system = forcefield.createSystem(topology, nonbondedMethod=app.PME,
+                                              nonbondedCutoff=self.nonbondedCutoff,
+                                              constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
 
-        nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
-        nonbonded.setUseSwitchingFunction(use=True)
-        nonbonded.setSwitchingDistance(self.switching_distance)
-        # nonbonded.setUseDispersionCorrection(True)
-        # nonbonded.setReciprocalSpaceForceGroup(1)
-
-        state = mm.XmlSerializer.deserialize(open(self.state_file).read())
+        if self.use_switching_distance:
+            print("System will use Switching Distance")
+            nonbonded = [f for f in self.system.getForces() if isinstance(f, NonbondedForce)][0]
+            nonbonded.setUseSwitchingFunction(use=True)
+            nonbonded.setSwitchingDistance(self.switching_distance)
+            # nonbonded.setUseDispersionCorrection(False)
+            print("Dispertion Correction Not working")
+            # nonbonded.setReciprocalSpaceForceGroup(1)
 
         integrator = VerletIntegrator(self.time_step)
+        integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
         platform = mm.Platform.getPlatformByName(self.platform_name)
 
         # ok now let's do some simulation using this restraint
         simulation = app.Simulation(topology, self.system, integrator, platform, self.properties)
-        simulation.context.setState(state)
-        simulation.context.setTime(0)
-
+        simulation.loadState(self.state_file)
+        final_state = simulation.context.getState(getVelocities=True, getPositions=True)
+        positions = final_state.getPositions()
+        velocities = final_state.getVelocities()
+        simulation.context.setPositions(positions)
         simulation.context.computeVirtualSites()
+        simulation.context.setVelocities(velocities)
+
+        # simulation.context.setTime(0)
 
         if self.report_interval > self.reference_total_Steps:
             self.report_interval = int(self.reference_total_Steps / 2)
@@ -128,7 +174,8 @@ class Reference_MD_Engine:
             XTC_file_path = os.path.join(self.output_directory, '%s.xtc' % undissipated_traj_name)
             simulation.reporters.append(XTCReporter(XTC_file_path, self.xtc_write_period))
 
-        simulation.reporters.append(app.StateDataReporter(stdout, self.report_interval, step=True, time=True, potentialEnergy=True,
+        simulation.reporters.append(
+            app.StateDataReporter(stdout, self.report_interval, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
                                   density=True, remainingTime=True, speed=True, totalSteps=self.reference_total_Steps,
                                   separator='\t'))
