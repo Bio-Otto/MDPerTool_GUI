@@ -1,6 +1,6 @@
 <h1 align="center">Energy Dissipation Concept with MDPERTOOL 
 <a href="https://www.producthunt.com/posts/awesome-github-profiles?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-awesome-github-profiles" target="_blank">
-<img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/1500x500.jpg" /></a></h1>
+<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" /></a></h1>
 <div align="center">
 <img src="https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg" alt="Awesome Badge"/>
 <a href="http://compbio.bioe.eng.marmara.edu.tr/"><img src="https://img.shields.io/static/v1?label=&labelColor=505050&message=ozbek-lab&color=%230076D6&style=flat&logo=google-chrome&logoColor=%230076D6" alt="website"/></a>
