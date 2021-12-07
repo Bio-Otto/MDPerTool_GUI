@@ -32,7 +32,7 @@
 
 <p align="left">
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 150px; height: 60px;" width="150" height="60" /></a>
+    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 200px; height: 70px;" width="200" height="70" /></a>
     <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="70" title="Available on Ubuntu 20.10">
     <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="70" title="Available on Windows">
 </p>
