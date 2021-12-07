@@ -1,7 +1,7 @@
 
 <h1 align="left">
 <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="position:fixed; bottom:0px; width: 150px; vertical-align: text-top; height: 120px;" width="150" height="120" align="bottom"/>
+<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="position:fixed; bottom:0px; width: 150px; height: 120px;" width="150" height="120" align="top"/>
 <span style="">MDPERTOOL: Perturbation based Allosteric Pathway Finder</span>
 
 </a>
