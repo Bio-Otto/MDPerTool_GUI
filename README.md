@@ -26,7 +26,6 @@
 
 
 
-
 <p align="center">
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
     <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 250px; height: 40px;" width="250" height="40" /></a>
@@ -34,9 +33,20 @@
     <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="40" title="Available on Windows">
 </p>
 
-A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
+### Installation
 
-For terminal usage just use; 
+Open your favorite Terminal and run these commands.
+
+
+```diff
+$ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
+$ cd cd MDPERTOOL_v01
+$ conda env create -f envs/env.yml 
+$ conda activate mdpertool
+$ python ui_main.py
+```
+
+### For terminal usage just use; 
 
 ```sh
 $ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
@@ -87,22 +97,7 @@ The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular
   - Automated Topology Builder
   - Residue Decomposition
   - DCD and XTC file format support 
-
-### Installation
-
-Open your favorite Terminal and run these commands.
-
-
-```diff
-$ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
-$ cd cd MDPERTOOL_v01
-$ conda env create -f envs/env.yml 
-$ conda activate mdpertool
-$ python ui_main.py
-```
-
-
-
+  
 
 ### Features of MDPERTOOL v0.1
 
