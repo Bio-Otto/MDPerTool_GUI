@@ -1,6 +1,6 @@
-<h1 align="center">MDPERTOOL | Perturbation based Allosteric Pathway Finder 
+<h1 align="center">MDPERTOOL: Perturbation based Allosteric Pathway Finder 
 <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_blank">
-<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="width: 200px; height: 150px;" width="200" height="150"/>
+<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="width: 175px; height: 130px;" width="175" height="130"/>
 </a>
 </h1>
 <div align="center">
