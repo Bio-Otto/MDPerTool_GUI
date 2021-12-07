@@ -30,7 +30,7 @@
 
 <p align="left">
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 250px; height: 40px;" width="250" height="40" align="top"/></a>
+    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 250px; height: 40px;" width="250" height="40" align="middle"/></a>
     <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="60" title="Available on Ubuntu 20.10">
     <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="60" title="Available on Windows">
 </p>
