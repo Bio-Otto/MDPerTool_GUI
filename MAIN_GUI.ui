@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1576,7 +1576,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                         </property>
                         <property name="currentIndex">
-                         <number>0</number>
+                         <number>1</number>
                         </property>
                         <widget class="QWidget" name="Perturb_Quick">
                          <attribute name="title">
@@ -4169,11 +4169,6 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                      </property>
                                      <item>
                                       <property name="text">
-                                       <string>amber99sb</string>
-                                      </property>
-                                     </item>
-                                     <item>
-                                      <property name="text">
                                        <string>amber03</string>
                                       </property>
                                      </item>
@@ -4185,6 +4180,21 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                      <item>
                                       <property name="text">
                                        <string>amber96</string>
+                                      </property>
+                                     </item>
+                                     <item>
+                                      <property name="text">
+                                       <string>amber99sb</string>
+                                      </property>
+                                     </item>
+                                     <item>
+                                      <property name="text">
+                                       <string>amber99sbildn</string>
+                                      </property>
+                                     </item>
+                                     <item>
+                                      <property name="text">
+                                       <string>charmm36</string>
                                       </property>
                                      </item>
                                     </widget>
