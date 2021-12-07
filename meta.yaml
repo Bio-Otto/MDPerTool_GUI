@@ -27,7 +27,7 @@ requirements:
 
 test:
   imports:
-    - ui_main
+    - mdpertool
 
 about:
   home: https://github.com/Bio-Otto/MDPERTOOL_v01
