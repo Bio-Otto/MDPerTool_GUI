@@ -1,5 +1,5 @@
-<h1 align="center">Energy Dissipation Concept with MDPERTOOL 
-<a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_blank">
+<h1 align="center">MDPERTOOL | Perturbation based Allosteric Pathway Finder 
+<a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_top">
 <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="width: 200px; height: 150px;" width="200" height="150"/>
 </a>
 </h1>
