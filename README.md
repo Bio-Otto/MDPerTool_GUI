@@ -1,6 +1,6 @@
 <h1 align="center">Energy Dissipation Concept with MDPERTOOL 
 <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_blank">
-<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="width: 250px; height: 200px;" width="250" height="200"/>
+<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="width: 200px; height: 150px;" width="200" height="150"/>
 </a>
 </h1>
 <div align="center">
