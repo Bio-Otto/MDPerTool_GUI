@@ -1,6 +1,6 @@
 <h1 align="center">MDPERTOOL: Perturbation based Allosteric Pathway Finder 
 <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="position:fixed; bottom:0px; top:25px; width: 150px; height: 120px;" width="150" height="120" />
+<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/big_icons/logo_for_contacts.png" style="position:fixed; bottom:0px; width: 150px; height: 120px;" width="150" height="120" />
 </a>
 </h1>
 <div align="center">
@@ -19,19 +19,21 @@
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/issues"><img src="https://img.shields.io/github/issues/Bio-Otto/Bio-Otto" alt="Issues Badge"/></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Bio-Otto/MDPerTool_GUI?color=2b9348"></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
+![MDPERTOOL v0.1 ff69b4](https://img.shields.io/badge/MDPERTOOL-v0.1-<ff69b4>)
 
 <img alt="Awesome GitHub Profile Readme" src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/MDPerTool.gif"> </img>
 
 
 
 
-# Energy Dissipation Concept with MDPERTOOL v0.1      ![MDPERTOOL v0.1 ff69b4](https://img.shields.io/badge/<MDPERTOOL>-<v0.1>-<ff69b4>)
-
-[![Powered by |Ozbek' Lab](https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png)](http://compbio.bioe.eng.marmara.edu.tr/)
+<a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
+<img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 150px; height: 120px;" width="150" height="120" />
+</a>
 
 <p align="left">
-  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="50" title="Available on Ubuntu 20.10">
-  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="50" title="Available on Windows">
+  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="70" title="Available on Ubuntu 20.10">
+  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="70" title="Available on Windows">
 </p>
 
 A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
