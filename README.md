@@ -34,8 +34,10 @@ MDPERTOOL uses a number of open source projects to work properly:
 * __Numpy__ -  The fundamental package for scientific computing with Python 
 * __Pymol (Open Source)__ - PyMOL is a user-sponsored molecular visualization system on an open-source foundation, maintained and distributed by Schrödinger.
 * __Matplotlib__ - Matplotlib is a comprehensive library for creating static, animated, and interactive visualizations in Python.
-* __Mayavi__ - 3D scientific data visualization and plotting in Python
-* __Pyqt5__ - Python bindings for the Qt cross platform application toolkit
+* __Pyqtgraph__ - Scientific Graphics and GUI Library for Python
+* __PySide2__ - Python bindings for the Qt cross-platform application and UI framework
+* __ProDy__ - Protein Dynamics and Sequence Analysis
+* __Parmed__ - Parameter/topology editor and molecular simulator
 
 And of course MDPERTOOL v0.1 itself is open source with a [public repository][MDPERTOOL] on GitHub.
 
@@ -64,8 +66,11 @@ The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular
 Open your favorite Terminal and run these commands.
 
 ```sh
-$ cd MDPERTOOL_v01
-$ python setup.py --install
+$ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
+$ cd MDPerTool_GUI
+$ conda env create -f env.yml 
+$ conda activate mdpertool
+$ python ui_main.py
 ```
 
 
