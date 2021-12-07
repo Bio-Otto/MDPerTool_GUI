@@ -27,13 +27,14 @@
 
 
 
-<a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-<img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 150px; height: 120px;" width="150" height="120" />
+<a 
 </a>
 
 <p align="left">
-  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="70" title="Available on Ubuntu 20.10">
-  <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="70" title="Available on Windows">
+    <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
+    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" style="position:fixed; bottom:0px; width: 150px; height: 120px;" width="150" height="120" /></a>
+    <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/orange-logo-linux.png" width="70" title="Available on Ubuntu 20.10">
+    <img src="https://github.com/Bio-Otto/MDPERTOOL_v01/blob/ubuntu_gui_development/icons/windows-logo.png" width="70" title="Available on Windows">
 </p>
 
 A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
