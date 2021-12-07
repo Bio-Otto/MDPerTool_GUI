@@ -1,3 +1,28 @@
+<h1 align="center">Energy Dissipation Concept with MDPERTOOL 
+<a href="https://www.producthunt.com/posts/awesome-github-profiles?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-awesome-github-profiles" target="_blank">
+<img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/1500x500.jpg" /></a></h1>
+<div align="center">
+<img src="https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg" alt="Awesome Badge"/>
+<a href="http://compbio.bioe.eng.marmara.edu.tr/"><img src="https://img.shields.io/static/v1?label=&labelColor=505050&message=ozbek-lab&color=%230076D6&style=flat&logo=google-chrome&logoColor=%230076D6" alt="website"/></a>
+<!-- <img src="http://hits.dwyl.com/abhisheknaiidu/awesome-github-profile-readme.svg" alt="Hits Badge"/> -->
+<img src="https://img.shields.io/static/v1?label=%F0%9F%8C%9F&message=If%20Useful&style=style=flat&color=BC4E99" alt="Star Badge"/>
+<a href="https://twitter.com/LabOzbek" ><img src="https://img.shields.io/twitter/follow/pemoshh.svg?style=social" /> </a>
+<br>
+
+<i>A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations</i>
+
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/stargazers"><img src="https://img.shields.io/github/stars/Bio-Otto/Bio-Otto" alt="Stars Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/members"><img src="https://img.shields.io/github/forks/Bio-Otto/Bio-Otto" alt="Forks Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/pulls"><img src="https://img.shields.io/github/issues-pr/Bio-Otto/Bio-Otto" alt="Pull Requests Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/issues"><img src="https://img.shields.io/github/issues/Bio-Otto/Bio-Otto" alt="Issues Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Bio-Otto/MDPerTool_GUI?color=2b9348"></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
+
+<img alt="Awesome GitHub Profile Readme" src="assets/agpr.gif"> </img>
+
+
+
+
 # Energy Dissipation Concept with MDPERTOOL v0.1      ![MDPERTOOL v0.1 ff69b4](https://img.shields.io/badge/<MDPERTOOL>-<v0.1>-<ff69b4>)
 
 [![Powered by |Ozbek' Lab](https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png)](http://compbio.bioe.eng.marmara.edu.tr/)
@@ -65,13 +90,15 @@ The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular
 
 Open your favorite Terminal and run these commands.
 
-```sh
+
+```diff
 $ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
-$ cd MDPerTool_GUI
-$ conda env create -f env.yml 
+$ cd cd MDPERTOOL_v01
+$ conda env create -f envs/env.yml 
 $ conda activate mdpertool
 $ python ui_main.py
 ```
+
 
 
 
@@ -79,12 +106,34 @@ $ python ui_main.py
 
 MDPERTOOL is currently extended with the following features. Instructions on how to use them in your own works are linked below.
 
-| Feature | README |
-| ------ | ------ |
-| Each Residue Decomposition | [plugins/dropbox/README.md][MDPERTOOL] |
-| Molecular Dynamic Simulation | [plugins/github/README.md][MDPERTOOL] |
-| Energy Dissipation Network | [plugins/googledrive/README.md][MDPERTOOL] |
-| Free Energy Calculations | [plugins/onedrive/README.md][MDPERTOOL] |
+<table align="center">
+    <thead>
+        <tr>
+            <th align="left">Feature</th>
+            <th align="center">README</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="left">Each Residue Decomposition</td>
+            <td align="center">[plugins/dropbox/README.md][MDPERTOOL]</td>
+        </tr>
+        <tr>
+            <td align="left">Molecular Dynamic Simulation</td>
+            <td align="center">[plugins/github/README.md][MDPERTOOL]</td>
+        </tr>
+        <tr>
+            <td align="left">Energy Dissipation Network</td>
+            <td align="center">[plugins/googledrive/README.md][MDPERTOOL]</td>
+        </tr>
+        <tr>
+            <td align="left">Free Energy Calculations</td>
+            <td align="center">[plugins/onedrive/README.md][MDPERTOOL]</td>
+        </tr>
+    </tbody>
+
+</table><p></p></div>
+
 
 ### Development
 
