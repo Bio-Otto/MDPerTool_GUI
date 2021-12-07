@@ -18,7 +18,7 @@
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Bio-Otto/MDPerTool_GUI?color=2b9348"></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
 
-<img alt="Awesome GitHub Profile Readme" src="assets/agpr.gif"> </img>
+<img alt="Awesome GitHub Profile Readme" src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/MDPerTool.gif"> </img>
 
 
 
