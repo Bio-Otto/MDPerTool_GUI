@@ -1,9 +1,5 @@
 import os
-
-from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QFileDialog, QWidget
-from PyQt5.QtWidgets import QMessageBox
+from PySide2.QtWidgets import QFileDialog, QMessageBox
 
 
 

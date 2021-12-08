@@ -43,12 +43,12 @@ class Helper_Functions():
         """
             :return: The function will return available platforms on your system for OpenMM Engine
         """
-        import simtk.openmm
+        import openmm
         avail_plt_and_speed = dict()
 
-        for index in range(simtk.openmm.Platform.getNumPlatforms()):
+        for index in range(openmm.Platform.getNumPlatforms()):
             avail_plt_and_speed[
-                (simtk.openmm.Platform.getPlatform(index).getName())] = simtk.openmm.Platform.getPlatform(
+                (openmm.Platform.getPlatform(index).getName())] = openmm.Platform.getPlatform(
                 index).getSpeed()
 
         return avail_plt_and_speed.keys(), avail_plt_and_speed

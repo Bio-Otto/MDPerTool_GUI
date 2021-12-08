@@ -42,8 +42,8 @@ Open your favorite Terminal and run these commands.
 
 ```diff
 $ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
-$ cd cd MDPERTOOL_v01
-$ conda env create -f envs/env.yml 
+$ cd cd MDPerTool_GUI
+$ conda env create -f envs/winx64_env.yml 
 $ conda activate mdpertool
 $ python ui_main.py
 ```

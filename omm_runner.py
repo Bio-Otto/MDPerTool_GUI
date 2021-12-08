@@ -1,4 +1,4 @@
-from simtk.openmm.app import StateDataReporter
+from openmm.app import StateDataReporter
 from io import StringIO
 import time
 import ctypes

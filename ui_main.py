@@ -1,9 +1,7 @@
 import os
 import sys
 import platform
-
 from PySide2.QtCore import QSize, QThreadPool
-
 from src.pyside_dynamic import loadUi
 from PySide2 import QtXml, QtCore, QtGui, QtWidgets
 from PySide2.QtUiTools import QUiLoader
@@ -13,23 +11,14 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFo
                            QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QIntValidator,
                            QRegExpValidator)
 from PySide2.QtWidgets import *
-
 from PySide2 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import (QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-#                          QSize, QTime, QUrl, Qt, QEvent, QRectF)
-# from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-#                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QRegion)
 from PySide2.QtWidgets import *
 import os
 import sys
 from platform import system, release
 from PySide2 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-#                          QSize, QTime, QUrl, Qt, QEvent)
-# from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-#                          QLinearGradient, QPalette, QPainter, QPixmap, QPainterPath)
-# from PyQt5.QtGui import QPainterPath, QRegion
-## ==> MAIN WINDOW
+
+# ==> MAIN WINDOW
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 from mplwidget import *
 from icons import *
@@ -41,10 +30,7 @@ from builder import *
 from omm_runner import *
 from pdbfixer import PDBFixer
 
-# from app_functions import *
-# from browse_menu import browse_file
-# from omm_runner import *
-## ==> GLOBALS
+#  ==> GLOBALS
 counter = 0
 
 
@@ -63,7 +49,7 @@ def center_window(widget):
 class PlotSignal(QObject):
     plot_network = Signal()
 
-# YOUR APPLICATION
+
 class MainWindow(QtWidgets.QMainWindow):
     global active_workers, network_holder, log_holder
 

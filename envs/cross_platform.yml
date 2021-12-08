@@ -1,0 +1,20 @@
+name: mdpertool
+channels:
+  - defaults
+dependencies:
+  - python=3.7
+  - pymol-open-source
+  - pyside2
+  - matplotlib
+  - pandas
+  - pyqtgraph
+  - openmm
+  - pystache
+  - networkx
+  - pdbfixer
+  - parmed
+  - prody
+  - pyvis
+  - pyopengl
+  - mdtraj
+prefix: C:\Users\HIbrahim\anaconda3\envs\mdpertool
