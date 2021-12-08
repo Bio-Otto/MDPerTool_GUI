@@ -41,7 +41,8 @@ platforms = ["Linux", "Windows", "Mac"]
 
 keywords = ["Perturbation", "Energy", "Dissipation", "Allostery", "OpenMM", "Molecular Dynamics"]
 
-install_requires = ["pyqtgraph", "parmed", "mdtraj", "matplotlib", "pandas", "numpy", "pyside2==5.15.2", "pymol-open-source"]
+install_requires = ["pyqtgraph", "parmed", "mdtraj", "matplotlib", "pandas", "numpy", "openmm", "pystache",
+                    "pyside2==5.13.2", "pymol-open-source", "networkx", "pdbfixer", "prody", "pyvis", "pyopengl"]
 
 
 
