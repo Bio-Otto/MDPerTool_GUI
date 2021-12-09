@@ -9,10 +9,9 @@ from PySide2.QtCore import Slot
 from pdbfixer import PDBFixer
 from openmm import *
 from openmm.app import *
-from checkBox_menu import *
+from src.checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
-from checkBox_menu import *
 from ui_main import *
 from message import Message_Boxes
 import multiprocessing as mp

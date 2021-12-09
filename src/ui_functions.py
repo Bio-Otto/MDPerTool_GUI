@@ -1,20 +1,6 @@
-# from PyQt5.QtWidgets import *
-import os
-
-from PySide2 import QtCore, QtGui, QtWidgets
-
-# from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-#                           QSize, QTime, QUrl, Qt, QEvent)
-
-''' from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                         QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient) '''
 
 ## ==> GUI FILE
-# from ui_main import *
-# IMPORT QSS CUSTOM
 from ui_styles import Style
-
-# import sip
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0
@@ -22,9 +8,8 @@ GLOBAL_TITLE_BAR = True
 
 ## ==> COUT INITIAL MENU
 count = 1
-import networkx as nx
-from app_functions import *
-from PyMolWidget import PymolQtWidget
+from src.app_functions import *
+from src.PyMolWidget import PymolQtWidget
 from analysis import VisJS_Widget
 
 
@@ -62,6 +47,7 @@ class UIFunctions(MainWindow):
         global GLOBAL_STATE
         status = GLOBAL_STATE
         if status == 0:
+            print("1")
             self.showMaximized()
             GLOBAL_STATE = 1
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -69,7 +55,8 @@ class UIFunctions(MainWindow):
             self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-restore.png"))
             # self.frame_top_btns.setStyleSheet("background-color: rgb(27, 29, 35)")
             self.frame_size_grip.hide()
-        else:
+        if status == 1:
+            print("2")
             GLOBAL_STATE = 0
             self.showNormal()
             # self.resize(self.width() + 1, self.height() + 1)

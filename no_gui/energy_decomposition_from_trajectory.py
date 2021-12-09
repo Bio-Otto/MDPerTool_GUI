@@ -14,7 +14,7 @@ import time
 import os
 import pandas as pd
 from ui_main import *
-from builder import *
+from src.builder import *
 
 # from .get_positions_from_trajectory_file import get_openmm_pos_from_traj
 # from .response_time_creator import getResidueResponseTimes

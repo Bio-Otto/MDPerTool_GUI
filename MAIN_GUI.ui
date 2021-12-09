@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>2</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -10723,6 +10723,13 @@ QLineEdit:focus {
                               </layout>
                              </item>
                             </layout>
+                           </widget>
+                          </item>
+                          <item row="5" column="0">
+                           <widget class="QPushButton" name="add_tabb">
+                            <property name="text">
+                             <string>PushButton</string>
+                            </property>
                            </widget>
                           </item>
                          </layout>

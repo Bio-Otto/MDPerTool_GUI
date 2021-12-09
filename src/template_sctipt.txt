@@ -180,6 +180,33 @@ for i in range(len({{speed_factor}})):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
+        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
+            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+            precision = 'double'
+
+        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
+            properties = {'OpenCLPrecision': 'double'}
+            precision = 'double'
+
+        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
+            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
+            precision = 'double'
+
+        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
+            properties = {'CudaPrecision': 'double'}
+            precision = 'double'
+
+        if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
+            print("The CPU platform always uses 'mixed' precision.")
+            print("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
+            properties = {'CpuThreads': '{{Number_of_CPU}}'}
+            precision = 'mixed'
+
+        if '{{platform}}' == 'Reference':
+            print("The Reference platform always uses 'double' precision.")
+            properties = None
+            precision= 'double'
+
         # we'll just take the topology from here...
         pdb = app.PDBFile(last_pdb_file_path)
         topology = pdb.topology

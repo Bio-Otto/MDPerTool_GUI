@@ -17,8 +17,11 @@ if sys.platform == "win32":
 
 # dependencies
 build_exe_options = {
-    "packages": ["os", "sys", "re", "PySide2.QtCore", "PySide2.QtWidgets", "PySide2.QtUiTools", "PySide2.QtXml", "OpenGL", "pymol",
-                 "PySide2.QtQml", "PySide2.QtGui", "shiboken2", "pdbfixer", "pyqtgraph", "openmm", "mdtraj", "parmed"],
+    "packages": ["os", "sys", "re", "PySide2.QtCore", "PySide2.QtWidgets", "PySide2.QtUiTools", "PySide2.QtQuick",
+                 "PySide2.QtQml", "PySide2.QtGui", "matplotlib", "pandas", "pyqtgraph", "OpenGL", "pymol",
+                 "networkx", "prody", "pystache", "shiboken2", "pdbfixer", "pyqtgraph", "openmm",
+                 "mdtraj", "parmed", "pyvis", "OpenGL"],
+
 
     "include_files": ['MAIN_GUI.ui', 'LICENSE', 'splash_screen.ui',
                       'C:\\Users\\HIbrahim\\anaconda3\\envs\\moldyn\\Lib\\xdrlib.py', 'test/'],

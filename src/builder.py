@@ -9,7 +9,7 @@ import queue
 import threading
 import itertools
 import tokenize
-from omm_runner import *
+from src.omm_runner import *
 from ui_styles import Style
 from ui_main import *
 

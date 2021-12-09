@@ -1,8 +1,8 @@
 import os
 import sys
 import platform
-from PySide2.QtCore import QSize, QThreadPool
-from src.pyside_dynamic import loadUi
+from PySide2.QtCore import QSize, QThreadPool, Signal
+
 from PySide2 import QtXml, QtCore, QtGui, QtWidgets
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
@@ -13,21 +13,19 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFo
 from PySide2.QtWidgets import *
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtWidgets import *
-import os
-import sys
 from platform import system, release
 from PySide2 import QtCore, QtGui, QtWidgets
 
-# ==> MAIN WINDOW
+# =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
-from mplwidget import *
+
 from icons import *
 import pyqtgraph as pg
-# IMPORT FUNCTIONS
-from omm_runner import *
-from ui_functions import *
-from builder import *
-from omm_runner import *
+from src.omm_runner import *
+from src.ui_functions import *
+from src.builder import *
+from src.mplwidget import *
+from src.pyside_dynamic import loadUi
 from pdbfixer import PDBFixer
 
 #  ==> GLOBALS
@@ -190,6 +188,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
         self.Handel_Save_Figure_Options_Changed()
         self.Handel_Save_Figure_Options()
+
+        # ----> Analysis Menu Parameters
         self.threadpool = QThreadPool()
         self.active_workers = 0
         self.network_holder = []
@@ -197,6 +197,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.node_threshold = None
         self.thread_main = QtCore.QThread()
         self.thread_main.start()
+        self.analysis_TabWidget.setTabsClosable(True)
+        self.analysis_TabWidget.tabCloseRequested.connect(self.closeTab)
+
+        # #### TRAIL
+        self.add_tabb.clicked.connect(self.add_tab)
+
+    def add_tab(self):
+        self.tab = QtWidgets.QWidget()
+        self.tab.setTabButton(0, QTabBar.RightSide, None)
+        self.tab.setObjectName("tabb")
+        self.analysis_TabWidget.addTab(self.tab, "")
+        self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
+
+    def closeTab(self, currentIndex):
+        self.analysis_TabWidget.removeTab(currentIndex)
+
+    # #### TRAIL
 
     """
     def eventFilter(self, obj, event):
@@ -445,18 +462,24 @@ class MainWindow(QtWidgets.QMainWindow):
     # ----- > Widget to Move
     # ---> Mouse Click Event - Start
     def mouseMoveEvent(self, event):
-        if UIFunctions.returStatus() == 1:
-            UIFunctions.maximize_restore(self)
+        # if UIFunctions.returStatus() == 1:
+        #     UIFunctions.maximize_restore(self)
         # ---> Move Window
         if event.buttons() == Qt.LeftButton:
-            widget = self.childAt(event.pos())
-            if widget is not None:
-                if widget.objectName() == 'label_title_bar_top':
-                    self.move(self.pos() + event.globalPos() - self.dragPos)
-                    self.dragPos = event.globalPos()
-                    event.accept()
+            # widget = self.childAt(event.pos())
+            # if widget is not None:
+            # if widget.objectName() == 'label_title_bar_top':
+            self.move(self.pos() + event.globalPos() - self.dragPos)
+            self.dragPos = event.globalPos()
+            event.accept()
 
     # ----- > Mouse Double Click
+    def mouseDoubleClickEvent(self, event):
+        widget = self.childAt(event.pos())
+        if widget is not None:
+            if widget.objectName() == 'label_title_bar_top':
+                UIFunctions.maximize_restore(self)
+
     """
     def eventFilter(self, watched, event):
         if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
@@ -472,12 +495,6 @@ class MainWindow(QtWidgets.QMainWindow):
             print('Mouse click: RIGHT CLICK')
         if event.buttons() == Qt.MidButton:
             print('Mouse click: MIDDLE BUTTON')
-
-    def mouseDoubleClickEvent(self, event):
-        widget = self.childAt(event.pos())
-        if widget is not None:
-            if widget.objectName() == 'label_title_bar_top':
-                UIFunctions.maximize_restore(self)
 
     # ----- > Key Pressed
     def keyPressEvent(self, event):
