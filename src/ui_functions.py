@@ -1,6 +1,6 @@
 
 ## ==> GUI FILE
-from ui_styles import Style
+from gui.ui_styles import Style
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0

@@ -10,7 +10,7 @@ import threading
 import itertools
 import tokenize
 from src.omm_runner import *
-from ui_styles import Style
+from gui.ui_styles import Style
 from ui_main import *
 
 from PySide2.QtCore import Signal

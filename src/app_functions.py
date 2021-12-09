@@ -13,7 +13,7 @@ from src.checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
 from ui_main import *
-from message import Message_Boxes
+from src.message import Message_Boxes
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,

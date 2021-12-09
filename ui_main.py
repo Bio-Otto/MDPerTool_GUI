@@ -19,7 +19,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 # =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 
-from icons import *
+from gui.icons import *
 import pyqtgraph as pg
 from src.omm_runner import *
 from src.ui_functions import *
@@ -53,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
-        self.ui = loadUi('MAIN_GUI.ui', self)
+        self.ui = loadUi('gui/MAIN_GUI.ui', self)
 
         ################################################################################################################
         #                                       ==> START OF WINDOW ATTRIBUTES <==                                     #
@@ -662,7 +662,7 @@ class SplashScreen(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        self.ui = loadUi('splash_screen.ui', self)
+        self.ui = loadUi('gui/splash_screen.ui', self)
 
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
