@@ -1,23 +1,18 @@
-import time
-
-from PySide2.QtWidgets import QFileDialog, QWidget, QMessageBox
-import gzip
+from ui_main import *
+import networkx as nx
+from PySide2.QtWidgets import QFileDialog, QDialog, QTableWidgetItem
+from PySide2.QtCore import Qt, Slot
 import csv
 from pathlib import Path
-from PySide2 import QtCore, QtWidgets
-from PySide2.QtCore import Slot
 from pdbfixer import PDBFixer
-from openmm import *
-from openmm.app import *
-from src.checkBox_menu import *
 from os import path
 from urllib.request import urlretrieve
-from ui_main import *
+from openmm.app import *
+from src.checkBox_menu import *
 from src.message import Message_Boxes
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
-                                     call_pymol_for_network_visualization)
+from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path)
 
 
 class Helper_Functions():
@@ -64,7 +59,7 @@ class Functions(MainWindow):
             self.active_workers += 1
             self.progress = QProgressDialog('Work in progress...', None, 0, 0, self)
             self.progress.setWindowTitle("Calculation")
-            self.progress.setWindowModality(QtCore.Qt.WindowModal)
+            self.progress.setWindowModality(Qt.WindowModal)
             self.progress.show()
             self.progress.setValue(0)
 
@@ -414,7 +409,7 @@ class Functions(MainWindow):
 
                         pdb_fix_dialog_answer = checked_list.exec_()
 
-                        if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
+                        if pdb_fix_dialog_answer == QDialog.Accepted:
                             selected_chains = [str(s) for s in checked_list.choices]
                             delete_chains = list(set(chains) - set(selected_chains))
                             fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
@@ -432,7 +427,7 @@ class Functions(MainWindow):
                             InputFile(fetch_result)
                             return fetched_pdb
 
-                        elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                        elif pdb_fix_dialog_answer == QDialog.Rejected:
                             modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
                                                                      self.Output_Folder_textEdit.toPlainText(),
                                                                      ph=7, chains_to_remove=None)
@@ -522,7 +517,7 @@ class Functions(MainWindow):
 
             if i in self.platforms:
                 self.platform_comboBox.setItemData(item_no, str("Estimated Speed For This Devices Is "
-                                                                + str(self.plt_speeds[i])), QtCore.Qt.ToolTipRole)
+                                                                + str(self.plt_speeds[i])), Qt.ToolTipRole)
 
     @staticmethod
     def platform_comboBox_Changed(self):
