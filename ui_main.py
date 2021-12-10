@@ -27,7 +27,7 @@ from src.builder import *
 from src.mplwidget import *
 from src.pyside_dynamic import loadUi
 from pdbfixer import PDBFixer
-
+import multiprocessing as mp
 #  ==> GLOBALS
 counter = 0
 
@@ -53,6 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
+        self.dragPos = None
         self.ui = loadUi('gui/MAIN_GUI.ui', self)
 
         ################################################################################################################
@@ -130,6 +131,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ------------------------------- > MAINWINDOW WIDGETS FUNCTIONS/PARAMETERS < -------------------------------- #
         self.quit_pushButton.clicked.connect(lambda: UIFunctions.close_application(self))
+        self.PDB_ID_lineEdit.returnPressed.connect(self.fetch_and_load_pdbfile)
         self.stop_pushButton.clicked.connect(self.stop_button_clicked)
         self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
@@ -200,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_TabWidget.setTabsClosable(True)
         self.analysis_TabWidget.tabCloseRequested.connect(self.closeTab)
 
-        # #### TRAIL
+# ############################################# TRAIL ##################################################### #
         self.add_tabb.clicked.connect(self.add_tab)
 
     def add_tab(self):
@@ -212,16 +214,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
-
-    # #### TRAIL
-
-    """
-    def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and obj is self.Number_of_steps_spinBox:
-            if event.key() == QtCore.Qt.Key_Return and self.Number_of_steps_spinBox.hasFocus():
-                print('Enter pressed')
-        return super().eventFilter(obj, event)
-    """
+# ############################################# TRAIL ##################################################### #
 
     def run_btn_clicked(self):
         self.r_factor_count = 0
@@ -444,8 +437,8 @@ class MainWindow(QtWidgets.QMainWindow):
     #                                          == > START OF APP EVENTS < ==                                           #
     ####################################################################################################################
 
-    def moveEvent(self, e):
-        super(MainWindow, self).moveEvent(e)
+    # def moveEvent(self, e):
+    #     super(MainWindow, self).moveEvent(e)
 
     # ----- > Move Window / Maximize / Restore
     @staticmethod
@@ -459,42 +452,50 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dragPos = event.globalPos()
             event.accept()
 
-    # ----- > Widget to Move
-    # ---> Mouse Click Event - Start
-    def mouseMoveEvent(self, event):
-        # if UIFunctions.returStatus() == 1:
-        #     UIFunctions.maximize_restore(self)
-        # ---> Move Window
-        if event.buttons() == Qt.LeftButton:
-            # widget = self.childAt(event.pos())
-            # if widget is not None:
-            # if widget.objectName() == 'label_title_bar_top':
-            self.move(self.pos() + event.globalPos() - self.dragPos)
-            self.dragPos = event.globalPos()
-            event.accept()
-
-    # ----- > Mouse Double Click
-    def mouseDoubleClickEvent(self, event):
-        widget = self.childAt(event.pos())
-        if widget is not None:
-            if widget.objectName() == 'label_title_bar_top':
-                UIFunctions.maximize_restore(self)
-
-    """
-    def eventFilter(self, watched, event):
-        if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
-            print("pos: ", event.pos())
-    """
-
     # ----- > Mouse Click Event
     def mousePressEvent(self, event):
         self.dragPos = event.globalPos()
+        self.old_width = self.width()
+        self.old_height = self.height()
         if event.buttons() == Qt.LeftButton:
             print('Mouse click: LEFT CLICK')
         if event.buttons() == Qt.RightButton:
             print('Mouse click: RIGHT CLICK')
         if event.buttons() == Qt.MidButton:
             print('Mouse click: MIDDLE BUTTON')
+
+    # ---> Mouse Click Event - Start
+    def mouseMoveEvent(self, event):
+        if self.dragPos:
+            delta = QPoint(event.globalPos() - self.dragPos)
+            if (self.dragPos.x() > self.x() + self.old_width - 10) or (
+                    self.dragPos.y() > self.y() + self.old_height - 10):
+                self.setFixedSize(self.old_width + delta.x(), self.old_height + delta.y())
+            else:
+                self.move(self.x() + delta.x(), self.y() + delta.y())
+                self.dragPos = event.globalPos()
+
+        if UIFunctions.returStatus() == 1:
+            UIFunctions.maximize_restore(self)
+
+    def mouseReleaseEvent(self, event):
+        self.dragPos = None
+
+    # ----- > Mouse Double Click
+    def mouseDoubleClickEvent(self, event):
+        widget = self.childAt(event.pos())
+        if widget.objectName() == 'label_title_bar_top':
+            if self.isMaximized():
+                self.showNormal()
+                self.btn_maximize_restore.setToolTip("Maximize")
+                self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-maximize.png"))
+                self.frame_size_grip.show()
+            else:
+                self.showMaximized()
+                self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+                self.btn_maximize_restore.setToolTip("Restore")
+                self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-restore.png"))
+                self.frame_size_grip.hide()
 
     # ----- > Key Pressed
     def keyPressEvent(self, event):
@@ -666,7 +667,7 @@ class SplashScreen(QMainWindow):
 
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
-        app_icon.addFile('%s/icons/big_icons/style_icon_48x48.png' % os.getcwd())
+        app_icon.addFile('%s/gui/icons/big_icons/style_icon_48x48.png' % os.getcwd())
 
         # ----- > Remove Background and Give icon to The Program
         self.setWindowIcon(QIcon(app_icon))

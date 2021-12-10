@@ -1,12 +1,10 @@
 from PySide2.QtWidgets import *
+from PySide2.QtWidgets import QWidget, QSizePolicy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import os
-from ast import literal_eval
+
 
 class WidgetPlot(QWidget):
     def __init__(self, *args, **kwargs):
@@ -22,7 +20,6 @@ class PlotCanvas(FigureCanvas):
         self.setParent(parent)
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        # self.plot()
 
     def plot(self, data, source_residue=None):
         ax = self.figure.add_subplot(111)
@@ -45,15 +42,11 @@ class PlotCanvas(FigureCanvas):
 
         if source_residue is not None:
             ax.text(max_handler - 350, 10, 'Perturbed Residue(s): %s' % source_residue, style='italic',
-                     bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 5})
+                    bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 5})
             ax.legend(title='Speed Factor')
 
         ax.margins(x=0.01, y=0.01, tight=True)
         self.figure.tight_layout()
-
-
-        # fig.set_size_inches((25, 15), forward=False)
-        # fig.savefig('%s.png' % top_file_name, dpi=300)  # Change is over here
 
         self.draw()
 
@@ -75,7 +68,8 @@ def getResponseTimeGraph(responseTimeFile):
 
     return row, col, Response_Count
 
-    """
+
+"""
     if speed_factors is not None:
         for factor in sorted(speed_factors):
             try:
@@ -83,5 +77,4 @@ def getResponseTimeGraph(responseTimeFile):
             except:
                 print("There is no % named file in the directory")
 
-
-    """
+"""

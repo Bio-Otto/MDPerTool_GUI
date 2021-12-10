@@ -11,7 +11,7 @@ count = 1
 from src.app_functions import *
 from src.PyMolWidget import PymolQtWidget
 from analysis import VisJS_Widget
-
+from src.message import Message_Boxes
 
 class UIFunctions(MainWindow):
     # ----- > GLOBALS
@@ -46,8 +46,18 @@ class UIFunctions(MainWindow):
     def maximize_restore(self):
         global GLOBAL_STATE
         status = GLOBAL_STATE
-        if status == 0:
-            print("1")
+
+        if self.isMaximized():
+            GLOBAL_STATE = 0
+            self.showNormal()
+            # self.resize(self.width() + 1, self.height() + 1)
+            # self.horizontalLayout.setContentsMargins(10, 10, 10, 10)
+            self.btn_maximize_restore.setToolTip("Maximize")
+            self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-maximize.png"))
+            # self.frame_top_btns.setStyleSheet("background-color: rgba(27, 29, 35, 200)")
+            self.frame_size_grip.show()
+
+        else:
             self.showMaximized()
             GLOBAL_STATE = 1
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -55,17 +65,7 @@ class UIFunctions(MainWindow):
             self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-restore.png"))
             # self.frame_top_btns.setStyleSheet("background-color: rgb(27, 29, 35)")
             self.frame_size_grip.hide()
-        if status == 1:
-            print("2")
-            GLOBAL_STATE = 0
-            self.showNormal()
-            # self.resize(self.width() + 1, self.height() + 1)
-            print(self.width())
-            # self.horizontalLayout.setContentsMargins(10, 10, 10, 10)
-            self.btn_maximize_restore.setToolTip("Maximize")
-            self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-maximize.png"))
-            # self.frame_top_btns.setStyleSheet("background-color: rgba(27, 29, 35, 200)")
-            self.frame_size_grip.show()
+
 
     # ----- > Return Status
     def returStatus():
