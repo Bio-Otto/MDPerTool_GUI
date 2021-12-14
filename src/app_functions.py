@@ -347,7 +347,6 @@ class Functions(MainWindow):
             return True
 
         except Exception as ins:
-            print(ins)
             return False
 
     def browse_pdbFile(self):

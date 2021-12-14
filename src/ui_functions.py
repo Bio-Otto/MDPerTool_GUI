@@ -287,7 +287,7 @@ class UIFunctions(MainWindow):
 
     def start_VisJS_2D_Network(self):
         self.VisJSEngineView = VisJS_Widget.VisJS_QtWidget()
-        self.Network_2D_verticalLayout.addWidget(self.VisJSEngineView)
+        self.Network_2D_verticalLayout.addWidget(self.VisJSEngineView.m_output)
 
     # def load_nx_to_VisJS_2D_Network(self, intersection_graph='2d_network.html', gml_file='example.gml'):
     #     initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')

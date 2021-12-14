@@ -88,6 +88,8 @@ def get_openmm_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_ato
     save_directory = os.path.dirname(modif_traj)
 
     trajectory_collector = object
+    traj1 = object
+    traj2 = object
     if ref_traj is not None:
         traj1 = md.join(md.iterload(ref_traj, chunk=100, stride=stride, atom_indices=None, top=top))
         traj2 = md.join(md.iterload(modif_traj, chunk=100, stride=stride, atom_indices=None, top=top))
@@ -107,6 +109,7 @@ def get_openmm_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_ato
         first_snapshot_name = os.path.join(save_directory, '%s_first_snapshot.pdb' % selected_atoms)
         wanted_atoms_traj[0].save_pdb(first_snapshot_name)
 
+    del traj1, traj2, trajectory_collector
     return positions, first_snapshot_name
 
 # traj = 'trajectory.dcd'

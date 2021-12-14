@@ -23,6 +23,7 @@ from src.mplwidget import *
 from src.pyside_dynamic import loadUi
 from pdbfixer import PDBFixer
 import multiprocessing as mp
+
 #  ==> GLOBALS
 counter = 0
 
@@ -65,9 +66,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ############################################################################################################ #
         # -------------------------------------- > START OF MATPLOTLIB WIDGET < -------------------------------------- #
-        self.matplotlib_widget()
-        self.plot_signal = PlotSignal()
-        self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
+        # self.matplotlib_widget()
+        # self.plot_signal = PlotSignal()
+        # self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
         # -------------------------------------- > END OF MATPLOTLIB WIDGET < ---------------------------------------- #
         # ############################################################################################################ #
 
@@ -149,8 +150,6 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: Functions.number_of_steps_changed_from_quick(self))
         self.integrator_time_step.textChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_advanced(self))
-        # self.Number_of_steps_spinBox.installEventFilter(self)
-
         self.run = OpenMMScriptRunner
         self.run.Signals.decomp_process.connect(
             lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0] + 1) * 100) / decomp_data[1]))
@@ -172,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.network_calculate_pushButton.clicked.connect(self.run_network_analysis)
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
         UIFunctions.start_pymol(self)
-        UIFunctions.start_VisJS_2D_Network(self)
+        # UIFunctions.start_VisJS_2D_Network(self)
         self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
         self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
         self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
@@ -197,33 +196,118 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_TabWidget.setTabsClosable(True)
         self.analysis_TabWidget.tabCloseRequested.connect(self.closeTab)
 
-# ############################################# TRAIL ##################################################### #
+        # #################################################### TRAIL ##################################################### #
         self.add_tabb.clicked.connect(self.add_tab)
+        self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
+        self.analysis_TabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
+        self.tab_count_on_analysis = str(self.analysis_TabWidget.count())
 
     def add_tab(self):
-        self.tab = QtWidgets.QWidget()
-        self.tab.setTabButton(0, QTabBar.RightSide, None)
-        self.tab.setObjectName("tabb")
-        self.analysis_TabWidget.addTab(self.tab, "")
+        tab = QtWidgets.QWidget()
+        tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
+
         self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
+        self.tab_count_on_analysis = self.analysis_TabWidget.count()
+
+        horizontalLayout = QtWidgets.QHBoxLayout(tab)
+        horizontalLayout.setObjectName("horizontalLayout_" + str(self.tab_count_on_analysis))
+        gridLayout = QtWidgets.QGridLayout()
+        gridLayout.setObjectName("gridLayout_" + str(self.tab_count_on_analysis))
+
+        label = QtWidgets.QLabel(tab)
+        label.setMinimumSize(QtCore.QSize(0, 22))
+        label.setMaximumSize(QtCore.QSize(16777215, 22))
+        label.setStyleSheet("QLabel {\n"
+                            "    background-color: rgb(27, 29, 35);\n"
+                            "    border-radius: 5px;\n"
+                            "    border: 2px solid rgb(27, 29, 35);\n"
+                            "    padding: 1px 1px 1px 1px;\n"
+                            "    \n"
+                            "    border-bottom-color: rgb(157, 90, 198);\n"
+                            "}\n"
+                            "\n"
+                            "\n"
+                            "QLabel:hover{\n"
+                            "    border: 2px solid rgb(64, 71, 88);\n"
+                            "    selection-color: rgb(127, 5, 64);\n"
+                            "\n"
+                            "}")
+        label.setObjectName("label_" + str(self.tab_count_on_analysis))
+        gridLayout.addWidget(label, 2, 0, 1, 1)
+
+        shortest_path_listWidget = QtWidgets.QListWidget(tab)
+        shortest_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+        shortest_path_listWidget.setObjectName("shortest_path_listWidget")
+        gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
+
+        intersection_path_listWidget = QtWidgets.QListWidget(tab)
+        intersection_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+        intersection_path_listWidget.setObjectName("intersection_path_listWidget")
+        gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
+        label_2 = QtWidgets.QLabel(tab)
+        label_2.setMinimumSize(QtCore.QSize(0, 22))
+        label_2.setMaximumSize(QtCore.QSize(16777215, 22))
+        label_2.setStyleSheet("QLabel {\n"
+                              "    background-color: rgb(27, 29, 35);\n"
+                              "    border-radius: 5px;\n"
+                              "    border: 2px solid rgb(27, 29, 35);\n"
+                              "    padding: 1px 1px 1px 1px;\n"
+                              "    \n"
+                              "    border-bottom-color: rgb(157, 90, 198);\n"
+                              "}\n"
+                              "\n"
+                              "\n"
+                              "QLabel:hover{\n"
+                              "    border: 2px solid rgb(64, 71, 88);\n"
+                              "    selection-color: rgb(127, 5, 64);\n"
+                              "\n"
+                              "}")
+        label_2.setObjectName("label_29")
+        gridLayout.addWidget(label_2, 0, 0, 1, 1)
+        pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
+        pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
+                                              "   border: 1px solid black;\n"
+                                              "   border-radius: 5px;\n"
+                                              "   border-top-color: rgb(157, 90, 198);\n"
+                                              "   border-left-color: rgb(157, 90, 198);\n"
+                                              "   border-bottom-color: rgb(157, 90, 198);\n"
+                                              "   border-right-color: rgb(157, 90, 198);\n"
+                                              "   margin-top: 5px;\n"
+                                              "}")
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(pyMOL_3D_analysis_frame.sizePolicy().hasHeightForWidth())
+        pyMOL_3D_analysis_frame.setSizePolicy(sizePolicy)
+        pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
+        gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 4, 1)
+        horizontalLayout.addLayout(gridLayout)
+        self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
 
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
-# ############################################# TRAIL ##################################################### #
+        self.tab_count_on_analysis = self.analysis_TabWidget.count()
 
+    def handle_tabbar_clicked(self, index_of_tab):
+        print()
+        print(index_of_tab)
+
+    # #################################################### TRAIL ##################################################### #
     def run_btn_clicked(self):
         self.r_factor_count = 0
         self.Run.setEnabled(False)
         self.start_monitoring = False
         self.start_monitoring = Advanced.send_arg_to_Engine(self)
-
         self.run.plotdata = {}
 
+        print("MONITORING: ", self.start_monitoring)
         if self.start_monitoring:
             self.show_simulation_monitoring()
 
         if not self.start_monitoring:
-            self.Run.setEnabled(False)
+            self.Run.setEnabled(True)
 
     def stop_button_clicked(self):
         self.__stop = True
@@ -494,6 +578,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # ----- > Key Pressed
     def keyPressEvent(self, event):
+        # if event.key() == Qt.Key_Escape:
+        #     self.close()
         print('Key: ' + str(event.key()) + ' | Text Press: ' + str(event.text()))
 
     # ----- > Resize Event

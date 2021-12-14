@@ -446,6 +446,10 @@ for i in range(len({{speed_factor}})):
                             outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
 
 
+    try:
+        del XTC_file_path, ref_simulation, simulation
+    except NameError:
+        pass
 
 
 

@@ -11,8 +11,9 @@ class VisJS_QtWidget(QtWidgets.QWidget):
         self.html_file = None
         self.network = None
         self.m_output = QtWebEngineWidgets.QWebEngineView()
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.addWidget(self.m_output)
+
+        # layout = QtWidgets.QVBoxLayout(self)
+        # layout.addWidget(self.m_output)
         # self.resize(640, 480)
 
     def load_network_component(self, network, html_file='2d_network.html'):
