@@ -21,7 +21,6 @@
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/issues"><img src="https://img.shields.io/github/issues/Bio-Otto/Bio-Otto" alt="Issues Badge"/></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Bio-Otto/MDPerTool_GUI?color=2b9348"></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
-<a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
 ![MDPERTOOL v0.1 ff69b4](https://img.shields.io/badge/MDPERTOOL-v0.1-<ff69b4>)
 
 <img alt="Awesome GitHub Profile Readme" src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/MDPerTool.gif"> </img>
