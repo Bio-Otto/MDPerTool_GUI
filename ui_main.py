@@ -67,8 +67,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # ############################################################################################################ #
         # -------------------------------------- > START OF MATPLOTLIB WIDGET < -------------------------------------- #
         # self.matplotlib_widget()
-        # self.plot_signal = PlotSignal()
-        # self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
+        self.plot_signal = PlotSignal()
+        self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
         # -------------------------------------- > END OF MATPLOTLIB WIDGET < ---------------------------------------- #
         # ############################################################################################################ #
 
@@ -286,6 +286,34 @@ class MainWindow(QtWidgets.QMainWindow):
         horizontalLayout.addLayout(gridLayout)
         self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
 
+        # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
+
+        Protein3DNetworkView = PymolQtWidget(self)
+        verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
+        verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
+        self.setLayout(verticalLayoutProteinNetworkView)
+        Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
+        Protein3DNetworkView.update()
+        Protein3DNetworkView.show()
+        verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
+
+        # matplotlib_widget = WidgetPlot(self)
+        # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
+        # verticalLayout.addWidget(self.matplotlib_widget.canvas)
+
+        self.plot_signal.plot_network.connect(
+            lambda: Functions.plot_networks(self, pymol=Protein3DNetworkView,
+                                            shortest_listwidget=shortest_path_listWidget,
+                                            intersect_listwidget=intersection_path_listWidget,
+                                            source_res=self.source_res_comboBox.currentText()[:-1],
+                                            target_res_list=[self.selected_target_residues_listWidget.item(x).text()[:-1]
+                                                             for x in range(self.selected_target_residues_listWidget.count())]))
+
+        # shortest_path_listWidget.addItems(["PHE36 -> THR34 -> GLY15 -> ALA43", "PHE36 -> THR34 -> GLY15 -> ALA43",
+        #                                    "PHE37 -> THR35 -> GLY16 -> ALA44", "PHE37 -> THR35 -> GLY16 -> ALA44",
+        #                                    "PHE38 -> THR36 -> GLY17 -> ALA45"])
+        # ################################### ==> END - WIDGETS LOCATING <== ################################### #
+
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
         self.tab_count_on_analysis = self.analysis_TabWidget.count()
@@ -302,7 +330,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.start_monitoring = Advanced.send_arg_to_Engine(self)
         self.run.plotdata = {}
 
-        print("MONITORING: ", self.start_monitoring)
         if self.start_monitoring:
             self.show_simulation_monitoring()
 
@@ -661,12 +688,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
             source_residue = self.source_res_comboBox.currentText()
             row, col, Response_Count = getResponseTimeGraph(possible_path)
-
+            """
             if source_residue == '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=None)
             if source_residue != '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=source_residue)
-
+            """
     def run_network_analysis(self):
 
         # try:

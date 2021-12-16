@@ -43,6 +43,25 @@ def check_dissipated_residues_coordinates(pdb_file, querry_res_list, atom_name='
     return dissipation_coordinates
 
 
+def check_shortest_path_residue_coordinates(pdb_file, querry_res_list, atom_name='CA'):
+    shortest_path_res_coordinates = {}
+    p = PDBParser()
+    structure = p.get_structure('prot', pdb_file)
+    for model in structure:
+        for chain in model:
+            for residue in chain:
+                ResId = residue.get_id()[1]
+                ResName = residue.get_resname()
+                Residue_label = ResName + str(ResId)
+
+                if Residue_label in querry_res_list:
+                    for atom in residue:
+                        if atom.name == atom_name:
+                            shortest_path_res_coordinates[Residue_label] = atom.get_coord().tolist()
+
+    return shortest_path_res_coordinates
+
+
 def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_directory, verbose=False):
     '''creates a residue network having edges within given cutoff range'''
 
@@ -436,7 +455,6 @@ class Multi_Task_Engine(object):
         try:
 
             for i in target:
-
                 self.Work.append(
                     Calc_Net_Worker(pairNetworks, network=copy.deepcopy(self.network), source=self.source,
                                     target=i,
@@ -456,6 +474,7 @@ class Multi_Task_Engine(object):
 
 
 def intersection_of_directed_networks(graphs_list):
+    all_graph_list = copy.deepcopy(graphs_list)
     len_of_nodes_on_list = [len(graph.nodes()) for graph in graphs_list]
     smallest_network_and_indices = min([(v, i) for i, v in enumerate(len_of_nodes_on_list)])
 
@@ -467,7 +486,7 @@ def intersection_of_directed_networks(graphs_list):
             R.remove_edges_from(
                 e for e in graphs_list[smallest_network_and_indices[1]].edges if e not in graphs_list[cnt].edges)
 
-    return R
+    return R, all_graph_list
 
 
 def Pymol_Visualize_Path(graph, pdb_file):
@@ -482,6 +501,17 @@ def Pymol_Visualize_Path(graph, pdb_file):
         arrows_cordinates.append((coords[edges[0]], coords[edges[1]]))
 
     return arrows_cordinates, intersection_node_list
+
+
+def Shortest_Path_Visualize(pdb_file, selected_path):
+    shortest_path_res_coordinates = check_shortest_path_residue_coordinates(pdb_file, querry_res_list=selected_path)
+
+    arrows_cordinates = []
+    for i in range(len(selected_path)-1):
+        arrows_cordinates.append(
+            (shortest_path_res_coordinates[selected_path[i]], shortest_path_res_coordinates[selected_path[i+1]]))
+
+    return arrows_cordinates
 
 
 def call_pymol_for_network_visualization(pdb_file, arrows_cordinates, intersection_node_list):

@@ -381,7 +381,7 @@ class PymolQtWidget(QGLWidget):
         # self._pymol.cmd.save('aa.pdb')
 
     def create_directed_arrows(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
-                               color='red', name=''):
+                               color='red', name='', shortest_path=False):
 
         """
             cgo_arrow [ atom1 [, atom2 [, radius [, gap [, hlength [, hradius [, color [, name ]]]]]]]]
@@ -396,6 +396,9 @@ class PymolQtWidget(QGLWidget):
             color = string: one or two color names {default: blue red}
             name = string: name of CGO object
         """
+
+        if shortest_path:
+            color = 'blue'
 
         radius, gap = float(radius), float(gap)
         hlength, hradius = float(hlength), float(hradius)

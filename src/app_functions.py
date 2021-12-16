@@ -10,9 +10,10 @@ from urllib.request import urlretrieve
 from openmm.app import *
 from src.checkBox_menu import *
 from src.message import Message_Boxes
+from src.PyMolWidget import PymolQtWidget
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path)
+from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path, Shortest_Path_Visualize)
 
 
 class Helper_Functions():
@@ -185,10 +186,157 @@ class Functions(MainWindow):
 
         # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
         if len(clean_graph_list) > 0:
-            intersection_graph = intersection_of_directed_networks(clean_graph_list)
+            intersection_graph, all_graph_list = intersection_of_directed_networks(clean_graph_list)
             if self.create_output:
                 nx.write_gml(intersection_graph, os.path.join(output_folder_directory, 'intersection_graph.gml'))
 
+            # ############################################
+            tab = QtWidgets.QWidget()
+            tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
+
+            self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
+            self.tab_count_on_analysis = self.analysis_TabWidget.count()
+
+            horizontalLayout = QtWidgets.QHBoxLayout(tab)
+            horizontalLayout.setObjectName("horizontalLayout_" + str(self.tab_count_on_analysis))
+            gridLayout = QtWidgets.QGridLayout()
+            gridLayout.setObjectName("gridLayout_" + str(self.tab_count_on_analysis))
+
+            label = QtWidgets.QLabel(tab)
+            label.setText("All Available Intersection Shortest Path(s)")
+            label.setMinimumSize(QtCore.QSize(0, 22))
+            label.setMaximumSize(QtCore.QSize(16777215, 22))
+            label.setStyleSheet("QLabel {\n"
+                                "    background-color: rgb(27, 29, 35);\n"
+                                "    border-radius: 5px;\n"
+                                "    border: 2px solid rgb(27, 29, 35);\n"
+                                "    padding: 1px 1px 1px 1px;\n"
+                                "    \n"
+                                "    border-bottom-color: rgb(157, 90, 198);\n"
+                                "}\n"
+                                "\n"
+                                "\n"
+                                "QLabel:hover{\n"
+                                "    border: 2px solid rgb(64, 71, 88);\n"
+                                "    selection-color: rgb(127, 5, 64);\n"
+                                "\n"
+                                "}")
+            label.setObjectName("label_" + str(self.tab_count_on_analysis))
+            gridLayout.addWidget(label, 2, 0, 1, 1)
+
+            shortest_path_listWidget = QtWidgets.QListWidget(tab)
+            shortest_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+            shortest_path_listWidget.setObjectName("shortest_path_listWidget")
+            gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
+
+            intersection_path_listWidget = QtWidgets.QListWidget(tab)
+            intersection_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+            intersection_path_listWidget.setObjectName("intersection_path_listWidget")
+            gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
+
+            label_2 = QtWidgets.QLabel(tab)
+            label_2.setText("All Available Shortest Path(s)")
+            label_2.setMinimumSize(QtCore.QSize(0, 22))
+            label_2.setMaximumSize(QtCore.QSize(16777215, 22))
+            label_2.setStyleSheet("QLabel {\n"
+                                  "    background-color: rgb(27, 29, 35);\n"
+                                  "    border-radius: 5px;\n"
+                                  "    border: 2px solid rgb(27, 29, 35);\n"
+                                  "    padding: 1px 1px 1px 1px;\n"
+                                  "    \n"
+                                  "    border-bottom-color: rgb(157, 90, 198);\n"
+                                  "}\n"
+                                  "\n"
+                                  "\n"
+                                  "QLabel:hover{\n"
+                                  "    border: 2px solid rgb(64, 71, 88);\n"
+                                  "    selection-color: rgb(127, 5, 64);\n"
+                                  "\n"
+                                  "}")
+            label_2.setObjectName("label_29")
+            gridLayout.addWidget(label_2, 0, 0, 1, 1)
+            pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
+            pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
+                                                  "   border: 1px solid black;\n"
+                                                  "   border-radius: 5px;\n"
+                                                  "   border-top-color: rgb(157, 90, 198);\n"
+                                                  "   border-left-color: rgb(157, 90, 198);\n"
+                                                  "   border-bottom-color: rgb(157, 90, 198);\n"
+                                                  "   border-right-color: rgb(157, 90, 198);\n"
+                                                  "   margin-top: 5px;\n"
+                                                  "}")
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(pyMOL_3D_analysis_frame.sizePolicy().hasHeightForWidth())
+            pyMOL_3D_analysis_frame.setSizePolicy(sizePolicy)
+            pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
+            pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
+            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 4, 1)
+            horizontalLayout.addLayout(gridLayout)
+            self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
+
+            # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
+
+            Protein3DNetworkView = PymolQtWidget(self)
+            verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
+            verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
+            self.setLayout(verticalLayoutProteinNetworkView)
+            Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
+            Protein3DNetworkView.update()
+            Protein3DNetworkView.show()
+            verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
+
+            # matplotlib_widget = WidgetPlot(self)
+            # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
+            # verticalLayout.addWidget(self.matplotlib_widget.canvas)
+
+            source_res = self.source_res_comboBox.currentText()[:-1]
+            target_res_list = [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                               for x in range(self.selected_target_residues_listWidget.count())]
+
+            # #################################################
+            shrotest_str_form = ''
+
+            colors = ['#957DAD', '#D291BC', '#FEC8D8', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8abb5']
+            for graph_i in all_graph_list:
+                for cnt, target_i in enumerate(target_res_list):
+                    try:
+                        sp = nx.shortest_path(graph_i, source_res, target_i)
+                        for res_id in range(len(sp)):
+                            if res_id == len(sp) - 1:
+                                shrotest_str_form += '%s' % sp[res_id]
+                            else:
+                                shrotest_str_form += '%s --> ' % sp[res_id]
+
+                        item = QListWidgetItem(shrotest_str_form)
+                        item.setBackground(QColor(colors[cnt]))
+                        shortest_path_listWidget.addItem(item)  # print("SHORTEST PATH: ", sp)
+                        shrotest_str_form = ''
+
+                    except Exception as err:
+                        print("SHORTEST PATH LOG: ", err)
+
+            intersect_shrotest_str_form = ''
+
+            for target_i in target_res_list:
+                try:
+                    isp = nx.shortest_path(intersection_graph, source_res, target_i)
+                    for res_id in range(len(isp)):
+                        if res_id == len(isp) - 1:
+                            intersect_shrotest_str_form += '%s' % isp[res_id]
+                        else:
+                            intersect_shrotest_str_form += '%s --> ' % isp[res_id]
+                    intersection_path_listWidget.addItem(intersect_shrotest_str_form)
+                    intersect_shrotest_str_form = ''
+
+                except Exception as err:
+                    print("INTERSECTION SHORTEST PATH LOG: ", err)
+
+            shortest_path_listWidget.itemDoubleClicked.connect(lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
+            intersection_path_listWidget.itemDoubleClicked.connect(lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
+            # ############################################
         else:
             print("There is no suitable Graph for your search parameters")
 
@@ -200,25 +348,26 @@ class Functions(MainWindow):
                                                                                      pdb_file=self.pdb)
 
                     # ----------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
-                    self.Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
+                    Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
                     for arrow_coord in arrows_cordinates:
-                        self.Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                        Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
                                                                          radius=0.05,
-                                                                         gap=0.4, hradius=0.4, hlength=0.8, color='green')
+                                                                         gap=0.4, hradius=0.4, hlength=0.8,
+                                                                         color='green')
                     for node in intersection_node_list:
                         resID_of_node = int(''.join(list(filter(str.isdigit, node))))
-                        self.Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
+                        Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
 
                     # MAKE PYMOL VISUALIZATION BETTER
-                    self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
-                    self.Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
-                    self.Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
-                    self.Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
-                    self.Protein3DNetworkView.update()
-                    self.Protein3DNetworkView.show()
+                    Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                    Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
+                    Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                    Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+                    Protein3DNetworkView.update()
+                    Protein3DNetworkView.show()
 
                     # ----------------------> 2D NETWORK VISUALIZATION USING visJS / START <---------------------- #
-                    self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
+                    # self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
 
                 except Exception as error:
                     print("Problem: ", error)
@@ -232,7 +381,8 @@ class Functions(MainWindow):
                 Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
                 del self.log_holder, self.network_holder
             else:
-                Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(", Style.MessageBox_stylesheet)
+                Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
+                                                  Style.MessageBox_stylesheet)
         except Exception as e:
             print("Problem: ", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -243,6 +393,27 @@ class Functions(MainWindow):
         #     # CLOSE THE ALREADY OPENED POOL
         #     pool.close()
         #     pool.join()
+
+    def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget):
+        processed_path = [x.strip() for x in item.text().split('-->')]
+        shortest_path_arrow_coords = Shortest_Path_Visualize(pdb_file=self.pdb, selected_path=processed_path)
+
+        for arrow_coord in shortest_path_arrow_coords:
+            PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                                        radius=0.05,
+                                                        gap=0.4, hradius=0.4, hlength=0.8,
+                                                        color='green', shortest_path=True)
+        for node in processed_path:
+            resID_of_node = int(''.join(list(filter(str.isdigit, node))))
+            PyMOL_Widget.resi_label_add('resi ' + str(resID_of_node))
+
+        # MAKE PYMOL VISUALIZATION BETTER
+        PyMOL_Widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+        PyMOL_Widget._pymol.cmd.set('cartoon_oval_width', 0.2)
+        PyMOL_Widget._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+        PyMOL_Widget._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+        PyMOL_Widget.update()
+        PyMOL_Widget.show()
 
     def get_conservation_scores(self):
         try:
