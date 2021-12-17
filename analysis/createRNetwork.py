@@ -130,7 +130,7 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_direc
     openReTimes = open(reTimeFile, 'r')
     reTimeList = list()
     reTimes = openReTimes.read().splitlines()
-
+    len_of_reTimes_on_file = len(reTimes)
     for j in range(0, len(reTimes)):
         chunk = reTimes[j]
         reTimeList.append(chunk)
@@ -189,7 +189,7 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_direc
     # nx.draw_networkx_nodes(network, position)
     # nx.draw_networkx_edges(network, position)
     # plt.show()
-    return network, residueList, resId_List
+    return network, residueList, resId_List, len_of_reTimes_on_file
 
 
 def pairNetworks(network, source, target, pairNetworkName, write_out, out_directory, progress_callback,
@@ -440,13 +440,14 @@ class Multi_Task_Engine(object):
 
     def calculate_general_network(self):
         try:
-            self.network, residue_list, self.resId_List = createRNetwork(pdb=self.pdb_file, cutoff=self.cutoff,
-                                                                         reTimeFile=self.reTimeFile,
-                                                                         verbose=self.verbose,
-                                                                         outputFileName=self.outputFileName,
-                                                                         write_out=self.write_outputs,
-                                                                         out_directory=self.output_directory)
-            return self.network, self.resId_List
+            self.network, residue_list, self.resId_List, len_of_reTimes = createRNetwork(pdb=self.pdb_file,
+                                                                                         cutoff=self.cutoff,
+                                                                                         reTimeFile=self.reTimeFile,
+                                                                                         verbose=self.verbose,
+                                                                                         outputFileName=self.outputFileName,
+                                                                                         write_out=self.write_outputs,
+                                                                                         out_directory=self.output_directory)
+            return self.network, self.resId_List, len_of_reTimes
 
         except Exception as Error:
             print(Error)
@@ -507,9 +508,9 @@ def Shortest_Path_Visualize(pdb_file, selected_path):
     shortest_path_res_coordinates = check_shortest_path_residue_coordinates(pdb_file, querry_res_list=selected_path)
 
     arrows_cordinates = []
-    for i in range(len(selected_path)-1):
+    for i in range(len(selected_path) - 1):
         arrows_cordinates.append(
-            (shortest_path_res_coordinates[selected_path[i]], shortest_path_res_coordinates[selected_path[i+1]]))
+            (shortest_path_res_coordinates[selected_path[i]], shortest_path_res_coordinates[selected_path[i + 1]]))
 
     return arrows_cordinates
 

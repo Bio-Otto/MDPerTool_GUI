@@ -13,7 +13,8 @@ from src.message import Message_Boxes
 from src.PyMolWidget import PymolQtWidget
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path, Shortest_Path_Visualize)
+from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
+                                     Shortest_Path_Visualize)
 
 
 class Helper_Functions():
@@ -134,39 +135,47 @@ class Functions(MainWindow):
                                    outputFileName=self.outputFileName, write_outputs=self.create_output,
                                    output_directory=output_folder_directory)
 
-        engine.calculate_general_network()
-        if use_conservation:
-            res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
-                                                          cutoff=conservation_threshold, bound_pdb=self.pdb)
-            if save_conservation_scores:
-                rows = zip(res_IDs, con_scores)
-                with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
-                          newline='') as f:
-                    writer = csv.writer(f)
-                    for row in rows:
-                        writer.writerow(row)
-            intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
+        network, resId_List, len_of_reTimes = engine.calculate_general_network()
 
-            engine.run_pairNet_calc(intersection_resIDs)
-            for work in engine.Work:
-                work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
-                work.signals.work_started.connect(lambda: Functions.on_started(self))
-                work.signals.result.connect(lambda x: Functions.print_output(self, x))
-                work.signals.finished.connect(lambda: Functions.thread_complete(self))
-                self.threadpool.start(work)
+        if len(resId_List) == len_of_reTimes:
 
-        if not use_conservation:
-            engine.run_pairNet_calc(target_residues)
+            if use_conservation:
+                res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
+                                                              cutoff=conservation_threshold, bound_pdb=self.pdb)
+                if save_conservation_scores:
+                    rows = zip(res_IDs, con_scores)
+                    with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
+                              newline='') as f:
+                        writer = csv.writer(f)
+                        for row in rows:
+                            writer.writerow(row)
+                intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
 
-            for work in engine.Work:
-                work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
-                work.signals.work_started.connect(lambda: Functions.on_started(self))
-                work.signals.result.connect(lambda x: Functions.print_output(self, x))
-                work.signals.finished.connect(lambda: Functions.thread_complete(self))
-                self.threadpool.start(work)
+                engine.run_pairNet_calc(intersection_resIDs)
+                for work in engine.Work:
+                    work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
+                    work.signals.work_started.connect(lambda: Functions.on_started(self))
+                    work.signals.result.connect(lambda x: Functions.print_output(self, x))
+                    work.signals.finished.connect(lambda: Functions.thread_complete(self))
+                    self.threadpool.start(work)
 
-        del engine
+            if not use_conservation:
+                engine.run_pairNet_calc(target_residues)
 
+                for work in engine.Work:
+                    work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
+                    work.signals.work_started.connect(lambda: Functions.on_started(self))
+                    work.signals.result.connect(lambda x: Functions.print_output(self, x))
+                    work.signals.finished.connect(lambda: Functions.thread_complete(self))
+                    self.threadpool.start(work)
+
+            del engine
+
+        else:
+            Message_Boxes.Warning_message(self, "Mismatch Error!", "The number of residues in the topology file you "
+                                                                   "have provided is not equal to the response time file.",
+                                          Style.MessageBox_stylesheet)
+            del engine
         # time.sleep(0.1)
         # net, log = zip(*pool.map(engine, target_residues))  # ########################################
 
@@ -205,7 +214,7 @@ class Functions(MainWindow):
             label = QtWidgets.QLabel(tab)
             label.setText("All Available Intersection Shortest Path(s)")
             label.setMinimumSize(QtCore.QSize(0, 22))
-            label.setMaximumSize(QtCore.QSize(16777215, 22))
+            label.setMaximumSize(QtCore.QSize(450, 22))
             label.setStyleSheet("QLabel {\n"
                                 "    background-color: rgb(27, 29, 35);\n"
                                 "    border-radius: 5px;\n"
@@ -225,19 +234,19 @@ class Functions(MainWindow):
             gridLayout.addWidget(label, 2, 0, 1, 1)
 
             shortest_path_listWidget = QtWidgets.QListWidget(tab)
-            shortest_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+            shortest_path_listWidget.setMaximumSize(QtCore.QSize(450, 16777215))
             shortest_path_listWidget.setObjectName("shortest_path_listWidget")
             gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
 
             intersection_path_listWidget = QtWidgets.QListWidget(tab)
-            intersection_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+            intersection_path_listWidget.setMaximumSize(QtCore.QSize(450, 16777215))
             intersection_path_listWidget.setObjectName("intersection_path_listWidget")
             gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
 
             label_2 = QtWidgets.QLabel(tab)
             label_2.setText("All Available Shortest Path(s)")
             label_2.setMinimumSize(QtCore.QSize(0, 22))
-            label_2.setMaximumSize(QtCore.QSize(16777215, 22))
+            label_2.setMaximumSize(QtCore.QSize(450, 22))
             label_2.setStyleSheet("QLabel {\n"
                                   "    background-color: rgb(27, 29, 35);\n"
                                   "    border-radius: 5px;\n"
@@ -255,6 +264,58 @@ class Functions(MainWindow):
                                   "}")
             label_2.setObjectName("label_29")
             gridLayout.addWidget(label_2, 0, 0, 1, 1)
+
+            label_3 = QtWidgets.QLabel(tab)
+            label_3.setText("Energy Dissipation Curve")
+            label_3.setMinimumSize(QtCore.QSize(0, 22))
+            label_3.setMaximumSize(QtCore.QSize(450, 22))
+            label_3.setStyleSheet("QLabel {\n"
+                                  "    background-color: rgb(27, 29, 35);\n"
+                                  "    border-radius: 5px;\n"
+                                  "    border: 2px solid rgb(27, 29, 35);\n"
+                                  "    padding: 1px 1px 1px 1px;\n"
+                                  "    \n"
+                                  "    border-bottom-color: rgb(157, 90, 198);\n"
+                                  "}\n"
+                                  "\n"
+                                  "\n"
+                                  "QLabel:hover{\n"
+                                  "    border: 2px solid rgb(64, 71, 88);\n"
+                                  "    selection-color: rgb(127, 5, 64);\n"
+                                  "\n"
+                                  "}")
+            label_3.setObjectName("label_27")
+            gridLayout.addWidget(label_3, 4, 0, 1, 1)
+
+            # --> Dissipation Widget
+            dissipation_curve_widget = WidgetPlot(self)
+            dissipationVerticalLayout = QtWidgets.QVBoxLayout()
+            dissipationVerticalLayout.addWidget(dissipation_curve_widget.toolbar)
+            dissipationVerticalLayout.addWidget(dissipation_curve_widget.canvas)
+            widget = QtWidgets.QWidget()
+            widget.setLayout(dissipationVerticalLayout)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(widget.sizePolicy().hasHeightForWidth())
+            widget.setSizePolicy(sizePolicy)
+            widget.setMinimumSize(QtCore.QSize(0, 300))
+            widget.setMaximumSize(QtCore.QSize(450, 350))
+            dissipation_curve_widget.setObjectName("dissipation_curve_widget")
+            gridLayout.addWidget(widget, 5, 0, 1, 1)
+
+            possible_path = str(self.response_time_lineEdit.text())
+            if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
+                source_residue = self.source_res_comboBox.currentText()
+                row, col, Response_Count = getResponseTimeGraph(possible_path)
+
+                if source_residue == '':
+                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=None)
+                if source_residue != '':
+                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue)
+
+
+            # --> 3D View Frame
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
             pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
                                                   "   border: 1px solid black;\n"
@@ -273,12 +334,11 @@ class Functions(MainWindow):
             pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
             pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
-            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 4, 1)
+            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 6, 1)
             horizontalLayout.addLayout(gridLayout)
             self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
 
-            # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
-
+            # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             Protein3DNetworkView = PymolQtWidget(self)
             verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
             verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
@@ -334,8 +394,10 @@ class Functions(MainWindow):
                 except Exception as err:
                     print("INTERSECTION SHORTEST PATH LOG: ", err)
 
-            shortest_path_listWidget.itemDoubleClicked.connect(lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
-            intersection_path_listWidget.itemDoubleClicked.connect(lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
+            shortest_path_listWidget.itemDoubleClicked.connect(
+                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
+            intersection_path_listWidget.itemDoubleClicked.connect(
+                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
             # ############################################
         else:
             print("There is no suitable Graph for your search parameters")
@@ -351,9 +413,9 @@ class Functions(MainWindow):
                     Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
                     for arrow_coord in arrows_cordinates:
                         Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                                         radius=0.05,
-                                                                         gap=0.4, hradius=0.4, hlength=0.8,
-                                                                         color='green')
+                                                                    radius=0.05,
+                                                                    gap=0.4, hradius=0.4, hlength=0.8,
+                                                                    color='green')
                     for node in intersection_node_list:
                         resID_of_node = int(''.join(list(filter(str.isdigit, node))))
                         Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
@@ -400,9 +462,9 @@ class Functions(MainWindow):
 
         for arrow_coord in shortest_path_arrow_coords:
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                        radius=0.05,
-                                                        gap=0.4, hradius=0.4, hlength=0.8,
-                                                        color='green', shortest_path=True)
+                                                radius=0.05,
+                                                gap=0.4, hradius=0.4, hlength=0.8,
+                                                color='green', shortest_path=True)
         for node in processed_path:
             resID_of_node = int(''.join(list(filter(str.isdigit, node))))
             PyMOL_Widget.resi_label_add('resi ' + str(resID_of_node))

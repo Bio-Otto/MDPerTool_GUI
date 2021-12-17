@@ -41,8 +41,8 @@ class PlotCanvas(FigureCanvas):
                 print(ERr)
 
         if source_residue is not None:
-            ax.text(max_handler - 350, 10, 'Perturbed Residue(s): %s' % source_residue, style='italic',
-                    bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 5})
+            ax.text(max_handler - 470, 18, 'Perturbed Residue(s): %s' % source_residue, style='italic',
+                    bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 5}, fontsize=8)
             ax.legend(title='Speed Factor')
 
         ax.margins(x=0.01, y=0.01, tight=True)

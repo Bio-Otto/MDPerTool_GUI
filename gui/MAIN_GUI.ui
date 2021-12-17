@@ -188,6 +188,15 @@
        </color>
       </brush>
      </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>210</red>
+        <green>210</green>
+        <blue>210</blue>
+       </color>
+      </brush>
+     </colorrole>
     </active>
     <inactive>
      <colorrole role="WindowText">
@@ -352,6 +361,15 @@
        </color>
       </brush>
      </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>210</red>
+        <green>210</green>
+        <blue>210</blue>
+       </color>
+      </brush>
+     </colorrole>
     </inactive>
     <disabled>
      <colorrole role="WindowText">
@@ -510,6 +528,15 @@
      <colorrole role="ToolTipText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
+        <red>210</red>
+        <green>210</green>
+        <blue>210</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
         <red>210</red>
         <green>210</green>
         <blue>210</blue>
@@ -8330,7 +8357,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                       </property>
                       <property name="currentIndex">
-                       <number>0</number>
+                       <number>1</number>
                       </property>
                       <widget class="QWidget" name="Perturb_Quick_3">
                        <attribute name="title">
@@ -10352,6 +10379,7 @@ QLineEdit:focus {
                                   <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
+	padding-left: 8px;
 
 }
 QLineEdit:hover {
@@ -10745,8 +10773,8 @@ QLineEdit:focus {
                        <layout class="QHBoxLayout" name="horizontalLayout_20">
                         <item>
                          <layout class="QGridLayout" name="gridLayout_10">
-                          <item row="2" column="0">
-                           <widget class="QLabel" name="label_28">
+                          <item row="4" column="0">
+                           <widget class="QLabel" name="label_27">
                             <property name="minimumSize">
                              <size>
                               <width>0</width>
@@ -10777,27 +10805,7 @@ QLabel:hover{
 }</string>
                             </property>
                             <property name="text">
-                             <string>Intersection Shortest Path(s)</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QListWidget" name="shortest_path_listWidget">
-                            <property name="maximumSize">
-                             <size>
-                              <width>500</width>
-                              <height>16777215</height>
-                             </size>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="0">
-                           <widget class="QListWidget" name="intersection_path_listWidget">
-                            <property name="maximumSize">
-                             <size>
-                              <width>500</width>
-                              <height>16777215</height>
-                             </size>
+                             <string>Energy Dissipation Curve</string>
                             </property>
                            </widget>
                           </item>
@@ -10837,7 +10845,17 @@ QLabel:hover{
                             </property>
                            </widget>
                           </item>
-                          <item row="0" column="1" rowspan="4">
+                          <item row="1" column="0">
+                           <widget class="QListWidget" name="shortest_path_listWidget">
+                            <property name="maximumSize">
+                             <size>
+                              <width>450</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="1" rowspan="6">
                            <widget class="QFrame" name="pyMOL_3D_analysis_frame">
                             <property name="sizePolicy">
                              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -10850,6 +10868,74 @@ QLabel:hover{
                             </property>
                             <property name="frameShadow">
                              <enum>QFrame::Raised</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="2" column="0">
+                           <widget class="QLabel" name="label_28">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>22</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>22</height>
+                             </size>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">QLabel {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+    padding: 1px 1px 1px 1px;
+	
+	border-bottom-color: rgb(157, 90, 198);
+}
+
+
+QLabel:hover{
+	border: 2px solid rgb(64, 71, 88);
+	selection-color: rgb(127, 5, 64);
+
+}</string>
+                            </property>
+                            <property name="text">
+                             <string>Intersection Shortest Path(s)</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="0">
+                           <widget class="QListWidget" name="intersection_path_listWidget">
+                            <property name="maximumSize">
+                             <size>
+                              <width>450</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="5" column="0">
+                           <widget class="QWidget" name="dissipation_curve_widget" native="true">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>350</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>450</width>
+                              <height>16777215</height>
+                             </size>
                             </property>
                            </widget>
                           </item>

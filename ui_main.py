@@ -264,6 +264,20 @@ class MainWindow(QtWidgets.QMainWindow):
                               "}")
         label_2.setObjectName("label_29")
         gridLayout.addWidget(label_2, 0, 0, 1, 1)
+
+        ###############################################################################################################
+        dissipation_curve_widget = QtWidgets.QWidget(tab)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(dissipation_curve_widget.sizePolicy().hasHeightForWidth())
+        dissipation_curve_widget.setSizePolicy(sizePolicy)
+        dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 350))
+        dissipation_curve_widget.setMaximumSize(QtCore.QSize(450, 16777215))
+        dissipation_curve_widget.setObjectName("dissipation_curve_widget")
+        gridLayout.addWidget(dissipation_curve_widget, 4, 0, 1, 1)
+        ###############################################################################################################
+
         pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
         pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
                                               "   border: 1px solid black;\n"
@@ -282,7 +296,7 @@ class MainWindow(QtWidgets.QMainWindow):
         pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
         pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
-        gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 4, 1)
+        gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 6, 1)
         horizontalLayout.addLayout(gridLayout)
         self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
 
