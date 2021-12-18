@@ -116,10 +116,7 @@ class Functions(MainWindow):
         conservation_threshold = self.conserv_score_doubleSpinBox.value()
         save_conservation_scores = False
 
-        visualize_on_PyMol = True  # Networkx Graph Visulization on PyMol
-        visualize_on_VisJS = True  # Networkx Graph Visulization on VisJS
         self.create_output = True  # Supports True or False Conditions for creation of all networks (*.gml) on a folder
-        just_visualize = False  # If you have already calculated network you can directly visualize it.
 
         general_output_folder = os.path.join(self.output_directory, 'network_outputs')
         Path(general_output_folder).mkdir(parents=True, exist_ok=True)
@@ -128,7 +125,6 @@ class Functions(MainWindow):
         output_folder_directory = os.path.join(general_output_folder, folder_name)
         Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
 
-        # pool = mp.Pool(number_of_threads)
         engine = Multi_Task_Engine(pdb_file=self.pdb, cutoff=self.cutoff, reTimeFile=self.retime_file,
                                    source=self.source,
                                    node_threshold=self.node_threshold, verbose=verbose_condition,
@@ -176,8 +172,7 @@ class Functions(MainWindow):
                                                                    "have provided is not equal to the response time file.",
                                           Style.MessageBox_stylesheet)
             del engine
-        # time.sleep(0.1)
-        # net, log = zip(*pool.map(engine, target_residues))  # ########################################
+
 
     def plot_networks(self):
         print(len(self.network_holder))
