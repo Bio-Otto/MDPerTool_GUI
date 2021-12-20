@@ -159,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
         self.response_time_lineEdit.textChanged.connect(self.response_time_graph_path_changed)
         self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
-
+        self.all_targets_checkBox.stateChanged.connect(lambda: Functions.All_Residues_as_target_Changed(self))
         self.output_directory_button.clicked.connect(lambda: Functions.analysis_output_directory(self))
         self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local())
         self.add_residue_to_targets_pushButton.clicked.connect(lambda: Functions.add_residue_to_target_List(self))
@@ -197,7 +197,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_TabWidget.tabCloseRequested.connect(self.closeTab)
 
         # #################################################### TRAIL ##################################################### #
-        self.add_tabb.clicked.connect(self.add_tab)
+        # self.add_tabb.clicked.connect(self.add_tab)
         self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
         self.analysis_TabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
         self.tab_count_on_analysis = str(self.analysis_TabWidget.count())
@@ -315,29 +315,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
         # verticalLayout.addWidget(self.matplotlib_widget.canvas)
 
-        self.plot_signal.plot_network.connect(
-            lambda: Functions.plot_networks(self, pymol=Protein3DNetworkView,
-                                            shortest_listwidget=shortest_path_listWidget,
-                                            intersect_listwidget=intersection_path_listWidget,
-                                            source_res=self.source_res_comboBox.currentText()[:-1],
-                                            target_res_list=[self.selected_target_residues_listWidget.item(x).text()[:-1]
-                                                             for x in range(self.selected_target_residues_listWidget.count())]))
-
-        # shortest_path_listWidget.addItems(["PHE36 -> THR34 -> GLY15 -> ALA43", "PHE36 -> THR34 -> GLY15 -> ALA43",
-        #                                    "PHE37 -> THR35 -> GLY16 -> ALA44", "PHE37 -> THR35 -> GLY16 -> ALA44",
-        #                                    "PHE38 -> THR36 -> GLY17 -> ALA45"])
-        # ################################### ==> END - WIDGETS LOCATING <== ################################### #
+        self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
 
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
         self.tab_count_on_analysis = self.analysis_TabWidget.count()
 
     def handle_tabbar_clicked(self, index_of_tab):
-        print()
         print(index_of_tab)
 
     # #################################################### TRAIL ##################################################### #
     def run_btn_clicked(self):
+
         self.r_factor_count = 0
         self.Run.setEnabled(False)
         self.start_monitoring = False
@@ -708,6 +697,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if source_residue != '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=source_residue)
             """
+
     def run_network_analysis(self):
 
         # try:
@@ -750,7 +740,6 @@ class MainWindow(QtWidgets.QMainWindow):
         #     QMessageBox(QMessageBox.Critical, "Error", "Problem\nnAn error occured while getting output directory")
 
     def network_calc_thread(self, x):
-
         print('mycallback is called with {}'.format(x))
         # progress = QProgressDialog("Downloading...", "Abort", 0, 0, parent=self)
         # progress.setWindowModality(QtCore.Qt.WindowModal)
@@ -789,7 +778,7 @@ class SplashScreen(QMainWindow):
 
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
-        app_icon.addFile('%s/gui/icons/big_icons/style_icon_48x48.png' % os.getcwd())
+        app_icon.addFile('icon.png')
 
         # ----- > Remove Background and Give icon to The Program
         self.setWindowIcon(QIcon(app_icon))

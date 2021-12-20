@@ -20,7 +20,6 @@ from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed
 class Helper_Functions():
 
     def fill_residue_combobox(self, pdb_path):
-        print(pdb_path)
         from prody.proteins.pdbfile import parsePDB
         combobox = []
 
@@ -77,6 +76,9 @@ class Functions(MainWindow):
     def thread_complete(self):
         self.active_workers -= 1
         if self.active_workers == 0 and len(self.network_holder) != 0:
+            print("===============================")
+            print(self.log_holder, self.network_holder)
+            print("===============================")
             self.plot_signal.plot_network.emit()
             self.progress.cancel()
 
@@ -87,7 +89,6 @@ class Functions(MainWindow):
     def calculate_intersection_network(self):
         global intersection_graph, output_folder_directory, network_holder
 
-        # try:
         self.active_workers = 0
         self.network_holder = []
         self.log_holder = []
@@ -101,13 +102,20 @@ class Functions(MainWindow):
         self.source = self.source_res_comboBox.currentText()[:-1]  # One of the perturbed residues
         self.node_threshold = self.node_threshold_spinBox.value()  # None or an Integer
         self.node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
+        self.all_residue_as_target = self.all_targets_checkBox.isChecked()
 
         if self.node_threshold_use_condition:
             self.node_threshold = None
 
         verbose_condition = True  # True or False
-        target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
-                           for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
+
+        if self.all_residue_as_target:
+            target_residues = [self.target_res_comboBox.itemText(i)[:-1] for i in
+                               range(self.target_res_comboBox.count())]
+
+        if not self.all_residue_as_target:
+            target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                               for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
 
         use_conservation = self.use_conservation_checkBox.isChecked()
 
@@ -163,6 +171,7 @@ class Functions(MainWindow):
                     work.signals.work_started.connect(lambda: Functions.on_started(self))
                     work.signals.result.connect(lambda x: Functions.print_output(self, x))
                     work.signals.finished.connect(lambda: Functions.thread_complete(self))
+
                     self.threadpool.start(work)
 
             del engine
@@ -173,13 +182,13 @@ class Functions(MainWindow):
                                           Style.MessageBox_stylesheet)
             del engine
 
-
     def plot_networks(self):
-        print(len(self.network_holder))
-
+        print("================***===============")
+        print(self.log_holder, self.network_holder)
+        print("================***===============")
         clean_graph_list = []
-        if self.node_threshold is not None:
 
+        if self.node_threshold is not None:
             for i in self.network_holder:
                 if len(i.nodes()) > self.node_threshold:
                     clean_graph_list.append(i)
@@ -309,7 +318,6 @@ class Functions(MainWindow):
                 if source_residue != '':
                     dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue)
 
-
             # --> 3D View Frame
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
             pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
@@ -355,36 +363,49 @@ class Functions(MainWindow):
             shrotest_str_form = ''
 
             colors = ['#957DAD', '#D291BC', '#FEC8D8', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8abb5']
+
+            all_paths = []
             for graph_i in all_graph_list:
-                for cnt, target_i in enumerate(target_res_list):
-                    try:
-                        sp = nx.shortest_path(graph_i, source_res, target_i)
-                        for res_id in range(len(sp)):
-                            if res_id == len(sp) - 1:
-                                shrotest_str_form += '%s' % sp[res_id]
-                            else:
-                                shrotest_str_form += '%s --> ' % sp[res_id]
+                if isinstance(graph_i, nx.classes.digraph.DiGraph):
+                    for cnt, target_i in enumerate(target_res_list):
+                        try:
+                            if nx.has_path(graph_i, source_res, target_i):
+                                sp = nx.shortest_path(graph_i, source_res, target_i)
+                                for res_id in range(len(sp)):
+                                    if res_id == len(sp) - 1:
+                                        shrotest_str_form += '%s' % sp[res_id]
+                                    else:
+                                        shrotest_str_form += '%s --> ' % sp[res_id]
 
-                        item = QListWidgetItem(shrotest_str_form)
-                        item.setBackground(QColor(colors[cnt]))
-                        shortest_path_listWidget.addItem(item)  # print("SHORTEST PATH: ", sp)
-                        shrotest_str_form = ''
+                                item = QListWidgetItem(shrotest_str_form)
+                                item.setBackground(QColor(colors[cnt]))
+                                shortest_path_listWidget.addItem(item)  # print("SHORTEST PATH: ", sp)
+                                shrotest_str_form = ''
 
-                    except Exception as err:
-                        print("SHORTEST PATH LOG: ", err)
+                                all_paths.append('Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (source_res, target_i, len(graph_i.nodes())))
+
+                        except Exception as err:
+                            print("SHORTEST PATH LOG: ", err)
+
+            all_path_string = ''
+            for j in all_paths:
+                if j != '':
+                    all_path_string = all_path_string + '\n' + j
+                    print("all: ", all_path_string)
+            Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
 
             intersect_shrotest_str_form = ''
-
             for target_i in target_res_list:
                 try:
-                    isp = nx.shortest_path(intersection_graph, source_res, target_i)
-                    for res_id in range(len(isp)):
-                        if res_id == len(isp) - 1:
-                            intersect_shrotest_str_form += '%s' % isp[res_id]
-                        else:
-                            intersect_shrotest_str_form += '%s --> ' % isp[res_id]
-                    intersection_path_listWidget.addItem(intersect_shrotest_str_form)
-                    intersect_shrotest_str_form = ''
+                    if isinstance(graph_i, nx.classes.digraph.DiGraph):
+                        isp = nx.shortest_path(intersection_graph, source_res, target_i)
+                        for res_id in range(len(isp)):
+                            if res_id == len(isp) - 1:
+                                intersect_shrotest_str_form += '%s' % isp[res_id]
+                            else:
+                                intersect_shrotest_str_form += '%s --> ' % isp[res_id]
+                        intersection_path_listWidget.addItem(intersect_shrotest_str_form)
+                        intersect_shrotest_str_form = ''
 
                 except Exception as err:
                     print("INTERSECTION SHORTEST PATH LOG: ", err)
@@ -394,57 +415,65 @@ class Functions(MainWindow):
             intersection_path_listWidget.itemDoubleClicked.connect(
                 lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
             # ############################################
+
+            try:
+                if isinstance(graph_i, nx.classes.digraph.DiGraph):
+                    if len(intersection_graph.nodes()) > 0:
+                        try:
+                            arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph,
+                                                                                             pdb_file=self.pdb)
+
+                            # ----------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
+                            Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
+                            for arrow_coord in arrows_cordinates:
+                                Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                                                            radius=0.05,
+                                                                            gap=0.4, hradius=0.4, hlength=0.8,
+                                                                            color='green')
+                            for node in intersection_node_list:
+                                resID_of_node = int(''.join(list(filter(str.isdigit, node))))
+                                Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
+
+                            # MAKE PYMOL VISUALIZATION BETTER
+                            Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                            Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
+                            Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                            Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+                            Protein3DNetworkView.update()
+                            Protein3DNetworkView.show()
+
+                            # ----------------------> 2D NETWORK VISUALIZATION USING visJS / START <---------------------- #
+                            # self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
+
+                        except Exception as error:
+                            print("Problem: ", error)
+                            exc_type, exc_obj, exc_tb = sys.exc_info()
+                            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                            print(exc_type, fname, exc_tb.tb_lineno)
+
+                        all = ''
+                        for j in self.log_holder:
+                            if j != '':
+                                all = all + '\n' + j
+                                print("all: ", all)
+                        Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
+                        del self.log_holder, self.network_holder
+
+                    # elif len(intersection_graph.nodes()) == 0:
+                    #     print("NO INTERSECTION GRAPH")
+
+
+                    else:
+                        Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
+                                                          Style.MessageBox_stylesheet)
+            except Exception as e:
+                print("Problem: ", e)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
         else:
             print("There is no suitable Graph for your search parameters")
 
-        try:
-            if len(intersection_graph.nodes()) > 0:
-                try:
-
-                    arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph,
-                                                                                     pdb_file=self.pdb)
-
-                    # ----------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
-                    Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
-                    for arrow_coord in arrows_cordinates:
-                        Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                                    radius=0.05,
-                                                                    gap=0.4, hradius=0.4, hlength=0.8,
-                                                                    color='green')
-                    for node in intersection_node_list:
-                        resID_of_node = int(''.join(list(filter(str.isdigit, node))))
-                        Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
-
-                    # MAKE PYMOL VISUALIZATION BETTER
-                    Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
-                    Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
-                    Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
-                    Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
-                    Protein3DNetworkView.update()
-                    Protein3DNetworkView.show()
-
-                    # ----------------------> 2D NETWORK VISUALIZATION USING visJS / START <---------------------- #
-                    # self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
-
-                except Exception as error:
-                    print("Problem: ", error)
-                    exc_type, exc_obj, exc_tb = sys.exc_info()
-                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    print(exc_type, fname, exc_tb.tb_lineno)
-
-                all = ''
-                for j in self.log_holder:
-                    all = all + '\n' + j
-                Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
-                del self.log_holder, self.network_holder
-            else:
-                Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
-                                                  Style.MessageBox_stylesheet)
-        except Exception as e:
-            print("Problem: ", e)
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
         #
         # finally:
         #     # CLOSE THE ALREADY OPENED POOL
@@ -559,6 +588,16 @@ class Functions(MainWindow):
         else:
             self.node_threshold_spinBox.setEnabled(True)
 
+    @staticmethod
+    def All_Residues_as_target_Changed(self):
+        if not self.all_targets_checkBox.isChecked():
+            self.target_res_comboBox.setEnabled(True)
+            self.residues_conservation_tableWidget.setEnabled(True)
+
+        if self.all_targets_checkBox.isChecked():
+            self.target_res_comboBox.setEnabled(False)
+            self.residues_conservation_tableWidget.setEnabled(False)
+
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
 
     # ######################################### PERTURBATION WINDOW FUNCTIONS ##########################################
@@ -642,8 +681,6 @@ class Functions(MainWindow):
                             fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
                                                                     self.Output_Folder_textEdit.toPlainText(), ph=7,
                                                                     chains_to_remove=delete_chains)
-                            print(delete_chains)
-                            print("fetched pdb: %s" % fetched_pdb)
 
                             self.upload_pdb_textEdit.setText(fetched_pdb)
                             self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
@@ -738,7 +775,6 @@ class Functions(MainWindow):
 
         for item_no, i in enumerate(self.platform_list_on_the_program):
             if i not in self.platforms:
-                print(item_no)
                 self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
                 self.platform_comboBox.setCurrentIndex(item_no + 1)
 
@@ -863,7 +899,6 @@ class pdb_Tools:
             from prody.proteins.localpdb import fetchPDB, pathPDBFolder
             from multiprocessing import Process
             Download_folder = os.path.join(os.getcwd(), 'Download')
-            print(Download_folder)
 
             try:
                 os.makedirs(Download_folder)

@@ -1,3 +1,5 @@
+
+
 from PySide2 import QtCore
 from PySide2.QtCore import Slot, QThread
 from PySide2.QtWidgets import QMessageBox
@@ -316,17 +318,13 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
     @Slot()
     def update_display(self, script_structure):
-
-        # print(script_structure)
         renderer = pystache.Renderer()
-        # print("ok")
+
         template = pystache.parse(open('src/template_sctipt.txt').read())
-
         self.contents = renderer.render(template, script_structure)
-        # print(self.contents)
-        return self.contents
-        # Graphs().run_script(contents)
 
-        # runner = OpenMMScriptRunner(contents)
-        # runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
-        # OpenMMScriptRunner(script_structure)
+        with open('readme.txt', 'w') as f:
+            f.write(self.contents)
+
+        return self.contents
+

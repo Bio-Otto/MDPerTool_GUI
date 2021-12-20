@@ -46,9 +46,15 @@ class PlotCanvas(FigureCanvas):
             ax.legend(title='Speed Factor')
 
         ax.margins(x=0.01, y=0.01, tight=True)
-        self.figure.tight_layout()
 
-        self.draw()
+        self.figure.tight_layout(rect=(0.150, 0.160, 0.900, 0.880))  # left, bottom, right, top
+
+        # try:
+        #     ax.subplots_adjust(top=0.85)
+        #     print("2222222222222222222222")
+        # except:
+        #     pass
+        # self.draw()
 
 
 def getResponseTimeGraph(responseTimeFile):

@@ -20,12 +20,8 @@ build_exe_options = {
                  "networkx", "prody", "pystache", "shiboken2", "pdbfixer", "pyqtgraph", "openmm",
                  "mdtraj", "parmed", "pyvis", "OpenGL"],
 
-
     "include_files": ['LICENSE', 'fonts/', 'test/', 'gui/', 'src/', 'analysis/', 'Download/', 'no_gui/'],
-                      
     "excludes": ["tkinter", "PyQt5"],
-
-
     "build_exe": "build"
 }
 

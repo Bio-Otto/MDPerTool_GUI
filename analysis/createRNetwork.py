@@ -324,7 +324,6 @@ def getResNetwork(resContMap, CorrFile, pdb, outputFileName, verbose=True):
         nodeList.append(nodeID)
         network.add_node(nodeList[chunk])
 
-        print(network.nodes())
     # Load the CorrFile and determine the maximum edge weight
     resCorrMat = np.loadtxt(CorrFile)
     resCorrArray = np.squeeze(resCorrMat)
@@ -340,7 +339,6 @@ def getResNetwork(resContMap, CorrFile, pdb, outputFileName, verbose=True):
 
     for i in range(1, len(lines)):
         line = lines[i].split()
-        print(line)
         res1name = line[0].split(":")
         res1 = res1name[3] + res1name[1]
         res2name = line[2].split(":")
@@ -398,8 +396,10 @@ def analyzeNetwork(resContMap, CorrFile, pdb, outputFileName, source, verbose=Fa
 
 
 def runTest(pdb, cutoff, reTimeFile, outputFileName, source, target, pairNetworkName):
-    network, residue_list = createRNetwork(pdb, cutoff, reTimeFile, outputFileName, verbose=False, write_out=True,
-                                           out_directory=os.getcwd())
+    network, residue_list, resId_List, len_of_reTimes_on_file = createRNetwork(pdb, cutoff, reTimeFile, outputFileName,
+                                                                               verbose=False, write_out=True,
+                                                                               out_directory=os.getcwd())
+
     pairNetworks(network, source, target, pairNetworkName)
     return network
 
@@ -453,13 +453,16 @@ class Multi_Task_Engine(object):
             print(Error)
 
     def run_pairNet_calc(self, target):
+        print("====================================")
+        print("TARGETS: ", target)
+        print("====================================")
         try:
 
             for i in target:
                 self.Work.append(
                     Calc_Net_Worker(pairNetworks, network=copy.deepcopy(self.network), source=self.source,
                                     target=i,
-                                    pairNetworkName='%s_%s.gml' % (self.source, target),
+                                    pairNetworkName='%s_%s.gml' % (self.source, i),
                                     node_threshold=self.node_threshold,
                                     verbose=self.verbose, write_out=self.write_outputs,
                                     out_directory=self.output_directory))
@@ -476,17 +479,17 @@ class Multi_Task_Engine(object):
 
 def intersection_of_directed_networks(graphs_list):
     all_graph_list = copy.deepcopy(graphs_list)
-    len_of_nodes_on_list = [len(graph.nodes()) for graph in graphs_list]
-    smallest_network_and_indices = min([(v, i) for i, v in enumerate(len_of_nodes_on_list)])
+    # len_of_nodes_on_list = [len(graph.nodes()) for graph in graphs_list]
+    # smallest_network_and_indices = min([(v, i) for i, v in enumerate(len_of_nodes_on_list)])
 
-    R = copy.deepcopy(graphs_list[smallest_network_and_indices[1]])
-
-    for cnt, graph_count in enumerate(graphs_list):
-        if cnt != smallest_network_and_indices[1]:
-            R.remove_nodes_from(n for n in graphs_list[smallest_network_and_indices[1]] if n not in graphs_list[cnt])
-            R.remove_edges_from(
-                e for e in graphs_list[smallest_network_and_indices[1]].edges if e not in graphs_list[cnt].edges)
-
+    # R = copy.deepcopy(graphs_list[smallest_network_and_indices[1]])
+    #
+    # for cnt, graph_count in enumerate(graphs_list):
+    #     if cnt != smallest_network_and_indices[1]:
+    #         R.remove_nodes_from(n for n in graphs_list[smallest_network_and_indices[1]] if n not in graphs_list[cnt])
+    #         R.remove_edges_from(
+    #             e for e in graphs_list[smallest_network_and_indices[1]].edges if e not in graphs_list[cnt].edges)
+    R = nx.intersection_all(graphs_list)
     return R, all_graph_list
 
 

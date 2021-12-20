@@ -48,6 +48,7 @@ class Calc_Net_Worker(QRunnable):
         try:
             self.signals.work_started.emit()
             net, log = self.fn(*self.args, **self.kwargs)
+            time.sleep(0.1)
         except:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]

@@ -1,3 +1,4 @@
+
 from openmm.app import StateDataReporter
 from io import StringIO
 import time
@@ -347,6 +348,7 @@ class Graphs(QWidget):
         print(data_decomp)
 
     def run_script(self, contents):
+
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
         self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
