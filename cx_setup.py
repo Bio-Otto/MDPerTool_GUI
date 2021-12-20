@@ -2,6 +2,10 @@ import sys
 import os
 from cx_Freeze import setup, Executable
 
+base = None
+if sys.platform == "win32":
+    base = "Win32GUI"
+
 # ADD FILES
 files = ['icon.png', 'LICENSE', 'fonts/', 'test/', 'gui/', 'src/', 'analysis/', 'Download/',
          'no_gui/', 'C:\\Users\\law5_\\.conda\\envs\\mdpertool\\Lib\\xdrlib.py']
@@ -9,7 +13,7 @@ files = ['icon.png', 'LICENSE', 'fonts/', 'test/', 'gui/', 'src/', 'analysis/', 
 # TARGET
 target = Executable(
     script="ui_main.py",
-    base="Win32GUI",
+    base=base,
     icon="icon.png"
 )
 
