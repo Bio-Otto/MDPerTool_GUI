@@ -2,10 +2,11 @@
 
 package:
   name: mdpertool
-  version: {{ data['version'] }}
+  version: {{data.get('version')}}
 
 source:
-  git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git#hard_dev
+  git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
+  git_rev: packaging
   sha256: b1fbb8193e9a75736ad3eaa9f53cdab0fe53d5b3c26bc1ac48f67a5b71ed56ca
   path: ..
 
@@ -52,12 +53,12 @@ test:
     - pytest -vv --pyargs mdpertool
 
 about:
-  home: data['url']
+  home: data.get('url')
   license: BSD 3-Clause
   license_file: LICENSE.md
   license_family: BSD
 
-  summary: data['description']
-  description: data['long_description']
+  summary: data.get('description')
+  description: data.get('long_description')
   #doc_url: https://bio-otto.github.io/Bio-Otto/MDPerTool_GUI
-  dev_url: data['url']
+  dev_url: data.get('url')
