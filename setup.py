@@ -4,11 +4,10 @@ from setuptools import setup, find_packages
 import os.path as op
 import sys
 
-#with open(op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
-    #exec(version_file.read())
-file_path = op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')
-
-os.system(f'py {file_path}')
+with open(op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
+    exec(version_file.read())
+#file_path = op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')
+#os.system(f'py {file_path}')
 
 with open(op.join(op.dirname(op.realpath(__file__)), 'README.md')) as readme_file:
     readme = readme_file.read()
