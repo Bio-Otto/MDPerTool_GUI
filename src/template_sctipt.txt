@@ -70,7 +70,7 @@ nonbonded.setUseDispersionCorrection(True)
 print('Creating a %sIntegrator with %s %s .' %('{{integrator_kind}}', {{integrator_time_step}}, '{{integrator_time_step_unit}}'))
 integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}}*{{integrator_time_step_unit}})
 
-if {{cuda_active}}:
+if {{cuda_active}} == True:
     platform = mm.Platform.getPlatformByName('{{platform}}')
     {{#properties_active}}properties = {'{{cuda_precision_prefix}}Precision': '{{precision}}'{{#Device_ID_active}},'{{cuda_precision_prefix}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
 else:
@@ -172,7 +172,7 @@ for i in range(len({{speed_factor}})):
     name_of_changed_state_xml = change_velocity(state_file_path, {{speed_factor}}[i], modify_atoms)
     new_dissipated_trajectory_name = dissipated_trajectory_name + str({{speed_factor}}[i])
 
-    if not {{DCDReporter}} and not {{XTCReporter}}:
+    if {{DCDReporter}} == False and {{XTCReporter}} == False:
         write_dcd_cond = True
 
     if i == 0:
@@ -218,7 +218,7 @@ for i in range(len({{speed_factor}})):
         reference_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
                                                    constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
 
-        if {{use_switching_distance}}:
+        if {{use_switching_distance}} == True:
             print("System will use Switching Distance")
             nonbonded = [f for f in reference_system.getForces() if isinstance(f, NonbondedForce)][0]
             nonbonded.setUseSwitchingFunction(use=True)
@@ -254,17 +254,17 @@ for i in range(len({{speed_factor}})):
             ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
         else:
-            if not {{DCDReporter}} and not {{XTCReporter}}:
+            if {{DCDReporter}} == False and {{XTCReporter}} == False:
                 print("Saving DCD File for every 1 period")
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-            if {{DCDReporter}}:
+            if {{DCDReporter}} == True:
                 print("Saving DCD File for every 1 period")
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-            if {{XTCReporter}}:
+            if {{XTCReporter}} == True:
                 print("Saving XTC File for every 1 period")
                 XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
@@ -324,7 +324,7 @@ for i in range(len({{speed_factor}})):
     perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
                                                constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
 
-    if {{use_switching_distance}}:
+    if {{use_switching_distance}} == True:
         print("System will use Switching Distance")
         nonbonded = [f for f in perturbed_system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
@@ -360,17 +360,17 @@ for i in range(len({{speed_factor}})):
         simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
     else:
-        if not {{DCDReporter}} and not {{XTCReporter}}:
+        if {{DCDReporter}} == False and {{XTCReporter}} == False:
             print("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-        if {{DCDReporter}}:
+        if {{DCDReporter}} == True:
             print("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-        if {{XTCReporter}}:
+        if {{XTCReporter}} == True:
             print("Saving XTC File for every 1 period")
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
             simulation.reporters.append(XTCReporter(XTC_file_path, 1))
@@ -395,17 +395,17 @@ for i in range(len({{speed_factor}})):
         dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
 
     else:
-        if not {{DCDReporter}} and not {{XTCReporter}}:
+        if {{DCDReporter}} == False and {{XTCReporter}} == False:
             print("Decompose started using DCD File")
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
 
-        if {{DCDReporter}}:
+        if {{DCDReporter}} == True:
             print("Decompose started using DCD File")
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
 
-        if {{XTCReporter}}:
+        if {{XTCReporter}} == True:
             print("Decompose started using XTC File")
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
@@ -423,7 +423,6 @@ for i in range(len({{speed_factor}})):
                                                                  ref_traj=None,
                                                                  modif_traj=dissipation_traj_file_for_pos)
 
-
      # --> RESIDUE BASED DECOMPOSITION
     if i == 0:
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
@@ -431,6 +430,7 @@ for i in range(len({{speed_factor}})):
                                     ref_energy_name='reference_energy_file.csv',
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}')
+
     if i != 0:
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,

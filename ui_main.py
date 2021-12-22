@@ -136,8 +136,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         Functions.Send_Available_Platforms_to_GUI(self)
         Functions.maximum_thread_of_system(self)
+        self.platform_specific_precision_applying()
+
         self.node_threshold_checkBox.stateChanged.connect(lambda: Functions.node_threshold_use(self))
-        self.platform_comboBox.currentTextChanged.connect(lambda: Functions.platform_comboBox_Changed(self))
+        self.equ_platform_comboBox.currentTextChanged.connect(
+            lambda: Functions.platform_comboBox_Changed(self, eq_md=True, per_md=False))
+        self.per_platform_comboBox.currentTextChanged.connect(
+            lambda: Functions.platform_comboBox_Changed(self, eq_md=False, per_md=True))
+
         self.minimize_checkBox.stateChanged.connect(lambda: Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
@@ -196,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_TabWidget.setTabsClosable(True)
         self.analysis_TabWidget.tabCloseRequested.connect(self.closeTab)
 
-        # #################################################### TRAIL ##################################################### #
+        # ################################################# TRAIL #################################################### #
         # self.add_tabb.clicked.connect(self.add_tab)
         self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
         self.analysis_TabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
@@ -338,6 +344,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if not self.start_monitoring:
             self.Run.setEnabled(True)
+
+    def platform_specific_precision_applying(self):
+        eq_md_precission_indexes = {'single': self.eq_precision_comboBox.findText('single'),
+                                    'mixed': self.eq_precision_comboBox.findText('mixed'),
+                                    'double': self.eq_precision_comboBox.findText('double')}
+
+        per_md_precission_indexes = {'single': self.per_precision_comboBox.findText('single'),
+                                     'mixed': self.per_precision_comboBox.findText('mixed'),
+                                     'double': self.per_precision_comboBox.findText('double')}
+
+        self.equ_platform_comboBox.currentTextChanged.connect(
+            lambda: Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
+                                                          per_md_indexes=None))
+        self.per_platform_comboBox.currentTextChanged.connect(
+            lambda: Functions.precision_combobox_settings(self, eq_md_indexes=None,
+                                                          per_md_indexes=per_md_precission_indexes))
+        Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
+                                              per_md_indexes=per_md_precission_indexes)
 
     def stop_button_clicked(self):
         self.__stop = True

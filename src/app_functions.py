@@ -605,6 +605,46 @@ class Functions(MainWindow):
         self.Number_CPU_spinBox.setMaximum(mp.cpu_count())
         self.Number_of_thread_for_network_spinBox.setMaximum(mp.cpu_count())
 
+    def precision_combobox_settings(self, eq_md_indexes, per_md_indexes):
+
+        if eq_md_indexes is not None:
+            if str(self.equ_platform_comboBox.currentText()) == 'CPU':
+                self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(False)
+                self.eq_precision_comboBox.model().item(eq_md_indexes['mixed']).setEnabled(True)
+                self.eq_precision_comboBox.model().item(eq_md_indexes['double']).setEnabled(False)
+                self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['mixed'])
+
+            if str(self.equ_platform_comboBox.currentText()) == 'Reference':
+                self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(False)
+                self.eq_precision_comboBox.model().item(eq_md_indexes['mixed']).setEnabled(False)
+                self.eq_precision_comboBox.model().item(eq_md_indexes['double']).setEnabled(True)
+                self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['double'])
+
+            if str(self.equ_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
+                self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(True)
+                self.eq_precision_comboBox.model().item(eq_md_indexes['mixed']).setEnabled(True)
+                self.eq_precision_comboBox.model().item(eq_md_indexes['double']).setEnabled(True)
+                self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['single'])
+
+        if per_md_indexes is not None:
+            if str(self.per_platform_comboBox.currentText()) == 'CPU':
+                self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
+                self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
+                self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(False)
+                self.per_precision_comboBox.setCurrentIndex(per_md_indexes['mixed'])
+
+            if str(self.per_platform_comboBox.currentText()) == 'Reference':
+                self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
+                self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(False)
+                self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
+                self.per_precision_comboBox.setCurrentIndex(per_md_indexes['double'])
+
+            if str(self.per_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
+                self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(True)
+                self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
+                self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
+                self.per_precision_comboBox.setCurrentIndex(per_md_indexes['single'])
+
     def output_file(self):
         try:
             options = QFileDialog.Options()
@@ -770,27 +810,37 @@ class Functions(MainWindow):
     @staticmethod
     def Send_Available_Platforms_to_GUI(self):
         self.platforms, self.plt_speeds = Helper_Functions.available_platforms(self)
-        self.platform_list_on_the_program = [self.platform_comboBox.itemText(i) for i in
-                                             range(self.platform_comboBox.count())]
+        self.platform_list_on_the_program = [self.equ_platform_comboBox.itemText(i) for i in
+                                             range(self.equ_platform_comboBox.count())]
 
         for item_no, i in enumerate(self.platform_list_on_the_program):
             if i not in self.platforms:
-                self.platform_comboBox.model().item(int(item_no)).setEnabled(False)
-                self.platform_comboBox.setCurrentIndex(item_no + 1)
+                self.equ_platform_comboBox.model().item(int(item_no)).setEnabled(False)
+                self.equ_platform_comboBox.setCurrentIndex(item_no + 1)
 
             if i in self.platforms:
-                self.platform_comboBox.setItemData(item_no, str("Estimated Speed For This Devices Is "
+                self.equ_platform_comboBox.setItemData(item_no, str("Estimated Speed For This Devices Is "
                                                                 + str(self.plt_speeds[i])), Qt.ToolTipRole)
 
     @staticmethod
-    def platform_comboBox_Changed(self):
-        if self.platform_comboBox.currentText() in ["CPU", "Reference"]:
-            self.Device_Number_comboBox.setEnabled(False)
-            self.Device_ID_checkBox.setEnabled(False)
+    def platform_comboBox_Changed(self, eq_md, per_md):
+        if eq_md:
+            if self.equ_platform_comboBox.currentText() in ["CPU", "Reference"]:
+                self.Device_Number_comboBox.setEnabled(False)
+                self.Device_ID_checkBox.setEnabled(False)
 
-        else:
-            self.Device_Number_comboBox.setEnabled(True)
-            self.Device_ID_checkBox.setEnabled(True)
+            else:
+                self.Device_Number_comboBox.setEnabled(True)
+                self.Device_ID_checkBox.setEnabled(True)
+
+        if per_md:
+            if self.per_platform_comboBox.currentText() in ["CPU", "Reference"]:
+                self.per_Device_Number_lineEdit.setEnabled(False)
+                self.per_Device_ID_checkBox.setEnabled(False)
+
+            else:
+                self.per_Device_Number_lineEdit.setEnabled(True)
+                self.per_Device_ID_checkBox.setEnabled(True)
 
     def add_residue_toList(self):
         if str(self.res1_comboBox.currentText()) != "":

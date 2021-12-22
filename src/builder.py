@@ -187,17 +187,17 @@ class Advanced(QtCore.QThread):
             if self.Additional_Integrators_checkBox.isChecked():
                 Additional_Integrator = True
 
-            if self.platform_comboBox.currentText() in ["CUDA", "OpenCL"]:
+            if self.equ_platform_comboBox.currentText() in ["CUDA", "OpenCL"]:
                 properties_active = True
 
-            if self.platform_comboBox.currentText() == "CPU":
+            if self.equ_platform_comboBox.currentText() == "CPU":
                 CPU_properties_active = True
 
             if self.Device_ID_checkBox.isChecked():
                 Device_ID_active = True
 
             platform_name, properties, precision = Advanced_Helper_Functions.selected_platform(self,
-                                                                                               self.platform_comboBox.currentText(),
+                                                                                               self.equ_platform_comboBox.currentText(),
                                                                                                Device_ID_active,
                                                                                                precision)
             cuda_precision_prefix = None

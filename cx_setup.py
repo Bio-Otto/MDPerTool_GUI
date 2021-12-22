@@ -18,7 +18,7 @@ target = Executable(
 )
 
 # PACKAGES
-packages = ["OpenGL", "pymol", "parmed", "mdtraj"]
+packages = ["OpenGL", "pymol", "parmed", "mdtraj", "openmm"]
 #                   "os", "sys", "re", "matplotlib", "pandas", "pyqtgraph", "OpenGL", "pymol", "numpy",
 #                  "networkx", "prody", "pystache", "shiboken2", "pdbfixer", "pyqtgraph", "openmm",
 #                  "mdtraj", "parmed", "pyvis"
