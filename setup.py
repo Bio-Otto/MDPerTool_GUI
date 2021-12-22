@@ -66,7 +66,7 @@ setup(
     long_description=long_description,
     url='https://github.com/bio-otto/MDPerTool_GUI',
     author='Halil I. Ozdemir',
-    author_email='halil.ibrahim.ozdemir@protonmail.com',
+    author_email='halil.ibrahim.oozdemir@gmail.com',
     license='MIT',
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
