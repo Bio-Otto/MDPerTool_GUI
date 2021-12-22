@@ -1,0 +1,5 @@
+include tests/*
+include mdpertool/gui/*
+include mdpertool/fonts/*
+include mdpertool/src/*
+include mdpertool/Download/*

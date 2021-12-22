@@ -1,0 +1,63 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: mdpertool
+  version: {{ data['version'] }}
+
+source:
+  git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git#hard_dev
+  sha256: b1fbb8193e9a75736ad3eaa9f53cdab0fe53d5b3c26bc1ac48f67a5b71ed56ca
+  path: ..
+
+build:
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+  entry_points:
+    - processrcmfolder = uconnrcmpy.dataprocessing:process_folder
+
+
+requirements:
+  build:
+    - python >=3.7,{{PY_VER}}*
+    - setuptools
+
+  run:
+    - python {{PY_VER}}*
+    - numpy >=1.21.0
+    - mdtraj >=1.9.4
+    - pyyaml >=3.12
+    - matplotlib >=3.4.0
+    - pyvis >=0.1.9
+    - openmm >=7.6.0
+    - pyqtgraph >=0.12.3
+    - prody >=2.0
+    - pymol-open-source>=2.5.0
+    - pyopengl>=3.1.5
+    - networkx>=2.6.3
+    - parmed>=3.2*
+    - pdbfixer>=1.8.1
+    - prody>=2.0
+    - pyside2>=5.13.2
+    - pystache>=0.5*
+
+test:
+  imports:
+    - mdpertool
+
+  requires:
+    - pytest >=3.0.0
+    - pytest-cov >=2.3.1
+
+  commands:
+    - pytest -vv --pyargs mdpertool
+
+about:
+  home: data['url']
+  license: BSD 3-Clause
+  license_file: LICENSE.md
+  license_family: BSD
+
+  summary: data['description']
+  description: data['long_description']
+  #doc_url: https://bio-otto.github.io/Bio-Otto/MDPerTool_GUI
+  dev_url: data['url']
