@@ -1,9 +1,8 @@
-{% set data = load_setup_py_data() %}
-{% set version = "0.0.1" %}
+{% set data = load_setup_py_data(setup_file="MDPerTool_GUI/setup.py") %}
 
 package:
   name: mdpertool
-  version: {{ version }}
+  version: {{ data.get('version') }}
 
 source:
   git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
@@ -11,6 +10,7 @@ source:
   path: ..
 
 build:
+  noarch: python
   number: 0
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
@@ -19,12 +19,12 @@ build:
 
 requirements:
   build:
-    - python >=3.7,{{PY_VER}}*
+    - python >=3.7
     - setuptools
 
   run:
-    - python {{PY_VER}}*
-    - numpy
+    - python >=3.7
+    - numpy 
     - mdtraj
     - pyyaml
     - matplotlib
@@ -33,7 +33,7 @@ requirements:
     - pyqtgraph
     - prody
     - pymol-open-source
-    - pyopengl>
+    - pyopengl
     - networkx
     - parmed
     - pdbfixer

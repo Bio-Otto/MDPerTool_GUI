@@ -29,21 +29,21 @@ except (ImportError, OSError, IOError):
     long_description = desc
 
 install_requires = [
-    'openmm',
-    'numpy',
-    'pyvis',
-    'pymol-open-source',
+    'openmm >=7.6',
+    'numpy >=1.20',
+    'pyvis >=0.19',
+    'pymol-open-source >=2.5',
     'pyyaml',
-    'matplotlib',
-    'pyopengl',
-    'pdbfixer',
-    'mdtraj',
-    'networkx',
-    'parmed',
-    'prody',
-    'pyside2',
-    'pystache',
-    'pyqtgraph'
+    'matplotlib >=3.4',
+    'pyopengl >=3.1',
+    'pdbfixer >=1.8',
+    'mdtraj >=1.9.5',
+    'networkx >=2.6',
+    'parmed >=3.2',
+    'prody >=2.0',
+    'pyside2 >=5.13',
+    'pystache >=0.5',
+    'pyqtgraph >=0.12'
 ]
 
 tests_require = [
@@ -95,7 +95,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'processrcmfolder=mdpertool.no_gui:no_gui.py',
+            'processrcmfolder=mdpertool.ui_main:ui_main.py',
         ],
     },
     install_requires=install_requires,
