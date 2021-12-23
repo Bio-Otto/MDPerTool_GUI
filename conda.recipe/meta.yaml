@@ -18,7 +18,8 @@ build:
 
 requirements:
   build:
-    noarch: python
+    - noarch: python
+    - gcc
     - setuptools
 
   run:
