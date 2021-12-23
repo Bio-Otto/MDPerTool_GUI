@@ -64,5 +64,5 @@ about:
 
   summary: {{ description }}
   description: {{ long_description }}
-  #doc_url: https://bio-otto.github.io/Bio-Otto/MDPerTool_GUI
   dev_url: {{ url }}
+  #doc_url: https://bio-otto.github.io/Bio-Otto/MDPerTool_GUI
