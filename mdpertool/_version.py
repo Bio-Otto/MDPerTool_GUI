@@ -1,4 +1,3 @@
-import os
 import os.path as op
 
 global readme, changelog, __citation__, __long_description__, __url__, __author_email__
@@ -22,8 +21,7 @@ if len(__version_info__) == 4:
     __version__ += __version_info__[-1]
 
 
-
-with open(op.join('../', 'README.md')) as readme_file:
+with open(op.join(op.dirname(op.realpath(__file__)), 'README.md')) as readme_file:
     readme = readme_file.read()
 
 # with open(op.join(op.dirname(op.realpath(__file__)), 'CHANGELOG.md')) as changelog_file:
