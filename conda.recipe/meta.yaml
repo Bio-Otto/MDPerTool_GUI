@@ -2,10 +2,11 @@
 {% set description = data.get("description") %}
 {% set long_description = data.get("long_description") %}
 {% set url = data.get("url") %}
+{% set version = data.get("version") %}
 
 package:
   name: mdpertool
-  version: {{ data.get('version') }}
+  version: {{ version }}
 
 source:
   git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
