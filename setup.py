@@ -29,22 +29,21 @@ except (ImportError, OSError, IOError):
     long_description = desc
 
 install_requires = [
-    'openmm @ https://github.com/openmm/openmm/archive/refs/tags/7.7.0.zip',
-    'numpy>=1.21.0',
-    'pyvis>=0.1.9',
-    'pymol-open-source>=2.5.0',
-    'pyyaml>=3.12',
-    'matplotlib>=3.4.0',
-    'pyopengl>=3.1.5',
-    # 'pdbfixer>=1.8.1',
-    'pdbfixer @ https://github.com/openmm/pdbfixer/archive/refs/tags/v1.8.1.zip',
-    'mdtraj>=1.9.4',
-    'networkx>=2.6.3',
-    'parmed>=3.4.3',
-    'prody>=2.0',
-    'pyside2>=5.13.2',
-    'pystache>=0.5',
-    'pyqtgraph>=0.11'
+    'openmm',
+    'numpy',
+    'pyvis',
+    'pymol-open-source',
+    'pyyaml',
+    'matplotlib',
+    'pyopengl',
+    'pdbfixer',
+    'mdtraj',
+    'networkx',
+    'parmed',
+    'prody',
+    'pyside2',
+    'pystache',
+    'pyqtgraph'
 ]
 
 tests_require = [
