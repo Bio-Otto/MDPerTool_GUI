@@ -1,4 +1,4 @@
-{% set data = load_setup_py_data(setup_file="MDPerTool_GUI/setup.py") %}
+{% set data = load_setup_py_data(setup_file="../setup.py") %}
 
 package:
   name: mdpertool
@@ -24,7 +24,7 @@ requirements:
 
   run:
     - python >=3.7
-    - numpy 
+    - numpy >=1.20
     - mdtraj
     - pyyaml
     - matplotlib
