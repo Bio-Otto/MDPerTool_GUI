@@ -25,13 +25,13 @@ if len(__version_info__) == 4:
 with open(op.join(op.dirname(op.realpath(__file__)), 'README.md')) as readme_file:
     readme = readme_file.read()
 
-with open(op.join(op.dirname(op.realpath(__file__)), 'CHANGELOG.md')) as changelog_file:
-    changelog = changelog_file.read()
+# with open(op.join(op.dirname(op.realpath(__file__)), 'CHANGELOG.md')) as changelog_file:
+#     changelog = changelog_file.read()
 
 #with open(op.join(op.dirname(op.realpath(__file__)), 'CITATION.md')) as citation_file:
 #    __citation__ = citation_file.read()
 
-desc = readme + '\n\n' + changelog + '\n\n' # + __citation__
+desc = readme + '\n\n' #+ changelog + '\n\n' + __citation__
 try:
     import pypandoc
 
