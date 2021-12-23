@@ -1,32 +1,10 @@
-import os
-
 from setuptools import setup, find_packages
 import os.path as op
 import sys
 
 with open(op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
     exec(version_file.read())
-#file_path = op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')
-#os.system(f'py {file_path}')
 
-with open(op.join(op.dirname(op.realpath(__file__)), 'README.md')) as readme_file:
-    readme = readme_file.read()
-
-with open(op.join(op.dirname(op.realpath(__file__)), 'CHANGELOG.md')) as changelog_file:
-    changelog = changelog_file.read()
-
-with open(op.join(op.dirname(op.realpath(__file__)), 'CITATION.md')) as citation_file:
-    citation = citation_file.read()
-
-desc = readme + '\n\n' + changelog + '\n\n' + citation
-try:
-    import pypandoc
-
-    long_description = pypandoc.convert_text(desc, 'rst', format='md')
-    with open(op.join(op.dirname(op.realpath(__file__)), 'README.rst'), 'w') as rst_readme:
-        rst_readme.write(long_description)
-except (ImportError, OSError, IOError):
-    long_description = desc
 
 install_requires = [
     'openmm >=7.6',
@@ -59,12 +37,11 @@ setup_requires = ['pytest-runner'] if needs_pytest else []
 setup(
     name='mdpertool',
     version=__version__,
-    description='A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy '
-                'Dissipation in Molecular Dynamics Simulations',
-    long_description=long_description,
-    url='https://github.com/bio-otto/MDPerTool_GUI',
+    description=__description__,
+    long_description=__long_description__,
+    url=__url__,
     author=__author__,
-    author_email='halil.ibrahim.oozdemir@gmail.com',
+    author_email=__author_email__,
     license='MIT',
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
