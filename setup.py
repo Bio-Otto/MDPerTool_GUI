@@ -63,7 +63,7 @@ setup(
                 'Dissipation in Molecular Dynamics Simulations',
     long_description=long_description,
     url='https://github.com/bio-otto/MDPerTool_GUI',
-    author='Halil I. Ozdemir',
+    author=__author__,
     author_email='halil.ibrahim.oozdemir@gmail.com',
     license='MIT',
     classifiers=[
