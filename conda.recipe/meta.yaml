@@ -53,12 +53,12 @@ test:
     - pytest -vv --pyargs mdpertool
 
 about:
-  home: data.get('url')
+  home: {{ data.get('url') }}
   license: BSD 3-Clause
   license_file: LICENSE.md
   license_family: BSD
 
-  summary: data.get('description')
-  description: data.get('long_description')
+  summary: {{ data.get('description') }}
+  description: {{ data.get('long_description') }}
   #doc_url: https://bio-otto.github.io/Bio-Otto/MDPerTool_GUI
-  dev_url: data.get('url')
+  dev_url: {{ data.get('url') }}
