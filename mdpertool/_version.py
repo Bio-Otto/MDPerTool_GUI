@@ -31,12 +31,16 @@ with open(op.join(op.dirname(op.realpath(__file__)), 'README.md')) as readme_fil
 #with open(op.join(op.dirname(op.realpath(__file__)), 'CITATION.md')) as citation_file:
 #    __citation__ = citation_file.read()
 
-desc = readme + '\n\n' #+ changelog + '\n\n' + __citation__
-try:
-    import pypandoc
-
-    __long_description__ = pypandoc.convert_text(desc, 'rst', format='md')
-    with open(op.join(op.dirname(op.realpath(__file__)), 'README.rst'), 'w') as rst_readme:
-        rst_readme.write(__long_description__)
-except (ImportError, OSError, IOError):
-    __long_description__ = desc
+__long_description__ = """The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic 
+Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be 
+calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy 
+decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script. """
+# desc = readme + '\n\n' + changelog + '\n\n' + __citation__
+# try:
+#     import pypandoc
+#
+#     __long_description__ = pypandoc.convert_text(desc, 'rst', format='md')
+#     with open(op.join(op.dirname(op.realpath(__file__)), 'README.rst'), 'w') as rst_readme:
+#         rst_readme.write(__long_description__)
+# except (ImportError, OSError, IOError):
+#     __long_description__ = desc
