@@ -33,10 +33,6 @@ requirements:
   build:
     - setuptools
     - numpy
-
-
-  run:
-
     - biopython
     - matplotlib
     - mdtraj
@@ -53,6 +49,11 @@ requirements:
     - pyside2=5.13.2
     - pystache
     - pyvis
+
+
+  run:
+
+    - python >=3.7
 
 test:
   imports:
