@@ -12,12 +12,13 @@ install_requires = [
     'pyopengl',
     'pdbfixer',
     'mdtraj',
-    'networkx',
+    'networkx >=2.0',
     'prody',
     'pyside2',
     'pystache',
     'pyqtgraph',
-    'pandas'
+    'pandas',
+    'numpy >=1.14'
 ]
 
 tests_require = [
@@ -70,7 +71,6 @@ setup(
         ],
     },
     install_requires=install_requires,
-    python_requires='>=3.5, <=3.9',
     tests_require=tests_require,
     setup_requires=setup_requires,
     # dependency_links=[

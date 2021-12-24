@@ -11,6 +11,7 @@ package:
 
 source:
   git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
+  git_tag: 0.0.1
   sha256: b1fbb8193e9a75736ad3eaa9f53cdab0fe53d5b3c26bc1ac48f67a5b71ed56ca
   path: ..
 
@@ -20,28 +21,28 @@ extra:
 
 build:
   number: 0
+  skip: True  # [win or py2k]
+  preserve_egg_dir: True
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
     - mdpertool = mdpertool.__main__:main
 
 
 requirements:
-  host:
-    - python >=3.7
-    - pip
-
   build:
+    - python
     - setuptools
-    - numpy
+    - numpy >=1.14
+    - openmm >=7.5.0
     - biopython
     - matplotlib
     - mdtraj
-    - networkx
+    - networkx >=2.0
     - openmm
     - pandas
     - parmed
     - pdbfixer
-    - prody=2.0
+    - prody
     - pymol-open-source
     - pyopengl
     - pyqtgraph
@@ -52,8 +53,26 @@ requirements:
 
 
   run:
-
-    - python >=3.7
+    - python
+    - setuptools
+    - numpy >=1.14
+    - openmm >=7.5.0
+    - biopython
+    - matplotlib
+    - mdtraj
+    - networkx >=2.0
+    - openmm
+    - pandas
+    - parmed
+    - pdbfixer
+    - prody
+    - pymol-open-source
+    - pyopengl
+    - pyqtgraph
+    - pyqtwebengine
+    - pyside2=5.13.2
+    - pystache
+    - pyvis
 
 test:
   imports:
