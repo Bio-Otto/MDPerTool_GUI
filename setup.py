@@ -7,28 +7,22 @@ with open(op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')
 
 
 install_requires = [
-    'openmm >=7.6',
-    'numpy >=1.20',
-    'pyvis >=0.1.9',
-    'pymol >=2.5',
-    'shiboken2',
-    # 'pymol-open-source >=2.5',
-    'pyyaml',
-    'matplotlib >=3.4',
-    'pyopengl >=3.1',
-    'pdbfixer >=1.8',
-    'mdtraj >=1.9.5',
-    'networkx >=2.6',
-    'parmed >=3.2',
-    'prody >=2.0',
-    'pyside2 >=5.13',
-    'pystache >=0.5',
-    'pyqtgraph >=0.12'
+
+    'matplotlib',
+    'pyopengl',
+    'pdbfixer',
+    'mdtraj',
+    'networkx',
+    'prody',
+    'pyside2',
+    'pystache',
+    'pyqtgraph',
+    'pandas'
 ]
 
 tests_require = [
-    'pytest>=3.0.0',
-    'pytest-cov>=2.3.1',
+    'pytest',
+    'pytest-cov',
 ]
 
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
@@ -72,11 +66,11 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'processrcmfolder=mdpertool.ui_main:ui_main.py',
+            'mdpertool=mdpertool.__main__:main',
         ],
     },
     install_requires=install_requires,
-    python_requires='>=3.6, <=3.8',
+    python_requires='>=3.7, <=3.9',
     tests_require=tests_require,
     setup_requires=setup_requires,
     # dependency_links=[

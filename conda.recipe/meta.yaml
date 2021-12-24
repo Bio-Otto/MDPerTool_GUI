@@ -18,38 +18,38 @@ build:
   number: 0
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
-    - processrcmfolder = mdpertool.dataprocessing:process_folder
+    - mdpertool = mdpertool.__main__:main
 
 
 requirements:
   build:
-    - python
+    - python >=3.7, <=3.9
     - setuptools
 
 
   run:
-    - python
-    - mdtraj
-    - matplotlib
-    - pyvis
-    - openmm
-    - pyqtgraph
-    - prody
+    - python >=3.7, <=3.9
     - pymol-open-source
-    - pyopengl
-    - networkx
-    - parmed
-    - pdbfixer
-    - prody
     - pyside2
+    - matplotlib
+    - pandas
+    - pyqtgraph
+    - openmm
     - pystache
+    - networkx
+    - pdbfixer
+    - parmed
+    - prody
+    - pyvis
+    - pyopengl
+    - mdtraj
 
 test:
   imports:
     - mdpertool
 
   requires:
-    - pytest >=3.0.0
+    - pytest
 
   commands:
     - pytest -vv --pyargs mdpertool
