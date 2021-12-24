@@ -17,7 +17,7 @@ source:
 extra:
   channels:
     - conda-forge
-    
+
 build:
   number: 0
   script: python setup.py install --single-version-externally-managed --record=record.txt
@@ -32,11 +32,12 @@ requirements:
 
   build:
     - setuptools
+    - numpy
 
 
   run:
-    - numpy >=1.20
-    - python >=3.7
+    - numpy
+    - python >=3.5,<=3.9
     - pymol-open-source
     - pyside2
     - matplotlib
