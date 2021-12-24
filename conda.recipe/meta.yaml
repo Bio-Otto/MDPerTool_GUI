@@ -21,7 +21,7 @@ extra:
 build:
   number: 0
   #skip: True  # [win or py2k]
-  preserve_egg_dir: True
+  #preserve_egg_dir: True
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
     - mdpertool = mdpertool.__main__:main
@@ -29,7 +29,7 @@ build:
 
 requirements:
   build:
-    - python
+    - python >=3.7
     - setuptools
     - numpy >=1.14
     - openmm >=7.5.0
@@ -52,7 +52,7 @@ requirements:
 
 
   run:
-    - python
+    - python >=3.7
     - setuptools
     - numpy >=1.14
     - openmm >=7.5.0
