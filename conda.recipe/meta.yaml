@@ -28,7 +28,6 @@ requirements:
 
   build:
       run_exports:
-        - {{ pin_subpackage('libpng', max_pin='x.x') }}
         strong:
           - libgcc
     - setuptools
