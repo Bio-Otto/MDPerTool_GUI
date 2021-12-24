@@ -22,8 +22,15 @@ build:
 
 
 requirements:
-  build:
+  host:
     - python >=3.7, <=3.9
+    - pip
+
+  build:
+      run_exports:
+        - {{ pin_subpackage('libpng', max_pin='x.x') }}
+        strong:
+          - libgcc
     - setuptools
 
 
