@@ -82,7 +82,4 @@ about:
   license_file: LICENSE.md
   license_family: BSD
   summary: A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
-  description: The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic 
-Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be 
-calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy 
-decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
+  description: The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
