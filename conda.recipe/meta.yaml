@@ -28,9 +28,6 @@ requirements:
 
   build:
     - setuptools
-      run_exports:
-        strong:
-          - libgcc
 
 
   run:
