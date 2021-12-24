@@ -14,6 +14,10 @@ source:
   sha256: b1fbb8193e9a75736ad3eaa9f53cdab0fe53d5b3c26bc1ac48f67a5b71ed56ca
   path: ..
 
+extra:
+  channels:
+    - conda-forge
+    
 build:
   number: 0
   script: python setup.py install --single-version-externally-managed --record=record.txt
