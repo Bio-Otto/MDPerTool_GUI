@@ -1,13 +1,6 @@
-{% set data = load_setup_py_data(setup_file='../setup.py', from_recipe_dir=True) %}
-{% set description = data.get("description") %}
-{% set long_description = data.get("long_description") %}
-{% set url = data.get("url") %}
-{% set version = data.get("version") %}
-
-
 package:
   name: mdpertool
-  version: "{{ version }}"
+  version: 0.0.1
 
 source:
   git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
@@ -15,13 +8,13 @@ source:
   path: ..
 
 extra:
-  channels:
-    - conda-forge
+  upload: main # Upload to anaconda with the "main" label.
+
 
 build:
-  number: 0
+  preserve_egg_dir: True
+  number: 0 # Build number and string do not work together.
   #skip: True  # [win or py2k]
-  #preserve_egg_dir: True
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
     - mdpertool = mdpertool.__main__:main
@@ -29,14 +22,14 @@ build:
 
 requirements:
   build:
-    - python >=3.7
+    - python
     - setuptools
-    - numpy >=1.14
-    - openmm >=7.5.0
+    - numpy
+    - openmm
     - biopython
     - matplotlib
     - mdtraj
-    - networkx >=2.0
+    - networkx
     - openmm
     - pandas
     - parmed
@@ -52,14 +45,14 @@ requirements:
 
 
   run:
-    - python >=3.7
+    - python
     - setuptools
-    - numpy >=1.14
-    - openmm >=7.5.0
+    - numpy
+    - openmm
     - biopython
     - matplotlib
     - mdtraj
-    - networkx >=2.0
+    - networkx
     - openmm
     - pandas
     - parmed
@@ -84,12 +77,9 @@ test:
     - pytest -vv --pyargs mdpertool
 
 about:
-  home: "{{ url }}"
+  home: https://github.com/Bio-Otto/MDPerTool_GUI
   license: BSD 3-Clause
   license_file: LICENSE.md
   license_family: BSD
-
   summary: {{ description }}
-  description: "{{ long_description }}"
-  dev_url: "{{ url }}"
-  #doc_url: https://bio-otto.github.io/Bio-Otto/MDPerTool_GUI
+  description: A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations
