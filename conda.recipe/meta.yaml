@@ -11,7 +11,6 @@ package:
 
 source:
   git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
-  git_tag: 0.0.1
   sha256: b1fbb8193e9a75736ad3eaa9f53cdab0fe53d5b3c26bc1ac48f67a5b71ed56ca
   path: ..
 
