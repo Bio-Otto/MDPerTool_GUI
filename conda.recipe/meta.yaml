@@ -23,14 +23,14 @@ build:
 
 requirements:
   host:
-    - python >=3.7, <=3.9
+    - python >=3.7
     - pip
 
   build:
+    - setuptools
       run_exports:
         strong:
           - libgcc
-    - setuptools
 
 
   run:
