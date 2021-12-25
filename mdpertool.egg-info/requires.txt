@@ -1,0 +1,14 @@
+numpy
+biopython
+matplotlib
+mdtraj
+networkx
+pandas
+parmed
+prody
+pyopengl
+pyqtgraph
+pyqtwebengine
+pyside2
+pystache
+pyvis
