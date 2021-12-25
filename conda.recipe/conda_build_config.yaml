@@ -618,10 +618,10 @@ ntl:
 # we build for the oldest version possible of numpy for forward compatibility
 numpy:
   # part of a zip_keys: python, python_impl, numpy
-  - 1.18   # [not (osx and arm64)]
-  - 1.18   # [not (osx and arm64)]
-  - 1.19   # [osx and arm64]
-  - 1.19
+  - 1.20   # [not (osx and arm64)]
+  - 1.20   # [not (osx and arm64)]
+  - 1.21   # [osx and arm64]
+  - 1.21
 occt:
   - '7.5'
 openblas:
