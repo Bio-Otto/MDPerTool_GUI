@@ -7,19 +7,21 @@ with open(op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')
 
 
 install_requires = [
-
+    'numpy',
+    'biopython',
     'matplotlib',
-    'pyopengl',
-    'pdbfixer',
     'mdtraj',
-    'networkx >=2.0',
+    'networkx',
+    'pandas',
+    'parmed',
     'prody',
+    'pyopengl',
+    'pyqtgraph',
+    'pyqtwebengine',
     'pyside2',
     'pystache',
-    'pyqtgraph',
-    'pandas',
-    'numpy >=1.14'
-]
+    'pyvis'
+            ]
 
 tests_require = [
     'pytest',
