@@ -622,6 +622,8 @@ numpy:
   - 1.19   # [not (osx and arm64)]
   - 1.20   # [osx and arm64]
   - 1.20
+  - 1.21
+  - 1.21
 occt:
   - '7.5'
 openblas:
@@ -668,12 +670,14 @@ pybind11_abi:
   - 4
 python:
   # part of a zip_keys: python, python_impl, numpy
+  - 3.6.* *_cpython
   - 3.7.* *_cpython    # [not (osx and arm64)]
-  #- 3.8.* *_cpython
-  #- 3.9.* *_cpython
+  - 3.8.* *_cpython
+  - 3.9.* *_cpython
 python_impl:
   # part of a zip_keys: python, python_impl, numpy
   - cpython   # [not (osx and arm64)]
+  - cpython
   - cpython
   - cpython
 qt:
