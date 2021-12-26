@@ -48,12 +48,6 @@ test:
   imports:
     - mdpertool
 
-  requires:
-    - pytest
-
-  commands:
-    - pytest -vv --pyargs mdpertool
-
 about:
   home: "https://github.com/Bio-Otto/MDPerTool_GUI"
   license: MIT
