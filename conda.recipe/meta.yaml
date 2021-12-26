@@ -21,28 +21,6 @@ requirements:
   host:
     - pip
     - python >=3.7
-  build:
-    - python >=3.7
-    - setuptools
-    - numpy
-    - openmm
-    - biopython
-    - matplotlib
-    - mdtraj
-    - networkx
-    - openmm
-    - pandas
-    - parmed
-    - pdbfixer
-    - prody
-    - pymol-open-source
-    - pyopengl
-    - pyqtgraph
-    - pyqtwebengine
-    - pyside2
-    - pystache
-    - pyvis
-
 
   run:
     - python >=3.7
