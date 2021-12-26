@@ -857,10 +857,19 @@ class SplashScreen(QMainWindow):
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
 
-if __name__ == "__main__":
-    mp.freeze_support()
-    app = QtWidgets.QApplication(sys.argv)
-    app.setStyleSheet(Style.QToolTip_stylesheet)
-    window = SplashScreen()
-    QtCore.QTimer.singleShot(0, lambda: center_window(window))
-    sys.exit(app.exec_())
+def run_gui(command):
+    if command == 'run':
+        mp.freeze_support()
+        app = QtWidgets.QApplication(sys.argv)
+        app.setStyleSheet(Style.QToolTip_stylesheet)
+        window = SplashScreen()
+        QtCore.QTimer.singleShot(0, lambda: center_window(window))
+        sys.exit(app.exec_())
+
+# if __name__ == "__main__":
+#     mp.freeze_support()
+#     app = QtWidgets.QApplication(sys.argv)
+#     app.setStyleSheet(Style.QToolTip_stylesheet)
+#     window = SplashScreen()
+#     QtCore.QTimer.singleShot(0, lambda: center_window(window))
+#     sys.exit(app.exec_())
