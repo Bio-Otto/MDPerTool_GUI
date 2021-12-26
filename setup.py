@@ -10,6 +10,7 @@ install_requires = [
     'numpy',
     'biopython',
     'matplotlib',
+    'cython >=0.29',
     'mdtraj',
     'networkx',
     'pandas',

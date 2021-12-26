@@ -1,7 +1,8 @@
 import os
 import sys
 import platform
-
+from importlib import resources
+import io
 from PySide2 import QtXml, QtCore, QtGui, QtWidgets
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
@@ -14,7 +15,8 @@ from PySide2.QtWidgets import *
 # =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 
-from gui.icons import *
+# sys.path.append(os.path.join(os.getcwd(), 'gui/icons'))
+import gui
 import pyqtgraph as pg
 from src.omm_runner import *
 from src.ui_functions import *
@@ -857,19 +859,10 @@ class SplashScreen(QMainWindow):
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
 
-def run_gui(command):
-    if command == 'run':
-        mp.freeze_support()
-        app = QtWidgets.QApplication(sys.argv)
-        app.setStyleSheet(Style.QToolTip_stylesheet)
-        window = SplashScreen()
-        QtCore.QTimer.singleShot(0, lambda: center_window(window))
-        sys.exit(app.exec_())
-
-# if __name__ == "__main__":
-#     mp.freeze_support()
-#     app = QtWidgets.QApplication(sys.argv)
-#     app.setStyleSheet(Style.QToolTip_stylesheet)
-#     window = SplashScreen()
-#     QtCore.QTimer.singleShot(0, lambda: center_window(window))
-#     sys.exit(app.exec_())
+if __name__ == "__main__":
+    mp.freeze_support()
+    app = QtWidgets.QApplication(sys.argv)
+    app.setStyleSheet(Style.QToolTip_stylesheet)
+    window = SplashScreen()
+    QtCore.QTimer.singleShot(0, lambda: center_window(window))
+    sys.exit(app.exec_())

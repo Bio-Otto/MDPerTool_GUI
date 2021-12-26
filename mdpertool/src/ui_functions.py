@@ -1,4 +1,3 @@
-
 ## ==> GUI FILE
 from gui.ui_styles import Style
 
@@ -12,6 +11,7 @@ from src.app_functions import *
 from src.PyMolWidget import PymolQtWidget
 from analysis import VisJS_Widget
 from src.message import Message_Boxes
+
 
 class UIFunctions(MainWindow):
     # ----- > GLOBALS
@@ -65,7 +65,6 @@ class UIFunctions(MainWindow):
             self.btn_maximize_restore.setIcon(QtGui.QIcon(u":/16x16/icons/16x16/cil-window-restore.png"))
             # self.frame_top_btns.setStyleSheet("background-color: rgb(27, 29, 35)")
             self.frame_size_grip.hide()
-
 
     # ----- > Return Status
     def returStatus():

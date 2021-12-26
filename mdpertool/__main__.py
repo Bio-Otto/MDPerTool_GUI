@@ -1,5 +1,5 @@
 import sys
-from ui_main import run_gui
+from .ui_main import run_gui
 
 
 def main():
