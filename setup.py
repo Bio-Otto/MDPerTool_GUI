@@ -13,7 +13,7 @@ install_requires = [
     'mdtraj',
     'networkx',
     'pandas',
-    'parmed',
+    'parmed ==3.2',
     'prody',
     'pyopengl',
     'pyqtgraph',
