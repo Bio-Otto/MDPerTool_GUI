@@ -35,7 +35,7 @@ requirements:
     - networkx
     - openmm
     - pandas
-    - parmed ==3.2
+    - parmed
     - pdbfixer
     - prody
     - pymol-open-source
