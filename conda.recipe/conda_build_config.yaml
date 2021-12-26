@@ -668,12 +668,12 @@ pybind11_abi:
   - 4
 python:
   # part of a zip_keys: python, python_impl, numpy
-  - 3.7.* *_cpython    # [not (osx and arm64)]
+  - 3.8.* *_cpython    # [not (osx and arm64)]
 python_impl:
   # part of a zip_keys: python, python_impl, numpy
   - cpython
 qt:
-  - 5.12
+  - 5.15
 qtkeychain:
   - '0.12'
 re2:
