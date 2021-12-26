@@ -8,16 +8,21 @@ source:
   path: ..
 
 build:
+  number: 0 # Build number and string do not work together.
   noarch: python
   #preserve_egg_dir: True
-  number: 0 # Build number and string do not work together.
   #skip: True  # [win or py2k]
-  script: python setup.py install --single-version-externally-managed --record=record.txt
-  entry_points:
-    - mdpertool = mdpertool.__main__:main
+  #script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: {{ PYTHON }} setup.py install
+  #entry_points:
+  #  - mdpertool = mdpertool.__main__:main
 
 
 requirements:
+  build:
+    - python
+    - setuptools
+    
   host:
     - pip
     - python >=3.7
@@ -47,6 +52,12 @@ requirements:
 test:
   imports:
     - mdpertool
+
+  requires:
+    - pytest
+
+  commands:
+    - pytest -vv --pyargs mdpertool
 
 about:
   home: "https://github.com/Bio-Otto/MDPerTool_GUI"
