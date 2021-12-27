@@ -68,12 +68,12 @@ nonbonded.setUseDispersionCorrection(True)
 print('Creating a %sIntegrator with %s %s .' %('Langevin', 2.0, 'femtosecond'))
 integrator = mm.LangevinIntegrator(310.0*kelvin, 91.0/picosecond, 2.0*femtosecond)
 
-if False == True:
-    platform = mm.Platform.getPlatformByName('OpenCL')
-    properties = {'NonePrecision': 'single'}
+if True == True:
+    platform = mm.Platform.getPlatformByName('CUDA')
+    properties = {'CudaPrecision': 'single'}
 else:
-    platform = mm.Platform.getPlatformByName('OpenCL')
-    properties = {'OpenCLPrecision': 'single'}
+    platform = mm.Platform.getPlatformByName('CUDA')
+    properties = {'CUDAPrecision': 'single'}
 
 
 
@@ -149,7 +149,7 @@ OUTPUT_FOLDER_NAME = str
 OUTPUT_DIRECTORY = Path('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download')
 
 last_pdb_file_path = os.path.join(OUTPUT_DIRECTORY, last_pdb)
-modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['ARG4'], 'CA')
+modify_atoms = convert_res_to_atoms(last_pdb_file_path, [], 'CA')
 state_file_path = os.path.join(OUTPUT_DIRECTORY, state_file_name)
 
 print("SPEED LIST: ", [3, 4])
@@ -166,29 +166,29 @@ for i in range(len([3, 4])):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        if 'OpenCL' == 'OpenCL' and False == True:
+        if 'CUDA' == 'OpenCL' and False == True:
             properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
             precision = 'double'
 
-        if 'OpenCL' == 'OpenCL' and False == False:
+        if 'CUDA' == 'OpenCL' and False == False:
             properties = {'OpenCLPrecision': 'double'}
             precision = 'double'
 
-        if 'OpenCL' == 'CUDA' and False == True:
+        if 'CUDA' == 'CUDA' and False == True:
             properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
             precision = 'double'
 
-        if 'OpenCL' == 'CUDA' and False == False:
+        if 'CUDA' == 'CUDA' and False == False:
             properties = {'CudaPrecision': 'double'}
             precision = 'double'
 
-        if 'OpenCL' == 'CPU' and False == True:
+        if 'CUDA' == 'CPU' and False == True:
             print("The CPU platform always uses 'mixed' precision.")
             print("Simulation process will use %s Thread(s)" % 2)
             properties = {'CpuThreads': '2'}
             precision = 'mixed'
 
-        if 'OpenCL' == 'Reference':
+        if 'CUDA' == 'Reference':
             print("The Reference platform always uses 'double' precision.")
             properties = None
             precision= 'double'
@@ -214,7 +214,7 @@ for i in range(len([3, 4])):
         integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('OpenCL')
+        platform = mm.Platform.getPlatformByName('CUDA')
 
         # ok now let's do some simulation using this restraint
         if properties is None:
@@ -268,34 +268,34 @@ for i in range(len([3, 4])):
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
     ################################################################################################################
 
-    if 'OpenCL' == 'OpenCL' and False == True:
+    if 'CUDA' == 'OpenCL' and False == True:
         properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
         precision = 'double'
 
-    if 'OpenCL' == 'OpenCL' and False == False:
+    if 'CUDA' == 'OpenCL' and False == False:
         properties = {'OpenCLPrecision': 'double'}
         precision = 'double'
 
-    if 'OpenCL' == 'CUDA' and False == True:
+    if 'CUDA' == 'CUDA' and False == True:
         properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
         precision = 'double'
 
-    if 'OpenCL' == 'CUDA' and False == False:
+    if 'CUDA' == 'CUDA' and False == False:
         properties = {'CudaPrecision': 'double'}
         precision = 'double'
 
-    if 'OpenCL' == 'CPU' and False == True:
+    if 'CUDA' == 'CPU' and False == True:
         print("The CPU platform always uses 'mixed' precision.")
         print("Simulation process will use %s Thread(s)" % 2)
         properties = {'CpuThreads': '2'}
         precision = 'mixed'
 
-    if 'OpenCL' == 'Reference':
+    if 'CUDA' == 'Reference':
         print("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
 
-    print("System will use %s Platform with %s Precision" % ('OpenCL', precision))
+    print("System will use %s Platform with %s Precision" % ('CUDA', precision))
 
     # we'll just take the topology from here...
     pdb = app.PDBFile(last_pdb_file_path)
@@ -318,7 +318,7 @@ for i in range(len([3, 4])):
     integrator.setConstraintTolerance(1e-8)
 
     # let's specify our simulation platform again
-    platform = mm.Platform.getPlatformByName('OpenCL')
+    platform = mm.Platform.getPlatformByName('CUDA')
 
     # ok now let's do some simulation using this restraint
     if properties is None:

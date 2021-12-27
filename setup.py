@@ -1,16 +1,15 @@
 from setuptools import setup, find_packages
-import os.path as op
+import os
 import sys
 
-with open(op.join(op.dirname(op.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
+with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
     exec(version_file.read())
-
 
 install_requires = [
     'numpy',
     'biopython',
     'matplotlib',
-    'mdtraj ==1.96',
+    'mdtraj',
     'networkx',
     'pandas',
     'parmed',
@@ -21,7 +20,7 @@ install_requires = [
     'pyside2',
     'pystache',
     'pyvis'
-            ]
+]
 
 tests_require = [
     'pytest',
@@ -31,7 +30,14 @@ tests_require = [
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
 setup_requires = ['pytest-runner'] if needs_pytest else []
 
-# github_token = os.environ['GITHUB_TOKEN']
+
+def find_package_data():
+    files = []
+    for root, dirnames, filenames in os.walk('mdpertool'):
+        for fn in filenames:
+            files.append(os.path.relpath(os.path.join(root, fn), 'mdpertool'))
+    return files
+
 
 setup(
     name='mdpertool',
@@ -66,6 +72,7 @@ setup(
         "Topic :: Software Development :: Widget Sets",
     ],
     packages=find_packages(),
+    package_data={'mdpertool': find_package_data()},
     include_package_data=True,
     entry_points={
         'console_scripts': [
