@@ -4,10 +4,10 @@ import sys
 import os
 from PySide2.QtWidgets import QApplication
 
-from .ui_main import run_gui
+import mdpertool
 
 
-def main():
+def run_mdpertool():
     print("===== GUI APP WILL COME HERE =====")
 
     if os.name == 'nt':
@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
 
     if args.show_gui:
-        run_gui()
+        mdpertool.run_gui()
 
     if args.commandline:
         pass

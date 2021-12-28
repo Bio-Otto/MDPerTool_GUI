@@ -8,9 +8,9 @@ from pdbfixer import PDBFixer
 from os import path
 from urllib.request import urlretrieve
 from openmm.app import *
-from src.checkBox_menu import *
-from src.message import Message_Boxes
-from src.PyMolWidget import PymolQtWidget
+from .checkBox_menu import *
+from .message import Message_Boxes
+from .PyMolWidget import PymolQtWidget
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
@@ -382,7 +382,9 @@ class Functions(MainWindow):
                                 shortest_path_listWidget.addItem(item)  # print("SHORTEST PATH: ", sp)
                                 shrotest_str_form = ''
 
-                                all_paths.append('Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (source_res, target_i, len(graph_i.nodes())))
+                                all_paths.append(
+                                    'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
+                                    source_res, target_i, len(graph_i.nodes())))
 
                         except Exception as err:
                             print("SHORTEST PATH LOG: ", err)
@@ -461,7 +463,6 @@ class Functions(MainWindow):
 
                     # elif len(intersection_graph.nodes()) == 0:
                     #     print("NO INTERSECTION GRAPH")
-
 
                     else:
                         Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
@@ -661,10 +662,14 @@ class Functions(MainWindow):
             The function provides Main GUI / Upload button activity for select pdb file indicated by the user
         """
         try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            self.pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
-                                                               "pdb Files (*.pdb)", str(options))
+            fileFormats = "*.pdb *.gro *.psf"  # without commas
+            self.pdb_filename, _ = QtWidgets.QFileDialog.getOpenFileName(parent=None,
+                                                                         caption="Set pdb file",
+                                                                         filter=fileFormats)
+            # options = QFileDialog.Options()
+            # options |= QFileDialog.DontUseNativeDialog
+            # self.pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
+            #                                                    "pdb Files (*.pdb)", str(options))
 
             self.pdb_path = self.pdb_filename
             self.pdb_filename = os.path.splitext(os.path.basename(self.pdb_filename))
@@ -820,7 +825,7 @@ class Functions(MainWindow):
 
             if i in self.platforms:
                 self.equ_platform_comboBox.setItemData(item_no, str("Estimated Speed For This Devices Is "
-                                                                + str(self.plt_speeds[i])), Qt.ToolTipRole)
+                                                                    + str(self.plt_speeds[i])), Qt.ToolTipRole)
 
     @staticmethod
     def platform_comboBox_Changed(self, eq_md, per_md):

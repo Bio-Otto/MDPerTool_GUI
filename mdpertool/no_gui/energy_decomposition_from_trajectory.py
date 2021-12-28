@@ -90,7 +90,7 @@ def get_residue_atoms():
 
 
 def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output_directory, ref_energy_name,
-                                modif_energy_name, origin_last_pdb, ff, que=None):
+                                modif_energy_name, origin_last_pdb, ff, platform_name, que=None):
     global modeller, by_pass_bonds_index, simulation, by_pass_atoms, nonbonded_group_num, modified_df, reference_df
 
     print('Loading...')
@@ -138,7 +138,7 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
     # platform = Platform.getPlatformByName('CUDA')
     # properties = {'CudaPrecision': 'mixed', 'DeterministicForces': 'true'}
 
-    platform = Platform.getPlatformByName('OpenCL')
+    platform = Platform.getPlatformByName(platform_name)
     # properties = {'Threads': '8'}
     properties = {'Precision': 'mixed'}
     # properties = {'OpenCLDeviceIndex': '0'}

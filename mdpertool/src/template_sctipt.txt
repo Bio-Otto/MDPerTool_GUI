@@ -426,7 +426,7 @@ for i in range(len({{speed_factor}})):
      # --> RESIDUE BASED DECOMPOSITION
     if i == 0:
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue,
+                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='{{platform}}',
                                     ref_energy_name='reference_energy_file.csv',
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}')
@@ -434,7 +434,7 @@ for i in range(len({{speed_factor}})):
     if i != 0:
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue,
+                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='{{platform}}',
                                     ref_energy_name=None,
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path,

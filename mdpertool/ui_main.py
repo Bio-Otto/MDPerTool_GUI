@@ -2,9 +2,9 @@ import os
 import sys
 import platform
 from importlib import resources
-import io
-from PySide2 import QtXml, QtCore, QtGui, QtWidgets
-from PySide2.QtUiTools import QUiLoader
+# import io
+# from PySide2 import QtXml, QtCore, QtGui, QtWidgets
+# from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
@@ -16,10 +16,17 @@ from PySide2.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 
 # sys.path.append(os.path.join(os.getcwd(), 'gui/icons'))
-import gui
-import pyqtgraph as pg
+from openmm.app import Modeller
+
+# from gui import *
+# import pyqtgraph as pg
+
+
+import src.ui_functions as UIF
+
+# from src.checkBox_menu import ChecklistDialog
+# from src.message import Message_Boxes
 from src.omm_runner import *
-from src.ui_functions import *
 from src.builder import *
 from src.mplwidget import *
 from src.pyside_dynamic import loadUi
@@ -70,19 +77,19 @@ class MainWindow(QtWidgets.QMainWindow):
         # -------------------------------------- > START OF MATPLOTLIB WIDGET < -------------------------------------- #
         # self.matplotlib_widget()
         self.plot_signal = PlotSignal()
-        self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
+        self.plot_signal.plot_network.connect(lambda: UIF.Functions.plot_networks(self))
         # -------------------------------------- > END OF MATPLOTLIB WIDGET < ---------------------------------------- #
         # ############################################################################################################ #
 
         # -------------------------------------- > Remove Standart Title Bar < --------------------------------------- #
-        UIFunctions.removeTitleBar(True)
+        UIF.UIFunctions.removeTitleBar(True)
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
         # ----- > Set Window Title
         self.setWindowTitle('MDPerTool v0.1')
         # self.setWindowIcon(QIcon('%s/icons/MDPerTool.ico' % os.getcwd()))
-        UIFunctions.labelTitle(self, 'MDPerTool - %s %s' % (platform.system(), platform.release()))
-        UIFunctions.labelDescription(self, str(os.getcwd()))
+        UIF.UIFunctions.labelTitle(self, 'MDPerTool - %s %s' % (platform.system(), platform.release()))
+        UIF.UIFunctions.labelDescription(self, str(os.getcwd()))
 
         # # ----- > Move The Screen To Center
         # qtRectangle = self.frameGeometry()
@@ -98,98 +105,98 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --------------------------------------------- > CREATE MENUS < --------------------------------------------- #
         # ----- > Toggle Menu Size
-        self.btn_toggle_menu.clicked.connect(lambda: UIFunctions.toggleMenu(self, 220, True))
+        self.btn_toggle_menu.clicked.connect(lambda: UIF.UIFunctions.toggleMenu(self, 220, True))
 
         # ----- > Add Custom Menus
         self.stackedWidget.setMinimumWidth(20)
-        UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation", "url(:/20x20/icons/20x20/chemical_20x20.png)",
+        UIF.UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation", "url(:/20x20/icons/20x20/chemical_20x20.png)",
                                True)
-        UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring", "url(:/20x20/icons/20x20/cil-monitor.png)", True)
-        UIFunctions.addNewMenu(self, "Analysis", "btn_analysis", "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
-        UIFunctions.addNewMenu(self, "Settings", "btn_settings", "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
-        UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
+        UIF.UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring", "url(:/20x20/icons/20x20/cil-monitor.png)", True)
+        UIF.UIFunctions.addNewMenu(self, "Analysis", "btn_analysis", "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
+        UIF.UIFunctions.addNewMenu(self, "Settings", "btn_settings", "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
+        UIF.UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
 
         # ----- > Start Menu Selection
-        UIFunctions.selectStandardMenu(self, "btn_perturbation")
+        UIF.UIFunctions.selectStandardMenu(self, "btn_perturbation")
 
         # ----- > Start Page
         self.stackedWidget.setCurrentWidget(self.page_home)
 
         # ----- > Show / Hide User Icon
-        UIFunctions.userIcon(self, "HIO", "", True)
+        UIF.UIFunctions.userIcon(self, "HIO", "", True)
 
         # self.frame_label_top_btns.mouseMoveEvent = self.moveWindow
 
         # ----- > Load Definitions
-        UIFunctions.uiDefinitions(self)
+        UIF.UIFunctions.uiDefinitions(self)
 
         ################################################################################################################
         #                                        ==> END OF WINDOW ATTRIBUTES <==                                      #
         ################################################################################################################
 
         # ------------------------------- > MAINWINDOW WIDGETS FUNCTIONS/PARAMETERS < -------------------------------- #
-        self.quit_pushButton.clicked.connect(lambda: UIFunctions.close_application(self))
+        self.quit_pushButton.clicked.connect(lambda: UIF.UIFunctions.close_application(self))
         self.PDB_ID_lineEdit.returnPressed.connect(self.fetch_and_load_pdbfile)
         self.stop_pushButton.clicked.connect(self.stop_button_clicked)
         self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
-        self.PDB_ID_lineEdit.textChanged.connect(lambda: Functions.PDB_ID_lineEdit(self))
+        self.PDB_ID_lineEdit.textChanged.connect(lambda: UIF.Functions.PDB_ID_lineEdit(self))
         self.fetch_pdb_Button.clicked.connect(lambda: self.fetch_and_load_pdbfile())
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
-        Functions.Send_Available_Platforms_to_GUI(self)
-        Functions.maximum_thread_of_system(self)
+        UIF.Functions.Send_Available_Platforms_to_GUI(self)
+        UIF.Functions.maximum_thread_of_system(self)
         self.platform_specific_precision_applying()
 
-        self.node_threshold_checkBox.stateChanged.connect(lambda: Functions.node_threshold_use(self))
+        self.node_threshold_checkBox.stateChanged.connect(lambda: UIF.Functions.node_threshold_use(self))
         self.equ_platform_comboBox.currentTextChanged.connect(
-            lambda: Functions.platform_comboBox_Changed(self, eq_md=True, per_md=False))
+            lambda: UIF.Functions.platform_comboBox_Changed(self, eq_md=True, per_md=False))
         self.per_platform_comboBox.currentTextChanged.connect(
-            lambda: Functions.platform_comboBox_Changed(self, eq_md=False, per_md=True))
+            lambda: UIF.Functions.platform_comboBox_Changed(self, eq_md=False, per_md=True))
 
-        self.minimize_checkBox.stateChanged.connect(lambda: Functions.minimize_Step_isVisible(self))
-        self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: Functions.State_Data_Reporter_Changed(self))
-        self.DCD_Reporter_checkBox.stateChanged.connect(lambda: Functions.DCD_Reporter_Changed(self))
-        self.XTC_Reporter_checkBox.stateChanged.connect(lambda: Functions.XTC_Reporter_Changed(self))
+        self.minimize_checkBox.stateChanged.connect(lambda: UIF.Functions.minimize_Step_isVisible(self))
+        self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.State_Data_Reporter_Changed(self))
+        self.DCD_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.DCD_Reporter_Changed(self))
+        self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
 
         # --> RUN TIME SETTINGS
-        self.run_duration_doubleSpinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
+        self.run_duration_doubleSpinBox.valueChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.long_simulation_time_unit.currentTextChanged.connect(
-            lambda: Functions.number_of_steps_changed_from_quick(self))
-        self.integrator_time_step.textChanged.connect(lambda: Functions.number_of_steps_changed_from_quick(self))
-        self.Number_of_steps_spinBox.valueChanged.connect(lambda: Functions.number_of_steps_changed_from_advanced(self))
+            lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        self.integrator_time_step.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        self.Number_of_steps_spinBox.valueChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
         self.run = OpenMMScriptRunner
         self.run.Signals.decomp_process.connect(
             lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0] + 1) * 100) / decomp_data[1]))
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
-        self.response_time_upload_Button.clicked.connect(lambda: Functions.browse_responseTimeFile(self))
+        self.response_time_upload_Button.clicked.connect(lambda: UIF.Functions.browse_responseTimeFile(self))
         self.response_time_lineEdit.textChanged.connect(self.response_time_graph_path_changed)
         self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
-        self.all_targets_checkBox.stateChanged.connect(lambda: Functions.All_Residues_as_target_Changed(self))
-        self.output_directory_button.clicked.connect(lambda: Functions.analysis_output_directory(self))
+        self.all_targets_checkBox.stateChanged.connect(lambda: UIF.Functions.All_Residues_as_target_Changed(self))
+        self.output_directory_button.clicked.connect(lambda: UIF.Functions.analysis_output_directory(self))
         self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local())
-        self.add_residue_to_targets_pushButton.clicked.connect(lambda: Functions.add_residue_to_target_List(self))
+        self.add_residue_to_targets_pushButton.clicked.connect(lambda: UIF.Functions.add_residue_to_target_List(self))
         self.discard_residue_from_targets_pushButton.clicked.connect(
-            lambda: Functions.discard_residue_from_target_List(self))
-        self.get_conserv_score_pushButton.clicked.connect(lambda: Functions.get_conservation_scores(self))
+            lambda: UIF.Functions.discard_residue_from_target_List(self))
+        self.get_conserv_score_pushButton.clicked.connect(lambda: UIF.Functions.get_conservation_scores(self))
         # self.show_2d_network_pushButton.clicked.connect(lambda: UIFunctions.start_VisJS_2D_Network(self))
 
         self.network_calculate_pushButton.clicked.connect(self.run_network_analysis)
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
-        UIFunctions.start_pymol(self)
+        UIF.UIFunctions.start_pymol(self)
         # UIFunctions.start_VisJS_2D_Network(self)
-        self.add_residue_pushButton.clicked.connect(lambda: Functions.add_residue_toList(self))
-        self.discard_residue_pushButton.clicked.connect(lambda: Functions.discard_residue_fromList(self))
-        self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIFunctions.show_residue_labels(self))
-        self.refresh_pushButton.clicked.connect(lambda: UIFunctions.clear_residue_labels(self))
-        self.activate_pymol_navigation.clicked.connect(lambda: UIFunctions.activate_navigation_on_Pymol(self))
-        self.deactivate_pymol_navigation.clicked.connect(lambda: UIFunctions.deactivate_navigation_on_Pymol(self))
+        self.add_residue_pushButton.clicked.connect(lambda: UIF.Functions.add_residue_toList(self))
+        self.discard_residue_pushButton.clicked.connect(lambda: UIF.Functions.discard_residue_fromList(self))
+        self.selected_residues_listWidget.itemDoubleClicked.connect(lambda: UIF.UIFunctions.show_residue_labels(self))
+        self.refresh_pushButton.clicked.connect(lambda: UIF.UIFunctions.clear_residue_labels(self))
+        self.activate_pymol_navigation.clicked.connect(lambda: UIF.UIFunctions.activate_navigation_on_Pymol(self))
+        self.deactivate_pymol_navigation.clicked.connect(lambda: UIF.UIFunctions.deactivate_navigation_on_Pymol(self))
         self.visualization_Handel_buttons_changing()
         self.Handel_Buttons()
-        self.ss_beatiful_snapshoot.clicked.connect(lambda: UIFunctions.show_beatiful_in_Pymol(self))
-        self.get_figure_pushButton.clicked.connect(lambda: UIFunctions.save_as_png_Pymol(self))
+        self.ss_beatiful_snapshoot.clicked.connect(lambda: UIF.UIFunctions.show_beatiful_in_Pymol(self))
+        self.get_figure_pushButton.clicked.connect(lambda: UIF.UIFunctions.save_as_png_Pymol(self))
         self.Handel_Save_Figure_Options_Changed()
         self.Handel_Save_Figure_Options()
 
@@ -310,7 +317,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
 
-        Protein3DNetworkView = PymolQtWidget(self)
+        Protein3DNetworkView = UIF.PymolQtWidget(self)
         verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
         verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
         self.setLayout(verticalLayoutProteinNetworkView)
@@ -323,7 +330,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
         # verticalLayout.addWidget(self.matplotlib_widget.canvas)
 
-        self.plot_signal.plot_network.connect(lambda: Functions.plot_networks(self))
+        self.plot_signal.plot_network.connect(lambda: UIF.Functions.plot_networks(self))
 
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
@@ -357,12 +364,12 @@ class MainWindow(QtWidgets.QMainWindow):
                                      'double': self.per_precision_comboBox.findText('double')}
 
         self.equ_platform_comboBox.currentTextChanged.connect(
-            lambda: Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
+            lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
                                                           per_md_indexes=None))
         self.per_platform_comboBox.currentTextChanged.connect(
-            lambda: Functions.precision_combobox_settings(self, eq_md_indexes=None,
+            lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=None,
                                                           per_md_indexes=per_md_precission_indexes))
-        Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
+        UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
                                               per_md_indexes=per_md_precission_indexes)
 
     def stop_button_clicked(self):
@@ -377,10 +384,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.stackedWidget.setCurrentIndex(1)
         self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
 
-        UIFunctions.resetStyle(self, "btn_monitoring")
-        UIFunctions.labelPage(self, "MONITORING THE PROCESS")
+        UIF.UIFunctions.resetStyle(self, "btn_monitoring")
+        UIF.UIFunctions.labelPage(self, "MONITORING THE PROCESS")
         widget = self.findChild(QPushButton, "btn_monitoring")
-        widget.setStyleSheet(UIFunctions.selectMenu(widget.styleSheet()))
+        widget.setStyleSheet(UIF.UIFunctions.selectMenu(widget.styleSheet()))
 
         self.Real_Time_Graphs.run_script(self.created_script)
 
@@ -389,20 +396,20 @@ class MainWindow(QtWidgets.QMainWindow):
         Fetch action for getting crystal structure from pdb databank
         :return: path of downloaded pdb file or None conditions will return
         """
-        fetched_and_modified_pdb = Functions.Fetch_PDB_File(self)
+        fetched_and_modified_pdb = UIF.Functions.Fetch_PDB_File(self)
 
         if fetched_and_modified_pdb:
-            UIFunctions.load_pdb_to_pymol(self, fetched_and_modified_pdb)
+            UIF.UIFunctions.load_pdb_to_pymol(self, fetched_and_modified_pdb)
 
         if fetched_and_modified_pdb is None:
-            Message_Boxes.Information_message(self, 'Wrong pdb id "%s"' % self.PDB_ID_lineEdit.text(),
+            UIF.Message_Boxes.Information_message(self, 'Wrong pdb id "%s"' % self.PDB_ID_lineEdit.text(),
                                               'There is no protein crystal structure in this expression.',
                                               Style.MessageBox_stylesheet)
 
     def upload_pdb_from_local(self):
         global selected_chains
         try:
-            upload_condition, pdb_path = Functions.browse_pdbFile(self)
+            upload_condition, pdb_path = UIF.Functions.browse_pdbFile(self)
 
             if os.path.exists(pdb_path):
                 fixer = PDBFixer(pdb_path)
@@ -411,7 +418,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 modeller = Modeller(fixer.topology, fixer.positions)
                 chains = [r.id for r in modeller.topology.chains()]
 
-                checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
+                checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
                                                checked=True)
                 pdb_fix_dialog_answer = checked_list.exec_()
                 if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
@@ -419,30 +426,30 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                              ph=7, chains_to_remove=delete_chains)
 
                     self.upload_pdb_textEdit.setText(modified_pdb)
 
-                    self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                    self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.combobox:
                         self.res1_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                              ph=7, chains_to_remove=None)
 
                     self.upload_pdb_textEdit.setText(modified_pdb)
 
-                    self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                    self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.combobox:
                         self.res1_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
-                UIFunctions.load_pdb_to_pymol(self, modified_pdb)
+                UIF.UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
         except TypeError:
             pass
@@ -450,7 +457,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def upload_boundForm_pdb_from_local(self):
         global selected_chains
         try:
-            upload_condition, pdb_path = Functions.browse_bound_form_pdbFile(self)
+            upload_condition, pdb_path = UIF.Functions.browse_bound_form_pdbFile(self)
 
             if os.path.exists(pdb_path):
                 fixer = PDBFixer(pdb_path)
@@ -459,7 +466,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 modeller = Modeller(fixer.topology, fixer.positions)
                 chains = [r.id for r in modeller.topology.chains()]
 
-                checked_list = ChecklistDialog('Select the chain (s) to be used in the system', chains,
+                checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
                                                checked=True)
                 pdb_fix_dialog_answer = checked_list.exec_()
                 if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
@@ -467,12 +474,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                              ph=7, chains_to_remove=delete_chains)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
-                    self.target_combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                    self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
 
                     for i in self.target_combobox:
                         self.target_res_comboBox.addItem(str(i))
@@ -484,12 +491,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                    modified_pdb = pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                              ph=7, chains_to_remove=None)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
-                    self.target_combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                    self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.target_combobox:
                         self.target_res_comboBox.addItem(str(i))
                         self.source_res_comboBox.addItem(str(i))
@@ -499,21 +506,21 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.source_res_comboBox.clear()  # delete all items from comboBox
                     self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
 
-                UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
+                UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
 
         except TypeError:
             pass
 
     def output_folder_browse(self):
-        Functions.output_file(self)
+        UIF.Functions.output_file(self)
 
     def Stocasthic_Changed(self):
-        Functions.Stochastic_changed(self)
+        UIF.Functions.Stochastic_changed(self)
 
     def finish_message(self, alert_message):
         self.r_factor_count += 1
         if self.r_factor_count == len(str(self.R_factor_lineEdit.text()).split(',')):
-            Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
+            UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
 
     ####################################################################################################################
@@ -526,44 +533,44 @@ class MainWindow(QtWidgets.QMainWindow):
         # PAGE HOME
         if btnWidget.objectName() == "btn_home":
             self.stackedWidget.setCurrentWidget(self.page_home)
-            UIFunctions.resetStyle(self, "btn_home")
-            UIFunctions.labelPage(self, "Home")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+            UIF.UIFunctions.resetStyle(self, "btn_home")
+            UIF.UIFunctions.labelPage(self, "Home")
+            btnWidget.setStyleSheet(UIF.UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE PERTURBATION
         if btnWidget.objectName() == "btn_perturbation":
             self.stackedWidget.setCurrentWidget(self.page_home)
-            UIFunctions.resetStyle(self, "btn_perturbation")
-            UIFunctions.labelPage(self, "Perturbation User Interface")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+            UIF.UIFunctions.resetStyle(self, "btn_perturbation")
+            UIF.UIFunctions.labelPage(self, "Perturbation User Interface")
+            btnWidget.setStyleSheet(UIF.UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE MONITORING
         if btnWidget.objectName() == "btn_monitoring":
             self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
-            UIFunctions.resetStyle(self, "btn_monitoring")
-            UIFunctions.labelPage(self, "MONITORING THE PROCESS")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+            UIF.UIFunctions.resetStyle(self, "btn_monitoring")
+            UIF.UIFunctions.labelPage(self, "MONITORING THE PROCESS")
+            btnWidget.setStyleSheet(UIF.UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE ANALYSIS
         if btnWidget.objectName() == "btn_analysis":
             self.stackedWidget.setCurrentWidget(self.Analysis)
-            UIFunctions.resetStyle(self, "btn_analysis")
-            UIFunctions.labelPage(self, "ENERGY DISSIPATION ANALYSIS")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+            UIF.UIFunctions.resetStyle(self, "btn_analysis")
+            UIF.UIFunctions.labelPage(self, "ENERGY DISSIPATION ANALYSIS")
+            btnWidget.setStyleSheet(UIF.UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE WIDGETS
         if btnWidget.objectName() == "btn_settings":
             self.stackedWidget.setCurrentWidget(self.page_settings)
-            UIFunctions.resetStyle(self, "btn_settings")
-            UIFunctions.labelPage(self, "Settings")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+            UIF.UIFunctions.resetStyle(self, "btn_settings")
+            UIF.UIFunctions.labelPage(self, "Settings")
+            btnWidget.setStyleSheet(UIF.UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE ABOUT
         if btnWidget.objectName() == "btn_about":
             self.stackedWidget.setCurrentWidget(self.page_contact)
-            UIFunctions.resetStyle(self, "btn_about")
-            UIFunctions.labelPage(self, "ABOUT & CONTACT")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+            UIF.UIFunctions.resetStyle(self, "btn_about")
+            UIF.UIFunctions.labelPage(self, "ABOUT & CONTACT")
+            btnWidget.setStyleSheet(UIF.UIFunctions.selectMenu(btnWidget.styleSheet()))
 
     ####################################################################################################################
     #                                     == > END OF DYNAMIC MENUS FUNCTIONS < ==                                     #
@@ -579,8 +586,8 @@ class MainWindow(QtWidgets.QMainWindow):
     @staticmethod
     def moveWindow(self, event):
         # ----- > If Maximized Change to Normal
-        if UIFunctions.returStatus() == 1:
-            UIFunctions.maximize_restore(self)
+        if UIF.UIFunctions.returStatus() == 1:
+            UIF.UIFunctions.maximize_restore(self)
         # ----- > Move Window
         if event.buttons() == Qt.LeftButton:
             self.move(self.pos() + event.globalPos() - self.dragPos)
@@ -610,8 +617,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.move(self.x() + delta.x(), self.y() + delta.y())
                 self.dragPos = event.globalPos()
 
-        if UIFunctions.returStatus() == 1:
-            UIFunctions.maximize_restore(self)
+        if UIF.UIFunctions.returStatus() == 1:
+            UIF.UIFunctions.maximize_restore(self)
 
     def mouseReleaseEvent(self, event):
         self.dragPos = None
@@ -758,7 +765,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 output_directory_for_network = os.path.abspath(output_directory_for_network.strip()).replace('\\', '/')
                 self.net_output_directory_lineedit.setText(output_directory_for_network)
 
-            Functions.calculate_intersection_network(self)
+            UIF.Functions.calculate_intersection_network(self)
         # except:
         #     exc_type, exc_obj, exc_tb = sys.exc_info()
         #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -857,6 +864,16 @@ class SplashScreen(QMainWindow):
         counter += 1
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
+
+
+def run_gui():
+
+    mp.freeze_support()
+    app = QtWidgets.QApplication(sys.argv)
+    app.setStyleSheet(Style.QToolTip_stylesheet)
+    window = SplashScreen()
+    QtCore.QTimer.singleShot(0, lambda: center_window(window))
+    sys.exit(app.exec_())
 
 
 if __name__ == "__main__":

@@ -68,12 +68,12 @@ nonbonded.setUseDispersionCorrection(True)
 print('Creating a %sIntegrator with %s %s .' %('Langevin', 2.0, 'femtosecond'))
 integrator = mm.LangevinIntegrator(310.0*kelvin, 91.0/picosecond, 2.0*femtosecond)
 
-if True == True:
-    platform = mm.Platform.getPlatformByName('CUDA')
-    properties = {'CudaPrecision': 'single'}
+if False == True:
+    platform = mm.Platform.getPlatformByName('OpenCL')
+    properties = {'NonePrecision': 'single','NoneDeviceIndex': '1'}
 else:
-    platform = mm.Platform.getPlatformByName('CUDA')
-    properties = {'CUDAPrecision': 'single'}
+    platform = mm.Platform.getPlatformByName('OpenCL')
+    properties = {'OpenCLPrecision': 'single','OpenCLDeviceIndex': '1'}
 
 
 
@@ -149,7 +149,7 @@ OUTPUT_FOLDER_NAME = str
 OUTPUT_DIRECTORY = Path('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download')
 
 last_pdb_file_path = os.path.join(OUTPUT_DIRECTORY, last_pdb)
-modify_atoms = convert_res_to_atoms(last_pdb_file_path, [], 'CA')
+modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['ARG4'], 'CA')
 state_file_path = os.path.join(OUTPUT_DIRECTORY, state_file_name)
 
 print("SPEED LIST: ", [3, 4])
@@ -166,29 +166,29 @@ for i in range(len([3, 4])):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        if 'CUDA' == 'OpenCL' and False == True:
+        if 'OpenCL' == 'OpenCL' and True == True:
             properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
             precision = 'double'
 
-        if 'CUDA' == 'OpenCL' and False == False:
+        if 'OpenCL' == 'OpenCL' and True == False:
             properties = {'OpenCLPrecision': 'double'}
             precision = 'double'
 
-        if 'CUDA' == 'CUDA' and False == True:
+        if 'OpenCL' == 'CUDA' and True == True:
             properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
             precision = 'double'
 
-        if 'CUDA' == 'CUDA' and False == False:
+        if 'OpenCL' == 'CUDA' and True == False:
             properties = {'CudaPrecision': 'double'}
             precision = 'double'
 
-        if 'CUDA' == 'CPU' and False == True:
+        if 'OpenCL' == 'CPU' and False == True:
             print("The CPU platform always uses 'mixed' precision.")
             print("Simulation process will use %s Thread(s)" % 2)
             properties = {'CpuThreads': '2'}
             precision = 'mixed'
 
-        if 'CUDA' == 'Reference':
+        if 'OpenCL' == 'Reference':
             print("The Reference platform always uses 'double' precision.")
             properties = None
             precision= 'double'
@@ -214,7 +214,7 @@ for i in range(len([3, 4])):
         integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('CUDA')
+        platform = mm.Platform.getPlatformByName('OpenCL')
 
         # ok now let's do some simulation using this restraint
         if properties is None:
@@ -268,34 +268,34 @@ for i in range(len([3, 4])):
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
     ################################################################################################################
 
-    if 'CUDA' == 'OpenCL' and False == True:
+    if 'OpenCL' == 'OpenCL' and True == True:
         properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
         precision = 'double'
 
-    if 'CUDA' == 'OpenCL' and False == False:
+    if 'OpenCL' == 'OpenCL' and True == False:
         properties = {'OpenCLPrecision': 'double'}
         precision = 'double'
 
-    if 'CUDA' == 'CUDA' and False == True:
+    if 'OpenCL' == 'CUDA' and True == True:
         properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
         precision = 'double'
 
-    if 'CUDA' == 'CUDA' and False == False:
+    if 'OpenCL' == 'CUDA' and True == False:
         properties = {'CudaPrecision': 'double'}
         precision = 'double'
 
-    if 'CUDA' == 'CPU' and False == True:
+    if 'OpenCL' == 'CPU' and False == True:
         print("The CPU platform always uses 'mixed' precision.")
         print("Simulation process will use %s Thread(s)" % 2)
         properties = {'CpuThreads': '2'}
         precision = 'mixed'
 
-    if 'CUDA' == 'Reference':
+    if 'OpenCL' == 'Reference':
         print("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
 
-    print("System will use %s Platform with %s Precision" % ('CUDA', precision))
+    print("System will use %s Platform with %s Precision" % ('OpenCL', precision))
 
     # we'll just take the topology from here...
     pdb = app.PDBFile(last_pdb_file_path)
@@ -318,7 +318,7 @@ for i in range(len([3, 4])):
     integrator.setConstraintTolerance(1e-8)
 
     # let's specify our simulation platform again
-    platform = mm.Platform.getPlatformByName('CUDA')
+    platform = mm.Platform.getPlatformByName('OpenCL')
 
     # ok now let's do some simulation using this restraint
     if properties is None:
@@ -408,7 +408,7 @@ for i in range(len([3, 4])):
      # --> RESIDUE BASED DECOMPOSITION
     if i == 0:
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue,
+                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='OpenCL',
                                     ref_energy_name='reference_energy_file.csv',
                                     modif_energy_name='modified_energy_file_%s.csv' % int([3, 4][i]),
                                     origin_last_pdb=last_pdb_file_path, ff='amber03.xml')
@@ -416,7 +416,7 @@ for i in range(len([3, 4])):
     if i != 0:
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue,
+                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='OpenCL',
                                     ref_energy_name=None,
                                     modif_energy_name='modified_energy_file_%s.csv' % int([3, 4][i]),
                                     origin_last_pdb=last_pdb_file_path,

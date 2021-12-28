@@ -76,7 +76,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'mdpertool=mdpertool.__main__:main',
+            'mdpertool=mdpertool.__main__:run_mdpertool',
         ],
     },
     install_requires=install_requires,

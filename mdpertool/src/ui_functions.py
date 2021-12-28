@@ -7,10 +7,10 @@ GLOBAL_TITLE_BAR = True
 
 ## ==> COUT INITIAL MENU
 count = 1
-from src.app_functions import *
-from src.PyMolWidget import PymolQtWidget
+from .app_functions import *
+from .PyMolWidget import PymolQtWidget
 from analysis import VisJS_Widget
-from src.message import Message_Boxes
+from .message import Message_Boxes
 
 
 class UIFunctions(MainWindow):
@@ -34,6 +34,7 @@ class UIFunctions(MainWindow):
                                                                                 "program?", Style.MessageBox_stylesheet)
 
             if close_answer == QMessageBox.Yes:
+                self.thread_main.exit()
                 self.close()
             if close_answer == QMessageBox.No:
                 pass
