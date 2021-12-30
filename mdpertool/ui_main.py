@@ -12,13 +12,14 @@ from PySide2.QtWidgets import *
 # =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 from openmm.app import Modeller
-
-from gui.ui_styles import Style
-from src.pyside_dynamic import loadUi
 import src.ui_functions as UIF
-from src.omm_runner import *
 from src.builder import *
+from gui.ui_styles import Style
 from src.mplwidget import *
+from src.omm_runner import *
+from src.pyside_dynamic import loadUi
+
+
 
 from pdbfixer import PDBFixer
 import multiprocessing as mp
@@ -149,6 +150,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
         self.load_sim_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_simulation(self))
+        self.export_workspace_pushButton.clicked.connect(lambda: UIF.Functions.export_workspace(self))
+        self.import_workspace_pushButton.clicked.connect(lambda: import_workspace())
+
+
 
         # --> RUN TIME SETTINGS
         self.run_duration_doubleSpinBox.valueChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))

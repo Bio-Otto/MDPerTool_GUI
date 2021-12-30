@@ -17,6 +17,7 @@ import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
                                      Shortest_Path_Visualize)
+from .config import write_output_configuration_file, read_output_configuration_file, config_template
 
 
 class Helper_Functions():
@@ -721,6 +722,87 @@ class Functions(MainWindow):
             self.run_duration_spinBox.blockSignals(False)
             self.run_duration_doubleSpinBox.blockSignals(False)
             self.Number_of_steps_spinBox.blockSignals(False)
+
+    def export_workspace(self):
+        try:
+            # default_dir = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            output_file_directory, _ = QFileDialog.getSaveFileName(self, "Save configuration file", "",
+                                                      "Config File Name (*.yaml)", options=options)
+            print([self.selected_residues_listWidget.item(x).text() for x in range(self.selected_residues_listWidget.count())])
+            template = config_template()
+
+            # INPUTS
+            template['Inputs']['topology'] = self.upload_pdb_lineEdit.text().strip()
+            template['Inputs']['output directory'] = self.Output_Folder_textEdit.toPlainText().strip()
+            template['Inputs']['run duration'] = float(self.run_duration_doubleSpinBox.value())
+            template['Inputs']['run duration unit'] = self.long_simulation_time_unit.currentText()
+            template['Inputs']['threading number'] = int(self.Number_CPU_spinBox_2.value())
+            template['Inputs']['all cpu is active'] = self.All_CPU_checkBox.isChecked()
+            template['Inputs']['r factor'] = self.R_factor_lineEdit.text().strip()
+            template['Inputs']['selected residue'] = [self.selected_residues_listWidget.item(x).text() for x in range(self.selected_residues_listWidget.count())]
+            template['Inputs']['perturbation run duration'] = int(self.run_duration_spinBox.value())
+            template['Inputs']['perturbation run duration unit'] = self.perturb_time_unit_comboBox.currentText()
+            template['Inputs']['perturbation threading number'] = int(self.Number_CPU_spinBox.value())
+            template['Inputs']['perturbation all cpu is active'] = self.perturbation_All_CPU_checkBox.isChecked()
+
+            # SIMULATION
+            template['Simulation']['equilibrium platform'] = self.equ_platform_comboBox.currentText()
+            template['Simulation']['equilibrium precision'] = self.eq_precision_comboBox.currentText()
+            template['Simulation']['equilibrium device id'] = self.Device_Number_comboBox.currentText()
+            template['Simulation']['equilibrium use device id'] = self.Device_ID_checkBox.isChecked()
+            template['Simulation']['perturbation platform'] = self.per_platform_comboBox.currentText()
+            template['Simulation']['perturbation precision'] = self.per_precision_comboBox.currentText()
+            template['Simulation']['perturbation device id'] = self.per_Device_Number_lineEdit.text().strip()
+            template['Simulation']['perturbation use device id'] = self.per_Device_ID_checkBox.isChecked()
+            template['Simulation']['protein forcefield'] = self.protein_forcefield_comboBox.currentText()
+            template['Simulation']['water forcefield'] = self.water_forcefield_comboBox.currentText()
+            template['Simulation']['water geometry padding'] = self.water_padding_lineEdit.text().strip()
+            template['Simulation']['equilibrium integrator'] = self.integrator_kind_comboBox.currentText()
+            template['Simulation']['equilibrium time step'] = self.integrator_time_step.toPlainText().strip()
+            template['Simulation']['equilibrium time step unit'] = self.integrator_time_step_unit.currentText()
+            template['Simulation']['equilibrium additional integrator parameters'] = self.Additional_Integrators_checkBox.isChecked()
+            template['Simulation']['friction'] = self.friction_textEdit.toPlainText().strip()
+            template['Simulation']['temperature'] = self.temperature_textEdit.toPlainText().strip()
+            template['Simulation']['nonbonded method'] = self.nonBounded_Method_comboBox.currentText()
+            template['Simulation']['constraints'] = self.system_constraints_comboBox.currentText()
+            template['Simulation']['rigid water is active'] = self.rigid_water_checkBox.isChecked()
+            template['Simulation']['nonbonded cutoff'] = self.nonbounded_CutOff_textEdit.toPlainText()
+            template['Simulation']['switching distance'] = self.switching_distance_textEdit.toPlainText()
+            template['Simulation']['use switching distance'] = self.use_switching_checkBox.isChecked()
+            template['Simulation']['number of simulation steps'] = self.Number_of_steps_spinBox.value()
+            template['Simulation']['minimize'] = self.minimize_checkBox.isChecked()
+            template['Simulation']['minimization max iterations'] = self.Max_minimize_iter_textEdit.toPlainText()
+            template['Simulation']['Equilibrate'] = self.equilubrate_checkBox.isChecked()
+            template['Simulation']['Equilibration steps'] = self.Max_equilubrate_steps_textEdit.toPlainText()
+            template['Simulation']['DCD report'] = self.DCD_Reporter_checkBox.isChecked()
+            template['Simulation']['XTC report'] = self.XTC_Reporter_checkBox.isChecked()
+            template['Simulation']['state data report'] = self.State_Data_Reporter_checkBox.isChecked()
+            template['Simulation']['DCD writing frequency'] = self.DCD_write_freq_textEdit.toPlainText()
+            template['Simulation']['DCD output name'] = self.DCD_Output_Name_textEdit.toPlainText()
+            template['Simulation']['XTC writing frequency'] = self.XTC_write_freq_textEdit.toPlainText()
+            template['Simulation']['XTC output name'] = self.XTC_Output_Name_textEdit.toPlainText()
+            template['Simulation']['state data frequency'] = self.StateData_frequency_textEdit.toPlainText()
+
+            write_output_configuration_file(file_path=output_file_directory, template_yml=template)
+
+        except Exception as err:
+            print("ERR: ", err)
+            pass
+        print("exporting to %s ..." % output_file_directory)
+
+    def import_workspace(self):
+        fileFormats = "*.yaml"  # without commas
+        try:
+            config_file_path, _ = QtWidgets.QFileDialog.getOpenFileName(parent=None,
+                                                                        caption="Select configuration file to load",
+                                                                        filter=fileFormats)
+        except:
+            pass
+
+        print("importing %s ..." % config_file_path)
 
     @staticmethod
     def PDB_ID_lineEdit(self):

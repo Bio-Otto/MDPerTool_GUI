@@ -2924,7 +2924,7 @@ QSpinBox QAbstractItemView {
                                   </widget>
                                  </item>
                                  <item row="3" column="2">
-                                  <widget class="QCheckBox" name="checkBox_2">
+                                  <widget class="QCheckBox" name="perturbation_All_CPU_checkBox">
                                    <property name="sizePolicy">
                                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                      <horstretch>0</horstretch>
@@ -3529,7 +3529,7 @@ QListWidget:hover{
                               <property name="maximumSize">
                                <size>
                                 <width>16777215</width>
-                                <height>60</height>
+                                <height>120</height>
                                </size>
                               </property>
                               <property name="font">
@@ -3538,12 +3538,131 @@ QListWidget:hover{
                                </font>
                               </property>
                               <property name="styleSheet">
-                               <string notr="true"/>
+                               <string notr="true">QGroupBox {
+  
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 10px;
+  padding: 4px;
+  margin-top: 16px;
+}
+
+QGroupBox::title {
+  subcontrol-origin: margin;
+  subcontrol-position: top left;
+  left: 10px;
+  padding-left: 3px;
+  padding-right: 5px;
+  padding-top: 8px;
+  padding-bottom: 16px;
+}
+
+QGroupBox::indicator {
+  margin-left: 2px;
+  height: 16px;
+  width: 16px;
+}</string>
                               </property>
                               <property name="title">
                                <string/>
                               </property>
-                              <layout class="QHBoxLayout" name="horizontalLayout_43">
+                              <layout class="QVBoxLayout" name="verticalLayout_26">
+                               <item>
+                                <layout class="QHBoxLayout" name="horizontalLayout_11">
+                                 <item>
+                                  <widget class="QPushButton" name="export_workspace_pushButton">
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>0</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true"> QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }      </string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Export Workspace</string>
+                                   </property>
+                                   <property name="icon">
+                                    <iconset resource="icons_path.qrc">
+                                     <normaloff>:/16x16/icons/16x16/cil-save.png</normaloff>:/16x16/icons/16x16/cil-save.png</iconset>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <widget class="QPushButton" name="import_workspace_pushButton">
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>0</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QPushButton 
+{
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;		
+	background-color: rgb(202, 116, 220);
+	
+	background-color: rgb(253, 1, 136);
+}
+
+QPushButton:hover 
+{
+	
+	background-color: rgb(22, 200, 244); 
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed 
+{	
+	background-color: rgb(255, 170, 0);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>İmport Workspace</string>
+                                   </property>
+                                   <property name="icon">
+                                    <iconset resource="icons_path.qrc">
+                                     <normaloff>:/16x16/icons/16x16/cil-action-undo.png</normaloff>:/16x16/icons/16x16/cil-action-undo.png</iconset>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                </layout>
+                               </item>
                                <item>
                                 <layout class="QHBoxLayout" name="horizontalLayout_16">
                                  <item>
@@ -3619,44 +3738,6 @@ QPushButton:pressed {
                                    <property name="icon">
                                     <iconset resource="icons_path.qrc">
                                      <normaloff>:/16x16/icons/16x16/cil-media-stop.png</normaloff>:/16x16/icons/16x16/cil-media-stop.png</iconset>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item>
-                                  <widget class="QPushButton" name="pushButton_2">
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>0</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>9</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="styleSheet">
-                                    <string notr="true">QPushButton {
-	border: 2px solid rgb(52, 59, 72);
-	border-radius: 5px;	
-	background-color: rgb(0, 180, 95);
-}
-QPushButton:hover {
-	background-color: rgb(0, 152, 84);
-	border: 2px solid rgb(61, 70, 86);
-}
-QPushButton:pressed {	
-	background-color: rgb(220, 5, 100);
-	border: 2px solid rgb(43, 50, 61);
-}</string>
-                                   </property>
-                                   <property name="text">
-                                    <string>Save Script</string>
-                                   </property>
-                                   <property name="icon">
-                                    <iconset resource="icons_path.qrc">
-                                     <normaloff>:/16x16/icons/16x16/cil-save.png</normaloff>:/16x16/icons/16x16/cil-save.png</iconset>
                                    </property>
                                   </widget>
                                  </item>
