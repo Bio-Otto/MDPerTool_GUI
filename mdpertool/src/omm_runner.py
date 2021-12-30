@@ -1,4 +1,3 @@
-
 from openmm.app import StateDataReporter
 from io import StringIO
 import time
@@ -82,6 +81,7 @@ class Communicate(QtCore.QObject):
     thread_id_keeper = QtCore.Signal(int)
     decomp_process = QtCore.Signal(list)
     finish_alert = QtCore.Signal(str)
+    inform_about_situation = QtCore.Signal(str)
 
 
 class OpenMMScriptRunner(QtCore.QObject):
@@ -172,23 +172,24 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.decomp_data.append(data)
 
     def update_plot(self, msg):
-        if not self.plots_created:
+        if not self.plots_created and msg == '':
             self.create_plots(msg.keys())
             self.plots_created = True
 
         if type(msg) == dict:
-
             for k, v in msg.items():
                 current = self.plotdata.get(k)
                 self.plotdata.update({k: np.concatenate((current, v), axis=None)})
-
             self.Signals.dataSignal.emit(self.plotdata)
 
         if type(msg) == list:
             self.Signals.decomp_process.emit(msg)
 
         if type(msg) == str:
-            self.Signals.finish_alert.emit(msg)
+            if msg == "Progress Finished Succesfully :)":
+                self.Signals.finish_alert.emit(msg)
+            else:
+                self.Signals.inform_about_situation.emit(msg)
 
 
 class Graphs(QWidget):

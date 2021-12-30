@@ -2,9 +2,6 @@ import os
 import sys
 import platform
 from importlib import resources
-# import io
-# from PySide2 import QtXml, QtCore, QtGui, QtWidgets
-# from PySide2.QtUiTools import QUiLoader
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
@@ -14,22 +11,15 @@ from PySide2.QtWidgets import *
 
 # =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
-
-# sys.path.append(os.path.join(os.getcwd(), 'gui/icons'))
 from openmm.app import Modeller
 
-# from gui import *
-# import pyqtgraph as pg
-
-
+from gui.ui_styles import Style
+from src.pyside_dynamic import loadUi
 import src.ui_functions as UIF
-
-# from src.checkBox_menu import ChecklistDialog
-# from src.message import Message_Boxes
 from src.omm_runner import *
 from src.builder import *
 from src.mplwidget import *
-from src.pyside_dynamic import loadUi
+
 from pdbfixer import PDBFixer
 import multiprocessing as mp
 
@@ -138,7 +128,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.quit_pushButton.clicked.connect(lambda: UIF.UIFunctions.close_application(self))
         self.PDB_ID_lineEdit.returnPressed.connect(self.fetch_and_load_pdbfile)
         self.stop_pushButton.clicked.connect(self.stop_button_clicked)
-        self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local())
+        self.upload_pdb_Button.clicked.connect(lambda: self.upload_pdb_from_local(manuel=True))
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
         self.PDB_ID_lineEdit.textChanged.connect(lambda: UIF.Functions.PDB_ID_lineEdit(self))
         self.fetch_pdb_Button.clicked.connect(lambda: self.fetch_and_load_pdbfile())
@@ -158,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.DCD_Reporter_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
+        self.load_sim_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_simulation(self))
 
         # --> RUN TIME SETTINGS
         self.run_duration_doubleSpinBox.valueChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
@@ -169,6 +160,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run.Signals.decomp_process.connect(
             lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0] + 1) * 100) / decomp_data[1]))
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
+        self.run.Signals.inform_about_situation.connect(lambda inform_message: self.inform_about_progress(inform_message))
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: UIF.Functions.browse_responseTimeFile(self))
@@ -217,120 +209,120 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_TabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
         self.tab_count_on_analysis = str(self.analysis_TabWidget.count())
 
-    def add_tab(self):
-        tab = QtWidgets.QWidget()
-        tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
-
-        self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
-        self.tab_count_on_analysis = self.analysis_TabWidget.count()
-
-        horizontalLayout = QtWidgets.QHBoxLayout(tab)
-        horizontalLayout.setObjectName("horizontalLayout_" + str(self.tab_count_on_analysis))
-        gridLayout = QtWidgets.QGridLayout()
-        gridLayout.setObjectName("gridLayout_" + str(self.tab_count_on_analysis))
-
-        label = QtWidgets.QLabel(tab)
-        label.setMinimumSize(QtCore.QSize(0, 22))
-        label.setMaximumSize(QtCore.QSize(16777215, 22))
-        label.setStyleSheet("QLabel {\n"
-                            "    background-color: rgb(27, 29, 35);\n"
-                            "    border-radius: 5px;\n"
-                            "    border: 2px solid rgb(27, 29, 35);\n"
-                            "    padding: 1px 1px 1px 1px;\n"
-                            "    \n"
-                            "    border-bottom-color: rgb(157, 90, 198);\n"
-                            "}\n"
-                            "\n"
-                            "\n"
-                            "QLabel:hover{\n"
-                            "    border: 2px solid rgb(64, 71, 88);\n"
-                            "    selection-color: rgb(127, 5, 64);\n"
-                            "\n"
-                            "}")
-        label.setObjectName("label_" + str(self.tab_count_on_analysis))
-        gridLayout.addWidget(label, 2, 0, 1, 1)
-
-        shortest_path_listWidget = QtWidgets.QListWidget(tab)
-        shortest_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
-        shortest_path_listWidget.setObjectName("shortest_path_listWidget")
-        gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
-
-        intersection_path_listWidget = QtWidgets.QListWidget(tab)
-        intersection_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
-        intersection_path_listWidget.setObjectName("intersection_path_listWidget")
-        gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
-        label_2 = QtWidgets.QLabel(tab)
-        label_2.setMinimumSize(QtCore.QSize(0, 22))
-        label_2.setMaximumSize(QtCore.QSize(16777215, 22))
-        label_2.setStyleSheet("QLabel {\n"
-                              "    background-color: rgb(27, 29, 35);\n"
-                              "    border-radius: 5px;\n"
-                              "    border: 2px solid rgb(27, 29, 35);\n"
-                              "    padding: 1px 1px 1px 1px;\n"
-                              "    \n"
-                              "    border-bottom-color: rgb(157, 90, 198);\n"
-                              "}\n"
-                              "\n"
-                              "\n"
-                              "QLabel:hover{\n"
-                              "    border: 2px solid rgb(64, 71, 88);\n"
-                              "    selection-color: rgb(127, 5, 64);\n"
-                              "\n"
-                              "}")
-        label_2.setObjectName("label_29")
-        gridLayout.addWidget(label_2, 0, 0, 1, 1)
-
-        ###############################################################################################################
-        dissipation_curve_widget = QtWidgets.QWidget(tab)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(dissipation_curve_widget.sizePolicy().hasHeightForWidth())
-        dissipation_curve_widget.setSizePolicy(sizePolicy)
-        dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 350))
-        dissipation_curve_widget.setMaximumSize(QtCore.QSize(450, 16777215))
-        dissipation_curve_widget.setObjectName("dissipation_curve_widget")
-        gridLayout.addWidget(dissipation_curve_widget, 4, 0, 1, 1)
-        ###############################################################################################################
-
-        pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
-        pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
-                                              "   border: 1px solid black;\n"
-                                              "   border-radius: 5px;\n"
-                                              "   border-top-color: rgb(157, 90, 198);\n"
-                                              "   border-left-color: rgb(157, 90, 198);\n"
-                                              "   border-bottom-color: rgb(157, 90, 198);\n"
-                                              "   border-right-color: rgb(157, 90, 198);\n"
-                                              "   margin-top: 5px;\n"
-                                              "}")
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(pyMOL_3D_analysis_frame.sizePolicy().hasHeightForWidth())
-        pyMOL_3D_analysis_frame.setSizePolicy(sizePolicy)
-        pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
-        gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 6, 1)
-        horizontalLayout.addLayout(gridLayout)
-        self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
-
-        # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
-
-        Protein3DNetworkView = UIF.PymolQtWidget(self)
-        verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
-        verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
-        self.setLayout(verticalLayoutProteinNetworkView)
-        Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
-        Protein3DNetworkView.update()
-        Protein3DNetworkView.show()
-        verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
-
-        # matplotlib_widget = WidgetPlot(self)
-        # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
-        # verticalLayout.addWidget(self.matplotlib_widget.canvas)
-
-        self.plot_signal.plot_network.connect(lambda: UIF.Functions.plot_networks(self))
+    # def add_tab(self):
+    #     tab = QtWidgets.QWidget()
+    #     tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
+    #
+    #     self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
+    #     self.tab_count_on_analysis = self.analysis_TabWidget.count()
+    #
+    #     horizontalLayout = QtWidgets.QHBoxLayout(tab)
+    #     horizontalLayout.setObjectName("horizontalLayout_" + str(self.tab_count_on_analysis))
+    #     gridLayout = QtWidgets.QGridLayout()
+    #     gridLayout.setObjectName("gridLayout_" + str(self.tab_count_on_analysis))
+    #
+    #     label = QtWidgets.QLabel(tab)
+    #     label.setMinimumSize(QtCore.QSize(0, 22))
+    #     label.setMaximumSize(QtCore.QSize(16777215, 22))
+    #     label.setStyleSheet("QLabel {\n"
+    #                         "    background-color: rgb(27, 29, 35);\n"
+    #                         "    border-radius: 5px;\n"
+    #                         "    border: 2px solid rgb(27, 29, 35);\n"
+    #                         "    padding: 1px 1px 1px 1px;\n"
+    #                         "    \n"
+    #                         "    border-bottom-color: rgb(157, 90, 198);\n"
+    #                         "}\n"
+    #                         "\n"
+    #                         "\n"
+    #                         "QLabel:hover{\n"
+    #                         "    border: 2px solid rgb(64, 71, 88);\n"
+    #                         "    selection-color: rgb(127, 5, 64);\n"
+    #                         "\n"
+    #                         "}")
+    #     label.setObjectName("label_" + str(self.tab_count_on_analysis))
+    #     gridLayout.addWidget(label, 2, 0, 1, 1)
+    #
+    #     shortest_path_listWidget = QtWidgets.QListWidget(tab)
+    #     shortest_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+    #     shortest_path_listWidget.setObjectName("shortest_path_listWidget")
+    #     gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
+    #
+    #     intersection_path_listWidget = QtWidgets.QListWidget(tab)
+    #     intersection_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
+    #     intersection_path_listWidget.setObjectName("intersection_path_listWidget")
+    #     gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
+    #     label_2 = QtWidgets.QLabel(tab)
+    #     label_2.setMinimumSize(QtCore.QSize(0, 22))
+    #     label_2.setMaximumSize(QtCore.QSize(16777215, 22))
+    #     label_2.setStyleSheet("QLabel {\n"
+    #                           "    background-color: rgb(27, 29, 35);\n"
+    #                           "    border-radius: 5px;\n"
+    #                           "    border: 2px solid rgb(27, 29, 35);\n"
+    #                           "    padding: 1px 1px 1px 1px;\n"
+    #                           "    \n"
+    #                           "    border-bottom-color: rgb(157, 90, 198);\n"
+    #                           "}\n"
+    #                           "\n"
+    #                           "\n"
+    #                           "QLabel:hover{\n"
+    #                           "    border: 2px solid rgb(64, 71, 88);\n"
+    #                           "    selection-color: rgb(127, 5, 64);\n"
+    #                           "\n"
+    #                           "}")
+    #     label_2.setObjectName("label_29")
+    #     gridLayout.addWidget(label_2, 0, 0, 1, 1)
+    #
+    #     ###############################################################################################################
+    #     dissipation_curve_widget = QtWidgets.QWidget(tab)
+    #     sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    #     sizePolicy.setHorizontalStretch(0)
+    #     sizePolicy.setVerticalStretch(0)
+    #     sizePolicy.setHeightForWidth(dissipation_curve_widget.sizePolicy().hasHeightForWidth())
+    #     dissipation_curve_widget.setSizePolicy(sizePolicy)
+    #     dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 350))
+    #     dissipation_curve_widget.setMaximumSize(QtCore.QSize(450, 16777215))
+    #     dissipation_curve_widget.setObjectName("dissipation_curve_widget")
+    #     gridLayout.addWidget(dissipation_curve_widget, 4, 0, 1, 1)
+    #     ###############################################################################################################
+    #
+    #     pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
+    #     pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
+    #                                           "   border: 1px solid black;\n"
+    #                                           "   border-radius: 5px;\n"
+    #                                           "   border-top-color: rgb(157, 90, 198);\n"
+    #                                           "   border-left-color: rgb(157, 90, 198);\n"
+    #                                           "   border-bottom-color: rgb(157, 90, 198);\n"
+    #                                           "   border-right-color: rgb(157, 90, 198);\n"
+    #                                           "   margin-top: 5px;\n"
+    #                                           "}")
+    #     sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    #     sizePolicy.setHorizontalStretch(0)
+    #     sizePolicy.setVerticalStretch(0)
+    #     sizePolicy.setHeightForWidth(pyMOL_3D_analysis_frame.sizePolicy().hasHeightForWidth())
+    #     pyMOL_3D_analysis_frame.setSizePolicy(sizePolicy)
+    #     pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+    #     pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
+    #     pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
+    #     gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 6, 1)
+    #     horizontalLayout.addLayout(gridLayout)
+    #     self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
+    #
+    #     # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
+    #
+    #     Protein3DNetworkView = UIF.PymolQtWidget(self)
+    #     verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
+    #     verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
+    #     self.setLayout(verticalLayoutProteinNetworkView)
+    #     Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
+    #     Protein3DNetworkView.update()
+    #     Protein3DNetworkView.show()
+    #     verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
+    #
+    #     # matplotlib_widget = WidgetPlot(self)
+    #     # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
+    #     # verticalLayout.addWidget(self.matplotlib_widget.canvas)
+    #
+    #     self.plot_signal.plot_network.connect(lambda: UIF.Functions.plot_networks(self))
 
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
@@ -341,7 +333,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # #################################################### TRAIL ##################################################### #
     def run_btn_clicked(self):
-
         self.r_factor_count = 0
         self.Run.setEnabled(False)
         self.start_monitoring = False
@@ -406,10 +397,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                               'There is no protein crystal structure in this expression.',
                                               Style.MessageBox_stylesheet)
 
-    def upload_pdb_from_local(self):
+    def upload_pdb_from_local(self, manuel):
         global selected_chains
         try:
-            upload_condition, pdb_path = UIF.Functions.browse_pdbFile(self)
+            if manuel:
+                upload_condition, pdb_path = UIF.Functions.browse_pdbFile(self)
+            if not manuel:
+                pdb_path = self.upload_pdb_lineEdit.text()
 
             if os.path.exists(pdb_path):
                 fixer = PDBFixer(pdb_path)
@@ -429,7 +423,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
                                                              ph=7, chains_to_remove=delete_chains)
 
-                    self.upload_pdb_textEdit.setText(modified_pdb)
+                    self.upload_pdb_lineEdit.setText(modified_pdb)
 
                     self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.combobox:
@@ -523,6 +517,9 @@ class MainWindow(QtWidgets.QMainWindow):
             UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
 
+    def inform_about_progress(self, message):
+        print(message)
+        self.label_top_info_1.setText(message)
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################

@@ -1,3 +1,5 @@
+import os.path
+
 from ui_main import *
 import networkx as nx
 from PySide2.QtWidgets import QFileDialog, QDialog, QTableWidgetItem
@@ -384,7 +386,7 @@ class Functions(MainWindow):
 
                                 all_paths.append(
                                     'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
-                                    source_res, target_i, len(graph_i.nodes())))
+                                        source_res, target_i, len(graph_i.nodes())))
 
                         except Exception as err:
                             print("SHORTEST PATH LOG: ", err)
@@ -683,6 +685,43 @@ class Functions(MainWindow):
         except Exception as exp:
             Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
 
+    def load_sample_for_simulation(self):
+        from pathlib import Path
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(Path(current_path).parent, 'Download', '4htm.pdb')
+        output_directory = os.path.join(Path(current_path).parent, 'output')
+
+        if os.path.exists(path):
+            self.upload_pdb_lineEdit.setText(path)
+            self.upload_pdb_from_local(manuel=False)
+            try:
+                os.mkdir(output_directory)
+                print("Directory ", output_directory, " Created ")
+            except FileExistsError:
+                print("Directory ", output_directory, " already exists")
+            if not os.path.exists(output_directory):
+                os.mkdir(output_directory)
+                print("Directory ", output_directory, " Created ")
+            else:
+                print("Directory ", output_directory, " already exists")
+            self.Output_Folder_textEdit.setPlainText("")
+
+            self.PDB_ID_lineEdit.setText("")
+            self.Output_Folder_textEdit.setPlainText(output_directory)
+            if self.selected_residues_listWidget.count() == 0:
+                self.selected_residues_listWidget.addItem('SER345')
+            self.R_factor_lineEdit.setText("3, 4")
+
+            self.run_duration_spinBox.blockSignals(True)
+            self.run_duration_doubleSpinBox.blockSignals(True)
+            self.Number_of_steps_spinBox.blockSignals(True)
+            self.run_duration_spinBox.setValue(int(1000))
+            self.run_duration_doubleSpinBox.setValue(float(1.000))
+            self.Number_of_steps_spinBox.setValue(int(500000))
+            self.run_duration_spinBox.blockSignals(False)
+            self.run_duration_doubleSpinBox.blockSignals(False)
+            self.Number_of_steps_spinBox.blockSignals(False)
+
     @staticmethod
     def PDB_ID_lineEdit(self):
         """
@@ -691,11 +730,11 @@ class Functions(MainWindow):
         self.text_edit = self.PDB_ID_lineEdit.text()
         if self.text_edit == "":
             self.upload_pdb_Button.setEnabled(True)
-            self.upload_pdb_textEdit.setEnabled(True)
+            self.upload_pdb_lineEdit.setEnabled(True)
             self.label_32.setEnabled(True)
         else:
             self.upload_pdb_Button.setEnabled(False)
-            self.upload_pdb_textEdit.setEnabled(False)
+            self.upload_pdb_lineEdit.setEnabled(False)
             self.label_32.setEnabled(False)
 
     @staticmethod
@@ -727,7 +766,7 @@ class Functions(MainWindow):
                                                                     self.Output_Folder_textEdit.toPlainText(), ph=7,
                                                                     chains_to_remove=delete_chains)
 
-                            self.upload_pdb_textEdit.setText(fetched_pdb)
+                            self.upload_pdb_lineEdit.setText(fetched_pdb)
                             self.combobox = Helper_Functions.fill_residue_combobox(self, fetched_pdb)
                             for i in self.combobox:
                                 self.res1_comboBox.addItem(str(i))
@@ -741,7 +780,7 @@ class Functions(MainWindow):
                                                                      self.Output_Folder_textEdit.toPlainText(),
                                                                      ph=7, chains_to_remove=None)
 
-                            self.upload_pdb_textEdit.setText(modified_pdb)
+                            self.upload_pdb_lineEdit.setText(modified_pdb)
 
                             self.combobox = Helper_Functions.fill_residue_combobox(self, modified_pdb)
                             for i in self.combobox:

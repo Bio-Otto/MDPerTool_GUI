@@ -13,6 +13,7 @@ import numpy as np
 import time
 import os
 import pandas as pd
+
 # from ui_main import *
 # from src.builder import *
 
@@ -90,7 +91,8 @@ def get_residue_atoms():
 
 
 def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output_directory, ref_energy_name,
-                                modif_energy_name, origin_last_pdb, ff, platform_name, que=None):
+                                modif_energy_name, origin_last_pdb, ff, platform_name, device_id_active, num_of_threads,
+                                que=None):
     global modeller, by_pass_bonds_index, simulation, by_pass_atoms, nonbonded_group_num, modified_df, reference_df
 
     print('Loading...')
@@ -140,8 +142,35 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
     platform = Platform.getPlatformByName(platform_name)
     # properties = {'Threads': '8'}
-    properties = {'Precision': 'mixed'}
+    # properties = {'Precision': 'mixed'}
     # properties = {'OpenCLDeviceIndex': '0'}
+
+    if platform_name == 'OpenCL' and device_id_active == True:
+        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
+        precision = 'mixed'
+
+    if platform_name == 'OpenCL' and device_id_active == False:
+        properties = {'OpenCLPrecision': 'double'}
+        precision = 'mixed'
+
+    if platform_name == 'CUDA' and device_id_active == True:
+        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
+        precision = 'mixed'
+
+    if platform_name == 'CUDA' and device_id_active == False:
+        properties = {'CudaPrecision': 'double'}
+        precision = 'mixed'
+
+    if platform_name == 'CPU' and device_id_active == True:
+        print("The CPU platform always uses 'mixed' precision.")
+        print("Simulation process will use %s Thread(s)" % num_of_threads)
+        properties = {'CpuThreads': '%s' % num_of_threads}
+        precision = 'mixed'
+
+    if platform_name == 'Reference':
+        print("The Reference platform always uses 'double' precision.")
+        properties = None
+        precision = 'double'
 
     # properties = {  # 'Threads': '1', #number of threads for CPU - all definitions must be strings (I think)
     #     'Precision': 'mixed',  # for CUDA or OpenCL, select the precision (single, mixed, or double)

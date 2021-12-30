@@ -11,11 +11,10 @@ import queue
 import threading
 import itertools
 import tokenize
-from src.omm_runner import *
-from gui.ui_styles import Style
-from ui_main import *
-
 from PySide2.QtCore import Signal
+# from src.omm_runner import *
+# from gui.ui_styles import Style
+from ui_main import *
 
 
 class Advanced(QtCore.QThread):
@@ -28,7 +27,7 @@ class Advanced(QtCore.QThread):
     def send_arg_to_Engine(self):
         # self.stackedWidget.setCurrentIndex(1)
         global platform_name
-        pdb_pfile = os.path.abspath(self.upload_pdb_textEdit.toPlainText().strip()).replace('\\', '/')
+        pdb_pfile = os.path.abspath(self.upload_pdb_lineEdit.text().strip()).replace('\\', '/')
 
         rigid_water = True
         minimize = True
@@ -234,7 +233,7 @@ class Advanced(QtCore.QThread):
                                 water_padding=self.water_padding_lineEdit.text(),
                                 perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in
                                                     range(self.selected_residues_listWidget.count())],
-                                speed_factor=[int(r) if r.isdigit() else r for r in
+                                speed_factor=[int(r) if r.strip().isdigit() else r for r in
                                               self.R_factor_lineEdit.text().split(',')],
                                 perturb_simulation_time=self.run_duration_spinBox.value(),
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),

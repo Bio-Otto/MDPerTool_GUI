@@ -32,27 +32,34 @@ from mdtraj.reporters import XTCReporter
 
 simulation_last_time = 0
 print('pdb file fixing and preparing for simulation ...')
+__queue.put('pdb file fixing and preparing for simulation ...')
 fixed_pdb_name = fix_pdb('{{pdb}}', fixed_pdb_out_path='{{output_folder}}')
 
 print('Loading pdb to simulation engine ...')
+__queue.put('Loading pdb to simulation engine ...')
 pdb = app.PDBFile(fixed_pdb_name)
 
 box = pdb.topology.getUnitCellDimensions()
 
 print('Modeller of pdb file is preparing ...')
+__queue.put('Modeller of pdb file is preparing ...')
 modeller = mm.app.Modeller(pdb.topology, pdb.positions)
 modeller.topology.setUnitCellDimensions(box)
 
 print('Forcefield parameters loading to the simulation system ...')
+__queue.put('Forcefield parameters loading to the simulation system ...')
 forcefield = app.ForceField('{{protein_ff}}'{{#water_active}}, '{{water_ff}}'{{/water_active}})
 
 print('Adding missing hydrogens to the model ...')
+__queue.put('Adding missing hydrogens to the model ...')
 modeller.addHydrogens(forcefield)
 
 print('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
+__queue.put('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
 modeller.addSolvent(forcefield, model='{{model_water}}', padding={{water_padding}})
 
 print('Constructing an OpenMM System')
+__queue.put('Constructing an OpenMM System')
 system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
                                       {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
                                       constraints={{Constraints}}, rigidWater={{Rigid_Water}},
@@ -85,6 +92,7 @@ simulation.context.computeVirtualSites()
 
 {{#Minimize}}
 print('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
+__queue.put('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
 simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}})
 print("Minimization done, the energy is", simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
@@ -95,6 +103,7 @@ simulation.context.setVelocitiesToTemperature({{Temperature}})
 
 {{#Equilubrate}}
 print('Equilibrating for %s steps ...' % {{Equilubrate_steps}})
+__queue.put('Equilibrating for %s steps ...' % {{Equilubrate_steps}})
 simulation.step(int({{Equilubrate_steps}}))
 {{/Equilubrate}}
 
@@ -103,23 +112,27 @@ simulation.currentStep = simulation_last_time
 {{#DCDReporter}}
 print('The trajectories will be saved in DCD file format.')
 print("Saving DCD File for every {{DCD_write_freq}} period")
+__queue.put('Saving DCD File for every {{DCD_write_freq}} period')
 simulation.reporters.append(DCDReporter('{{output_folder}}/{{DCD_output_name}}', {{DCD_write_freq}}))
 {{/DCDReporter}}
 
 {{#XTCReporter}}
 print('The trajectories will be saved in XTC file format.')
 print("Saving XTC File for every {{XTC_write_freq}} period")
+__queue.put('The trajectories will be saved in XTC file format.')
 simulation.reporters.append(reporters.XTCReporter('{{output_folder}}/{{XTC_output_name}}', {{XTC_write_freq}}))
 {{/XTCReporter}}
 
 {{#State_Data_Reporter}}
 print('State Report will tell you.')
+__queue.put('State Report will tell you.')
 simulation.reporters.append(StateDataReporter(stdout, {{StateData_freq}}, step=True,
 time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True,
 remainingTime=True, speed=True, volume=True, density=True, totalSteps={{Number_of_steps}}))
 {{/State_Data_Reporter}}
 
 print('Running Production...')
+__queue.put('Running Production...')
 simulation.step({{Number_of_steps}})
 print('Done!')
 
@@ -427,7 +440,8 @@ for i in range(len({{speed_factor}})):
     if i == 0:
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
                                     output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='{{platform}}',
-                                    ref_energy_name='reference_energy_file.csv',
+                                    ref_energy_name='reference_energy_file.csv', device_id_active={{Device_ID_active}},
+                                    num_of_threads={{Number_of_CPU}},
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}')
 
@@ -435,7 +449,7 @@ for i in range(len({{speed_factor}})):
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
                                     output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='{{platform}}',
-                                    ref_energy_name=None,
+                                    ref_energy_name=None, device_id_active={{Device_ID_active}}, num_of_threads={{Number_of_CPU}},
                                     modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
                                     origin_last_pdb=last_pdb_file_path,
                                     ff='{{protein_ff}}')
