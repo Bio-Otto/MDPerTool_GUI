@@ -731,7 +731,6 @@ class Functions(MainWindow):
             options |= QFileDialog.DontUseNativeDialog
             output_file_directory, _ = QFileDialog.getSaveFileName(self, "Save configuration file", "",
                                                       "Config File Name (*.yaml)", options=options)
-            print([self.selected_residues_listWidget.item(x).text() for x in range(self.selected_residues_listWidget.count())])
             template = config_template()
 
             # INPUTS
@@ -791,18 +790,44 @@ class Functions(MainWindow):
         except Exception as err:
             print("ERR: ", err)
             pass
-        print("exporting to %s ..." % output_file_directory)
 
     def import_workspace(self):
-        fileFormats = "*.yaml"  # without commas
         try:
             config_file_path, _ = QtWidgets.QFileDialog.getOpenFileName(parent=None,
                                                                         caption="Select configuration file to load",
-                                                                        filter=fileFormats)
-        except:
+                                                                        filter="*.yaml")
+            template = read_output_configuration_file(file_path=config_file_path)
+
+            if os.path.exists(template['Inputs']['topology']):
+                self.upload_pdb_lineEdit.setText(template['Inputs']['topology'])
+                self.upload_pdb_from_local(manuel=False)
+
+            try:
+                os.mkdir(template['Inputs']['output directory'])
+                self.Output_Folder_textEdit.setPlainText(template['Inputs']['output directory'])
+            except FileExistsError:
+                self.Output_Folder_textEdit.setPlainText(template['Inputs']['output directory'])
+
+            self.run_duration_doubleSpinBox.setValue(float(template['Inputs']['run duration']))
+            self.long_simulation_time_unit.setCurrentIndex(
+                self.long_simulation_time_unit.findText(
+                    str(template['Inputs']['run duration unit']), QtCore.Qt.MatchFixedString))
+            self.Number_CPU_spinBox_2.setValue(int(template['Inputs']['threading number']))
+            self.All_CPU_checkBox.setChecked(template['Inputs']['all cpu is active'])
+            self.R_factor_lineEdit.setText(str(template['Inputs']['r factor']))
+            self.selected_residues_listWidget.addItems(template['Inputs']['selected residue'])
+            self.run_duration_spinBox.setValue(int(template['Inputs']['perturbation run duration']))
+            self.perturb_time_unit_comboBox.setCurrentIndex(
+                self.perturb_time_unit_comboBox.findText(
+                    str(template['Inputs']['perturbation run duration unit']), QtCore.Qt.MatchFixedString))
+            self.Number_CPU_spinBox.setValue(int(template['Inputs']['perturbation threading number']))
+            self.perturbation_All_CPU_checkBox.setChecked(template['Inputs']['perturbation all cpu is active'])
+
+        except Exception as Err:
+            print(Err)
             pass
 
-        print("importing %s ..." % config_file_path)
+
 
     @staticmethod
     def PDB_ID_lineEdit(self):

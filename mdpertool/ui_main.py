@@ -151,7 +151,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Run.clicked.connect(self.run_btn_clicked)
         self.load_sim_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_simulation(self))
         self.export_workspace_pushButton.clicked.connect(lambda: UIF.Functions.export_workspace(self))
-        self.import_workspace_pushButton.clicked.connect(lambda: import_workspace())
+        self.import_workspace_pushButton.clicked.connect(lambda: UIF.Functions.import_workspace(self))
 
 
 
