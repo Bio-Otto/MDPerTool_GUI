@@ -6,14 +6,10 @@ import copy
 from pathlib import Path
 import networkx as nx
 from Bio.PDB.PDBParser import PDBParser
-# from Bio.PDB import Residue
 from PySide2.QtCore import QObject, Signal
 from prody import *
-# from collections import OrderedDict
 import math
 import matplotlib.pyplot as plt
-# import csv
-# import pandas
 import numpy as np
 import argparse
 from PySide2 import QtCore, QtWidgets

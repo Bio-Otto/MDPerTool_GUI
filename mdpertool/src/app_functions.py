@@ -1,6 +1,5 @@
 import os.path
 
-from ui_main import *
 import networkx as nx
 from PySide2.QtWidgets import QFileDialog, QDialog, QTableWidgetItem
 from PySide2.QtCore import Qt, Slot
@@ -18,6 +17,7 @@ from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
                                      Shortest_Path_Visualize)
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
+from ui_main import *
 
 
 class Helper_Functions():
@@ -730,7 +730,7 @@ class Functions(MainWindow):
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             output_file_directory, _ = QFileDialog.getSaveFileName(self, "Save configuration file", "",
-                                                      "Config File Name (*.yaml)", options=options)
+                                                                   "Config File Name (*.yaml)", options=options)
             template = config_template()
 
             # INPUTS
@@ -741,7 +741,8 @@ class Functions(MainWindow):
             template['Inputs']['threading number'] = int(self.Number_CPU_spinBox_2.value())
             template['Inputs']['all cpu is active'] = self.All_CPU_checkBox.isChecked()
             template['Inputs']['r factor'] = self.R_factor_lineEdit.text().strip()
-            template['Inputs']['selected residue'] = [self.selected_residues_listWidget.item(x).text() for x in range(self.selected_residues_listWidget.count())]
+            template['Inputs']['selected residue'] = [self.selected_residues_listWidget.item(x).text() for x in
+                                                      range(self.selected_residues_listWidget.count())]
             template['Inputs']['perturbation run duration'] = int(self.run_duration_spinBox.value())
             template['Inputs']['perturbation run duration unit'] = self.perturb_time_unit_comboBox.currentText()
             template['Inputs']['perturbation threading number'] = int(self.Number_CPU_spinBox.value())
@@ -762,7 +763,8 @@ class Functions(MainWindow):
             template['Simulation']['equilibrium integrator'] = self.integrator_kind_comboBox.currentText()
             template['Simulation']['equilibrium time step'] = self.integrator_time_step.toPlainText().strip()
             template['Simulation']['equilibrium time step unit'] = self.integrator_time_step_unit.currentText()
-            template['Simulation']['equilibrium additional integrator parameters'] = self.Additional_Integrators_checkBox.isChecked()
+            template['Simulation'][
+                'equilibrium additional integrator parameters'] = self.Additional_Integrators_checkBox.isChecked()
             template['Simulation']['friction'] = self.friction_textEdit.toPlainText().strip()
             template['Simulation']['temperature'] = self.temperature_textEdit.toPlainText().strip()
             template['Simulation']['nonbonded method'] = self.nonBounded_Method_comboBox.currentText()
@@ -826,8 +828,6 @@ class Functions(MainWindow):
         except Exception as Err:
             print(Err)
             pass
-
-
 
     @staticmethod
     def PDB_ID_lineEdit(self):

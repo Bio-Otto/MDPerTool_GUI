@@ -1,32 +1,32 @@
-from openmm.app import StateDataReporter
-from io import StringIO
-import time
-import ctypes
+import os
 import queue
 import threading
-import multiprocessing
+import time
 import tokenize
-import pystache
+from io import StringIO
 import numpy as np
-from PySide2 import QtWidgets, QtCore, QtGui
-from pyqtgraph import PlotWidget, plot, dockarea, ProgressDialog
 import pyqtgraph as pg
-from PySide2.QtCore import QTimer, QDateTime, Slot
-import subprocess
-# import continuous_threading
-import os
-import sys
 from PySide2 import QtCore
-from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt, QEvent)
-from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
-                           QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
+from openmm.app import StateDataReporter
 
 
-# ##############################################################################
-# # Functions
-# ##############################################################################
+# import multiprocessing
+# import pystache
+# from PySide2 import QtWidgets, QtCore, QtGui
+# from pyqtgraph import PlotWidget, plot, dockarea, ProgressDialog
+# from PySide2.QtCore import QTimer, QDateTime, Slot
+# import subprocess
+# import continuous_threading
+# from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
+#                            QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
+
+
+# ################################################################################################################### #
+# #################################################### FUNCTIONS #################################################### #
+# ################################################################################################################### #
+from typing import List
+
 
 def queue_reporter_factory(queue):
     """Factory function that returns a dynamically defined OpenMM
@@ -113,7 +113,6 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.t2.start()
 
     def stop_threads(self):
-
         # global _stop_running
         # _stop_running = True
         """
@@ -121,8 +120,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         print(T)
         self.t1.stop()
         """
-
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(threading.get_ident(), ctypes.py_object(SystemExit))
+        print("NO STOP FUNCTION YET")
 
     def run_openmm_script(self, code, queue):
 
@@ -172,7 +170,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.decomp_data.append(data)
 
     def update_plot(self, msg):
-        if not self.plots_created and msg == '':
+        if not self.plots_created and type(msg) == dict:
             self.create_plots(msg.keys())
             self.plots_created = True
 
@@ -192,23 +190,24 @@ class OpenMMScriptRunner(QtCore.QObject):
                 self.Signals.inform_about_situation.emit(msg)
 
 
-class Graphs(QWidget):
-    # global curve, data, p6
-    def __init__(self, *args, **kwargs):
-        # self.contents = contents
-        # super().__init__()
-        super().__init__(*args, **kwargs)
+class Graphs(pg.GraphicsWindow):
+    pg.setConfigOption('background', None)
+    pg.setConfigOption('foreground', (197, 198, 199))
+    global current_step_keeper
+
+    def __init__(self, parent=None, *args, **kwargs):
+        pg.GraphicsWindow.__init__(self, show=False, *args, **kwargs)
+        self.setParent(parent)
 
         self.real_time_as_minute = []
         self.real_speed = []
-        pg.setConfigOption('background', None)
-        pg.setConfigOption('foreground', (197, 198, 199))
-        self.win = pg.GraphicsWindow(show=False, title="Basic plotting examples")
+        self.current_step_keeper = None
+        # self.win = pg.GraphicsWindow(show=False, title="Basic plotting examples")
         # setting style sheet to the plot window
-        self.win.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
-        self.win.setWindowTitle('Real Time Simulation Monitoring')
+        self.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
+        self.setWindowTitle('Real Time Simulation Monitoring')
 
-        self.temperature_graph = self.win.addPlot(title="Temperature")
+        self.temperature_graph = self.addPlot(title="Temperature")
         self.temperature_graph.addLegend()
         self.temperature_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.temperature_graph.setLabel('left', "Temperature", units='K')
@@ -219,7 +218,7 @@ class Graphs(QWidget):
         self.temperature_graph_plot = self.temperature_graph.plot(name='Temperature')
 
         # self.win.nextRow()
-        self.energy_graph = self.win.addPlot(title="Energy")
+        self.energy_graph = self.addPlot(title="Energy")
         self.energy_graph.addLegend()
         self.energy_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.energy_graph.setLabel('left', "Energy", units='kJ/mole')
@@ -232,8 +231,8 @@ class Graphs(QWidget):
         self.total_energy_graph = self.energy_graph.plot(name='Total')
         # self.energy_graph.addLegend()
 
-        self.win.nextRow()
-        self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
+        self.nextRow()
+        self.simulation_speed_graph = self.addPlot(title="Speed", row=1, colspan=2)
         self.simulation_speed_graph.addLegend()
         self.simulation_speed_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.simulation_speed_graph.setLabel('left', "Speed", units='ns/day')
@@ -242,8 +241,8 @@ class Graphs(QWidget):
 
         self.simulation_speed_graph_plot = self.simulation_speed_graph.plot(name='Speed (ns/day)')
 
-        self.win.nextRow()
-        self.simulation_time_graph = self.win.addPlot(title="Remaining Time", row=2, colspan=2)
+        self.nextRow()
+        self.simulation_time_graph = self.addPlot(title="Remaining Time", row=2, colspan=2)
         self.simulation_time_graph.addLegend()
         self.simulation_time_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.simulation_time_graph.setLabel('left', "Remaining Time", units='sec')
@@ -315,6 +314,15 @@ class Graphs(QWidget):
         self.pretty_time(y_time_remaining)
 
         if x.shape == y_temp.shape:
+            print(self.current_step_keeper, x)
+            if self.current_step_keeper is not None and self.current_step_keeper[-1] > x[-1]:
+                if self.current_step_keeper[-1] - self.current_step_keeper[-2] > 1:
+
+                    ticks = pg.VTickGroup(xvals=[self.current_step_keeper[-1]], yrange=[0, 2.5],
+                                          pen={'color': 'g', 'width': 2.5})
+                    self.simulation_time_graph_plot.getViewBox().addItem(ticks)
+                x = np.append(self.current_step_keeper, self.current_step_keeper[-1] + 1)
+
             try:
                 self.temperature_graph_plot.setData(x=x, y=y_temp, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
                                                     name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
@@ -338,6 +346,8 @@ class Graphs(QWidget):
                                                          symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0,
                                                          name="Speed",
                                                          brush=(150, 150, 50, 30))
+
+                self.current_step_keeper = x
 
             except Exception as err:
                 print("========================\n", err)

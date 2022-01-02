@@ -1,4 +1,8 @@
-
+from gui.ui_styles import Style
+from src.mplwidget import *
+from src.omm_runner import *
+from src.pyside_dynamic import loadUi
+import src.ui_functions as UIF
 
 from PySide2 import QtCore
 from PySide2.QtCore import Slot, QThread
@@ -12,8 +16,6 @@ import threading
 import itertools
 import tokenize
 from PySide2.QtCore import Signal
-# from src.omm_runner import *
-# from gui.ui_styles import Style
 from ui_main import *
 
 

@@ -1,26 +1,19 @@
+from src.builder import *
+
+from importlib import resources
 import os
 import sys
 import platform
-from importlib import resources
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
                            QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QIntValidator,
                            QRegExpValidator)
-from PySide2.QtWidgets import *
+from PySide2 import QtWidgets, QtGui
 
 # =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 from openmm.app import Modeller
-import src.ui_functions as UIF
-from src.builder import *
-from gui.ui_styles import Style
-from src.mplwidget import *
-from src.omm_runner import *
-from src.pyside_dynamic import loadUi
-
-
-
 from pdbfixer import PDBFixer
 import multiprocessing as mp
 
@@ -61,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ------------------------------------ > START OF SIMULATION MONITORING < ------------------------------------ #
         self.created_script = None
         self.Real_Time_Graphs = Graphs()
-        self.verticalLayout_22.addWidget(self.Real_Time_Graphs.win)
+        self.verticalLayout_22.addWidget(self.Real_Time_Graphs)
         # ------------------------------------- > END OF SIMULATION MONITORING < ------------------------------------- #
 
         # ############################################################################################################ #
@@ -523,8 +516,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Run.setEnabled(True)
 
     def inform_about_progress(self, message):
-        print(message)
         self.label_top_info_1.setText(message)
+
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################
@@ -831,7 +824,7 @@ class SplashScreen(QMainWindow):
         # ----- > Qtimer For Change Description on Splash Screen
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.progress)
-        self.timer.start(8)
+        self.timer.start(19)
 
         # ----- > Change Description on Splash Screen
         self.label_title.setText("MDPerTool v0.1")
@@ -841,8 +834,8 @@ class SplashScreen(QMainWindow):
         self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")
 
         # ----- > CHANGE TEXT ON SPLASH SCREEN
-        QtCore.QTimer.singleShot(900, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
-        QtCore.QTimer.singleShot(1500,
+        QtCore.QTimer.singleShot(1500, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
+        QtCore.QTimer.singleShot(2000,
                                  lambda: self.label_description.setText("<strong>LOADING</strong> USER INTERFACE"))
 
         self.show()
