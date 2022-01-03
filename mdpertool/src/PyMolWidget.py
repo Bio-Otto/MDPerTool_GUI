@@ -180,6 +180,7 @@ class PymolQtWidget(QGLWidget):
     def clear_all_labels(self):
         self._pymol.cmd.label('all', '')
         self._pymol.cmd.do('color green')
+        self._pymol.cmd.set('ray_trace_mode', 1)
 
     def activate_navigation_tool(self):
         self._pymol.cmd.set("internal_gui", 1)

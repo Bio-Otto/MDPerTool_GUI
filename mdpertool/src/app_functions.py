@@ -305,7 +305,7 @@ class Functions(MainWindow):
             del engine
 
     def plot_networks(self):
-        
+
         clean_graph_list = []
         clean_log_list = []
 
