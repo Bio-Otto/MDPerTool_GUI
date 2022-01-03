@@ -82,7 +82,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.move(qtRectangle.topLeft())
 
         # ----- > Start With Standart Size
-        startSize = QSize(1600, 960)
+        startSize = QSize(1600, 1000)
         self.resize(startSize)
         self.setMinimumSize(startSize)
         # UIFunctions.enableMaximumSize(self, 500, 720)

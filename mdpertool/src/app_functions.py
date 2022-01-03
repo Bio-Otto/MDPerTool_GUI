@@ -309,15 +309,21 @@ class Functions(MainWindow):
         print(self.log_holder, self.network_holder)
         print("================***===============")
         clean_graph_list = []
+        clean_log_list = []
 
         if self.node_threshold is not None:
-            for i in self.network_holder:
+            print("node threshold is NOT --> NONE")
+            for k, i in enumerate(self.network_holder):
                 if len(i.nodes()) > self.node_threshold:
+                    clean_log_list.append(self.log_holder[k])
                     clean_graph_list.append(i)
 
         if self.node_threshold is None:
-            for i in self.network_holder:
-                clean_graph_list.append(i)
+            print("node threshold is --> NONE")
+            for k, i in enumerate(self.network_holder):
+                if len(i.nodes()) > 0:
+                    clean_log_list.append(self.log_holder[k])
+                    clean_graph_list.append(i)
 
         # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
         if len(clean_graph_list) > 0:
@@ -430,7 +436,7 @@ class Functions(MainWindow):
             dissipation_curve_widget.setObjectName("dissipation_curve_widget")
             gridLayout.addWidget(widget, 5, 0, 1, 1)
 
-            ################################################################################################
+            ############################################################################################################
             show_navigation_button = QtWidgets.QPushButton(tab)
             show_navigation_button.setEnabled(True)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
@@ -1157,8 +1163,6 @@ class Functions(MainWindow):
             hide_figure_settings_on_analysis_pushButton.setFlat(False)
             hide_figure_settings_on_analysis_pushButton.setObjectName("hide_figure_settings_pushButton")
 
-            ################################################################################################
-
             possible_path = str(self.response_time_lineEdit.text())
             if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
                 source_residue = self.source_res_comboBox.currentText()
@@ -1169,7 +1173,7 @@ class Functions(MainWindow):
                 if source_residue != '':
                     dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue)
 
-            # --> 3D View Frame
+            # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
             pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
                                                   "   border: 1px solid black;\n"
@@ -1193,8 +1197,6 @@ class Functions(MainWindow):
             self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
             horizontalLayout.addWidget(analysis_settings_groupBox)
 
-            # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
-
             Protein3DNetworkView = PymolQtWidget(self)
             verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
             verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
@@ -1203,7 +1205,7 @@ class Functions(MainWindow):
             Protein3DNetworkView.update()
             Protein3DNetworkView.show()
             verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
-
+            # ################################# ==> END - 3D WIDGETS LOCATING <== ################################## #
             # matplotlib_widget = WidgetPlot(self)
             # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
             # verticalLayout.addWidget(self.matplotlib_widget.canvas)
@@ -1242,18 +1244,25 @@ class Functions(MainWindow):
                                                                     pymol_ray_label_on_analysis)
 
             Helper_Functions.Handel_Save_Figure_Options_on_analysis_Changed(self, figure_settings_on_analysis_groupBox)
-            # self.Handel_Save_Figure_Options_Changed()
-            # self.Handel_Save_Figure_Options()
             ##########################################################################################################
 
             source_res = self.source_res_comboBox.currentText()[:-1]
-            target_res_list = [self.selected_target_residues_listWidget.item(x).text()[:-1]
-                               for x in range(self.selected_target_residues_listWidget.count())]
+
+            target_res_list = []
+            if self.all_residue_as_target:
+                for log in clean_log_list:
+                    target_res_list.append(log.split('\n')[0].split(' ')[-1])
+
+            if not self.all_residue_as_target:
+                target_res_list = [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                                   for x in range(self.selected_target_residues_listWidget.count())]
 
             # #################################################
             shrotest_str_form = ''
 
-            colors = ['#957DAD', '#D291BC', '#FEC8D8', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8abb5']
+            colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8abb5', '#77dd77', '#aa9499',
+                      '#b39eb5', '#c6a4a4', '#ff694f', '#95b8d1', '#52b2cf', '#d3ab9e', '#fb6f92', '#872187',
+                      '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
             all_paths = []
             for graph_i in all_graph_list:
@@ -1278,6 +1287,7 @@ class Functions(MainWindow):
                                         source_res, target_i, len(graph_i.nodes())))
 
                         except Exception as err:
+                            shrotest_str_form = ''
                             print("SHORTEST PATH LOG: ", err)
 
             all_path_string = ''
@@ -1345,10 +1355,10 @@ class Functions(MainWindow):
                             print(exc_type, fname, exc_tb.tb_lineno)
 
                         all = ''
-                        for j in self.log_holder:
-                            if j != '':
-                                all = all + '\n' + j
-                                print("all: ", all)
+                        for j in clean_log_list:
+                            # if j != '':
+                            all = all + '\n' + j
+                            print("all: ", all)
                         Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
                         del self.log_holder, self.network_holder
 
