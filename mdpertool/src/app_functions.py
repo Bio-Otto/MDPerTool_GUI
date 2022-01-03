@@ -51,6 +51,125 @@ class Helper_Functions():
 
         return avail_plt_and_speed.keys(), avail_plt_and_speed
 
+    def show_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                hide_navigation_button):
+        print("Showed clicked")
+        analysis_settings_groupBox.show()
+        show_navigation_button.hide()
+        hide_navigation_button.show()
+
+    def hide_visualization_settings_on_analysis(self, show_navigation_button, hide_navigation_button,
+                                                analysis_settings_groupBox):
+        print("Hide clicked")
+        analysis_settings_groupBox.hide()
+        show_navigation_button.show()
+        hide_navigation_button.hide()
+
+    def visualization_Handel_buttons_changing_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                          hide_navigation_button):
+        Helper_Functions.hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                hide_navigation_button)
+
+    def hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                hide_navigation_button):
+        analysis_settings_groupBox.hide()
+        show_navigation_button.show()
+        hide_navigation_button.hide()
+
+    def Handel_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button, hide_navigation_button):
+        show_navigation_button.clicked.connect(lambda:
+            Helper_Functions.show_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                    hide_navigation_button))
+        hide_navigation_button.clicked.connect(lambda:
+            Helper_Functions.hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                    hide_navigation_button))
+
+    # def clear_residue_labels(self):
+    #     self.ProteinView.clear_all_labels()
+    #     self.ProteinView.update()
+
+    def activate_navigation_on_Pymol(self, created_pymol_widget):
+        created_pymol_widget.activate_navigation_tool()
+        created_pymol_widget.paintGL()
+        created_pymol_widget.update()
+        created_pymol_widget.show()
+
+    def deactivate_navigation_on_Pymol(self, created_pymol_widget):
+        created_pymol_widget.deactivate_navigation_tool()
+        created_pymol_widget.paintGL()
+        created_pymol_widget.update()
+        created_pymol_widget.show()
+
+    def clear_residue_labels(self, created_pymol_widget):
+        created_pymol_widget.clear_all_labels()
+        created_pymol_widget.update()
+
+    def show_beatiful_in_Pymol(self, created_pymol_widget):
+        created_pymol_widget.set_ss_figure()
+        created_pymol_widget.update()
+        created_pymol_widget.show()
+
+    def save_as_png_Pymol(self, created_pymol_widget, width_horizontalSlider, height_horizontalSlider,
+                          dpi_horizontalSlider, ray_horizontalSlider):
+        filedialog = QFileDialog(self)
+        filedialog.setDefaultSuffix("png")
+        filedialog.setNameFilter("PNG Files (*.png);;All files (*.*)")
+        filedialog.setAcceptMode(QFileDialog.AcceptSave)
+        selected = filedialog.exec()
+
+        if selected:
+            filename = filedialog.selectedFiles()[0]
+        else:
+            return
+        if filename == "":
+            Message_Boxes.Warning_message(self, 'png save failed!', "No file name selected.",
+                                          Style.MessageBox_stylesheet)
+            return
+
+        try:
+            created_pymol_widget.get_png_figure(filename, width=width_horizontalSlider.value(),
+                                            height=height_horizontalSlider.value(),
+                                            dpi=dpi_horizontalSlider.value(),
+                                            ray=ray_horizontalSlider.value())
+            created_pymol_widget.update()
+
+        except Exception as save_err:
+            Message_Boxes.Critical_message(self, 'png save failed!', str(save_err), Style.MessageBox_stylesheet)
+
+    # ----------------------------------------- > FIGURE OPTIONS IN PYMOL < ------------------------------------------ #
+    def Handel_Save_Figure_Options_on_analysis_Changed(self, figure_settings_groupBox_on_analysis):
+        Helper_Functions.hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis)
+
+    def Handel_Save_Figure_Options_on_analysis(self, save_as_png_pushButton, hide_figure_settings_pushButton,
+                                               width_horizontalSlider, height_horizontalSlider, dpi_horizontalSlider,
+                                               ray_horizontalSlider, figure_settings_groupBox_on_analysis,
+                                               pymol_width_label, pymol_height_label, pymol_dpi_label, pymol_ray_label):
+
+        save_as_png_pushButton.clicked.connect(lambda: Helper_Functions.show_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis))
+        hide_figure_settings_pushButton.clicked.connect(lambda: Helper_Functions.hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis))
+        width_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_width_label_on_analysis(self, width_horizontalSlider, pymol_width_label))
+        height_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_height_label_on_analysis(self, height_horizontalSlider, pymol_height_label))
+        dpi_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_dpi_label_on_analysis(self, dpi_horizontalSlider, pymol_dpi_label))
+        ray_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_ray_label_on_analysis(self, ray_horizontalSlider, pymol_ray_label))
+
+    def show_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis):
+        figure_settings_groupBox_on_analysis.show()
+
+    def hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis):
+        figure_settings_groupBox_on_analysis.hide()
+
+    def figure_width_label_on_analysis(self, width_horizontalSlider, with_label):
+        with_label.setText("Width: " + str(width_horizontalSlider.value()))
+
+    def figure_height_label_on_analysis(self, height_horizontalSlider, height_label):
+        height_label.setText("Height: " + str(height_horizontalSlider.value()))
+
+    def figure_dpi_label_on_analysis(self, dpi_horizontalSlider, dpi_label):
+        dpi_label.setText("Dpi: " + str(dpi_horizontalSlider.value()))
+
+    def figure_ray_label_on_analysis(self, ray_horizontalSlider, ray_label):
+        ray_label.setText("Ray: " + str(ray_horizontalSlider.value()))
+
 
 class Functions(MainWindow):
     global active_workers
@@ -311,6 +430,735 @@ class Functions(MainWindow):
             dissipation_curve_widget.setObjectName("dissipation_curve_widget")
             gridLayout.addWidget(widget, 5, 0, 1, 1)
 
+            ################################################################################################
+            show_navigation_button = QtWidgets.QPushButton(tab)
+            show_navigation_button.setEnabled(True)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(show_navigation_button.sizePolicy().hasHeightForWidth())
+            show_navigation_button.setSizePolicy(sizePolicy)
+            show_navigation_button.setMaximumSize(QtCore.QSize(20, 61))
+            show_navigation_button.setStyleSheet(" QPushButton \n"
+                                                 "        {\n"
+                                                 "         color: white; \n"
+                                                 "        border: 2px solid rgb(52, 59, 72); \n"
+                                                 "        border-radius: 5px; \n"
+                                                 "        background-color:  rgb(255, 17, 100); \n"
+                                                 "        border-width: 1px; \n"
+                                                 "        outline: none;    \n"
+                                                 "        background-color: rgb(110, 105, 225);\n"
+                                                 "    \n"
+                                                 "        }\n"
+                                                 "\n"
+                                                 "QPushButton:hover \n"
+                                                 "       { \n"
+                                                 "        background-color: rgb(22, 200, 244); \n"
+                                                 "        border: 2px solid rgb(61, 70, 86);\n"
+                                                 "        }\n"
+                                                 "\n"
+                                                 "QPushButton:pressed \n"
+                                                 "        { \n"
+                                                 "         background-color:  rgb(15, 133, 163); \n"
+                                                 "         border: 2px solid rgb(43, 50, 61);\n"
+                                                 "         }      ")
+            show_navigation_button.setText("")
+            icon11 = QtGui.QIcon()
+            icon11.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-chevron-circle-right-alt.png"), QtGui.QIcon.Normal,
+                             QtGui.QIcon.Off)
+            show_navigation_button.setIcon(icon11)
+            show_navigation_button.setObjectName("show_navigation_button")
+            gridLayout.addWidget(show_navigation_button, 3, 1, 1, 1)
+
+            hide_navigation_button = QtWidgets.QPushButton(tab)
+            hide_navigation_button.setMaximumSize(QtCore.QSize(20, 61))
+            hide_navigation_button.setStyleSheet(" QPushButton \n"
+                                                 "        {\n"
+                                                 "         color: white; \n"
+                                                 "        border: 2px solid rgb(52, 59, 72); \n"
+                                                 "        border-radius: 5px; \n"
+                                                 "        background-color:  rgb(255, 17, 100); \n"
+                                                 "        border-width: 1px; \n"
+                                                 "        outline: none;    \n"
+                                                 "        background-color: rgb(110, 105, 225);\n"
+                                                 "    \n"
+                                                 "        }\n"
+                                                 "\n"
+                                                 "QPushButton:hover \n"
+                                                 "       { \n"
+                                                 "        background-color: rgb(22, 200, 244); \n"
+                                                 "        border: 2px solid rgb(61, 70, 86);\n"
+                                                 "        }\n"
+                                                 "\n"
+                                                 "QPushButton:pressed \n"
+                                                 "        { \n"
+                                                 "         background-color:  rgb(15, 133, 163); \n"
+                                                 "         border: 2px solid rgb(43, 50, 61);\n"
+                                                 "         }     ")
+            hide_navigation_button.setText("")
+            hide_navigation_button.setIcon(icon11)
+            hide_navigation_button.setObjectName("hide_navigation")
+            gridLayout.addWidget(hide_navigation_button, 3, 3, 1, 1)
+
+            analysis_settings_groupBox = QtWidgets.QGroupBox(tab)
+            analysis_settings_groupBox.setTitle('Visualization Settings')
+            analysis_settings_groupBox.setMinimumSize(QtCore.QSize(170, 0))
+            analysis_settings_groupBox.setMaximumSize(QtCore.QSize(170, 16777215))
+            analysis_settings_groupBox.setStyleSheet("QGroupBox\n"
+                                                     "{\n"
+                                                     "    border: 1px solid black;\n"
+                                                     "    border-radius: 5px;\n"
+                                                     "    border-top-color: rgb(157, 90, 198);\n"
+                                                     "    border-left-color: rgb(157, 90, 198);\n"
+                                                     "    border-bottom-color: rgb(157, 90, 198);\n"
+                                                     "    border-right-color: rgb(157, 90, 198);\n"
+                                                     " \n"
+                                                     "}")
+            analysis_settings_groupBox.setAlignment(
+                QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+            analysis_settings_groupBox.setObjectName("analysis_settings_groupBox")
+
+            gridLayoutWidget_on_analysis = QtWidgets.QWidget(analysis_settings_groupBox)
+            gridLayoutWidget_on_analysis.setGeometry(QtCore.QRect(11, 50, 151, 251))
+            gridLayoutWidget_on_analysis.setObjectName("gridLayoutWidget_on_analysis")
+            verticalLayout_analysis = QtWidgets.QVBoxLayout(gridLayoutWidget_on_analysis)
+            verticalLayout_analysis.setContentsMargins(0, 0, 0, 0)
+            verticalLayout_analysis.setObjectName("verticalLayout_analysis")
+
+            activate_pymol_navigation_on_analysis = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
+            activate_pymol_navigation_on_analysis.setText('Activate')
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(activate_pymol_navigation_on_analysis.sizePolicy().hasHeightForWidth())
+            activate_pymol_navigation_on_analysis.setSizePolicy(sizePolicy)
+            activate_pymol_navigation_on_analysis.setMinimumSize(QtCore.QSize(149, 33))
+            activate_pymol_navigation_on_analysis.setMaximumSize(QtCore.QSize(110, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            activate_pymol_navigation_on_analysis.setFont(font)
+            activate_pymol_navigation_on_analysis.setStyleSheet("            QPushButton \n"
+                                                                "            {\n"
+                                                                "                color: white; \n"
+                                                                "                border: 2px solid rgb(52, 59, 72); \n"
+                                                                "                border-radius: 5px; \n"
+                                                                "                background-color:  rgb(22, 200, 244); \n"
+                                                                "                margin-top:1px; \n"
+                                                                "                margin-bottom: 1px; \n"
+                                                                "                border-width: 1px; \n"
+                                                                "                padding: 5px; \n"
+                                                                "                outline: none;\n"
+                                                                "            }\n"
+                                                                "\n"
+                                                                "            QPushButton:hover \n"
+                                                                "            { \n"
+                                                                "                background-color: rgb(255, 17, 100); \n"
+                                                                "                border: 2px solid rgb(61, 70, 86);\n"
+                                                                "            }\n"
+                                                                "\n"
+                                                                "            QPushButton:pressed \n"
+                                                                "            { \n"
+                                                                "                background-color:  rgb(15, 133, 163); \n"
+                                                                "                border: 2px solid rgb(43, 50, 61);\n"
+                                                                "            }")
+            icon12 = QtGui.QIcon()
+            icon12.addPixmap(QtGui.QPixmap(":/24x24/icons/24x24/cil-cursor.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            activate_pymol_navigation_on_analysis.setIcon(icon12)
+            activate_pymol_navigation_on_analysis.setObjectName("activate_pymol_navigation_on_analysis")
+            verticalLayout_analysis.addWidget(activate_pymol_navigation_on_analysis)
+
+            deactivate_pymol_navigation_on_analysis = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
+            deactivate_pymol_navigation_on_analysis.setText('Deactivate')
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(deactivate_pymol_navigation_on_analysis.sizePolicy().hasHeightForWidth())
+            deactivate_pymol_navigation_on_analysis.setSizePolicy(sizePolicy)
+            deactivate_pymol_navigation_on_analysis.setMinimumSize(QtCore.QSize(149, 33))
+            deactivate_pymol_navigation_on_analysis.setMaximumSize(QtCore.QSize(110, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            deactivate_pymol_navigation_on_analysis.setFont(font)
+            deactivate_pymol_navigation_on_analysis.setStyleSheet("            QPushButton \n"
+                                                                  "            {\n"
+                                                                  "                color: white; \n"
+                                                                  "                border: 2px solid rgb(52, 59, 72); \n"
+                                                                  "                border-radius: 5px; \n"
+                                                                  "                background-color:  rgb(22, 200, 244); \n"
+                                                                  "                margin-top:1px; \n"
+                                                                  "                margin-bottom: 1px; \n"
+                                                                  "                border-width: 1px; \n"
+                                                                  "                padding: 5px; \n"
+                                                                  "                outline: none;\n"
+                                                                  "            }\n"
+                                                                  "\n"
+                                                                  "            QPushButton:hover \n"
+                                                                  "            { \n"
+                                                                  "                background-color: rgb(255, 17, 100); \n"
+                                                                  "                border: 2px solid rgb(61, 70, 86);\n"
+                                                                  "            }\n"
+                                                                  "\n"
+                                                                  "            QPushButton:pressed \n"
+                                                                  "            { \n"
+                                                                  "                background-color:  rgb(15, 133, 163); \n"
+                                                                  "                border: 2px solid rgb(43, 50, 61);\n"
+                                                                  "            }")
+            icon13 = QtGui.QIcon()
+            icon13.addPixmap(QtGui.QPixmap(":/20x20/icons/20x20/cil-x.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            deactivate_pymol_navigation_on_analysis.setIcon(icon13)
+            deactivate_pymol_navigation_on_analysis.setObjectName("deactivate_pymol_navigation")
+            verticalLayout_analysis.addWidget(deactivate_pymol_navigation_on_analysis)
+
+            refresh_pushButton_on_analysis = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
+            refresh_pushButton_on_analysis.setText('Refresh')
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(refresh_pushButton_on_analysis.sizePolicy().hasHeightForWidth())
+            refresh_pushButton_on_analysis.setSizePolicy(sizePolicy)
+            refresh_pushButton_on_analysis.setMinimumSize(QtCore.QSize(149, 33))
+            refresh_pushButton_on_analysis.setMaximumSize(QtCore.QSize(110, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            refresh_pushButton_on_analysis.setFont(font)
+            refresh_pushButton_on_analysis.setStyleSheet("            QPushButton \n"
+                                                         "            {\n"
+                                                         "                color: white; \n"
+                                                         "                border: 2px solid rgb(52, 59, 72); \n"
+                                                         "                border-radius: 5px; \n"
+                                                         "                background-color:  rgb(22, 200, 244); \n"
+                                                         "                margin-top:1px; \n"
+                                                         "                margin-bottom: 1px; \n"
+                                                         "                border-width: 1px; \n"
+                                                         "                padding: 5px; \n"
+                                                         "                outline: none;\n"
+                                                         "            }\n"
+                                                         "\n"
+                                                         "            QPushButton:hover \n"
+                                                         "            { \n"
+                                                         "                background-color: rgb(255, 17, 100); \n"
+                                                         "                border: 2px solid rgb(61, 70, 86);\n"
+                                                         "            }\n"
+                                                         "\n"
+                                                         "            QPushButton:pressed \n"
+                                                         "            { \n"
+                                                         "                background-color:  rgb(15, 133, 163); \n"
+                                                         "                border: 2px solid rgb(43, 50, 61);\n"
+                                                         "            }")
+            icon14 = QtGui.QIcon()
+            icon14.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-reload.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            refresh_pushButton_on_analysis.setIcon(icon14)
+            refresh_pushButton_on_analysis.setObjectName("refresh_pushButton_on_analysis")
+            verticalLayout_analysis.addWidget(refresh_pushButton_on_analysis)
+
+            ss_beatiful_snapshoot_on_analysis = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
+            ss_beatiful_snapshoot_on_analysis.setText('Beatiful Snap')
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(ss_beatiful_snapshoot_on_analysis.sizePolicy().hasHeightForWidth())
+            ss_beatiful_snapshoot_on_analysis.setSizePolicy(sizePolicy)
+            ss_beatiful_snapshoot_on_analysis.setMinimumSize(QtCore.QSize(149, 33))
+            ss_beatiful_snapshoot_on_analysis.setMaximumSize(QtCore.QSize(110, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            ss_beatiful_snapshoot_on_analysis.setFont(font)
+            ss_beatiful_snapshoot_on_analysis.setStyleSheet("            QPushButton \n"
+                                                            "            {\n"
+                                                            "                color: white; \n"
+                                                            "                border: 2px solid rgb(52, 59, 72); \n"
+                                                            "                border-radius: 5px; \n"
+                                                            "                background-color:  rgb(22, 200, 244); \n"
+                                                            "                margin-top:1px; \n"
+                                                            "                margin-bottom: 1px; \n"
+                                                            "                border-width: 1px; \n"
+                                                            "                padding: 5px; \n"
+                                                            "                outline: none;\n"
+                                                            "            }\n"
+                                                            "\n"
+                                                            "            QPushButton:hover \n"
+                                                            "            { \n"
+                                                            "                background-color: rgb(255, 17, 100); \n"
+                                                            "                border: 2px solid rgb(61, 70, 86);\n"
+                                                            "            }\n"
+                                                            "\n"
+                                                            "            QPushButton:pressed \n"
+                                                            "            { \n"
+                                                            "                background-color:  rgb(15, 133, 163); \n"
+                                                            "                border: 2px solid rgb(43, 50, 61);\n"
+                                                            "            }")
+            icon15 = QtGui.QIcon()
+            icon15.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-camera.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            ss_beatiful_snapshoot_on_analysis.setIcon(icon15)
+            ss_beatiful_snapshoot_on_analysis.setObjectName("ss_beatiful_snapshoot_on_analysis")
+            verticalLayout_analysis.addWidget(ss_beatiful_snapshoot_on_analysis)
+
+            save_as_png_on_analysis_pushButton = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
+            save_as_png_on_analysis_pushButton.setText('Save as png')
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(save_as_png_on_analysis_pushButton.sizePolicy().hasHeightForWidth())
+            save_as_png_on_analysis_pushButton.setSizePolicy(sizePolicy)
+            save_as_png_on_analysis_pushButton.setMinimumSize(QtCore.QSize(149, 33))
+            save_as_png_on_analysis_pushButton.setMaximumSize(QtCore.QSize(110, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            save_as_png_on_analysis_pushButton.setFont(font)
+            save_as_png_on_analysis_pushButton.setStyleSheet("            QPushButton \n"
+                                                             "            {\n"
+                                                             "                color: white; \n"
+                                                             "                border: 2px solid rgb(52, 59, 72); \n"
+                                                             "                border-radius: 5px; \n"
+                                                             "                background-color:  rgb(22, 200, 244); \n"
+                                                             "                margin-top:1px; \n"
+                                                             "                margin-bottom: 1px; \n"
+                                                             "                border-width: 1px; \n"
+                                                             "                padding: 5px; \n"
+                                                             "                outline: none;\n"
+                                                             "            }\n"
+                                                             "\n"
+                                                             "            QPushButton:hover \n"
+                                                             "            { \n"
+                                                             "                background-color: rgb(255, 17, 100); \n"
+                                                             "                border: 2px solid rgb(61, 70, 86);\n"
+                                                             "            }\n"
+                                                             "\n"
+                                                             "            QPushButton:pressed \n"
+                                                             "            { \n"
+                                                             "                background-color:  rgb(15, 133, 163); \n"
+                                                             "                border: 2px solid rgb(43, 50, 61);\n"
+                                                             "            }")
+            icon16 = QtGui.QIcon()
+            icon16.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-data-transfer-down.png"), QtGui.QIcon.Normal,
+                             QtGui.QIcon.Off)
+            save_as_png_on_analysis_pushButton.setIcon(icon16)
+            save_as_png_on_analysis_pushButton.setObjectName("save_as_png_on_analysis_pushButton")
+            verticalLayout_analysis.addWidget(save_as_png_on_analysis_pushButton)
+
+            figure_settings_on_analysis_groupBox = QtWidgets.QGroupBox(analysis_settings_groupBox)
+            figure_settings_on_analysis_groupBox.setTitle('Figure Settings')
+            figure_settings_on_analysis_groupBox.setGeometry(QtCore.QRect(-1, 300, 171, 401))
+            figure_settings_on_analysis_groupBox.setObjectName("figure_settings_on_analysis_groupBox")
+            verticalLayoutWidget_on_analysis_2 = QtWidgets.QWidget(figure_settings_on_analysis_groupBox)
+            verticalLayoutWidget_on_analysis_2.setGeometry(QtCore.QRect(10, 54, 151, 311))
+            verticalLayoutWidget_on_analysis_2.setObjectName("verticalLayoutWidget_on_analysis_2")
+            figure_settings_on_analysis_verticalLayout = QtWidgets.QVBoxLayout(verticalLayoutWidget_on_analysis_2)
+            figure_settings_on_analysis_verticalLayout.setContentsMargins(0, 0, 0, 0)
+            figure_settings_on_analysis_verticalLayout.setObjectName("figure_settings_on_analysis_verticalLayout")
+
+            pymol_width_label_on_analysis = QtWidgets.QLabel(verticalLayoutWidget_on_analysis_2)
+            pymol_width_label_on_analysis.setText("Width: 1200")
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(pymol_width_label_on_analysis.sizePolicy().hasHeightForWidth())
+            pymol_width_label_on_analysis.setSizePolicy(sizePolicy)
+            pymol_width_label_on_analysis.setMinimumSize(QtCore.QSize(50, 22))
+            pymol_width_label_on_analysis.setMaximumSize(QtCore.QSize(16777215, 22))
+            pymol_width_label_on_analysis.setStyleSheet("QLabel {\n"
+                                                        "    background-color: rgb(27, 29, 35);\n"
+                                                        "    border-radius: 5px;\n"
+                                                        "    border: 2px solid rgb(27, 29, 35);\n"
+                                                        "    padding: 1px 1px 1px 1px;\n"
+                                                        "    border-bottom-color: rgb(157, 90, 198);\n"
+                                                        "}\n"
+                                                        "\n"
+                                                        "\n"
+                                                        "QLabel:hover{\n"
+                                                        "    border: 2px solid rgb(64, 71, 88);\n"
+                                                        "    selection-color: rgb(127, 5, 64);\n"
+                                                        "\n"
+                                                        "}")
+            pymol_width_label_on_analysis.setObjectName("pymol_width_label_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(pymol_width_label_on_analysis)
+
+            width_horizontalSlider_on_analysis = QtWidgets.QSlider(verticalLayoutWidget_on_analysis_2)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(width_horizontalSlider_on_analysis.sizePolicy().hasHeightForWidth())
+            width_horizontalSlider_on_analysis.setSizePolicy(sizePolicy)
+            width_horizontalSlider_on_analysis.setStyleSheet("\n"
+                                                             "\n"
+                                                             "QSlider::handle:horizontal \n"
+                                                             "    {\n"
+                                                             "    background-color:  rgb(255, 17, 100);\n"
+                                                             "    border: 2px solid;\n"
+                                                             "    width: 8px;\n"
+                                                             "    margin: -15px 0px;\n"
+                                                             "    }\n"
+                                                             "\n"
+                                                             "QSlider:horizontal \n"
+                                                             "{\n"
+                                                             "    min-height: 20px;\n"
+                                                             "}\n"
+                                                             "\n"
+                                                             "QSlider::groove:horizontal \n"
+                                                             "{\n"
+                                                             "    height: 1px;\n"
+                                                             "    background-color: rgb(110, 105, 225);\n"
+                                                             "    border: 1px solid;\n"
+                                                             "    height: 5px;\n"
+                                                             "    margin: 0px;\n"
+                                                             "    border-radius: 5px;\n"
+                                                             "}\n"
+                                                             "\n"
+                                                             "QSlider::handle:horizontal \n"
+                                                             "{\n"
+                                                             "    width: 10px;\n"
+                                                             "    margin-top: -10px;\n"
+                                                             "    margin-bottom: -10px;\n"
+                                                             "    border-radius: 5px;\n"
+                                                             "    background-color: rgb(255, 17, 100);\n"
+                                                             "    border: 2px solid;\n"
+                                                             "}\n"
+                                                             "\n"
+                                                             "QSlider::handle:horizontal:hover\n"
+                                                             "{\n"
+                                                             "    background-color: rgb(22, 200, 244);\n"
+                                                             "}\n"
+                                                             "")
+            width_horizontalSlider_on_analysis.setMinimum(800)
+            width_horizontalSlider_on_analysis.setMaximum(1920)
+            width_horizontalSlider_on_analysis.setSingleStep(20)
+            width_horizontalSlider_on_analysis.setPageStep(20)
+            width_horizontalSlider_on_analysis.setProperty("value", 1200)
+            width_horizontalSlider_on_analysis.setOrientation(QtCore.Qt.Horizontal)
+            width_horizontalSlider_on_analysis.setInvertedAppearance(False)
+            width_horizontalSlider_on_analysis.setInvertedControls(False)
+            width_horizontalSlider_on_analysis.setTickPosition(QtWidgets.QSlider.NoTicks)
+            width_horizontalSlider_on_analysis.setTickInterval(20)
+            width_horizontalSlider_on_analysis.setObjectName("width_horizontalSlider_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(width_horizontalSlider_on_analysis)
+
+            pymol_height_label_on_analysis = QtWidgets.QLabel(verticalLayoutWidget_on_analysis_2)
+            pymol_height_label_on_analysis.setText("Height: 1080")
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(pymol_height_label_on_analysis.sizePolicy().hasHeightForWidth())
+            pymol_height_label_on_analysis.setSizePolicy(sizePolicy)
+            pymol_height_label_on_analysis.setMinimumSize(QtCore.QSize(50, 22))
+            pymol_height_label_on_analysis.setMaximumSize(QtCore.QSize(16777215, 22))
+            pymol_height_label_on_analysis.setStyleSheet("QLabel {\n"
+                                                         "    background-color: rgb(27, 29, 35);\n"
+                                                         "    border-radius: 5px;\n"
+                                                         "    border: 2px solid rgb(27, 29, 35);\n"
+                                                         "    padding: 1px 1px 1px 1px;\n"
+                                                         "    \n"
+                                                         "    border-bottom-color: rgb(157, 90, 198);\n"
+                                                         "}\n"
+                                                         "\n"
+                                                         "\n"
+                                                         "QLabel:hover{\n"
+                                                         "    border: 2px solid rgb(64, 71, 88);\n"
+                                                         "    selection-color: rgb(127, 5, 64);\n"
+                                                         "\n"
+                                                         "}")
+            pymol_height_label_on_analysis.setObjectName("pymol_height_label_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(pymol_height_label_on_analysis)
+
+            height_horizontalSlider_on_analysis = QtWidgets.QSlider(verticalLayoutWidget_on_analysis_2)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(height_horizontalSlider_on_analysis.sizePolicy().hasHeightForWidth())
+            height_horizontalSlider_on_analysis.setSizePolicy(sizePolicy)
+            height_horizontalSlider_on_analysis.setStyleSheet("QSlider::handle:horizontal \n"
+                                                              "    {\n"
+                                                              "    background-color:  rgb(255, 17, 100);\n"
+                                                              "    border: 2px solid;\n"
+                                                              "    width: 8px;\n"
+                                                              "    margin: -15px 0px;\n"
+                                                              "    }\n"
+                                                              "\n"
+                                                              "QSlider:horizontal \n"
+                                                              "{\n"
+                                                              "    min-height: 20px;\n"
+                                                              "}\n"
+                                                              "\n"
+                                                              "QSlider::groove:horizontal \n"
+                                                              "{\n"
+                                                              "    height: 1px;\n"
+                                                              "    background-color: rgb(110, 105, 225);\n"
+                                                              "    border: 1px solid;\n"
+                                                              "    height: 5px;\n"
+                                                              "    margin: 0px;\n"
+                                                              "    border-radius: 5px;\n"
+                                                              "}\n"
+                                                              "\n"
+                                                              "QSlider::handle:horizontal \n"
+                                                              "{\n"
+                                                              "    width: 10px;\n"
+                                                              "    margin-top: -10px;\n"
+                                                              "    margin-bottom: -10px;\n"
+                                                              "    border-radius: 5px;\n"
+                                                              "    background-color: rgb(255, 17, 100);\n"
+                                                              "    border: 2px solid;\n"
+                                                              "}\n"
+                                                              "\n"
+                                                              "QSlider::handle:horizontal:hover\n"
+                                                              "{\n"
+                                                              "    background-color: rgb(22, 200, 244);\n"
+                                                              "}\n"
+                                                              "")
+            height_horizontalSlider_on_analysis.setMinimum(600)
+            height_horizontalSlider_on_analysis.setMaximum(1080)
+            height_horizontalSlider_on_analysis.setSingleStep(20)
+            height_horizontalSlider_on_analysis.setPageStep(20)
+            height_horizontalSlider_on_analysis.setProperty("value", 1080)
+            height_horizontalSlider_on_analysis.setOrientation(QtCore.Qt.Horizontal)
+            height_horizontalSlider_on_analysis.setTickInterval(20)
+            height_horizontalSlider_on_analysis.setObjectName("height_horizontalSlider_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(height_horizontalSlider_on_analysis)
+
+            pymol_dpi_label_on_analysis = QtWidgets.QLabel(verticalLayoutWidget_on_analysis_2)
+            pymol_dpi_label_on_analysis.setText("Dpi: 150")
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(pymol_dpi_label_on_analysis.sizePolicy().hasHeightForWidth())
+            pymol_dpi_label_on_analysis.setSizePolicy(sizePolicy)
+            pymol_dpi_label_on_analysis.setMinimumSize(QtCore.QSize(50, 22))
+            pymol_dpi_label_on_analysis.setMaximumSize(QtCore.QSize(16777215, 22))
+            pymol_dpi_label_on_analysis.setStyleSheet("QLabel {\n"
+                                                      "    background-color: rgb(27, 29, 35);\n"
+                                                      "    border-radius: 5px;\n"
+                                                      "    border: 2px solid rgb(27, 29, 35);\n"
+                                                      "    padding: 1px 1px 1px 1px;\n"
+                                                      "    \n"
+                                                      "    border-bottom-color: rgb(157, 90, 198);\n"
+                                                      "}\n"
+                                                      "\n"
+                                                      "\n"
+                                                      "QLabel:hover{\n"
+                                                      "    border: 2px solid rgb(64, 71, 88);\n"
+                                                      "    selection-color: rgb(127, 5, 64);\n"
+                                                      "\n"
+                                                      "}")
+            pymol_dpi_label_on_analysis.setObjectName("pymol_dpi_label_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(pymol_dpi_label_on_analysis)
+
+            dpi_horizontalSlider_on_analysis = QtWidgets.QSlider(verticalLayoutWidget_on_analysis_2)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(dpi_horizontalSlider_on_analysis.sizePolicy().hasHeightForWidth())
+            dpi_horizontalSlider_on_analysis.setSizePolicy(sizePolicy)
+            dpi_horizontalSlider_on_analysis.setStyleSheet("QSlider::handle:horizontal \n"
+                                                           "    {\n"
+                                                           "    background-color:  rgb(255, 17, 100);\n"
+                                                           "    border: 2px solid;\n"
+                                                           "    width: 8px;\n"
+                                                           "    margin: -15px 0px;\n"
+                                                           "    }\n"
+                                                           "\n"
+                                                           "QSlider:horizontal \n"
+                                                           "{\n"
+                                                           "    min-height: 20px;\n"
+                                                           "}\n"
+                                                           "\n"
+                                                           "QSlider::groove:horizontal \n"
+                                                           "{\n"
+                                                           "    height: 1px;\n"
+                                                           "    background-color: rgb(110, 105, 225);\n"
+                                                           "    border: 1px solid;\n"
+                                                           "    height: 5px;\n"
+                                                           "    margin: 0px;\n"
+                                                           "    border-radius: 5px;\n"
+                                                           "}\n"
+                                                           "\n"
+                                                           "QSlider::handle:horizontal \n"
+                                                           "{\n"
+                                                           "    width: 10px;\n"
+                                                           "    margin-top: -10px;\n"
+                                                           "    margin-bottom: -10px;\n"
+                                                           "    border-radius: 5px;\n"
+                                                           "    background-color: rgb(255, 17, 100);\n"
+                                                           "    border: 2px solid;\n"
+                                                           "}\n"
+                                                           "\n"
+                                                           "QSlider::handle:horizontal:hover\n"
+                                                           "{\n"
+                                                           "    background-color: rgb(22, 200, 244);\n"
+                                                           "}\n"
+                                                           "")
+            dpi_horizontalSlider_on_analysis.setMinimum(100)
+            dpi_horizontalSlider_on_analysis.setMaximum(300)
+            dpi_horizontalSlider_on_analysis.setSingleStep(50)
+            dpi_horizontalSlider_on_analysis.setPageStep(50)
+            dpi_horizontalSlider_on_analysis.setProperty("value", 150)
+            dpi_horizontalSlider_on_analysis.setOrientation(QtCore.Qt.Horizontal)
+            dpi_horizontalSlider_on_analysis.setTickInterval(50)
+            dpi_horizontalSlider_on_analysis.setObjectName("dpi_horizontalSlider_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(dpi_horizontalSlider_on_analysis)
+
+            pymol_ray_label_on_analysis = QtWidgets.QLabel(verticalLayoutWidget_on_analysis_2)
+            pymol_ray_label_on_analysis.setText("Ray: 1")
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(pymol_ray_label_on_analysis.sizePolicy().hasHeightForWidth())
+            pymol_ray_label_on_analysis.setSizePolicy(sizePolicy)
+            pymol_ray_label_on_analysis.setMinimumSize(QtCore.QSize(0, 22))
+            pymol_ray_label_on_analysis.setMaximumSize(QtCore.QSize(16777215, 22))
+            pymol_ray_label_on_analysis.setStyleSheet("QLabel {\n"
+                                                      "    background-color: rgb(27, 29, 35);\n"
+                                                      "    border-radius: 5px;\n"
+                                                      "    border: 2px solid rgb(27, 29, 35);\n"
+                                                      "    padding: 1px 1px 1px 1px;\n"
+                                                      "    \n"
+                                                      "    border-bottom-color: rgb(157, 90, 198);\n"
+                                                      "}\n"
+                                                      "\n"
+                                                      "\n"
+                                                      "QLabel:hover{\n"
+                                                      "    border: 2px solid rgb(64, 71, 88);\n"
+                                                      "    selection-color: rgb(127, 5, 64);\n"
+                                                      "\n"
+                                                      "}")
+            pymol_ray_label_on_analysis.setObjectName("pymol_ray_label_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(pymol_ray_label_on_analysis)
+
+            ray_horizontalSlider_on_analysis = QtWidgets.QSlider(verticalLayoutWidget_on_analysis_2)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(ray_horizontalSlider_on_analysis.sizePolicy().hasHeightForWidth())
+            ray_horizontalSlider_on_analysis.setSizePolicy(sizePolicy)
+            ray_horizontalSlider_on_analysis.setStyleSheet("QSlider::handle:horizontal \n"
+                                                           "    {\n"
+                                                           "    background-color:  rgb(255, 17, 100);\n"
+                                                           "    border: 2px solid;\n"
+                                                           "    width: 8px;\n"
+                                                           "    margin: -15px 0px;\n"
+                                                           "    }\n"
+                                                           "\n"
+                                                           "QSlider:horizontal \n"
+                                                           "{\n"
+                                                           "    min-height: 20px;\n"
+                                                           "}\n"
+                                                           "\n"
+                                                           "QSlider::groove:horizontal \n"
+                                                           "{\n"
+                                                           "    height: 1px;\n"
+                                                           "    background-color: rgb(110, 105, 225);\n"
+                                                           "    border: 1px solid;\n"
+                                                           "    height: 5px;\n"
+                                                           "    margin: 0px;\n"
+                                                           "    border-radius: 5px;\n"
+                                                           "}\n"
+                                                           "\n"
+                                                           "QSlider::handle:horizontal \n"
+                                                           "{\n"
+                                                           "    width: 10px;\n"
+                                                           "    margin-top: -10px;\n"
+                                                           "    margin-bottom: -10px;\n"
+                                                           "    border-radius: 5px;\n"
+                                                           "    background-color: rgb(255, 17, 100);\n"
+                                                           "    border: 2px solid;\n"
+                                                           "}\n"
+                                                           "\n"
+                                                           "QSlider::handle:horizontal:hover\n"
+                                                           "{\n"
+                                                           "    background-color: rgb(22, 200, 244);\n"
+                                                           "}\n"
+                                                           "")
+            ray_horizontalSlider_on_analysis.setMinimum(1)
+            ray_horizontalSlider_on_analysis.setMaximum(5)
+            ray_horizontalSlider_on_analysis.setPageStep(1)
+            ray_horizontalSlider_on_analysis.setProperty("value", 1)
+            ray_horizontalSlider_on_analysis.setOrientation(QtCore.Qt.Horizontal)
+            ray_horizontalSlider_on_analysis.setTickInterval(1)
+            ray_horizontalSlider_on_analysis.setObjectName("ray_horizontalSlider_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(ray_horizontalSlider_on_analysis)
+
+            get_figure_pushButton_on_analysis = QtWidgets.QPushButton(verticalLayoutWidget_on_analysis_2)
+            get_figure_pushButton_on_analysis.setText("Get Figure")
+            get_figure_pushButton_on_analysis.setMinimumSize(QtCore.QSize(0, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            get_figure_pushButton_on_analysis.setFont(font)
+            get_figure_pushButton_on_analysis.setStyleSheet("QPushButton \n"
+                                                            "{\n"
+                                                            "    border: 2px solid rgb(52, 59, 72);\n"
+                                                            "    border-radius: 5px;        \n"
+                                                            "    background-color: rgb(202, 116, 220);\n"
+                                                            "    \n"
+                                                            "    background-color: rgb(253, 1, 136);\n"
+                                                            "}\n"
+                                                            "\n"
+                                                            "QPushButton:hover \n"
+                                                            "{\n"
+                                                            "    \n"
+                                                            "    background-color: rgb(22, 200, 244); \n"
+                                                            "    border: 2px solid rgb(61, 70, 86);\n"
+                                                            "}\n"
+                                                            "QPushButton:pressed \n"
+                                                            "{    \n"
+                                                            "    background-color: rgb(255, 170, 0);\n"
+                                                            "    border: 2px solid rgb(43, 50, 61);\n"
+                                                            "}")
+            icon17 = QtGui.QIcon()
+            icon17.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-image-plus.png"), QtGui.QIcon.Normal,
+                             QtGui.QIcon.Off)
+            get_figure_pushButton_on_analysis.setIcon(icon17)
+            get_figure_pushButton_on_analysis.setObjectName("get_figure_pushButton_on_analysis")
+            figure_settings_on_analysis_verticalLayout.addWidget(get_figure_pushButton_on_analysis)
+
+            hide_figure_settings_on_analysis_pushButton = QtWidgets.QPushButton(figure_settings_on_analysis_groupBox)
+            hide_figure_settings_on_analysis_pushButton.setEnabled(True)
+            hide_figure_settings_on_analysis_pushButton.setGeometry(QtCore.QRect(55, 370, 65, 20))
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(hide_figure_settings_on_analysis_pushButton.sizePolicy().hasHeightForWidth())
+            hide_figure_settings_on_analysis_pushButton.setSizePolicy(sizePolicy)
+            hide_figure_settings_on_analysis_pushButton.setMinimumSize(QtCore.QSize(65, 20))
+            hide_figure_settings_on_analysis_pushButton.setMaximumSize(QtCore.QSize(65, 20))
+            font = QtGui.QFont()
+            font.setWeight(50)
+            font.setBold(False)
+            hide_figure_settings_on_analysis_pushButton.setFont(font)
+            hide_figure_settings_on_analysis_pushButton.setStyleSheet(" QPushButton \n"
+                                                                      "        {\n"
+                                                                      "         color: white; \n"
+                                                                      "        border: 2px solid rgb(52, 59, 72); \n"
+                                                                      "        border-radius: 5px; \n"
+                                                                      "        background-color:  rgb(255, 17, 100); \n"
+                                                                      "        border-width: 1px; \n"
+                                                                      "        outline: none;    \n"
+                                                                      "        background-color: rgb(110, 105, 225);\n"
+                                                                      "        }\n"
+                                                                      "\n"
+                                                                      "QPushButton:hover \n"
+                                                                      "       { \n"
+                                                                      "        background-color: rgb(22, 200, 244); \n"
+                                                                      "        border: 2px solid rgb(61, 70, 86);\n"
+                                                                      "        }\n"
+                                                                      "\n"
+                                                                      "QPushButton:pressed \n"
+                                                                      "        { \n"
+                                                                      "         background-color:  rgb(15, 133, 163); \n"
+                                                                      "         border: 2px solid rgb(43, 50, 61);\n"
+                                                                      "         }     ")
+            hide_figure_settings_on_analysis_pushButton.setText("")
+            icon18 = QtGui.QIcon()
+            icon18.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-chevron-circle-up-alt.png"),
+                             QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            hide_figure_settings_on_analysis_pushButton.setIcon(icon18)
+            hide_figure_settings_on_analysis_pushButton.setFlat(False)
+            hide_figure_settings_on_analysis_pushButton.setObjectName("hide_figure_settings_pushButton")
+
+            ################################################################################################
+
             possible_path = str(self.response_time_lineEdit.text())
             if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
                 source_residue = self.source_res_comboBox.currentText()
@@ -340,11 +1188,13 @@ class Functions(MainWindow):
             pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
             pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
-            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 6, 1)
+            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 2, 6, 1)
             horizontalLayout.addLayout(gridLayout)
             self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
+            horizontalLayout.addWidget(analysis_settings_groupBox)
 
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
+
             Protein3DNetworkView = PymolQtWidget(self)
             verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
             verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
@@ -357,6 +1207,44 @@ class Functions(MainWindow):
             # matplotlib_widget = WidgetPlot(self)
             # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
             # verticalLayout.addWidget(self.matplotlib_widget.canvas)
+            ##########################################################################################################
+            Helper_Functions.visualization_Handel_buttons_changing_on_analysis(self, analysis_settings_groupBox,
+                                                                               show_navigation_button,
+                                                                               hide_navigation_button)
+            Helper_Functions.Handel_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+                                                        hide_navigation_button)
+
+            activate_pymol_navigation_on_analysis.clicked.connect(
+                lambda: Helper_Functions.activate_navigation_on_Pymol(self, Protein3DNetworkView))
+            deactivate_pymol_navigation_on_analysis.clicked.connect(
+                lambda: Helper_Functions.deactivate_navigation_on_Pymol(self, Protein3DNetworkView))
+            refresh_pushButton_on_analysis.clicked.connect(
+                lambda: Helper_Functions.clear_residue_labels(self, Protein3DNetworkView))
+            ss_beatiful_snapshoot_on_analysis.clicked.connect(
+                lambda: Helper_Functions.show_beatiful_in_Pymol(self, Protein3DNetworkView))
+            get_figure_pushButton_on_analysis.clicked.connect(
+                lambda: Helper_Functions.save_as_png_Pymol(self, Protein3DNetworkView,
+                                                           width_horizontalSlider_on_analysis,
+                                                           height_horizontalSlider_on_analysis,
+                                                           dpi_horizontalSlider_on_analysis,
+                                                           ray_horizontalSlider_on_analysis))
+
+            Helper_Functions.Handel_Save_Figure_Options_on_analysis(self, save_as_png_on_analysis_pushButton,
+                                                                    hide_figure_settings_on_analysis_pushButton,
+                                                                    width_horizontalSlider_on_analysis,
+                                                                    height_horizontalSlider_on_analysis,
+                                                                    dpi_horizontalSlider_on_analysis,
+                                                                    ray_horizontalSlider_on_analysis,
+                                                                    figure_settings_on_analysis_groupBox,
+                                                                    pymol_width_label_on_analysis,
+                                                                    pymol_height_label_on_analysis,
+                                                                    pymol_dpi_label_on_analysis,
+                                                                    pymol_ray_label_on_analysis)
+
+            Helper_Functions.Handel_Save_Figure_Options_on_analysis_Changed(self, figure_settings_on_analysis_groupBox)
+            # self.Handel_Save_Figure_Options_Changed()
+            # self.Handel_Save_Figure_Options()
+            ##########################################################################################################
 
             source_res = self.source_res_comboBox.currentText()[:-1]
             target_res_list = [self.selected_target_residues_listWidget.item(x).text()[:-1]

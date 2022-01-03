@@ -1576,7 +1576,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
 }</string>
                         </property>
                         <property name="currentIndex">
-                         <number>1</number>
+                         <number>0</number>
                         </property>
                         <widget class="QWidget" name="Perturb_Quick">
                          <attribute name="title">
@@ -2412,7 +2412,7 @@ QDoubleSpinBox QAbstractItemView {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>170</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -2756,7 +2756,7 @@ QGroupBox::indicator {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>170</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -3153,7 +3153,7 @@ QSpinBox QAbstractItemView {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>170</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
