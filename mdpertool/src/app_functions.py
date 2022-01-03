@@ -305,9 +305,7 @@ class Functions(MainWindow):
             del engine
 
     def plot_networks(self):
-        print("================***===============")
-        print(self.log_holder, self.network_holder)
-        print("================***===============")
+        
         clean_graph_list = []
         clean_log_list = []
 
