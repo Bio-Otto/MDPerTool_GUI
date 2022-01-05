@@ -190,35 +190,40 @@ class OpenMMScriptRunner(QtCore.QObject):
                 self.Signals.inform_about_situation.emit(msg)
 
 
-class Graphs(pg.GraphicsWindow):
+class Graphs(QWidget):
     pg.setConfigOption('background', None)
     pg.setConfigOption('foreground', (197, 198, 199))
+    pg.setConfigOptions(antialias=True)
     global current_step_keeper
 
-    def __init__(self, parent=None, *args, **kwargs):
-        pg.GraphicsWindow.__init__(self, show=False, *args, **kwargs)
-        self.setParent(parent)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.win = pg.GraphicsLayoutWidget(show=False, title="RMSD Plotting Region")
 
         self.real_time_as_minute = []
         self.real_speed = []
         self.current_step_keeper = None
         # self.win = pg.GraphicsWindow(show=False, title="Basic plotting examples")
         # setting style sheet to the plot window
-        self.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
-        self.setWindowTitle('Real Time Simulation Monitoring')
+        self.win.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
+        self.win.setWindowTitle('Real Time Simulation Monitoring')
 
-        self.temperature_graph = self.addPlot(title="Temperature")
+        self.temperature_graph = self.win.addPlot(title="Temperature")
+        self.temperature_graph.disableAutoRange()
         self.temperature_graph.addLegend()
         self.temperature_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.temperature_graph.setLabel('left', "Temperature", units='K')
         self.temperature_graph.setLabel('bottom', "Step")
         # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
+        self.temperature_graph.setLogMode(x=False, y=False)
         self.temperature_graph.setYRange(200, 400, padding=0)
         self.temperature_graph.showGrid(x=True, y=True)
+        self.temperature_graph.getAxis('left').enableAutoSIPrefix(False)
         self.temperature_graph_plot = self.temperature_graph.plot(name='Temperature')
 
         # self.win.nextRow()
-        self.energy_graph = self.addPlot(title="Energy")
+        self.energy_graph = self.win.addPlot(title="Energy")
         self.energy_graph.addLegend()
         self.energy_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.energy_graph.setLabel('left', "Energy", units='kJ/mole')
@@ -231,8 +236,8 @@ class Graphs(pg.GraphicsWindow):
         self.total_energy_graph = self.energy_graph.plot(name='Total')
         # self.energy_graph.addLegend()
 
-        self.nextRow()
-        self.simulation_speed_graph = self.addPlot(title="Speed", row=1, colspan=2)
+        self.win.nextRow()
+        self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
         self.simulation_speed_graph.addLegend()
         self.simulation_speed_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.simulation_speed_graph.setLabel('left', "Speed", units='ns/day')
@@ -241,8 +246,8 @@ class Graphs(pg.GraphicsWindow):
 
         self.simulation_speed_graph_plot = self.simulation_speed_graph.plot(name='Speed (ns/day)')
 
-        self.nextRow()
-        self.simulation_time_graph = self.addPlot(title="Remaining Time", row=2, colspan=2)
+        self.win.nextRow()
+        self.simulation_time_graph = self.win.addPlot(title="Remaining Time", row=2, colspan=2)
         self.simulation_time_graph.addLegend()
         self.simulation_time_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.simulation_time_graph.setLabel('left', "Remaining Time", units='sec')
@@ -314,7 +319,7 @@ class Graphs(pg.GraphicsWindow):
         self.pretty_time(y_time_remaining)
 
         if x.shape == y_temp.shape:
-            print(self.current_step_keeper, x)
+
             if self.current_step_keeper is not None and self.current_step_keeper[-1] > x[-1]:
                 if self.current_step_keeper[-1] - self.current_step_keeper[-2] > 1:
 
@@ -359,7 +364,6 @@ class Graphs(pg.GraphicsWindow):
         print(data_decomp)
 
     def run_script(self, contents):
-
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
         self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))

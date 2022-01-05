@@ -54,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ------------------------------------ > START OF SIMULATION MONITORING < ------------------------------------ #
         self.created_script = None
         self.Real_Time_Graphs = Graphs()
-        self.verticalLayout_22.addWidget(self.Real_Time_Graphs)
+        self.verticalLayout_22.addWidget(self.Real_Time_Graphs.win)
         # ------------------------------------- > END OF SIMULATION MONITORING < ------------------------------------- #
 
         # ############################################################################################################ #
