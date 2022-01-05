@@ -195,6 +195,7 @@ class UIFunctions(MainWindow):
 
     # ----- > UI Definitions
     def uiDefinitions(self):
+
         def dobleClickMaximizeRestore(event):
             # IF DOUBLE CLICK CHANGE STATUS
             if event.type() == QtCore.QEvent.MouseButtonDblClick:

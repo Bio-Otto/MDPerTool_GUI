@@ -93,11 +93,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ----- > Add Custom Menus
         self.stackedWidget.setMinimumWidth(20)
-        UIF.UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation", "url(:/20x20/icons/20x20/chemical_20x20.png)",
-                               True)
-        UIF.UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring", "url(:/20x20/icons/20x20/cil-monitor.png)", True)
-        UIF.UIFunctions.addNewMenu(self, "Analysis", "btn_analysis", "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
-        UIF.UIFunctions.addNewMenu(self, "Settings", "btn_settings", "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
+        UIF.UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation",
+                                   "url(:/20x20/icons/20x20/chemical_20x20.png)", True)
+        UIF.UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring",
+                                   "url(:/20x20/icons/20x20/cil-monitor.png)", True)
+        UIF.UIFunctions.addNewMenu(self, "Analysis", "btn_analysis",
+                                   "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
+        UIF.UIFunctions.addNewMenu(self, "Settings", "btn_settings",
+                                   "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
         UIF.UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
 
         # ----- > Start Menu Selection
@@ -146,19 +149,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.export_workspace_pushButton.clicked.connect(lambda: UIF.Functions.export_workspace(self))
         self.import_workspace_pushButton.clicked.connect(lambda: UIF.Functions.import_workspace(self))
 
-
-
         # --> RUN TIME SETTINGS
-        self.run_duration_doubleSpinBox.valueChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        self.run_duration_doubleSpinBox.valueChanged.connect(
+            lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.long_simulation_time_unit.currentTextChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.integrator_time_step.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
-        self.Number_of_steps_spinBox.valueChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
+        self.Number_of_steps_spinBox.valueChanged.connect(
+            lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
         self.run = OpenMMScriptRunner
         self.run.Signals.decomp_process.connect(
             lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0] + 1) * 100) / decomp_data[1]))
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
-        self.run.Signals.inform_about_situation.connect(lambda inform_message: self.inform_about_progress(inform_message))
+        self.run.Signals.inform_about_situation.connect(
+            lambda inform_message: self.inform_about_progress(inform_message))
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: UIF.Functions.browse_responseTimeFile(self))
@@ -207,121 +211,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_TabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
         self.tab_count_on_analysis = str(self.analysis_TabWidget.count())
 
-    # def add_tab(self):
-    #     tab = QtWidgets.QWidget()
-    #     tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
-    #
-    #     self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
-    #     self.tab_count_on_analysis = self.analysis_TabWidget.count()
-    #
-    #     horizontalLayout = QtWidgets.QHBoxLayout(tab)
-    #     horizontalLayout.setObjectName("horizontalLayout_" + str(self.tab_count_on_analysis))
-    #     gridLayout = QtWidgets.QGridLayout()
-    #     gridLayout.setObjectName("gridLayout_" + str(self.tab_count_on_analysis))
-    #
-    #     label = QtWidgets.QLabel(tab)
-    #     label.setMinimumSize(QtCore.QSize(0, 22))
-    #     label.setMaximumSize(QtCore.QSize(16777215, 22))
-    #     label.setStyleSheet("QLabel {\n"
-    #                         "    background-color: rgb(27, 29, 35);\n"
-    #                         "    border-radius: 5px;\n"
-    #                         "    border: 2px solid rgb(27, 29, 35);\n"
-    #                         "    padding: 1px 1px 1px 1px;\n"
-    #                         "    \n"
-    #                         "    border-bottom-color: rgb(157, 90, 198);\n"
-    #                         "}\n"
-    #                         "\n"
-    #                         "\n"
-    #                         "QLabel:hover{\n"
-    #                         "    border: 2px solid rgb(64, 71, 88);\n"
-    #                         "    selection-color: rgb(127, 5, 64);\n"
-    #                         "\n"
-    #                         "}")
-    #     label.setObjectName("label_" + str(self.tab_count_on_analysis))
-    #     gridLayout.addWidget(label, 2, 0, 1, 1)
-    #
-    #     shortest_path_listWidget = QtWidgets.QListWidget(tab)
-    #     shortest_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
-    #     shortest_path_listWidget.setObjectName("shortest_path_listWidget")
-    #     gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
-    #
-    #     intersection_path_listWidget = QtWidgets.QListWidget(tab)
-    #     intersection_path_listWidget.setMaximumSize(QtCore.QSize(500, 16777215))
-    #     intersection_path_listWidget.setObjectName("intersection_path_listWidget")
-    #     gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
-    #     label_2 = QtWidgets.QLabel(tab)
-    #     label_2.setMinimumSize(QtCore.QSize(0, 22))
-    #     label_2.setMaximumSize(QtCore.QSize(16777215, 22))
-    #     label_2.setStyleSheet("QLabel {\n"
-    #                           "    background-color: rgb(27, 29, 35);\n"
-    #                           "    border-radius: 5px;\n"
-    #                           "    border: 2px solid rgb(27, 29, 35);\n"
-    #                           "    padding: 1px 1px 1px 1px;\n"
-    #                           "    \n"
-    #                           "    border-bottom-color: rgb(157, 90, 198);\n"
-    #                           "}\n"
-    #                           "\n"
-    #                           "\n"
-    #                           "QLabel:hover{\n"
-    #                           "    border: 2px solid rgb(64, 71, 88);\n"
-    #                           "    selection-color: rgb(127, 5, 64);\n"
-    #                           "\n"
-    #                           "}")
-    #     label_2.setObjectName("label_29")
-    #     gridLayout.addWidget(label_2, 0, 0, 1, 1)
-    #
-    #     ###############################################################################################################
-    #     dissipation_curve_widget = QtWidgets.QWidget(tab)
-    #     sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-    #     sizePolicy.setHorizontalStretch(0)
-    #     sizePolicy.setVerticalStretch(0)
-    #     sizePolicy.setHeightForWidth(dissipation_curve_widget.sizePolicy().hasHeightForWidth())
-    #     dissipation_curve_widget.setSizePolicy(sizePolicy)
-    #     dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 350))
-    #     dissipation_curve_widget.setMaximumSize(QtCore.QSize(450, 16777215))
-    #     dissipation_curve_widget.setObjectName("dissipation_curve_widget")
-    #     gridLayout.addWidget(dissipation_curve_widget, 4, 0, 1, 1)
-    #     ###############################################################################################################
-    #
-    #     pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
-    #     pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
-    #                                           "   border: 1px solid black;\n"
-    #                                           "   border-radius: 5px;\n"
-    #                                           "   border-top-color: rgb(157, 90, 198);\n"
-    #                                           "   border-left-color: rgb(157, 90, 198);\n"
-    #                                           "   border-bottom-color: rgb(157, 90, 198);\n"
-    #                                           "   border-right-color: rgb(157, 90, 198);\n"
-    #                                           "   margin-top: 5px;\n"
-    #                                           "}")
-    #     sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-    #     sizePolicy.setHorizontalStretch(0)
-    #     sizePolicy.setVerticalStretch(0)
-    #     sizePolicy.setHeightForWidth(pyMOL_3D_analysis_frame.sizePolicy().hasHeightForWidth())
-    #     pyMOL_3D_analysis_frame.setSizePolicy(sizePolicy)
-    #     pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-    #     pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
-    #     pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
-    #     gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 1, 6, 1)
-    #     horizontalLayout.addLayout(gridLayout)
-    #     self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
-    #
-    #     # ################################### ==> START - 3D WIDGETS LOCATING <== ################################### #
-    #
-    #     Protein3DNetworkView = UIF.PymolQtWidget(self)
-    #     verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
-    #     verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
-    #     self.setLayout(verticalLayoutProteinNetworkView)
-    #     Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
-    #     Protein3DNetworkView.update()
-    #     Protein3DNetworkView.show()
-    #     verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
-    #
-    #     # matplotlib_widget = WidgetPlot(self)
-    #     # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
-    #     # verticalLayout.addWidget(self.matplotlib_widget.canvas)
-    #
-    #     self.plot_signal.plot_network.connect(lambda: UIF.Functions.plot_networks(self))
-
     def closeTab(self, currentIndex):
         self.analysis_TabWidget.removeTab(currentIndex)
         self.tab_count_on_analysis = self.analysis_TabWidget.count()
@@ -354,12 +243,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.equ_platform_comboBox.currentTextChanged.connect(
             lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
-                                                          per_md_indexes=None))
+                                                              per_md_indexes=None))
         self.per_platform_comboBox.currentTextChanged.connect(
             lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=None,
-                                                          per_md_indexes=per_md_precission_indexes))
+                                                              per_md_indexes=per_md_precission_indexes))
         UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
-                                              per_md_indexes=per_md_precission_indexes)
+                                                  per_md_indexes=per_md_precission_indexes)
 
     def stop_button_clicked(self):
         self.__stop = True
@@ -392,8 +281,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if fetched_and_modified_pdb is None:
             UIF.Message_Boxes.Information_message(self, 'Wrong pdb id "%s"' % self.PDB_ID_lineEdit.text(),
-                                              'There is no protein crystal structure in this expression.',
-                                              Style.MessageBox_stylesheet)
+                                                  'There is no protein crystal structure in this expression.',
+                                                  Style.MessageBox_stylesheet)
 
     def upload_pdb_from_local(self, manuel):
         global selected_chains
@@ -411,15 +300,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 chains = [r.id for r in modeller.topology.chains()]
 
                 checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                               checked=True)
+                                                   checked=True)
                 pdb_fix_dialog_answer = checked_list.exec_()
                 if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
                     selected_chains = [str(s) for s in checked_list.choices]
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
-                                                             ph=7, chains_to_remove=delete_chains)
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
+                                                                 self.Output_Folder_textEdit.toPlainText(),
+                                                                 ph=7, chains_to_remove=delete_chains)
 
                     self.upload_pdb_lineEdit.setText(modified_pdb)
 
@@ -430,8 +320,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
-                                                             ph=7, chains_to_remove=None)
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
+                                                                 self.Output_Folder_textEdit.toPlainText(),
+                                                                 ph=7, chains_to_remove=None)
 
                     self.upload_pdb_textEdit.setText(modified_pdb)
 
@@ -459,15 +350,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 chains = [r.id for r in modeller.topology.chains()]
 
                 checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                               checked=True)
+                                                   checked=True)
                 pdb_fix_dialog_answer = checked_list.exec_()
                 if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
                     selected_chains = [str(s) for s in checked_list.choices]
 
                     delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
-                                                             ph=7, chains_to_remove=delete_chains)
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
+                                                                 self.Output_Folder_textEdit.toPlainText(),
+                                                                 ph=7, chains_to_remove=delete_chains)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
@@ -483,8 +375,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path, self.Output_Folder_textEdit.toPlainText(),
-                                                             ph=7, chains_to_remove=None)
+                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
+                                                                 self.Output_Folder_textEdit.toPlainText(),
+                                                                 ph=7, chains_to_remove=None)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
@@ -862,7 +755,6 @@ class SplashScreen(QMainWindow):
 
 
 def run_gui():
-
     mp.freeze_support()
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)

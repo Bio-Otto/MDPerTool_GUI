@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>2</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2605,7 +2605,7 @@ QSpinBox QAbstractItemView {
                                     </size>
                                    </property>
                                    <property name="styleSheet">
-                                    <string notr="true">QPushButton {
+                                    <string notr="true">/*QPushButton {
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(157, 90, 198);
@@ -2621,7 +2621,30 @@ QPushButton:pressed {
 	background-color: rgb(190, 5, 100);
 	border: 2px solid rgb(43, 50, 61);
 }
+*/
+ QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
 
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }      
 
 
 </string>
@@ -9688,21 +9711,41 @@ QGroupBox::indicator {
                             <layout class="QVBoxLayout" name="verticalLayout_31">
                              <item>
                               <layout class="QGridLayout" name="gridLayout_20">
-                               <property name="leftMargin">
-                                <number>3</number>
-                               </property>
-                               <property name="topMargin">
-                                <number>4</number>
-                               </property>
-                               <property name="rightMargin">
-                                <number>0</number>
-                               </property>
-                               <property name="bottomMargin">
-                                <number>4</number>
-                               </property>
-                               <property name="horizontalSpacing">
-                                <number>6</number>
-                               </property>
+                               <item row="0" column="1">
+                                <widget class="QLineEdit" name="net_output_directory_lineedit">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>340</width>
+                                   <height>33</height>
+                                  </size>
+                                 </property>
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>16777215</width>
+                                   <height>33</height>
+                                  </size>
+                                 </property>
+                                 <property name="styleSheet">
+                                  <string notr="true">QLineEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding-left: 8px;
+}
+QLineEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QLineEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}</string>
+                                 </property>
+                                </widget>
+                               </item>
                                <item row="0" column="0">
                                 <widget class="QLabel" name="label_94">
                                  <property name="sizePolicy">
@@ -9765,7 +9808,7 @@ QGroupBox::indicator {
                                  </property>
                                 </widget>
                                </item>
-                               <item row="0" column="3">
+                               <item row="0" column="2">
                                 <widget class="QPushButton" name="output_directory_button">
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
@@ -9795,8 +9838,8 @@ QGroupBox::indicator {
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(0, 180, 95);
-	margin-top:1px;
-	margin-bottom: 1px;
+	margin-top: 2px;
+	margin-bottom: 2px;
 
 }
 QPushButton:hover {
@@ -9810,41 +9853,6 @@ QPushButton:pressed {
                                  </property>
                                  <property name="text">
                                   <string>Browse</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item row="0" column="1">
-                                <widget class="QLineEdit" name="net_output_directory_lineedit">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="minimumSize">
-                                  <size>
-                                   <width>340</width>
-                                   <height>33</height>
-                                  </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                  <size>
-                                   <width>16777215</width>
-                                   <height>33</height>
-                                  </size>
-                                 </property>
-                                 <property name="styleSheet">
-                                  <string notr="true">QLineEdit {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	padding-left: 8px;
-}
-QLineEdit:hover {
-	border: 2px solid rgb(64, 71, 88);
-}
-QLineEdit:focus {
-	border: 2px solid rgb(91, 101, 124);
-}</string>
                                  </property>
                                 </widget>
                                </item>
@@ -9884,6 +9892,84 @@ QLineEdit:focus {
                                  </property>
                                  <property name="text">
                                   <string>protein_general_cutoff_network.gml</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="2">
+                                <widget class="QPushButton" name="pushButton">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>106</width>
+                                   <height>38</height>
+                                  </size>
+                                 </property>
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>106</width>
+                                   <height>38</height>
+                                  </size>
+                                 </property>
+                                 <property name="font">
+                                  <font>
+                                   <family>Segoe UI</family>
+                                   <pointsize>10</pointsize>
+                                  </font>
+                                 </property>
+                                 <property name="styleSheet">
+                                  <string notr="true">/*QPushButton {
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(157, 90, 198);
+	margin-top:2px;
+	margin-bottom: 2px;
+
+}
+QPushButton:hover {
+	background-color: rgb(220, 5, 100);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(190, 5, 100);
+	border: 2px solid rgb(43, 50, 61);
+}
+*/
+ QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+		margin-top: 2px;
+		margin-bottom: 2px;
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }      
+
+
+</string>
+                                 </property>
+                                 <property name="text">
+                                  <string>Load Test</string>
                                  </property>
                                 </widget>
                                </item>
@@ -10842,7 +10928,7 @@ QGroupBox::indicator {
                                 <number>0</number>
                                </property>
                                <property name="bottomMargin">
-                                <number>4</number>
+                                <number>0</number>
                                </property>
                                <property name="horizontalSpacing">
                                 <number>3</number>
@@ -10981,7 +11067,7 @@ QLineEdit:focus {
                                   </font>
                                  </property>
                                  <property name="styleSheet">
-                                  <string notr="true">QPushButton {
+                                  <string notr="true">/*QPushButton {
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(157, 90, 198);
@@ -10996,7 +11082,37 @@ QPushButton:hover {
 QPushButton:pressed {	
 	background-color: rgb(190, 5, 100);
 	border: 2px solid rgb(43, 50, 61);
-}</string>
+}
+*/
+
+ QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+		margin-top: 2px;
+		margin-bottom: 2px;
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }      
+
+
+</string>
                                  </property>
                                  <property name="text">
                                   <string>GET SCORES</string>
@@ -11402,10 +11518,10 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
                                  </item>
                                 </layout>
                                </item>
-                               <item row="4" column="0" colspan="2">
+                               <item row="4" column="0" colspan="3">
                                 <widget class="QCheckBox" name="use_conservation_checkBox">
                                  <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                                    <horstretch>0</horstretch>
                                    <verstretch>0</verstretch>
                                   </sizepolicy>
@@ -11413,13 +11529,13 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
                                  <property name="minimumSize">
                                   <size>
                                    <width>115</width>
-                                   <height>22</height>
+                                   <height>25</height>
                                   </size>
                                  </property>
                                  <property name="maximumSize">
                                   <size>
                                    <width>16777215</width>
-                                   <height>22</height>
+                                   <height>25</height>
                                   </size>
                                  </property>
                                  <property name="font">
