@@ -409,7 +409,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Run.setEnabled(True)
 
     def inform_about_progress(self, message):
-        self.label_top_info_1.setText(message)
+        message_regular = '<font color="yellow">%s</font>' % message
+        self.label_top_info_1.setText(message_regular)
 
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
@@ -764,6 +765,12 @@ def run_gui():
 
 
 if __name__ == "__main__":
+    if os.name == 'nt':
+        print("PLATFORM IS WINDOWS ..")
+        import PySide2
+        pyqt = os.path.dirname(PySide2.__file__)
+        QApplication.addLibraryPath(os.path.join(pyqt, "plugins"))
+
     mp.freeze_support()
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)
