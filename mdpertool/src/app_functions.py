@@ -1622,11 +1622,10 @@ class Functions(MainWindow):
     def export_workspace(self):
         try:
             # default_dir = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
-
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
-            output_file_directory, _ = QFileDialog.getSaveFileName(self, "Save configuration file", "",
-                                                                   "Config File Name (*.yaml)", options=options)
+            output_file_directory, _ = QFileDialog.getSaveFileName(parent=None, caption="Save configuration file",
+                                                                   filter="Config File Name (*.yaml)", options=options)
             template = config_template()
 
             # INPUTS

@@ -205,58 +205,86 @@ class Graphs(QWidget):
         self.real_speed = []
         self.current_step_keeper = None
         # self.win = pg.GraphicsWindow(show=False, title="Basic plotting examples")
-        # setting style sheet to the plot window
         self.win.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
         self.win.setWindowTitle('Real Time Simulation Monitoring')
 
         self.temperature_graph = self.win.addPlot(title="Temperature")
-        self.temperature_graph.disableAutoRange()
+
+        # self.temperature_graph.disableAutoRange()
         self.temperature_graph.addLegend()
         self.temperature_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.temperature_graph.setLabel('left', "Temperature", units='K')
         self.temperature_graph.setLabel('bottom', "Step")
         # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
         self.temperature_graph.setLogMode(x=False, y=False)
-        self.temperature_graph.setYRange(200, 400, padding=0)
+        # self.temperature_graph.setYRange(200, 400, padding=0)
         self.temperature_graph.showGrid(x=True, y=True)
         self.temperature_graph.getAxis('left').enableAutoSIPrefix(False)
-        self.temperature_graph_plot = self.temperature_graph.plot(name='Temperature')
+        self.temperature_graph_plot = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 0, 0), width=3),
+                                                      name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
+        self.temperature_graph.addItem(self.temperature_graph_plot)
+        # self.temperature_graph_plot = self.temperature_graph.plot(name='Temperature')
 
         # self.win.nextRow()
         self.energy_graph = self.win.addPlot(title="Energy")
+        # self.energy_graph.disableAutoRange()
         self.energy_graph.addLegend()
         self.energy_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.energy_graph.setLabel('left', "Energy", units='kJ/mole')
         self.energy_graph.setLabel('bottom', "Step")
         # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
+        self.energy_graph.setLogMode(x=False, y=False)
+        # self.energy_graph.setYRange(200, 400, padding=0)
         self.energy_graph.showGrid(x=True, y=True)
+        self.energy_graph.getAxis('left').enableAutoSIPrefix(False)
 
-        self.potential_energy_graph = self.energy_graph.plot(name='Potential')
-        self.kinetic_energy_graph = self.energy_graph.plot(name='Kinetic')
-        self.total_energy_graph = self.energy_graph.plot(name='Total')
+        self.potential_energy_graph = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 0, 0), width=2),
+                                                      name="Potential", fillLevel=0.0, brush=(150, 150, 50, 30))
+        self.kinetic_energy_graph = pg.PlotDataItem(clear=True, pen=pg.mkPen((0, 255, 0), width=2),
+                                                      name="Kinetic", fillLevel=0.0, brush=(150, 150, 50, 30))
+        self.total_energy_graph = pg.PlotDataItem(clear=True, pen=pg.mkPen((0, 0, 255), width=2),
+                                                      name="Total", fillLevel=0.0, brush=(150, 150, 50, 30))
+        self.energy_graph.addItem(self.potential_energy_graph)
+        self.energy_graph.addItem(self.kinetic_energy_graph)
+        self.energy_graph.addItem(self.total_energy_graph)
         # self.energy_graph.addLegend()
 
         self.win.nextRow()
         self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
+        # self.simulation_speed_graph.disableAutoRange()
         self.simulation_speed_graph.addLegend()
         self.simulation_speed_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.simulation_speed_graph.setLabel('left', "Speed", units='ns/day')
         self.simulation_speed_graph.setLabel('bottom', "Step")
+        self.simulation_speed_graph.setLogMode(x=False, y=False)
+        # self.simulation_speed_graph.setYRange(200, 400, padding=0)
         self.simulation_speed_graph.showGrid(x=True, y=True)
+        self.simulation_speed_graph.getAxis('left').enableAutoSIPrefix(False)
 
-        self.simulation_speed_graph_plot = self.simulation_speed_graph.plot(name='Speed (ns/day)')
+        self.simulation_speed_graph_plot = pg.PlotDataItem(clear=True, name="Speed (ns/day)", fillLevel=0.0,
+                                                           brush=(150, 150, 50, 30),
+                                                           pen=pg.mkPen((200, 200, 200), width=2),
+                                                           symbolBrush=(255, 0, 0), symbolPen='w',
+                                     )
+        self.simulation_speed_graph.addItem(self.simulation_speed_graph_plot)
 
         self.win.nextRow()
         self.simulation_time_graph = self.win.addPlot(title="Remaining Time", row=2, colspan=2)
+        # self.simulation_time_graph.disableAutoRange()
         self.simulation_time_graph.addLegend()
         self.simulation_time_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
         self.simulation_time_graph.setLabel('left', "Remaining Time", units='sec')
         self.simulation_time_graph.setLabel('bottom', "Step")
+        self.simulation_time_graph.setLogMode(x=False, y=False)
+        # self.simulation_time_graph.setYRange(200, 400, padding=0)
         self.simulation_time_graph.showGrid(x=True, y=True)
+        # self.simulation_time_graph.setLogMode(x=False, y=False)  # logaritmik mode
+        # self.simulation_time_graph.enableAutoRange(axis='y')
+        self.simulation_time_graph.getAxis('left').enableAutoSIPrefix(False)
 
-        self.simulation_time_graph_plot = self.simulation_time_graph.plot(name='Remaining Time (sec)')
-        self.simulation_time_graph.setLogMode(x=False, y=False)  # logaritmik mode
-        self.simulation_time_graph.enableAutoRange(axis='y')
+        self.simulation_time_graph_plot = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 255, 0), width=2), fillLevel=0.0,
+                                                          name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
+        self.simulation_time_graph.addItem(self.simulation_time_graph_plot)
 
         self.first_entrance = 0
 
@@ -329,28 +357,18 @@ class Graphs(QWidget):
                 x = np.append(self.current_step_keeper, self.current_step_keeper[-1] + 1)
 
             try:
-                self.temperature_graph_plot.setData(x=x, y=y_temp, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
-                                                    name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
+                self.temperature_graph_plot.setData(x=x, y=y_temp)
                 # self.temperature_graph.autoRange()
 
-                self.potential_energy_graph.setData(x=x, y=y_potential, clear=True, pen=pg.mkPen((255, 0, 0), width=3),
-                                                    name="Potential")
+                self.potential_energy_graph.setData(x=x, y=y_potential)
 
-                self.kinetic_energy_graph.setData(x=x, y=y_kinetic, clear=True, pen=pg.mkPen((0, 255, 0), width=3),
-                                                  name="Kinetic")
+                self.kinetic_energy_graph.setData(x=x, y=y_kinetic)
 
-                self.total_energy_graph.setData(x=x, y=y_total, clear=True, pen=pg.mkPen((0, 0, 255), width=3),
-                                                fillLevel=0.0, brush=(150, 150, 50, 10), name="Total")
+                self.total_energy_graph.setData(x=x, y=y_total)
 
-                self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute,
-                                                        pen=pg.mkPen((0, 0, 255), width=3),
-                                                        fillLevel=0.0, name="Rime Remaining (sec)",
-                                                        brush=(150, 150, 50, 10))
+                self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute)
 
-                self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed, pen=pg.mkPen((200, 200, 200), width=3),
-                                                         symbolBrush=(255, 0, 0), symbolPen='w', fillLevel=0.0,
-                                                         name="Speed",
-                                                         brush=(150, 150, 50, 30))
+                self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
 
                 self.current_step_keeper = x
 
