@@ -340,10 +340,13 @@ class MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
 
-    def upload_boundForm_pdb_from_local(self):
+    def upload_boundForm_pdb_from_local(self, manuel=False):
         global selected_chains
         try:
-            upload_condition, pdb_path = UIF.Functions.browse_bound_form_pdbFile(self)
+            if manuel:
+                upload_condition, pdb_path = UIF.Functions.browse_bound_form_pdbFile(self)
+            if not manuel:
+                pdb_path = self.boundForm_pdb_lineedit.text()
 
             if os.path.exists(pdb_path):
                 fixer = PDBFixer(pdb_path)
