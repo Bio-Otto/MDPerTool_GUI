@@ -14,8 +14,7 @@ from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Multi_Task_Engine, intersection_of_directed_networks, Pymol_Visualize_Path,
-                                     Shortest_Path_Visualize)
+from analysis.createRNetwork import (Multi_Task_Engine, Pymol_Visualize_Path, Shortest_Path_Visualize)
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
 from ui_main import *
 
@@ -30,11 +29,14 @@ class Helper_Functions():
         protein = pdb.select('protein')
         for model in protein.getHierView():
             for chain in model:
-                # print(chain)
-                # self.combobox.append(str(model).split(" ")[1] + str(chain))
                 combobox.append(str(chain).replace(" ", "") + str(model).split(" ")[1])
 
-                # self.combobox_2.append(str(model).split(" ")[1] + str(chain))
+        """
+        import csv
+        with open('output.csv', 'w') as result_file:
+            wr = csv.writer(result_file, dialect='excel')
+            wr.writerow(combobox)
+        """
         return combobox
 
     def available_platforms(self):
@@ -209,11 +211,12 @@ class Functions(MainWindow):
         self.log_holder.append(s[1])
 
     def calculate_intersection_network(self):
-        global intersection_graph, output_folder_directory, network_holder
+        global output_folder_directory, network_holder
 
         self.active_workers = 0
         self.network_holder = []
         self.log_holder = []
+        self.initial_network = None
 
         self.number_of_threads = self.Number_of_thread_for_network_spinBox.value()
         self.pdb = self.boundForm_pdb_lineedit.text()  # PDB file path --> "BOUND FORM OF STRUCTURE"
@@ -257,11 +260,11 @@ class Functions(MainWindow):
 
         engine = Multi_Task_Engine(pdb_file=self.pdb, cutoff=self.cutoff, reTimeFile=self.retime_file,
                                    source=self.source,
-                                   node_threshold=self.node_threshold, verbose=verbose_condition,
+                                   node_threshold=self.node_threshold,
                                    outputFileName=self.outputFileName, write_outputs=self.create_output,
                                    output_directory=output_folder_directory)
 
-        network, resId_List, len_of_reTimes = engine.calculate_general_network()
+        self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
 
         if len(resId_List) == len_of_reTimes:
 
@@ -325,11 +328,7 @@ class Functions(MainWindow):
 
         # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
         if len(clean_graph_list) > 0:
-            intersection_graph, all_graph_list = intersection_of_directed_networks(clean_graph_list)
-            if self.create_output:
-                nx.write_gml(intersection_graph, os.path.join(output_folder_directory, 'intersection_graph.gml'))
-
-            # ############################################
+            all_graph_list = clean_graph_list
             tab = QtWidgets.QWidget()
             tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
 
@@ -341,40 +340,13 @@ class Functions(MainWindow):
             gridLayout = QtWidgets.QGridLayout()
             gridLayout.setObjectName("gridLayout_" + str(self.tab_count_on_analysis))
 
-            label = QtWidgets.QLabel(tab)
-            label.setText("All Available Intersection Shortest Path(s)")
-            label.setMinimumSize(QtCore.QSize(0, 22))
-            label.setMaximumSize(QtCore.QSize(450, 22))
-            label.setStyleSheet("QLabel {\n"
-                                "    background-color: rgb(27, 29, 35);\n"
-                                "    border-radius: 5px;\n"
-                                "    border: 2px solid rgb(27, 29, 35);\n"
-                                "    padding: 1px 1px 1px 1px;\n"
-                                "    \n"
-                                "    border-bottom-color: rgb(157, 90, 198);\n"
-                                "}\n"
-                                "\n"
-                                "\n"
-                                "QLabel:hover{\n"
-                                "    border: 2px solid rgb(64, 71, 88);\n"
-                                "    selection-color: rgb(127, 5, 64);\n"
-                                "\n"
-                                "}")
-            label.setObjectName("label_" + str(self.tab_count_on_analysis))
-            gridLayout.addWidget(label, 2, 0, 1, 1)
-
             shortest_path_listWidget = QtWidgets.QListWidget(tab)
             shortest_path_listWidget.setMaximumSize(QtCore.QSize(450, 16777215))
             shortest_path_listWidget.setObjectName("shortest_path_listWidget")
             gridLayout.addWidget(shortest_path_listWidget, 1, 0, 1, 1)
 
-            intersection_path_listWidget = QtWidgets.QListWidget(tab)
-            intersection_path_listWidget.setMaximumSize(QtCore.QSize(450, 16777215))
-            intersection_path_listWidget.setObjectName("intersection_path_listWidget")
-            gridLayout.addWidget(intersection_path_listWidget, 3, 0, 1, 1)
-
             label_2 = QtWidgets.QLabel(tab)
-            label_2.setText("All Available Shortest Path(s)")
+            label_2.setText("Shortest Path(s)")
             label_2.setMinimumSize(QtCore.QSize(0, 22))
             label_2.setMaximumSize(QtCore.QSize(450, 22))
             label_2.setStyleSheet("QLabel {\n"
@@ -472,8 +444,8 @@ class Functions(MainWindow):
                              QtGui.QIcon.Off)
             show_navigation_button.setIcon(icon11)
             show_navigation_button.setObjectName("show_navigation_button")
-            gridLayout.addWidget(show_navigation_button, 3, 1, 1, 1)
-
+            gridLayout.addWidget(show_navigation_button, 0, 1, 6, 1)
+                                                        # 0  2  6  1
             hide_navigation_button = QtWidgets.QPushButton(tab)
             hide_navigation_button.setMaximumSize(QtCore.QSize(20, 61))
             hide_navigation_button.setStyleSheet(" QPushButton \n"
@@ -502,7 +474,7 @@ class Functions(MainWindow):
             hide_navigation_button.setText("")
             hide_navigation_button.setIcon(icon11)
             hide_navigation_button.setObjectName("hide_navigation")
-            gridLayout.addWidget(hide_navigation_button, 3, 3, 1, 1)
+            gridLayout.addWidget(hide_navigation_button, 0, 3, 6, 1)
 
             analysis_settings_groupBox = QtWidgets.QGroupBox(tab)
             analysis_settings_groupBox.setTitle('Visualization Settings')
@@ -1263,8 +1235,10 @@ class Functions(MainWindow):
                       '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
             all_paths = []
+            clean_all_graps = []
             for graph_i in all_graph_list:
                 if isinstance(graph_i, nx.classes.digraph.DiGraph):
+                    clean_all_graps.append(graph_i)
                     for cnt, target_i in enumerate(target_res_list):
                         try:
                             if nx.has_path(graph_i, source_res, target_i):
@@ -1295,45 +1269,25 @@ class Functions(MainWindow):
                     print("all: ", all_path_string)
             Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
 
-            intersect_shrotest_str_form = ''
-            for target_i in target_res_list:
-                try:
-                    if isinstance(graph_i, nx.classes.digraph.DiGraph):
-                        isp = nx.shortest_path(intersection_graph, source_res, target_i)
-                        for res_id in range(len(isp)):
-                            if res_id == len(isp) - 1:
-                                intersect_shrotest_str_form += '%s' % isp[res_id]
-                            else:
-                                intersect_shrotest_str_form += '%s --> ' % isp[res_id]
-                        intersection_path_listWidget.addItem(intersect_shrotest_str_form)
-                        intersect_shrotest_str_form = ''
-
-                except Exception as err:
-                    print("INTERSECTION SHORTEST PATH LOG: ", err)
-
             shortest_path_listWidget.itemDoubleClicked.connect(
-                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
-            intersection_path_listWidget.itemDoubleClicked.connect(
-                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(self, item, Protein3DNetworkView))
-            # ############################################
+                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
+                    self, item, Protein3DNetworkView, clean_all_graps[shortest_path_listWidget.currentRow()]))
 
+            # #########################################################################################################
             try:
                 if isinstance(graph_i, nx.classes.digraph.DiGraph):
-                    if len(intersection_graph.nodes()) > 0:
+                    if len(self.initial_network.nodes()) > 0:
                         try:
-                            arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=intersection_graph,
+                            arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=self.initial_network,
                                                                                              pdb_file=self.pdb)
 
-                            # ----------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
+                            # ------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
                             Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
                             for arrow_coord in arrows_cordinates:
-                                Protein3DNetworkView.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                                            radius=0.05,
-                                                                            gap=0.4, hradius=0.4, hlength=0.8,
-                                                                            color='green')
-                            for node in intersection_node_list:
-                                resID_of_node = int(''.join(list(filter(str.isdigit, node))))
-                                Protein3DNetworkView.resi_label_add('resi ' + str(resID_of_node))
+                                Protein3DNetworkView.create_interacting_Residues(atom1=arrow_coord[0],
+                                                                                 atom2=arrow_coord[1],
+                                                                                 radius=0.05, gap=0.4, hradius=0.4,
+                                                                                 hlength=0.8, color='green')
 
                             # MAKE PYMOL VISUALIZATION BETTER
                             Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
@@ -1343,9 +1297,7 @@ class Functions(MainWindow):
                             Protein3DNetworkView.update()
                             Protein3DNetworkView.show()
 
-                            # ----------------------> 2D NETWORK VISUALIZATION USING visJS / START <---------------------- #
-                            # self.load_nx_to_VisJS_2D_Network(intersection_gml_file=intersection_graph)
-
+                            # --------------------> 2D NETWORK VISUALIZATION USING visJS / START <-------------------- #
                         except Exception as error:
                             print("Problem: ", error)
                             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -1360,9 +1312,6 @@ class Functions(MainWindow):
                         Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
                         del self.log_holder, self.network_holder
 
-                    # elif len(intersection_graph.nodes()) == 0:
-                    #     print("NO INTERSECTION GRAPH")
-
                     else:
                         Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
                                                           Style.MessageBox_stylesheet)
@@ -1374,21 +1323,23 @@ class Functions(MainWindow):
         else:
             print("There is no suitable Graph for your search parameters")
 
-        #
-        # finally:
-        #     # CLOSE THE ALREADY OPENED POOL
-        #     pool.close()
-        #     pool.join()
-
-    def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget):
+    def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget, selected_graph):
         processed_path = [x.strip() for x in item.text().split('-->')]
         shortest_path_arrow_coords = Shortest_Path_Visualize(pdb_file=self.pdb, selected_path=processed_path)
+        arrows_cordinates, _ = Pymol_Visualize_Path(graph=selected_graph, pdb_file=self.pdb)
+
+        for arrow_coord in arrows_cordinates:
+            PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                                             radius=0.0495, name='pairNet',
+                                                             gap=0.4, hradius=0.4, hlength=0.8,
+                                                             color='magenta')
 
         for arrow_coord in shortest_path_arrow_coords:
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
                                                 radius=0.05,
                                                 gap=0.4, hradius=0.4, hlength=0.8,
-                                                color='green', shortest_path=True)
+                                                color='blue', shortest_path=True)
+
         for node in processed_path:
             resID_of_node = int(''.join(list(filter(str.isdigit, node))))
             PyMOL_Widget.resi_label_add('resi ' + str(resID_of_node))
@@ -1405,7 +1356,6 @@ class Functions(MainWindow):
         try:
             conserv_pdb_id = self.conservation_PDB_ID_lineEdit.text()
             conser_pdb_chain_id = self.conservation_pdb_chain_id_lineedit.text()
-
             res_IDs, con_scores = get_conservation_scores(pdb_id=conserv_pdb_id,
                                                           chain_id=conser_pdb_chain_id,
                                                           cutoff=self.conserv_score_doubleSpinBox.value(),
@@ -1618,6 +1568,55 @@ class Functions(MainWindow):
             self.run_duration_spinBox.blockSignals(False)
             self.run_duration_doubleSpinBox.blockSignals(False)
             self.Number_of_steps_spinBox.blockSignals(False)
+
+    def load_sample_for_analysis(self):
+        from pathlib import Path
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        topology_path = os.path.join(Path(current_path).parent, 'Download', '2j0x_example.pdb')
+        reTime_File = os.path.join(Path(current_path).parent, 'Download', 'example_responseTimes_file.csv')
+        output_directory = os.path.join(Path(current_path).parent, 'output')
+
+        if os.path.exists(topology_path):
+            self.boundForm_pdb_lineedit.setText(topology_path)
+            self.response_time_lineEdit.setText(reTime_File)
+            self.upload_boundForm_pdb_from_local(manuel=False)
+            try:
+                os.mkdir(output_directory)
+                print("Directory ", output_directory, " Created ")
+            except FileExistsError:
+                print("Directory ", output_directory, " already exists")
+            if not os.path.exists(output_directory):
+                os.mkdir(output_directory)
+                print("Directory ", output_directory, " Created ")
+            else:
+                print("Directory ", output_directory, " already exists")
+            self.net_output_directory_lineedit.setText("")
+            self.net_output_directory_lineedit.setText(output_directory)
+
+            if self.selected_target_residues_listWidget.count() == 0:
+                self.selected_target_residues_listWidget.addItem('VAL258A')
+                self.target_res_comboBox.setCurrentIndex(255)
+            else:
+                self.selected_target_residues_listWidget.clear()
+                self.selected_target_residues_listWidget.addItem('VAL258A')
+                self.target_res_comboBox.setCurrentIndex(255)
+
+            self.source_res_comboBox.setCurrentIndex(342)
+
+            self.network_cutoff_spinBox.setValue(int(7))
+            self.node_threshold_checkBox.setChecked(True)
+            self.conservation_PDB_ID_lineEdit.setText("")
+            self.conservation_pdb_chain_id_lineedit.setText("")
+            self.conserv_score_doubleSpinBox.setValue(float(1.0))
+
+            # self.run_duration_spinBox.blockSignals(True)
+            # self.run_duration_doubleSpinBox.blockSignals(True)
+            # self.Number_of_steps_spinBox.blockSignals(True)
+            # self.run_duration_doubleSpinBox.setValue(float(1.000))
+            # self.Number_of_steps_spinBox.setValue(int(500000))
+            # self.run_duration_spinBox.blockSignals(False)
+            # self.run_duration_doubleSpinBox.blockSignals(False)
+            # self.Number_of_steps_spinBox.blockSignals(False)
 
     def export_workspace(self):
         try:
