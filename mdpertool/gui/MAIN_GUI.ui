@@ -3310,7 +3310,7 @@ margin-right: 20px;
                                     <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding-left: 5px;
+	padding-left: 10px;
 
 }
 QLineEdit:hover {
@@ -9561,6 +9561,7 @@ QLineEdit:focus {
                                  </property>
                                  <property name="styleSheet">
                                   <string notr="true">QPushButton {
+	color: white; 
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(0, 180, 95);
@@ -9612,6 +9613,7 @@ background-color: rgb(93, 83, 91);
                                  </property>
                                  <property name="styleSheet">
                                   <string notr="true">QPushButton {
+	color: white; 
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(0, 180, 95);
@@ -9854,6 +9856,7 @@ QLineEdit:focus {
                                  </property>
                                  <property name="styleSheet">
                                   <string notr="true">QPushButton {
+	color: white; 
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(0, 180, 95);
@@ -9911,84 +9914,6 @@ QLineEdit:focus {
                                  </property>
                                  <property name="text">
                                   <string>protein_general_cutoff_network.gml</string>
-                                 </property>
-                                </widget>
-                               </item>
-                               <item row="1" column="2">
-                                <widget class="QPushButton" name="load_analysis_sample_pushButton">
-                                 <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-                                   <horstretch>0</horstretch>
-                                   <verstretch>0</verstretch>
-                                  </sizepolicy>
-                                 </property>
-                                 <property name="minimumSize">
-                                  <size>
-                                   <width>106</width>
-                                   <height>38</height>
-                                  </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                  <size>
-                                   <width>106</width>
-                                   <height>38</height>
-                                  </size>
-                                 </property>
-                                 <property name="font">
-                                  <font>
-                                   <family>Segoe UI</family>
-                                   <pointsize>10</pointsize>
-                                  </font>
-                                 </property>
-                                 <property name="styleSheet">
-                                  <string notr="true">/*QPushButton {
-	border: 2px solid rgb(52, 59, 72);
-	border-radius: 5px;	
-	background-color: rgb(157, 90, 198);
-	margin-top:2px;
-	margin-bottom: 2px;
-
-}
-QPushButton:hover {
-	background-color: rgb(220, 5, 100);
-	border: 2px solid rgb(61, 70, 86);
-}
-QPushButton:pressed {	
-	background-color: rgb(190, 5, 100);
-	border: 2px solid rgb(43, 50, 61);
-}
-*/
- QPushButton 
-		{
- 		color: white; 
-        border: 2px solid rgb(52, 59, 72); 
-        border-radius: 5px; 
-        background-color:  rgb(255, 17, 100); 
-        border-width: 1px; 
-		margin-top: 2px;
-		margin-bottom: 2px;
-        outline: none;	
-		background-color: rgb(110, 105, 225);
-	
-		}
-
-QPushButton:hover 
-       { 
-        background-color: rgb(22, 200, 244); 
-        border: 2px solid rgb(61, 70, 86);
-        }
-
-QPushButton:pressed 
-        { 
-         background-color:  rgb(15, 133, 163); 
-         border: 2px solid rgb(43, 50, 61);
-         }      
-
-
-</string>
-                                 </property>
-                                 <property name="text">
-                                  <string>Load Test</string>
                                  </property>
                                 </widget>
                                </item>
@@ -11665,9 +11590,15 @@ QGroupBox::indicator {
                               <layout class="QHBoxLayout" name="horizontalLayout_30">
                                <item>
                                 <widget class="QPushButton" name="stop_pushButton_3">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
                                  <property name="minimumSize">
                                   <size>
-                                   <width>170</width>
+                                   <width>0</width>
                                    <height>33</height>
                                   </size>
                                  </property>
@@ -11679,6 +11610,7 @@ QGroupBox::indicator {
                                  </property>
                                  <property name="styleSheet">
                                   <string notr="true">QPushButton {
+ 	color: white; 
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(0, 180, 95);
@@ -11703,9 +11635,15 @@ QPushButton:pressed {
                                </item>
                                <item>
                                 <widget class="QPushButton" name="network_calculate_pushButton">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
                                  <property name="minimumSize">
                                   <size>
-                                   <width>170</width>
+                                   <width>0</width>
                                    <height>33</height>
                                   </size>
                                  </property>
@@ -11717,6 +11655,7 @@ QPushButton:pressed {
                                  </property>
                                  <property name="styleSheet">
                                   <string notr="true">QPushButton {
+	color: white; 
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(0, 180, 95);
@@ -11741,6 +11680,81 @@ QPushButton:pressed {
                                  </property>
                                 </widget>
                                </item>
+                               <item>
+                                <widget class="QPushButton" name="load_analysis_sample_pushButton">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>0</width>
+                                   <height>33</height>
+                                  </size>
+                                 </property>
+                                 <property name="maximumSize">
+                                  <size>
+                                   <width>16777215</width>
+                                   <height>16777215</height>
+                                  </size>
+                                 </property>
+                                 <property name="font">
+                                  <font>
+                                   <family>Segoe UI</family>
+                                   <pointsize>9</pointsize>
+                                  </font>
+                                 </property>
+                                 <property name="styleSheet">
+                                  <string notr="true">/*QPushButton {
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(157, 90, 198);
+	margin-top:2px;
+	margin-bottom: 2px;
+
+}
+QPushButton:hover {
+	background-color: rgb(220, 5, 100);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(190, 5, 100);
+	border: 2px solid rgb(43, 50, 61);
+}
+*/
+ QPushButton 
+		{
+ 		color: white; 
+        border: 2px solid rgb(52, 59, 72); 
+        border-radius: 5px; 
+        background-color:  rgb(255, 17, 100); 
+        border-width: 1px; 
+        outline: none;	
+		background-color: rgb(110, 105, 225);
+	
+		}
+
+QPushButton:hover 
+       { 
+        background-color: rgb(22, 200, 244); 
+        border: 2px solid rgb(61, 70, 86);
+        }
+
+QPushButton:pressed 
+        { 
+         background-color:  rgb(15, 133, 163); 
+         border: 2px solid rgb(43, 50, 61);
+         }      
+
+</string>
+                                 </property>
+                                 <property name="text">
+                                  <string>Load Test</string>
+                                 </property>
+                                </widget>
+                               </item>
                               </layout>
                              </item>
                              <item>
@@ -11751,10 +11765,16 @@ QPushButton:pressed {
                                <item>
                                 <widget class="QLabel" name="label_100">
                                  <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                                    <horstretch>0</horstretch>
                                    <verstretch>0</verstretch>
                                   </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>50</width>
+                                   <height>0</height>
+                                  </size>
                                  </property>
                                  <property name="maximumSize">
                                   <size>
@@ -11768,7 +11788,7 @@ QPushButton:pressed {
                                   </font>
                                  </property>
                                  <property name="text">
-                                  <string>Threading:</string>
+                                  <string>Threads</string>
                                  </property>
                                  <property name="alignment">
                                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -11781,7 +11801,7 @@ QPushButton:pressed {
                                <item>
                                 <widget class="QSpinBox" name="Number_of_thread_for_network_spinBox">
                                  <property name="sizePolicy">
-                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                                    <horstretch>0</horstretch>
                                    <verstretch>0</verstretch>
                                   </sizepolicy>
@@ -11794,7 +11814,7 @@ QPushButton:pressed {
                                  </property>
                                  <property name="maximumSize">
                                   <size>
-                                   <width>16777215</width>
+                                   <width>70</width>
                                    <height>33</height>
                                   </size>
                                  </property>
@@ -11840,7 +11860,7 @@ QSpinBox QAbstractItemView {
                                  </property>
                                  <property name="maximumSize">
                                   <size>
-                                   <width>115</width>
+                                   <width>100</width>
                                    <height>16777215</height>
                                   </size>
                                  </property>

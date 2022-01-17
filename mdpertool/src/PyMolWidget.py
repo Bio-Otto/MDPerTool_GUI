@@ -408,7 +408,7 @@ class PymolQtWidget(QGLWidget):
             pass
 
         if shortest_path:
-            color = 'blue'
+            color = 'green'
 
         else:
             pass
@@ -451,7 +451,6 @@ class PymolQtWidget(QGLWidget):
               [1.0, 0.0]
 
         if not shortest_path:
-
             if name == '':
                 new_name = self._pymol.cmd.get_unused_name('arrow')
                 self._pymol.cmd.load_cgo(obj, new_name)

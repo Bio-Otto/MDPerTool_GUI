@@ -1287,7 +1287,7 @@ class Functions(MainWindow):
                                 Protein3DNetworkView.create_interacting_Residues(atom1=arrow_coord[0],
                                                                                  atom2=arrow_coord[1],
                                                                                  radius=0.05, gap=0.4, hradius=0.4,
-                                                                                 hlength=0.8, color='green')
+                                                                                 hlength=0.8, color='blue')
 
                             # MAKE PYMOL VISUALIZATION BETTER
                             Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
@@ -1330,15 +1330,15 @@ class Functions(MainWindow):
 
         for arrow_coord in arrows_cordinates:
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                             radius=0.0495, name='pairNet',
+                                                             radius=0.05, name='pairNet',
                                                              gap=0.4, hradius=0.4, hlength=0.8,
-                                                             color='magenta')
+                                                             color='orange')
 
         for arrow_coord in shortest_path_arrow_coords:
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                radius=0.05,
+                                                radius=0.055,
                                                 gap=0.4, hradius=0.4, hlength=0.8,
-                                                color='blue', shortest_path=True)
+                                                color='green', shortest_path=True)
 
         for node in processed_path:
             resID_of_node = int(''.join(list(filter(str.isdigit, node))))
@@ -1535,7 +1535,7 @@ class Functions(MainWindow):
     def load_sample_for_simulation(self):
         from pathlib import Path
         current_path = os.path.dirname(os.path.realpath(__file__))
-        path = os.path.join(Path(current_path).parent, 'Download', '4htm.pdb')
+        path = os.path.join(Path(current_path).parent, 'Download', '2j0w_example.pdb')
         output_directory = os.path.join(Path(current_path).parent, 'output')
 
         if os.path.exists(path):
@@ -1555,19 +1555,28 @@ class Functions(MainWindow):
 
             self.PDB_ID_lineEdit.setText("")
             self.Output_Folder_textEdit.setPlainText(output_directory)
-            if self.selected_residues_listWidget.count() == 0:
-                self.selected_residues_listWidget.addItem('SER345')
-            self.R_factor_lineEdit.setText("3, 4")
 
+            if self.selected_residues_listWidget.count() == 0:
+                self.selected_residues_listWidget.addItem('SER345A')
+                self.res1_comboBox.setCurrentIndex(342)
+            else:
+                self.selected_residues_listWidget.clear()
+                self.selected_residues_listWidget.addItem('SER345A')
+                self.target_res_comboBox.setCurrentIndex(342)
+
+            self.R_factor_lineEdit.setText("4, 5")
             self.run_duration_spinBox.blockSignals(True)
             self.run_duration_doubleSpinBox.blockSignals(True)
             self.Number_of_steps_spinBox.blockSignals(True)
+            self.long_simulation_time_unit.blockSignals(True)
             self.run_duration_spinBox.setValue(int(1000))
-            self.run_duration_doubleSpinBox.setValue(float(1.000))
-            self.Number_of_steps_spinBox.setValue(int(500000))
+            self.run_duration_doubleSpinBox.setValue(float(600.000))
+            self.Number_of_steps_spinBox.setValue(int(300000))
+            self.long_simulation_time_unit.setCurrentIndex(1)
             self.run_duration_spinBox.blockSignals(False)
             self.run_duration_doubleSpinBox.blockSignals(False)
             self.Number_of_steps_spinBox.blockSignals(False)
+            self.long_simulation_time_unit.blockSignals(False)
 
     def load_sample_for_analysis(self):
         from pathlib import Path
@@ -1594,11 +1603,11 @@ class Functions(MainWindow):
             self.net_output_directory_lineedit.setText(output_directory)
 
             if self.selected_target_residues_listWidget.count() == 0:
-                self.selected_target_residues_listWidget.addItem('VAL258A')
+                self.selected_target_residues_listWidget.addItems(['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
                 self.target_res_comboBox.setCurrentIndex(255)
             else:
                 self.selected_target_residues_listWidget.clear()
-                self.selected_target_residues_listWidget.addItem('VAL258A')
+                self.selected_target_residues_listWidget.addItems(['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
                 self.target_res_comboBox.setCurrentIndex(255)
 
             self.source_res_comboBox.setCurrentIndex(342)
