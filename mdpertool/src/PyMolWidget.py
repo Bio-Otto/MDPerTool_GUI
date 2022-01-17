@@ -180,7 +180,6 @@ class PymolQtWidget(QGLWidget):
     def clear_all_labels(self):
         self._pymol.cmd.label('all', '')
         self._pymol.cmd.do('color green')
-        self._pymol.cmd.set('ray_trace_mode', 1)
 
     def activate_navigation_tool(self):
         self._pymol.cmd.set("internal_gui", 1)
@@ -382,7 +381,7 @@ class PymolQtWidget(QGLWidget):
         # self._pymol.cmd.save('aa.pdb')
 
     def create_directed_arrows(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
-                               color='green', name='', shortest_path=False):
+                               color='red', name='', shortest_path=False):
 
         """
             cgo_arrow [ atom1 [, atom2 [, radius [, gap [, hlength [, hradius [, color [, name ]]]]]]]]
@@ -397,6 +396,7 @@ class PymolQtWidget(QGLWidget):
             color = string: one or two color names {default: blue red}
             name = string: name of CGO object
         """
+
         try:
             aa = self._pymol.cmd.get_names("nongroup_objects", enabled_only=1)
             clean_ls = [i for i in aa if i.startswith('arrow')]
@@ -405,15 +405,13 @@ class PymolQtWidget(QGLWidget):
                 print(cc)
 
         except:
-            print("passing")
             pass
 
         if shortest_path:
-            print("Shortest clicked and painting as blue")
             color = 'blue'
+
         else:
-            print("Shortest clicked and painting as green")
-            color = 'green'
+            pass
 
         radius, gap = float(radius), float(gap)
         hlength, hradius = float(hlength), float(hradius)
@@ -432,32 +430,39 @@ class PymolQtWidget(QGLWidget):
                 return cmd.safe_list_eval(v)
             return cmd.get_atom_coords(v)
 
+        xyz1 = get_coord(atom1)
+        xyz2 = get_coord(atom2)
+        normal = cpv.normalize(cpv.sub(xyz1, xyz2))
+
+        if hlength < 0:
+            hlength = radius * 3.0
+        if hradius < 0:
+            hradius = hlength * 0.6
+
+        if gap:
+            diff = cpv.scale(normal, gap)
+            xyz1 = cpv.sub(xyz1, diff)
+            xyz2 = cpv.add(xyz2, diff)
+
+        xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
+
+        obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2 + \
+              [cgo.CONE] + xyz3 + xyz2 + [hradius, 0.0] + color2 + color2 + \
+              [1.0, 0.0]
+
         if not shortest_path:
-            xyz1 = get_coord(atom1)
-            xyz2 = get_coord(atom2)
-            normal = cpv.normalize(cpv.sub(xyz1, xyz2))
 
-            if hlength < 0:
-                hlength = radius * 3.0
-            if hradius < 0:
-                hradius = hlength * 0.6
+            if name == '':
+                new_name = self._pymol.cmd.get_unused_name('arrow')
+                self._pymol.cmd.load_cgo(obj, new_name)
+                self._pymol.cmd.group('Arrows', name)
+                # self._pymol.cmd.load_cgo(obj, name)
+                # self._pymol.cmd.group("Arrows", name)
 
-            if gap:
-                diff = cpv.scale(normal, gap)
-                xyz1 = cpv.sub(xyz1, diff)
-                xyz2 = cpv.add(xyz2, diff)
-
-            xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
-
-            obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2 + \
-                  [cgo.CONE] + xyz3 + xyz2 + [hradius, 0.0] + color2 + color2 + \
-                  [1.0, 0.0]
-
-            if not name:
-                name = self._pymol.cmd.get_unused_name('arrow')
-
-            self._pymol.cmd.load_cgo(obj, name)
-            self._pymol.cmd.group("Arrows", name)
+            if name != '':
+                new_name = self._pymol.cmd.get_unused_name(str(name))
+                self._pymol.cmd.load_cgo(obj, new_name)
+                self._pymol.cmd.group(name + 's', new_name)
 
         if shortest_path:
             hradius = -0.5
@@ -466,11 +471,6 @@ class PymolQtWidget(QGLWidget):
             xyz2 = get_coord(atom2)
             normal = cpv.normalize(cpv.sub(xyz1, xyz2))
 
-            if hlength < 0:
-                hlength = radius * 3.0
-            if hradius < 0:
-                hradius = hlength * 0.6
-
             if gap:
                 diff = cpv.scale(normal, gap)
                 xyz1 = cpv.sub(xyz1, diff)
@@ -482,14 +482,64 @@ class PymolQtWidget(QGLWidget):
                   [cgo.CONE] + xyz3 + xyz2 + [hradius, 0.0] + color2 + color2 + \
                   [1.0, 0.0]
 
-            if not name:
-                name = self._pymol.cmd.get_unused_name('arrow')
-
+            name = self._pymol.cmd.get_unused_name('path')
             self._pymol.cmd.load_cgo(obj, name)
-            self._pymol.cmd.group("Arrows", name)
+            self._pymol.cmd.group("Sh_Paths", name)
 
         self.update()
         # cmd.extend('cgo_arrow', cgo_arrow)
+
+    def create_interacting_Residues(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
+                                    color='red', name=''):
+
+        try:
+            aa = self._pymol.cmd.get_names("nongroup_objects", enabled_only=1)
+            clean_ls = [i for i in aa if i.startswith('interact')]
+            for i in clean_ls:
+                self._pymol.cmd.get_model('(%s)' % i, 1).get_coord_list()
+
+        except:
+            pass
+
+        radius, gap = float(radius), float(gap)
+        hlength = float(hlength)
+
+        try:
+            color1, color2 = color.split()
+        except:
+            color1 = color2 = color
+        color1 = list(self._pymol.cmd.get_color_tuple(color1))
+        color2 = list(self._pymol.cmd.get_color_tuple(color2))
+
+        def get_coord(v):
+            if not isinstance(v, str):
+                return v
+            if v.startswith('['):
+                return cmd.safe_list_eval(v)
+            return cmd.get_atom_coords(v)
+
+        xyz1 = get_coord(atom1)
+        xyz2 = get_coord(atom2)
+        normal = cpv.normalize(cpv.sub(xyz1, xyz2))
+
+        if hlength < 0:
+            hlength = radius * 3.0
+
+        if gap:
+            diff = cpv.scale(normal, gap)
+            xyz1 = cpv.sub(xyz1, diff)
+            xyz2 = cpv.add(xyz2, diff)
+
+        xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
+        obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2
+
+        if not name:
+            name = self._pymol.cmd.get_unused_name('interact')
+
+        self._pymol.cmd.load_cgo(obj, name)
+        self._pymol.cmd.group("Interacts", name)
+
+        self.update()
 
     def show_ligand_polar_interactions(self):
         self._pymol.preset.ligands(selection='all', _self=self._pymol.cmd)
