@@ -177,7 +177,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.get_conserv_score_pushButton.clicked.connect(lambda: UIF.Functions.get_conservation_scores(self))
         # self.show_2d_network_pushButton.clicked.connect(lambda: UIFunctions.start_VisJS_2D_Network(self))
 
+        self.load_analysis_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_analysis(self))
+
         self.network_calculate_pushButton.clicked.connect(self.run_network_analysis)
+
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
         UIF.UIFunctions.start_pymol(self)
         # UIFunctions.start_VisJS_2D_Network(self)
