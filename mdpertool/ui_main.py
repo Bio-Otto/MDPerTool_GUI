@@ -170,7 +170,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
         self.all_targets_checkBox.stateChanged.connect(lambda: UIF.Functions.All_Residues_as_target_Changed(self))
         self.output_directory_button.clicked.connect(lambda: UIF.Functions.analysis_output_directory(self))
-        self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local())
+        self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local(manuel=True))
         self.add_residue_to_targets_pushButton.clicked.connect(lambda: UIF.Functions.add_residue_to_target_List(self))
         self.discard_residue_from_targets_pushButton.clicked.connect(
             lambda: UIF.Functions.discard_residue_from_target_List(self))

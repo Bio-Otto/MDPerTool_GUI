@@ -17,7 +17,7 @@ from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (Multi_Task_Engine, Pymol_Visualize_Path, Shortest_Path_Visualize)
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
 from ui_main import *
-
+from src.file_dialog import Dialog as file_dialog
 
 class Helper_Functions():
 
@@ -1168,6 +1168,7 @@ class Functions(MainWindow):
             horizontalLayout.addWidget(analysis_settings_groupBox)
 
             Protein3DNetworkView = PymolQtWidget(self)
+            Protein3DNetworkView.change_default_background()
             verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
             verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
             self.setLayout(verticalLayoutProteinNetworkView)
@@ -1287,7 +1288,7 @@ class Functions(MainWindow):
                                 Protein3DNetworkView.create_interacting_Residues(atom1=arrow_coord[0],
                                                                                  atom2=arrow_coord[1],
                                                                                  radius=0.05, gap=0.4, hradius=0.4,
-                                                                                 hlength=0.8, color='blue')
+                                                                                 hlength=0.8, color='cyan')
 
                             # MAKE PYMOL VISUALIZATION BETTER
                             Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
@@ -1338,7 +1339,7 @@ class Functions(MainWindow):
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
                                                 radius=0.055,
                                                 gap=0.4, hradius=0.4, hlength=0.8,
-                                                color='green', shortest_path=True)
+                                                color='magenta', shortest_path=True)
 
         for node in processed_path:
             resID_of_node = int(''.join(list(filter(str.isdigit, node))))
@@ -1379,20 +1380,19 @@ class Functions(MainWindow):
             The function provides Main GUI / Upload button activity for select response time file indicated by the user
         """
         try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            self.response_filename, _ = QFileDialog.getOpenFileName(self, "Select The *.csv File", str(os.getcwd()),
-                                                                    "Response_Time_Files (*.csv)", str(options))
+            d = file_dialog(self)
+            d.filters = ['Response_Time_Files (*.csv)', 'Tüm Dosyalar (*.*)']
+            d.default_filter_index = 0
+            d.exec(load=True)
+            print(d.filename)
+            print(d.path)
 
-            self.response_time_file_path = self.response_filename
-            self.response_filename = os.path.splitext(os.path.basename(self.response_filename))
+            if d.filename[2] == 'csv':
+                self.response_time_lineEdit.setText(d.path)
+                return True, d.path
 
-            if self.response_filename[1] == '.csv':
-                self.response_time_lineEdit.setText(self.response_time_file_path)
-                return True, self.response_time_file_path
-
-            elif self.response_filename[1] != "":
-                Message_Boxes.Critical_message(self, "Error", "this is not a valid response time file",
+            else:
+                Message_Boxes.Critical_message(self, "Error", "This is not a valid response time file",
                                                Style.MessageBox_stylesheet)
 
         except Exception as exp:
@@ -1403,19 +1403,18 @@ class Functions(MainWindow):
             The function provides Main GUI / Upload button activity for select pdb file indicated by the user
         """
         try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            self.boundForm_pdb_filename, _ = QFileDialog.getOpenFileName(self, "Show The *pdb File", str(os.getcwd()),
-                                                                         "pdb Files (*.pdb)", str(options))
+            d = file_dialog(self)
+            d.filters = ['pdb Files (*.pdb)', 'Tüm Dosyalar (*.*)']
+            d.default_filter_index = 0
+            d.exec(load=True)
+            print(d.filename)
+            print(d.path)
 
-            self.boundForm_pdb_path = self.boundForm_pdb_filename
-            self.boundForm_pdb_filename = os.path.splitext(os.path.basename(self.boundForm_pdb_filename))
+            if d.filename[2] == 'pdb':
+                self.boundForm_pdb_lineedit.setText(d.path)
+                return True, d.path
 
-            if self.boundForm_pdb_filename[1] == '.pdb':
-                self.boundForm_pdb_lineedit.setText(self.boundForm_pdb_path)
-                return True, self.boundForm_pdb_path
-
-            elif self.boundForm_pdb_filename[1] != "":
+            else:
                 Message_Boxes.Critical_message(self, "Error", "this is not a pdb file", Style.MessageBox_stylesheet)
 
         except Exception as exp:

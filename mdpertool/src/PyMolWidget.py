@@ -45,6 +45,7 @@ class PymolQtWidget(QGLWidget):
 
         self.mol_name = None
 
+
     def initializeGL(self):
         """
         Reimplemented from QGLWidget
@@ -89,6 +90,9 @@ class PymolQtWidget(QGLWidget):
             self._pymol.cmd.button("single_right", "None", "None")
         self._pymol.button(buttonMap[ev.button()], 0, ev.x(), self.height() - ev.y(), 0)
         self._pymolProcess()
+
+    def change_default_background(self):
+        self._pymol.cmd.bg_color('0x2C313C')
 
     def mouseReleaseEvent(self, ev):
         self._pymol.button(buttonMap[ev.button()], 1, ev.x(), self.height() - ev.y(), 0)
@@ -325,8 +329,8 @@ class PymolQtWidget(QGLWidget):
         """
         self._pymol.cmd.show('surface')
         self._pymol.cmd.set('surface_quality', 1)
-        self._pymol.cmd.set('surface_color', "white")
-        self._pymol.cmd.set('transparency', 0.55)
+        self._pymol.cmd.set('surface_color', "palecyan")
+        self._pymol.cmd.set('transparency', 0.75)
 
         self._pymol.stored.residues = []
         self._pymol.cmd.iterate('name ca', 'stored.residues.append(resi)', _self=self._pymol.cmd)
@@ -408,7 +412,7 @@ class PymolQtWidget(QGLWidget):
             pass
 
         if shortest_path:
-            color = 'green'
+            color = 'magenta'
 
         else:
             pass
