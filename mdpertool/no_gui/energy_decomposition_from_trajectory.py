@@ -275,7 +275,8 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
                                                    0 * chargeProd if exclude else chargeProd,
                                                    sigma, 0 * epsilon if exclude else epsilon)
 
-            Nonbonded_F.updateParametersInContext(simulation.context)
+            # Nonbonded_F.updateParametersInContext(simulation.context)
+            simulation.context.reinitialize()
 
         if simulation.context.getPlatform().getName() == 'CPU':
             for index in range(Nonbonded_F.getNumParticles()):
@@ -291,7 +292,8 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
                                                    10e-15 * chargeProd if exclude else chargeProd,
                                                    sigma, 0 * epsilon if exclude else epsilon)
 
-            Nonbonded_F.updateParametersInContext(simulation.context)
+            # Nonbonded_F.updateParametersInContext(simulation.context)
+            simulation.context.reinitialize()
 
         # ------------------------------------------- HARMONIC BOND FORCE -------------------------------------------- #
         """

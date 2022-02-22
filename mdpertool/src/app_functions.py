@@ -1454,6 +1454,15 @@ class Functions(MainWindow):
         self.Number_CPU_spinBox.setMaximum(mp.cpu_count())
         self.Number_of_thread_for_network_spinBox.setMaximum(mp.cpu_count())
 
+    def mutator_isActive(self):
+        if self.mutator_checkBox.isChecked():
+            self.mut_res_comboBox.setEnabled(True)
+            self.mut_res_comboBox_2.setEnabled(True)
+
+        if not self.mutator_checkBox.isChecked():
+            self.mut_res_comboBox.setEnabled(False)
+            self.mut_res_comboBox_2.setEnabled(False)
+
     def precision_combobox_settings(self, eq_md_indexes, per_md_indexes):
 
         if eq_md_indexes is not None:
@@ -1462,18 +1471,27 @@ class Functions(MainWindow):
                 self.eq_precision_comboBox.model().item(eq_md_indexes['mixed']).setEnabled(True)
                 self.eq_precision_comboBox.model().item(eq_md_indexes['double']).setEnabled(False)
                 self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['mixed'])
+                self.All_CPU_checkBox.setEnabled(True)
+                self.Number_CPU_spinBox_2.setEnabled(True)
+                self.label_6.setEnabled(True)
 
             if str(self.equ_platform_comboBox.currentText()) == 'Reference':
                 self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(False)
                 self.eq_precision_comboBox.model().item(eq_md_indexes['mixed']).setEnabled(False)
                 self.eq_precision_comboBox.model().item(eq_md_indexes['double']).setEnabled(True)
                 self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['double'])
+                self.All_CPU_checkBox.setEnabled(False)
+                self.Number_CPU_spinBox_2.setEnabled(False)
+                self.label_6.setEnabled(False)
 
             if str(self.equ_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
                 self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(True)
                 self.eq_precision_comboBox.model().item(eq_md_indexes['mixed']).setEnabled(True)
                 self.eq_precision_comboBox.model().item(eq_md_indexes['double']).setEnabled(True)
                 self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['single'])
+                self.All_CPU_checkBox.setEnabled(False)
+                self.Number_CPU_spinBox_2.setEnabled(False)
+                self.label_6.setEnabled(False)
 
         if per_md_indexes is not None:
             if str(self.per_platform_comboBox.currentText()) == 'CPU':
@@ -1481,18 +1499,27 @@ class Functions(MainWindow):
                 self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
                 self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(False)
                 self.per_precision_comboBox.setCurrentIndex(per_md_indexes['mixed'])
+                self.perturbation_All_CPU_checkBox.setEnabled(True)
+                self.Number_CPU_spinBox.setEnabled(True)
+                self.label_35.setEnabled(True)
 
             if str(self.per_platform_comboBox.currentText()) == 'Reference':
                 self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
                 self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(False)
                 self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
                 self.per_precision_comboBox.setCurrentIndex(per_md_indexes['double'])
+                self.perturbation_All_CPU_checkBox.setEnabled(False)
+                self.Number_CPU_spinBox.setEnabled(False)
+                self.label_35.setEnabled(False)
 
             if str(self.per_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
                 self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(True)
                 self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
                 self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
                 self.per_precision_comboBox.setCurrentIndex(per_md_indexes['single'])
+                self.perturbation_All_CPU_checkBox.setEnabled(False)
+                self.Number_CPU_spinBox.setEnabled(False)
+                self.label_35.setEnabled(False)
 
     def output_file(self):
         try:

@@ -132,6 +132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         UIF.Functions.Send_Available_Platforms_to_GUI(self)
         UIF.Functions.maximum_thread_of_system(self)
+        self.mutator_checkBox.stateChanged.connect(lambda: UIF.Functions.mutator_isActive(self))
         self.platform_specific_precision_applying()
 
         self.node_threshold_checkBox.stateChanged.connect(lambda: UIF.Functions.node_threshold_use(self))
