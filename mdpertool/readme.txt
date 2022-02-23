@@ -33,7 +33,7 @@ from mdtraj.reporters import XTCReporter
 simulation_last_time = 0
 print('pdb file fixing and preparing for simulation ...')
 __queue.put('pdb file fixing and preparing for simulation ...')
-fixed_pdb_name = fix_pdb('/home/bio-otto/Desktop/MDPerTool_GUI/mdpertool/Download/2j0w_example_fixed_ph7.pdb', fixed_pdb_out_path='/home/bio-otto/Desktop/MDPerTool_GUI/mdpertool/output')
+fixed_pdb_name = fix_pdb('/home/bio-otto/Desktop/MDPerTool_GUI/mdpertool/output/3pee_fixed_ph7.pdb', fixed_pdb_out_path='/home/bio-otto/Desktop/MDPerTool_GUI/mdpertool/output')
 
 print('Loading pdb to simulation engine ...')
 __queue.put('Loading pdb to simulation engine ...')
@@ -48,7 +48,7 @@ modeller.topology.setUnitCellDimensions(box)
 
 print('Forcefield parameters loading to the simulation system ...')
 __queue.put('Forcefield parameters loading to the simulation system ...')
-forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
+forcefield = app.ForceField('charmm36.xml', 'charmm36/tip5p.xml')
 
 print('Adding missing hydrogens to the model ...')
 __queue.put('Adding missing hydrogens to the model ...')
@@ -56,7 +56,7 @@ modeller.addHydrogens(forcefield)
 
 print('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
 __queue.put('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
-modeller.addSolvent(forcefield, model='tip3p', padding=10 * angstrom)
+modeller.addSolvent(forcefield, model='tip5p', padding=10 * angstrom)
 
 print('Constructing an OpenMM System')
 __queue.put('Constructing an OpenMM System')
@@ -73,7 +73,7 @@ nonbonded.setSwitchingDistance(1*nanometer)
 nonbonded.setUseDispersionCorrection(True)
 
 print('Creating a %sIntegrator with %s %s .' %('Langevin', 2.0, 'femtosecond'))
-integrator = mm.LangevinIntegrator(310.0*kelvin, 91.0/picosecond, 2.0*femtosecond)
+integrator = mm.LangevinIntegrator(310.0*kelvin, 5.0/picosecond, 2.0*femtosecond)
 
 if True == True:
     platform = mm.Platform.getPlatformByName('CUDA')
@@ -104,21 +104,17 @@ simulation.step(int(500))
 
 simulation.currentStep = simulation_last_time
 
-print('The trajectories will be saved in DCD file format.')
-print("Saving DCD File for every 100 period")
-__queue.put('Saving DCD File for every 100 period')
-simulation.reporters.append(DCDReporter('/home/bio-otto/Desktop/MDPerTool_GUI/mdpertool/output/output.dcd', 100))
 
 
 print('State Report will tell you.')
 __queue.put('State Report will tell you.')
 simulation.reporters.append(StateDataReporter(stdout, 100, step=True,
 time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True,
-remainingTime=True, speed=True, volume=True, density=True, totalSteps=300000))
+remainingTime=True, speed=True, volume=True, density=True, totalSteps=250000))
 
 print('Running Production...')
 __queue.put('Running Production...')
-simulation.step(300000)
+simulation.step(250000)
 print('Done!')
 
 lastpositions = simulation.context.getState(getPositions=True).getPositions()
@@ -161,16 +157,16 @@ OUTPUT_FOLDER_NAME = str
 OUTPUT_DIRECTORY = Path('/home/bio-otto/Desktop/MDPerTool_GUI/mdpertool/output')
 
 last_pdb_file_path = os.path.join(OUTPUT_DIRECTORY, last_pdb)
-modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['SER345'], 'CA')
+modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['ARG209'], 'CA')
 state_file_path = os.path.join(OUTPUT_DIRECTORY, state_file_name)
 
-print("SPEED LIST: ", [4, 5])
+print("SPEED LIST: ", [4])
 
-for i in range(len([4, 5])):
-    name_of_changed_state_xml = change_velocity(state_file_path, [4, 5][i], modify_atoms)
-    new_dissipated_trajectory_name = dissipated_trajectory_name + str([4, 5][i])
+for i in range(len([4])):
+    name_of_changed_state_xml = change_velocity(state_file_path, [4][i], modify_atoms)
+    new_dissipated_trajectory_name = dissipated_trajectory_name + str([4][i])
 
-    if True == False and False == False:
+    if False == False and False == False:
         write_dcd_cond = True
 
     if i == 0:
@@ -210,7 +206,7 @@ for i in range(len([4, 5])):
         topology = pdb.topology
 
         print('Forcefield parameters loading to the simulation system ...')
-        forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
+        forcefield = app.ForceField('charmm36.xml', 'charmm36/tip5p.xml')
 
         print('Constructing an OpenMM System')
         reference_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff=1.2*nanometer,
@@ -253,12 +249,12 @@ for i in range(len([4, 5])):
             ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
         else:
-            if True == False and False == False:
+            if False == False and False == False:
                 print("Saving DCD File for every 1 period")
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-            if True == True:
+            if False == True:
                 print("Saving DCD File for every 1 period")
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
@@ -315,7 +311,7 @@ for i in range(len([4, 5])):
     topology = pdb.topology
 
     print('Forcefield parameters loading to the simulation system ...')
-    forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
+    forcefield = app.ForceField('charmm36.xml', 'charmm36/tip5p.xml')
 
     print('Constructing an OpenMM System')
     perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff=1.2*nanometer,
@@ -358,12 +354,12 @@ for i in range(len([4, 5])):
         dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
     else:
-        if True == False and False == False:
+        if False == False and False == False:
             print("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-        if True == True:
+        if False == True:
             print("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
@@ -391,12 +387,12 @@ for i in range(len([4, 5])):
         dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
 
     else:
-        if True == False and False == False:
+        if False == False and False == False:
             print("Decompose started using DCD File")
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
 
-        if True == True:
+        if False == True:
             print("Decompose started using DCD File")
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
@@ -425,22 +421,22 @@ for i in range(len([4, 5])):
                                     output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='CUDA',
                                     ref_energy_name='reference_energy_file.csv', device_id_active=False,
                                     num_of_threads=2,
-                                    modif_energy_name='modified_energy_file_%s.csv' % int([4, 5][i]),
-                                    origin_last_pdb=last_pdb_file_path, ff='amber03.xml')
+                                    modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
+                                    origin_last_pdb=last_pdb_file_path, ff='charmm36.xml')
 
     if i != 0:
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
                                     output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='CUDA',
                                     ref_energy_name=None, device_id_active=False, num_of_threads=2,
-                                    modif_energy_name='modified_energy_file_%s.csv' % int([4, 5][i]),
+                                    modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
                                     origin_last_pdb=last_pdb_file_path,
-                                    ff='amber03.xml')
+                                    ff='charmm36.xml')
 
     # --> RESPONSE TIME CSV EXPORTER
     getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
-                            os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([4, 5][i])),
-                            outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([4, 5][i])))
+                            os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([4][i])),
+                            outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([4][i])))
 
 
     try:

@@ -35,34 +35,42 @@
 
 ### Installation
 
-Open your favorite Terminal and run these commands.
+Open your favorite Terminal and run the commands below:
 
 
 ```diff
+# For Windows Users 
 $ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
-$ cd cd MDPerTool_GUI
-$ conda env create -f envs/winx64_env.yml 
+$ cd MDPerTool_GUI
+$ conda env create -f envs/winx64_env.yml
+$ conda activate mdpertool
+$ python ui_main.py
+```
+```diff
+# For linux Users
+$ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
+$ cd MDPerTool_GUI
+$ conda env create -f envs/linux64_env.yml
 $ conda activate mdpertool
 $ python ui_main.py
 ```
 
-### For terminal usage just use; 
+
+### For terminal usage just type; 
 
 ```sh
 $ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
 ```
 
-* __-p__  -->  Give the absolute path of your pdb file. 
-* __-wdcd__  -->  The program defaultly will use dcd reporting. But you can exchange it with XTC file format using ```-wdcd False -wxtc True``` argument
-* __-pert_res__  -->  You must list the residue or residues you want to perturbed.
-* __-speed_factor__  -->  Indicate how many times you want to increase the velocity of the residue atoms you want to perturbed.
+* __-p__  -->  User gives the absolute path of the pdb file. 
+* __-wdcd__  -->  The program uses dcd as default output format. Users can change it to XTC file format using ```-wdcd False -wxtc True``` argument.
+* __-pert_res__  -->  Users should enter the residue(s) to be perturbed.
+* __-speed_factor__  -->  Users should indicate the velocity rescale factor.
 
 
-## Then run it.
 
 ### Dependencies
 
-MDPERTOOL uses a number of open source projects to work properly:
 
 * __OpenMM__ - A high performance toolkit for molecular simulation. 
 * __Networkx__ - NetworkX is a Python package for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks.
@@ -76,21 +84,21 @@ MDPERTOOL uses a number of open source projects to work properly:
 * __ProDy__ - Protein Dynamics and Sequence Analysis
 * __Parmed__ - Parameter/topology editor and molecular simulator
 
-And of course MDPERTOOL v0.1 itself is open source with a [public repository][MDPERTOOL] on GitHub.
+And of course MDPERTOOL v0.0.1 itself is an open source [public repository][MDPERTOOL] on GitHub.
 
-### Also you can check full functional parameters with typing 
+### Also you can check full functional parameters with: 
 
 ```sh
 $ python no_gui.py -h
 ```
 
-For production Molecular Dynamic Simulation just type...
+For Molecular Dynamic Simulation production
 
 ```sh
 $ no_gui.py -p <pdb file> -pff <charmm36> -wff <tip5p> -wdcd <True>
 ```
 
-The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script.
+MDPerTool applies Energy Dissipation Concept using OpenMM Molecular Dynamic Toolkit, which also supports the CUDA platform.
 
 # New Features!
 
@@ -99,9 +107,9 @@ The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular
   - DCD and XTC file format support 
   
 
-### Features of MDPERTOOL v0.1
+### Features of MDPERTOOL v0.0.1
 
-MDPERTOOL is currently extended with the following features. Instructions on how to use them in your own works are linked below.
+MDPERTOOL includes the following features. 
 
 <table align="center">
     <thead>
@@ -135,12 +143,13 @@ MDPERTOOL is currently extended with the following features. Instructions on how
 ### Development
 
 Want to contribute?
-Get branch and Join us to make MDPERTOOL great!
+Get a branch and Join us to make MDPERTOOL even greater!
 
 ### Todos
 
  - Write MORE Tests
  - Add Night Mode
+ 
 
 License
 ----

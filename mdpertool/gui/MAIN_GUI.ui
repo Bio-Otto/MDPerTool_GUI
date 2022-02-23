@@ -3366,8 +3366,7 @@ background-color: rgb(93, 83, 91);
                                     </font>
                                    </property>
                                    <property name="styleSheet">
-                                    <string notr="true">
-</string>
+                                    <string notr="true"/>
                                    </property>
                                    <property name="text">
                                     <string>From: </string>
@@ -6820,7 +6819,7 @@ QCheckBox::indicator:checked {
                                    </font>
                                   </property>
                                   <property name="text">
-                                   <string>Nonbounded cutoff: </string>
+                                   <string>Nonbonded cutoff: </string>
                                   </property>
                                  </widget>
                                 </item>
@@ -6845,7 +6844,7 @@ QCheckBox::indicator:checked {
                                    </font>
                                   </property>
                                   <property name="text">
-                                   <string>Nonbounded Method: </string>
+                                   <string>Nonbonded Method: </string>
                                   </property>
                                  </widget>
                                 </item>
@@ -7226,7 +7225,7 @@ QGroupBox::indicator {
                                     <rect>
                                      <x>9</x>
                                      <y>30</y>
-                                     <width>261</width>
+                                     <width>251</width>
                                      <height>81</height>
                                     </rect>
                                    </property>
@@ -7393,9 +7392,9 @@ p, li { white-space: pre-wrap; }
                                   <widget class="QWidget" name="formLayoutWidget_5">
                                    <property name="geometry">
                                     <rect>
-                                     <x>290</x>
+                                     <x>270</x>
                                      <y>30</y>
-                                     <width>261</width>
+                                     <width>281</width>
                                      <height>81</height>
                                     </rect>
                                    </property>
@@ -7444,13 +7443,13 @@ p, li { white-space: pre-wrap; }
                                       </property>
                                       <property name="minimumSize">
                                        <size>
-                                        <width>107</width>
+                                        <width>125</width>
                                         <height>0</height>
                                        </size>
                                       </property>
                                       <property name="maximumSize">
                                        <size>
-                                        <width>107</width>
+                                        <width>125</width>
                                         <height>16777215</height>
                                        </size>
                                       </property>
@@ -7461,7 +7460,7 @@ p, li { white-space: pre-wrap; }
                                        </font>
                                       </property>
                                       <property name="text">
-                                       <string>Equilibrate steps: </string>
+                                       <string>Equilibration steps: </string>
                                       </property>
                                      </widget>
                                     </item>
@@ -7650,7 +7649,17 @@ QSpinBox QAbstractItemView {
 	background-color: rgb(27, 29, 35);
 	padding: 5px;
 	selection-background-color: rgb(39, 44, 54);
-}</string>
+}
+
+QAbstractSpinBox:disabled {
+    color: #f5f5f5;
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+}
+
+
+QSpinBox::up-button { width: 20px; }
+QSpinBox::down-button { width: 20px; }</string>
                                      </property>
                                      <property name="maximum">
                                       <number>500000000</number>
