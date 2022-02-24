@@ -283,7 +283,7 @@ class Graphs(QWidget):
         self.simulation_time_graph.getAxis('left').enableAutoSIPrefix(False)
 
         self.simulation_time_graph_plot = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 255, 0), width=2), fillLevel=0.0,
-                                                          name="Rime Remaining (sec)", brush=(150, 150, 50, 10))
+                                                          name="Remaining Time (sec)", brush=(150, 150, 50, 10))
         self.simulation_time_graph.addItem(self.simulation_time_graph_plot)
 
         self.first_entrance = 0
