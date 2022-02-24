@@ -24,7 +24,7 @@
 [![Version](https://badge.fury.io/gh/Bio-Otto%2FMDPerTool_GUI.svg)](https://badge.fury.io/gh/Bio-Otto%2FMDPerTool_GUI)
 [![GitHub Release](https://img.shields.io/github/release/Bio-Otto/MDPerTool_GUI.svg?style=flat)]()
 
-<img alt="Awesome GitHub Profile Readme" src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/MDPerTool.gif"> </img>
+<img alt="Awesome GitHub Profile Readme" src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/MDPerTool.gif"> </img>
 
 <p align="center">
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
