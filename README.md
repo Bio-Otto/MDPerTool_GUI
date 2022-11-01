@@ -44,6 +44,7 @@ $ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 $ cd MDPerTool_GUI
 $ conda env create -f envs/winx64_env.yml
 $ conda activate mdpertool
+$ cd mdpertool
 $ python ui_main.py
 ```
 ```diff
@@ -52,6 +53,7 @@ $ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 $ cd MDPerTool_GUI
 $ conda env create -f envs/linux64_env.yml
 $ conda activate mdpertool
+$ cd mdpertool
 $ python ui_main.py
 ```
 
