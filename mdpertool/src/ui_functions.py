@@ -304,6 +304,7 @@ class UIFunctions(MainWindow):
         self.ProteinView.show()
 
     def show_residue_labels(self):
+        print("AAAAAA")
         itemsTextList = self.selected_residues_listWidget.currentItem().text()
         # [str(self.selected_residues_listWidget.item(i).text()) for i in
         #              range(self.selected_residues_listWidget.count())]

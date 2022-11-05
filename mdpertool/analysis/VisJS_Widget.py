@@ -1,6 +1,6 @@
 from PySide2 import QtCore, QtWidgets, QtWebEngineWidgets
 import os
-from pyvis import network as net
+#from pyvis import network as net
 from io import StringIO
 
 

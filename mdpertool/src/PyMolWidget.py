@@ -12,6 +12,7 @@ from pymol.cgo import *
 from pymol.vfont import plain
 from pymol import cmd, cgo, CmdException, selector, stored
 from chempy import cpv
+from src.pdb_intro_1aki import pdb_id_1aki
 
 os.environ['QT_API'] = 'pyside2'
 buttonMap = {
@@ -20,8 +21,7 @@ buttonMap = {
     Qt.RightButton: 2,
 }
 path = os.getcwd()
-print(path)
-demo_pdb_path = path + '/Download/1aki.pdb'
+demo_pdb_path = os.path.join(path, 'Download', '1aki.pdb')
 
 
 class PymolQtWidget(QGLWidget):
@@ -45,14 +45,12 @@ class PymolQtWidget(QGLWidget):
 
         self.mol_name = None
 
-
     def initializeGL(self):
         """
         Reimplemented from QGLWidget
         Instance PyMOL _only_ when we're sure there's an OGL context up and running
         (i.e. in this method :-)
         """
-        print(path)
         if not self._enableUi:
             self._pymol.cmd.set("internal_gui", 0)
             self._pymol.cmd.set("internal_feedback", 0)
@@ -147,7 +145,6 @@ class PymolQtWidget(QGLWidget):
 
     def selection_color(self, selection):
         # self._pymol.cmd.color('red', 'resi %s' %s[3])
-        print(selection[3:-1])
         self.resicolor('resi %s' % selection[3:-1])
 
     def resicolor(self, selection):
@@ -165,7 +162,7 @@ class PymolQtWidget(QGLWidget):
             self._pymol.cmd.set('label_size', '20')
 
         except Exception as expression:
-            print(expression)
+            pass
 
     def resi_label_add(self, selection):
         try:
@@ -179,7 +176,7 @@ class PymolQtWidget(QGLWidget):
             self._pymol.cmd.set('label_size', '14')
 
         except Exception as expression:
-            print(expression)
+            pass
 
     def clear_all_labels(self):
         self._pymol.cmd.label('all', '')
@@ -406,7 +403,6 @@ class PymolQtWidget(QGLWidget):
             clean_ls = [i for i in aa if i.startswith('arrow')]
             for i in clean_ls:
                 cc = self._pymol.cmd.get_model('(%s)' % i, 1).get_coord_list()
-                print(cc)
 
         except:
             pass

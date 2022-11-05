@@ -2339,7 +2339,7 @@ QDoubleSpinBox::down-button { width: 20px; }</string>
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>134</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -2428,7 +2428,7 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                   </widget>
                                  </item>
                                  <item row="0" column="3">
-                                  <widget class="QCheckBox" name="checkBox">
+                                  <widget class="QCheckBox" name="equilubrate_checkBox">
                                    <property name="styleSheet">
                                     <string notr="true">QCheckBox {
     spacing: 5px;
@@ -2696,7 +2696,7 @@ QPushButton:pressed {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>134</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -2922,7 +2922,7 @@ QSpinBox QAbstractItemView {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>134</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -3254,7 +3254,7 @@ QGroupBox::indicator {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>134</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -3427,7 +3427,7 @@ background-color: rgb(93, 83, 91);
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>134</width>
+                                     <width>110</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -4071,7 +4071,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                                   <property name="minimumSize">
                                    <size>
                                     <width>0</width>
-                                    <height>160</height>
+                                    <height>200</height>
                                    </size>
                                   </property>
                                   <property name="font">
@@ -4108,83 +4108,91 @@ QGroupBox::indicator {
                                   <property name="title">
                                    <string>Equilibrium MD Platform and Properties</string>
                                   </property>
-                                  <widget class="QWidget" name="formLayoutWidget_9">
-                                   <property name="geometry">
-                                    <rect>
-                                     <x>10</x>
-                                     <y>29</y>
-                                     <width>621</width>
-                                     <height>121</height>
-                                    </rect>
+                                  <layout class="QVBoxLayout" name="verticalLayout_27">
+                                   <property name="spacing">
+                                    <number>5</number>
                                    </property>
-                                   <layout class="QGridLayout" name="gridLayout_7">
-                                    <property name="leftMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="topMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <property name="rightMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="bottomMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <item row="0" column="2">
-                                     <widget class="QLabel" name="label_27">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>120</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>140</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QLabel{
+                                   <property name="leftMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="topMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="rightMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="bottomMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <item>
+                                    <layout class="QGridLayout" name="gridLayout_7">
+                                     <property name="leftMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="topMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <property name="rightMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="bottomMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <item row="0" column="2">
+                                      <widget class="QLabel" name="label_27">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>120</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>140</width>
+                                         <height>16777215</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QLabel{
 			margin-left:15px;
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>Precision: </string>
-                                      </property>
-                                      <property name="alignment">
-                                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="1">
-                                     <widget class="QComboBox" name="Device_Number_comboBox">
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       </property>
+                                       <property name="text">
+                                        <string>Precision: </string>
+                                       </property>
+                                       <property name="alignment">
+                                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="1">
+                                      <widget class="QComboBox" name="Device_Number_comboBox">
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -4247,42 +4255,42 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>1</string>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="3">
-                                     <widget class="QComboBox" name="eq_precision_comboBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       <item>
+                                        <property name="text">
+                                         <string>1</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="3">
+                                      <widget class="QComboBox" name="eq_precision_comboBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -4341,52 +4349,52 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>single</string>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>mixed</string>
+                                       <item>
+                                        <property name="text">
+                                         <string>single</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>mixed</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>double</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="2">
+                                      <widget class="QCheckBox" name="Device_ID_checkBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>double</string>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>120</width>
+                                         <height>33</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="2">
-                                     <widget class="QCheckBox" name="Device_ID_checkBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>120</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>140</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QCheckBox {
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>140</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QCheckBox {
     spacing: 5px;
 	margin-left: 15px;
 }
@@ -4415,62 +4423,62 @@ QCheckBox:disabled {
 QCheckBox::indicator:checked {
 	border-image: url(:/20x20/icons/20x20/cil-check.png);
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>Use Device ID</string>
-                                      </property>
-                                      <property name="shortcut">
-                                       <string notr="true"/>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="0">
-                                     <widget class="QLabel" name="label_39">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>70</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Device ID: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="1">
-                                     <widget class="QComboBox" name="equ_platform_comboBox">
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       </property>
+                                       <property name="text">
+                                        <string>Use Device ID</string>
+                                       </property>
+                                       <property name="shortcut">
+                                        <string notr="true"/>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="0">
+                                      <widget class="QLabel" name="label_39">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>70</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Device ID: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="1">
+                                      <widget class="QComboBox" name="equ_platform_comboBox">
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -4529,120 +4537,120 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>CUDA</string>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>OpenCL</string>
+                                       <item>
+                                        <property name="text">
+                                         <string>CUDA</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>OpenCL</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>Reference</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>CPU</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="0">
+                                      <widget class="QLabel" name="label_38">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>Reference</string>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>33</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>CPU</string>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="0">
-                                     <widget class="QLabel" name="label_38">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Platform: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="2" column="0">
-                                     <widget class="QLabel" name="label_35">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>85</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>85</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Threads:</string>
-                                      </property>
-                                      <property name="alignment">
-                                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="2" column="1">
-                                     <widget class="QSpinBox" name="Number_CPU_spinBox_2">
-                                      <property name="enabled">
-                                       <bool>true</bool>
-                                      </property>
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="layoutDirection">
-                                       <enum>Qt::RightToLeft</enum>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QSpinBox{
+                                       <property name="text">
+                                        <string>Platform: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="2" column="0">
+                                      <widget class="QLabel" name="label_35">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>85</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>85</width>
+                                         <height>16777215</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Threads:</string>
+                                       </property>
+                                       <property name="alignment">
+                                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="2" column="1">
+                                      <widget class="QSpinBox" name="Number_CPU_spinBox_2">
+                                       <property name="enabled">
+                                        <bool>true</bool>
+                                       </property>
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="layoutDirection">
+                                        <enum>Qt::RightToLeft</enum>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QSpinBox{
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -4669,49 +4677,49 @@ QAbstractSpinBox:disabled {
 
 QSpinBox::up-button { width: 20px; }
 QSpinBox::down-button { width: 20px; }</string>
-                                      </property>
-                                      <property name="minimum">
-                                       <number>2</number>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="2" column="2">
-                                     <widget class="QCheckBox" name="All_CPU_checkBox">
-                                      <property name="enabled">
-                                       <bool>true</bool>
-                                      </property>
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>140</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="layoutDirection">
-                                       <enum>Qt::LeftToRight</enum>
-                                      </property>
-                                      <property name="autoFillBackground">
-                                       <bool>false</bool>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QCheckBox {
+                                       </property>
+                                       <property name="minimum">
+                                        <number>2</number>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="2" column="2">
+                                      <widget class="QCheckBox" name="All_CPU_checkBox">
+                                       <property name="enabled">
+                                        <bool>true</bool>
+                                       </property>
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="layoutDirection">
+                                        <enum>Qt::LeftToRight</enum>
+                                       </property>
+                                       <property name="autoFillBackground">
+                                        <bool>false</bool>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QCheckBox {
     spacing: 5px;
 	margin-left: 15px;
 }
@@ -4741,14 +4749,121 @@ QCheckBox::indicator:checked {
 
 
 </string>
-                                      </property>
-                                      <property name="text">
-                                       <string>All CPU</string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                   </layout>
-                                  </widget>
+                                       </property>
+                                       <property name="text">
+                                        <string>All CPU</string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                    </layout>
+                                   </item>
+                                   <item>
+                                    <layout class="QGridLayout" name="gridLayout_12">
+                                     <property name="leftMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="topMargin">
+                                      <number>8</number>
+                                     </property>
+                                     <property name="rightMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="bottomMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <item row="0" column="0">
+                                      <widget class="QLabel" name="label_44">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>16777215</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Equilibration steps: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="1">
+                                      <widget class="QTextEdit" name="Max_equilubrate_steps_textEdit">
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>200</width>
+                                         <height>35</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QTextEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding: 10px;
+}
+QTextEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QTextEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}
+
+QTextEdit:disabled {
+background-color: rgb(93, 83, 91);
+}</string>
+                                       </property>
+                                       <property name="html">
+                                        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;500&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="2">
+                                      <spacer name="horizontalSpacer_4">
+                                       <property name="orientation">
+                                        <enum>Qt::Horizontal</enum>
+                                       </property>
+                                       <property name="sizeHint" stdset="0">
+                                        <size>
+                                         <width>40</width>
+                                         <height>20</height>
+                                        </size>
+                                       </property>
+                                      </spacer>
+                                     </item>
+                                    </layout>
+                                   </item>
+                                  </layout>
                                  </widget>
                                 </item>
                                 <item>
@@ -4795,80 +4910,88 @@ QGroupBox::indicator {
                                   <property name="title">
                                    <string>Perturbation MD Platform and Properties</string>
                                   </property>
-                                  <widget class="QWidget" name="formLayoutWidget_7">
-                                   <property name="geometry">
-                                    <rect>
-                                     <x>10</x>
-                                     <y>30</y>
-                                     <width>621</width>
-                                     <height>119</height>
-                                    </rect>
+                                  <layout class="QHBoxLayout" name="horizontalLayout_22">
+                                   <property name="spacing">
+                                    <number>5</number>
                                    </property>
-                                   <layout class="QGridLayout" name="gridLayout_10">
-                                    <property name="leftMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="topMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <property name="rightMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="bottomMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <item row="0" column="2">
-                                     <widget class="QLabel" name="label_28">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>70</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QLabel{
+                                   <property name="leftMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="topMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="rightMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="bottomMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <item>
+                                    <layout class="QGridLayout" name="gridLayout_10">
+                                     <property name="leftMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="topMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <property name="rightMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="bottomMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <item row="0" column="2">
+                                      <widget class="QLabel" name="label_28">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>70</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>16777215</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QLabel{
 			margin-left:15px;
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>Precision: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="1">
-                                     <widget class="QComboBox" name="per_platform_comboBox">
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       </property>
+                                       <property name="text">
+                                        <string>Precision: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="1">
+                                      <widget class="QComboBox" name="per_platform_comboBox">
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -4927,88 +5050,88 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>CUDA</string>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>OpenCL</string>
+                                       <item>
+                                        <property name="text">
+                                         <string>CUDA</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>OpenCL</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>Reference</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>CPU</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="0">
+                                      <widget class="QLabel" name="label_47">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>Reference</string>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>70</width>
+                                         <height>0</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>CPU</string>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>33</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="0">
-                                     <widget class="QLabel" name="label_47">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>70</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Device ID: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="3">
-                                     <widget class="QComboBox" name="per_precision_comboBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Device ID: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="3">
+                                      <widget class="QComboBox" name="per_precision_comboBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -5067,55 +5190,55 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <property name="currentIndex">
-                                       <number>2</number>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>single</string>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>mixed</string>
+                                       <property name="currentIndex">
+                                        <number>2</number>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>double</string>
+                                       <item>
+                                        <property name="text">
+                                         <string>single</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>mixed</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>double</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="2">
+                                      <widget class="QCheckBox" name="per_Device_ID_checkBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="2">
-                                     <widget class="QCheckBox" name="per_Device_ID_checkBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>120</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>16777215</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QCheckBox {
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>120</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>16777215</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QCheckBox {
     spacing: 5px;
 	margin-left: 15px;
 }
@@ -5144,107 +5267,107 @@ QCheckBox:disabled {
 QCheckBox::indicator:checked {
 	border-image: url(:/20x20/icons/20x20/cil-check.png);
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>Use Device ID</string>
-                                      </property>
-                                      <property name="shortcut">
-                                       <string notr="true"/>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="0">
-                                     <widget class="QLabel" name="label_46">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Platform: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="2" column="0">
-                                     <widget class="QLabel" name="label_6">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>85</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>85</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Threads:</string>
-                                      </property>
-                                      <property name="alignment">
-                                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                      </property>
-                                      <property name="buddy">
-                                       <cstring>Number_CPU_spinBox</cstring>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="2" column="1">
-                                     <widget class="QSpinBox" name="Number_CPU_spinBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="layoutDirection">
-                                       <enum>Qt::RightToLeft</enum>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QSpinBox{
+                                       </property>
+                                       <property name="text">
+                                        <string>Use Device ID</string>
+                                       </property>
+                                       <property name="shortcut">
+                                        <string notr="true"/>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="0">
+                                      <widget class="QLabel" name="label_46">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Platform: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="2" column="0">
+                                      <widget class="QLabel" name="label_6">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>85</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>85</width>
+                                         <height>16777215</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Threads:</string>
+                                       </property>
+                                       <property name="alignment">
+                                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                       </property>
+                                       <property name="buddy">
+                                        <cstring>Number_CPU_spinBox</cstring>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="2" column="1">
+                                      <widget class="QSpinBox" name="Number_CPU_spinBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="layoutDirection">
+                                        <enum>Qt::RightToLeft</enum>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QSpinBox{
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -5271,42 +5394,42 @@ QAbstractSpinBox:disabled {
 
 QSpinBox::up-button { width: 20px; }
 QSpinBox::down-button { width: 20px; }</string>
-                                      </property>
-                                      <property name="minimum">
-                                       <number>2</number>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="2" column="2">
-                                     <widget class="QCheckBox" name="perturbation_All_CPU_checkBox">
-                                      <property name="enabled">
-                                       <bool>true</bool>
-                                      </property>
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>170</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QCheckBox {
+                                       </property>
+                                       <property name="minimum">
+                                        <number>2</number>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="2" column="2">
+                                      <widget class="QCheckBox" name="perturbation_All_CPU_checkBox">
+                                       <property name="enabled">
+                                        <bool>true</bool>
+                                       </property>
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>170</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QCheckBox {
     spacing: 5px;
 	margin-left: 15px;
 }
@@ -5335,28 +5458,28 @@ QCheckBox:disabled {
 QCheckBox::indicator:checked {
 	border-image: url(:/20x20/icons/20x20/cil-check.png);
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>All CPU</string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="1">
-                                     <widget class="QComboBox" name="per_Device_Number_comboBox">
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       </property>
+                                       <property name="text">
+                                        <string>All CPU</string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="1">
+                                      <widget class="QComboBox" name="per_Device_Number_comboBox">
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -5419,16 +5542,17 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>1</string>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                   </layout>
-                                  </widget>
+                                       <item>
+                                        <property name="text">
+                                         <string>1</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                    </layout>
+                                   </item>
+                                  </layout>
                                  </widget>
                                 </item>
                                 <item>
@@ -5475,56 +5599,64 @@ QGroupBox::indicator {
                                   <property name="title">
                                    <string>Forcefield</string>
                                   </property>
-                                  <widget class="QWidget" name="formLayoutWidget">
-                                   <property name="geometry">
-                                    <rect>
-                                     <x>9</x>
-                                     <y>30</y>
-                                     <width>591</width>
-                                     <height>91</height>
-                                    </rect>
+                                  <layout class="QVBoxLayout" name="verticalLayout_28">
+                                   <property name="spacing">
+                                    <number>5</number>
                                    </property>
-                                   <layout class="QGridLayout" name="gridLayout_8">
-                                    <property name="leftMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="topMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <property name="rightMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="bottomMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <item row="0" column="1">
-                                     <widget class="QComboBox" name="protein_forcefield_comboBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                   <property name="leftMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="topMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="rightMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <property name="bottomMargin">
+                                    <number>5</number>
+                                   </property>
+                                   <item>
+                                    <layout class="QGridLayout" name="gridLayout_8">
+                                     <property name="leftMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="topMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <property name="rightMargin">
+                                      <number>3</number>
+                                     </property>
+                                     <property name="bottomMargin">
+                                      <number>4</number>
+                                     </property>
+                                     <item row="0" column="1">
+                                      <widget class="QComboBox" name="protein_forcefield_comboBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -5583,132 +5715,132 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>amber03</string>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>amber10</string>
+                                       <item>
+                                        <property name="text">
+                                         <string>amber03</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>amber10</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>amber96</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>amber99sb</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>amber99sbildn</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>charmm36</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="0" column="0">
+                                      <widget class="QLabel" name="label_10">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>amber96</string>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>0</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>amber99sb</string>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>83</width>
+                                         <height>16777215</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>amber99sbildn</string>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
                                        </property>
-                                      </item>
-                                      <item>
                                        <property name="text">
-                                        <string>charmm36</string>
+                                        <string>Protein: </string>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="0">
-                                     <widget class="QLabel" name="label_10">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>83</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Protein: </string>
-                                      </property>
-                                      <property name="alignment">
-                                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="0">
-                                     <widget class="QLabel" name="label_11">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>70</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>80</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Water: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="1">
-                                     <widget class="QComboBox" name="water_forcefield_comboBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>134</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>180</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QComboBox {
+                                       <property name="alignment">
+                                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="0">
+                                      <widget class="QLabel" name="label_11">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>70</width>
+                                         <height>0</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>80</width>
+                                         <height>16777215</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="text">
+                                        <string>Water: </string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="1">
+                                      <widget class="QComboBox" name="water_forcefield_comboBox">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>110</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>180</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QComboBox {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	border: 2px solid rgb(27, 29, 35);
@@ -5767,87 +5899,87 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 }
 
 </string>
-                                      </property>
-                                      <item>
-                                       <property name="text">
-                                        <string>tip3p</string>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>spce</string>
+                                       <item>
+                                        <property name="text">
+                                         <string>tip3p</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>spce</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>tip5p</string>
+                                        </property>
+                                       </item>
+                                       <item>
+                                        <property name="text">
+                                         <string>tip4pew</string>
+                                        </property>
+                                       </item>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="2">
+                                      <widget class="QLabel" name="label_42">
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>70</width>
+                                         <height>33</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>tip5p</string>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>70</width>
+                                         <height>33</height>
+                                        </size>
                                        </property>
-                                      </item>
-                                      <item>
-                                       <property name="text">
-                                        <string>tip4pew</string>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
                                        </property>
-                                      </item>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="2">
-                                     <widget class="QLabel" name="label_42">
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>70</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>70</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QLabel {
+                                       <property name="styleSheet">
+                                        <string notr="true">QLabel {
 	margin-left: 10px;
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>Padding:</string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="3">
-                                     <widget class="QLineEdit" name="water_padding_lineEdit">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>150</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>16777215</width>
-                                        <height>33</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QLineEdit {
+                                       </property>
+                                       <property name="text">
+                                        <string>Padding:</string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                     <item row="1" column="3">
+                                      <widget class="QLineEdit" name="water_padding_lineEdit">
+                                       <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                       </property>
+                                       <property name="minimumSize">
+                                        <size>
+                                         <width>150</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="maximumSize">
+                                        <size>
+                                         <width>16777215</width>
+                                         <height>33</height>
+                                        </size>
+                                       </property>
+                                       <property name="font">
+                                        <font>
+                                         <family>Segoe UI</family>
+                                         <pointsize>10</pointsize>
+                                        </font>
+                                       </property>
+                                       <property name="styleSheet">
+                                        <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
 	padding-left: 10px;
@@ -5859,14 +5991,15 @@ QLineEdit:hover {
 QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
-                                      </property>
-                                      <property name="text">
-                                       <string>10 * angstrom</string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                   </layout>
-                                  </widget>
+                                       </property>
+                                       <property name="text">
+                                        <string>10 * angstrom</string>
+                                       </property>
+                                      </widget>
+                                     </item>
+                                    </layout>
+                                   </item>
+                                  </layout>
                                  </widget>
                                 </item>
                                </layout>
@@ -5982,7 +6115,7 @@ QGroupBox::indicator {
                                         </property>
                                         <property name="minimumSize">
                                          <size>
-                                          <width>134</width>
+                                          <width>110</width>
                                           <height>38</height>
                                          </size>
                                         </property>
@@ -7389,175 +7522,6 @@ p, li { white-space: pre-wrap; }
                                     </item>
                                    </layout>
                                   </widget>
-                                  <widget class="QWidget" name="formLayoutWidget_5">
-                                   <property name="geometry">
-                                    <rect>
-                                     <x>270</x>
-                                     <y>30</y>
-                                     <width>281</width>
-                                     <height>81</height>
-                                    </rect>
-                                   </property>
-                                   <layout class="QFormLayout" name="formLayout_5">
-                                    <property name="verticalSpacing">
-                                     <number>9</number>
-                                    </property>
-                                    <property name="leftMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="topMargin">
-                                     <number>8</number>
-                                    </property>
-                                    <property name="rightMargin">
-                                     <number>3</number>
-                                    </property>
-                                    <property name="bottomMargin">
-                                     <number>4</number>
-                                    </property>
-                                    <item row="0" column="0">
-                                     <widget class="QLabel" name="label_43">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Equilibrate:</string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="0">
-                                     <widget class="QLabel" name="label_44">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>125</width>
-                                        <height>0</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>125</width>
-                                        <height>16777215</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="text">
-                                       <string>Equilibration steps: </string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="0" column="1">
-                                     <widget class="QCheckBox" name="equilubrate_checkBox">
-                                      <property name="sizePolicy">
-                                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                       </sizepolicy>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QCheckBox {
-    spacing: 5px;
-	margin-left: 15px;
-}
-
-QCheckBox::indicator {
-    width: 15px;
-    height: 15px;
-}
-
-QCheckBox::indicator:unchecked {
-border-image: url(:/16x16/icons/16x16/cil-circle.png);
-
-}
-
-
-QCheckBox::indicator:checked {
-	border-image: url(:/20x20/icons/20x20/cil-check.png);
-}
-
-
-</string>
-                                      </property>
-                                      <property name="text">
-                                       <string/>
-                                      </property>
-                                      <property name="checked">
-                                       <bool>true</bool>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                    <item row="1" column="1">
-                                     <widget class="QTextEdit" name="Max_equilubrate_steps_textEdit">
-                                      <property name="minimumSize">
-                                       <size>
-                                        <width>0</width>
-                                        <height>38</height>
-                                       </size>
-                                      </property>
-                                      <property name="maximumSize">
-                                       <size>
-                                        <width>16777215</width>
-                                        <height>38</height>
-                                       </size>
-                                      </property>
-                                      <property name="font">
-                                       <font>
-                                        <family>Segoe UI</family>
-                                        <pointsize>10</pointsize>
-                                       </font>
-                                      </property>
-                                      <property name="styleSheet">
-                                       <string notr="true">QTextEdit {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	padding: 10px;
-}
-QTextEdit:hover {
-	border: 2px solid rgb(64, 71, 88);
-}
-QTextEdit:focus {
-	border: 2px solid rgb(91, 101, 124);
-}
-
-QTextEdit:disabled {
-background-color: rgb(93, 83, 91);
-}</string>
-                                      </property>
-                                      <property name="html">
-                                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;500&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                                      </property>
-                                     </widget>
-                                    </item>
-                                   </layout>
-                                  </widget>
                                  </widget>
                                  <widget class="QWidget" name="horizontalLayoutWidget_7">
                                   <property name="geometry">
@@ -7819,8 +7783,8 @@ QTextEdit:focus {
                                        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;100&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;100&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                                       </property>
                                      </widget>
                                     </item>
@@ -10724,7 +10688,7 @@ margin-right: 20px;
                                  </property>
                                  <property name="minimumSize">
                                   <size>
-                                   <width>134</width>
+                                   <width>110</width>
                                    <height>33</height>
                                   </size>
                                  </property>
@@ -10819,7 +10783,7 @@ QComboBox:disabled {
                                  </property>
                                  <property name="minimumSize">
                                   <size>
-                                   <width>134</width>
+                                   <width>110</width>
                                    <height>33</height>
                                   </size>
                                  </property>

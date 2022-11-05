@@ -308,7 +308,6 @@ class Graphs(QWidget):
     def pretty_time(self, t_remaining):
         """Format the time as minute"""
         time_style = t_remaining.split(':')
-        print(t_remaining)
         if t_remaining == '':
             return self.real_time_as_minute.append(float(0))
 
@@ -373,13 +372,10 @@ class Graphs(QWidget):
                 self.current_step_keeper = x
 
             except Exception as err:
-                print("========================\n", err)
-                print(x, "\n", self.real_speed)
-                print(y_speed)
-                print("\n========================")
+                pass
 
     def updating_decomposion(self, data_decomp):
-        print(data_decomp)
+        pass
 
     def run_script(self, contents):
         self.contents = contents

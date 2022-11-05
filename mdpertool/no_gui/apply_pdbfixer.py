@@ -10,7 +10,7 @@ import time
 import os
 
 
-def fix_pdb(pdb_id, fixed_pdb_out_path, pH=7):
+def fix_pdb(pdb_id, fixed_pdb_out_path, pH=7.4):
     print(pdb_id, fixed_pdb_out_path)
     if len(pdb_id) != 4:
         print("Creating PDBFixer...")
@@ -31,14 +31,14 @@ def fix_pdb(pdb_id, fixed_pdb_out_path, pH=7):
         fixer.replaceNonstandardResidues()
         print("Removing heterogens...")
         fixer.removeHeterogens(keepWater=False)
-
+        print(fixer.missingResidues)
         print("Finding missing atoms...")
         fixer.findMissingAtoms()
 
         print("Adding missing atoms...")
         fixer.addMissingAtoms()
         print("Adding missing hydrogens...")
-        fixer.addMissingHydrogens(pH)
+        #fixer.addMissingHydrogens(pH)
 
         print("Writing PDB file...")
         fixed_pdb_out_path = os.path.join(fixed_pdb_out_path, "%s_fixed_pH_%s.pdb" % (os.path.basename(pdb_id).split('.')[0], pH))

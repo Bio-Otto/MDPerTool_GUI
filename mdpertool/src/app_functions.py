@@ -55,14 +55,12 @@ class Helper_Functions():
 
     def show_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                 hide_navigation_button):
-        print("Showed clicked")
         analysis_settings_groupBox.show()
         show_navigation_button.hide()
         hide_navigation_button.show()
 
     def hide_visualization_settings_on_analysis(self, show_navigation_button, hide_navigation_button,
                                                 analysis_settings_groupBox):
-        print("Hide clicked")
         analysis_settings_groupBox.hide()
         show_navigation_button.show()
         hide_navigation_button.hide()
@@ -193,16 +191,13 @@ class Functions(MainWindow):
 
     @Slot()
     def progress_fn(self, progress_on_net_calc):
-        print(progress_on_net_calc, "IS DONE")
+        # print(progress_on_net_calc, "IS DONE")
         if self.active_workers == 0:
-            print("NOW FINISHED ON PROGRESS")
+            pass
 
     def thread_complete(self):
         self.active_workers -= 1
         if self.active_workers == 0 and len(self.network_holder) != 0:
-            print("===============================")
-            print(self.log_holder, self.network_holder)
-            print("===============================")
             self.plot_signal.plot_network.emit()
             self.progress.cancel()
 
@@ -313,14 +308,14 @@ class Functions(MainWindow):
         clean_log_list = []
 
         if self.node_threshold is not None:
-            print("node threshold is NOT --> NONE")
+            # print("node threshold is NOT --> NONE")
             for k, i in enumerate(self.network_holder):
                 if len(i.nodes()) > self.node_threshold:
                     clean_log_list.append(self.log_holder[k])
                     clean_graph_list.append(i)
 
         if self.node_threshold is None:
-            print("node threshold is --> NONE")
+            # print("node threshold is --> NONE")
             for k, i in enumerate(self.network_holder):
                 if len(i.nodes()) > 0:
                     clean_log_list.append(self.log_holder[k])
@@ -1261,13 +1256,12 @@ class Functions(MainWindow):
 
                         except Exception as err:
                             shrotest_str_form = ''
-                            print("SHORTEST PATH LOG: ", err)
+                            # print("SHORTEST PATH LOG: ", err)
 
             all_path_string = ''
             for j in all_paths:
                 if j != '':
                     all_path_string = all_path_string + '\n' + j
-                    print("all: ", all_path_string)
             Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
 
             shortest_path_listWidget.itemDoubleClicked.connect(
@@ -1300,16 +1294,13 @@ class Functions(MainWindow):
 
                             # --------------------> 2D NETWORK VISUALIZATION USING visJS / START <-------------------- #
                         except Exception as error:
-                            print("Problem: ", error)
                             exc_type, exc_obj, exc_tb = sys.exc_info()
                             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                            print(exc_type, fname, exc_tb.tb_lineno)
 
                         all = ''
                         for j in clean_log_list:
                             # if j != '':
                             all = all + '\n' + j
-                            print("all: ", all)
                         Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
                         del self.log_holder, self.network_holder
 
@@ -1317,7 +1308,6 @@ class Functions(MainWindow):
                         Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
                                                           Style.MessageBox_stylesheet)
             except Exception as e:
-                print("Problem: ", e)
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print(exc_type, fname, exc_tb.tb_lineno)
@@ -1384,8 +1374,6 @@ class Functions(MainWindow):
             d.filters = ['Response_Time_Files (*.csv)', 'Tüm Dosyalar (*.*)']
             d.default_filter_index = 0
             d.exec(load=True)
-            print(d.filename)
-            print(d.path)
 
             if d.filename[2] == 'csv':
                 self.response_time_lineEdit.setText(d.path)
@@ -1407,8 +1395,6 @@ class Functions(MainWindow):
             d.filters = ['pdb Files (*.pdb)', 'Tüm Dosyalar (*.*)']
             d.default_filter_index = 0
             d.exec(load=True)
-            print(d.filename)
-            print(d.path)
 
             if d.filename[2] == 'pdb':
                 self.boundForm_pdb_lineedit.setText(d.path)
@@ -1719,7 +1705,6 @@ class Functions(MainWindow):
             write_output_configuration_file(file_path=output_file_directory, template_yml=template)
 
         except Exception as err:
-            print("ERR: ", err)
             pass
 
     def import_workspace(self):
@@ -1755,7 +1740,6 @@ class Functions(MainWindow):
             self.perturbation_All_CPU_checkBox.setChecked(template['Inputs']['perturbation all cpu is active'])
 
         except Exception as Err:
-            print(Err)
             pass
 
     @staticmethod
@@ -2072,7 +2056,6 @@ class pdb_Tools:
         for key in list(keys):
             chain = chains[key[0]]
             if key[1] == 0 or key[1] == len(list(chain.residues())):
-                print("ok")
                 del fixer.missingResidues[key]
 
         print("Finding nonstandard residues...")

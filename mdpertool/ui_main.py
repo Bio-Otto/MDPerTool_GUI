@@ -48,8 +48,8 @@ class MainWindow(QtWidgets.QMainWindow):
         ################################################################################################################
         #                                       ==> START OF WINDOW ATTRIBUTES <==                                     #
         ################################################################################################################
-        print('System: ' + platform.system())
-        print('Version: ' + platform.release())
+        # print('System: ' + platform.system())
+        # print('Version: ' + platform.release())
         self.r_factor_count = 0
         # ------------------------------------ > START OF SIMULATION MONITORING < ------------------------------------ #
         self.created_script = None
@@ -99,8 +99,10 @@ class MainWindow(QtWidgets.QMainWindow):
                                    "url(:/20x20/icons/20x20/cil-monitor.png)", True)
         UIF.UIFunctions.addNewMenu(self, "Analysis", "btn_analysis",
                                    "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
+        """
         UIF.UIFunctions.addNewMenu(self, "Settings", "btn_settings",
                                    "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
+        """
         UIF.UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
 
         # ----- > Start Menu Selection
@@ -495,12 +497,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dragPos = event.globalPos()
         self.old_width = self.width()
         self.old_height = self.height()
+        """
         if event.buttons() == Qt.LeftButton:
             print('Mouse click: LEFT CLICK')
         if event.buttons() == Qt.RightButton:
             print('Mouse click: RIGHT CLICK')
         if event.buttons() == Qt.MidButton:
             print('Mouse click: MIDDLE BUTTON')
+        """
 
     # ---> Mouse Click Event - Start
     def mouseMoveEvent(self, event):
@@ -539,7 +543,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def keyPressEvent(self, event):
         # if event.key() == Qt.Key_Escape:
         #     self.close()
-        print('Key: ' + str(event.key()) + ' | Text Press: ' + str(event.text()))
+        # print('Key: ' + str(event.key()) + ' | Text Press: ' + str(event.text()))
+        pass
 
     # ----- > Resize Event
     def resizeEvent(self, event):
@@ -552,7 +557,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # ----- > When Resize The Frame It's Height and Width Will Print
     def resizeFunction(self):
-        print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
+        # print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
+        pass
 
     ##################################################################################################################
     #                                           == > END OF APP EVENTS < ==                                          #
@@ -669,7 +675,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #     QMessageBox(QMessageBox.Critical, "Error", "Problem\nnAn error occured while getting output directory")
 
     def network_calc_thread(self, x):
-        print('mycallback is called with {}'.format(x))
+        # print('mycallback is called with {}'.format(x))
         # progress = QProgressDialog("Downloading...", "Abort", 0, 0, parent=self)
         # progress.setWindowModality(QtCore.Qt.WindowModal)
         # progress.show()
@@ -686,6 +692,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # QMessageBox.information(self, "Done", "thread.status()")
         # progress.close()
         # return True
+        pass
 
     def load_nx_to_VisJS_2D_Network(self, intersection_graph_html='2d_network.html', intersection_gml_file=None):
         initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
@@ -773,8 +780,9 @@ def run_gui():
 
 if __name__ == "__main__":
     if os.name == 'nt':
-        print("PLATFORM IS WINDOWS ..")
+        # print("PLATFORM IS WINDOWS ..")
         import PySide2
+
         pyqt = os.path.dirname(PySide2.__file__)
         QApplication.addLibraryPath(os.path.join(pyqt, "plugins"))
 

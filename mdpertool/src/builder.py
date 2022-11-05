@@ -215,7 +215,6 @@ class Advanced(QtCore.QThread):
         print("Parameters Sending to Runner...")
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
-
                                 long_simulation_time=self.Number_of_steps_spinBox.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
 

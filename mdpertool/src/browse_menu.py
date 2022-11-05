@@ -4,7 +4,6 @@ from PySide2.QtWidgets import QFileDialog, QMessageBox
 
 
 class browse_file:
-
     def __init__(self):
         self.upload_pdb_textEdit = None
 
