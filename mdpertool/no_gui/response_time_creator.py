@@ -36,9 +36,6 @@ def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTi
             residueResponseTimes.append(0)
 
     residueResponseTimes = np.asarray(residueResponseTimes)
-    print("NUMBER OF RESIDUES: %s" % numEnergies)
-    print("NUMBER OF FRAME: %s" % numFrames)
-    print(residueResponseTimes)
     np.savetxt(outputName, residueResponseTimes, delimiter=',')
 
 

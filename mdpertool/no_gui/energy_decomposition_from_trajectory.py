@@ -92,18 +92,18 @@ def get_residue_atoms():
 
 def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output_directory, ref_energy_name,
                                 modif_energy_name, origin_last_pdb, ff, platform_name, device_id_active, num_of_threads,
-                                que=None):
+                                que=None, logger_object=None):
     global modeller, by_pass_bonds_index, simulation, by_pass_atoms, nonbonded_group_num, modified_df, reference_df
 
-    print('Loading...')
-
+    if logger_object is not None:
+        logger_object.info("The system parameters are being loaded for the decomposition process.".format())
     protein_ff = ff
     pdb = app.PDBFile(topol)
 
     modeller = app.Modeller(pdb.topology, pdb.positions)
 
     residue_length_of_protein = len([r for r in modeller.topology.residues()])
-    print("residue length of protein is %s" % residue_length_of_protein)
+    # print("residue length of protein is %s" % residue_length_of_protein)
 
     if ref_energy_name is None:
         modified_df = pd.DataFrame(
@@ -162,13 +162,15 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
         precision = 'mixed'
 
     if platform_name == 'CPU' and device_id_active == True:
-        print("The CPU platform always uses 'mixed' precision.")
-        print("Simulation process will use %s Thread(s)" % num_of_threads)
+        if logger_object is not None:
+            logger_object.info("The CPU platform always uses 'mixed' precision.".format())
+            logger_object.info("Simulation process will use %s Thread(s)" % num_of_threads)
         properties = {'CpuThreads': '%s' % num_of_threads}
         precision = 'mixed'
 
     if platform_name == 'Reference':
-        print("The Reference platform always uses 'double' precision.")
+        if logger_object is not None:
+            logger_object.info("The Reference platform always uses 'double' precision.")
         properties = None
         precision = 'double'
 
@@ -180,12 +182,16 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
     # platform = Platform.getPlatformByName('CPU')
     # properties = {'CpuThreads': '4'}
+    if logger_object is not None:
+        logger_object.info("The %s platform will be used for the decomposition process with %s precision."
+                           % (simulation.context.getPlatform().getName(), precision))
+
     nonbonded_group = None
     for i, f in enumerate(system.getForces()):
-        print(i, f.__class__.__name__)
         if isinstance(f, NonbondedForce):
             f.setForceGroup(i)
-
+            if logger_object is not None:
+                logger_object.info("NonbondedForce placed in group %s" % i)
             # f.setIncludeDirectSpace(False)
             nonbonded_group_num = i  # force.getForceGroup()
             # f.setUseSwitchingFunction(use=True)
@@ -193,26 +199,25 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
             # force.setUseSwitchingFunction(use=True)
             # force.setSwitchingDistance(10.0*u.angstrom)
             f.setUseDispersionCorrection(False)
-            print(f.getReactionFieldDielectric())
             f.setReactionFieldDielectric(1.0)
 
         if isinstance(f, HarmonicBondForce):
-            print("Harmonic Bond Force deleted")
+            # print("Harmonic Bond Force deleted")
             system.removeForce(i)
         if isinstance(f, HarmonicAngleForce):
-            print("Harmonic Angle Force deleted")
+            # print("Harmonic Angle Force deleted")
             system.removeForce(i)
 
         if isinstance(f, PeriodicTorsionForce):
-            print("Periodic Torsion Force deleted")
+            # print("Periodic Torsion Force deleted")
             system.removeForce(i)
 
         if isinstance(f, CustomTorsionForce):
-            print("Custom Torsion Force deleted")
+            # print("Custom Torsion Force deleted")
             system.removeForce(i)
 
         if isinstance(f, CMAPTorsionForce):
-            print("CMAP Torsion Force deleted")
+            # print("CMAP Torsion Force deleted")
             system.removeForce(i)
 
     # for force in system.getForces():
@@ -279,6 +284,9 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
             simulation.context.reinitialize()
 
         if simulation.context.getPlatform().getName() == 'CPU':
+            if logger_object is not None:
+                logger_object.info("The %s platform will be used for the decomposition process with %s precision."
+                                   % (simulation.context.getPlatform().getName(), precision))
             for index in range(Nonbonded_F.getNumParticles()):
                 charge, sigma, epsilon = NonBonded_Parameters[index]
                 exclude = (index not in by_pass_atoms_index)
@@ -356,6 +364,8 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
     if que is not None:
         que.put("Progress Finished Succesfully :)")  # res_num = current residue  -  res_number = all residues number
+        if logger_object is not None:
+            logger_object.info("Progress Finished Succesfully :)")
 # from get_positions_from_trajectory_file import get_openmm_pos_from_traj_with_mdtraj
 #
 # position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(
