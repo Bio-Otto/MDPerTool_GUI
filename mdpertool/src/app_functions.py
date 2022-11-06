@@ -1400,7 +1400,7 @@ class Functions(MainWindow):
                 d.directory = self.Output_Folder_textEdit.toPlainText().strip()
             else:
                 d.directory = os.getcwd()
-                
+
             d.filters = ['pdb Files (*.pdb)', 'Tüm Dosyalar (*.*)']
             d.default_filter_index = 0
             d.exec(load=True)
