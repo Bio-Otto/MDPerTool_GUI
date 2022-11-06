@@ -1371,6 +1371,10 @@ class Functions(MainWindow):
         """
         try:
             d = file_dialog(self)
+            if self.Output_Folder_textEdit.toPlainText().strip() != '' and os.path.exists(self.Output_Folder_textEdit.toPlainText().strip()):
+                d.directory = self.Output_Folder_textEdit.toPlainText().strip()
+            else:
+                d.directory = os.getcwd()
             d.filters = ['Response_Time_Files (*.csv)', 'Tüm Dosyalar (*.*)']
             d.default_filter_index = 0
             d.exec(load=True)
@@ -1392,6 +1396,11 @@ class Functions(MainWindow):
         """
         try:
             d = file_dialog(self)
+            if self.Output_Folder_textEdit.toPlainText().strip() != '' and os.path.exists(self.Output_Folder_textEdit.toPlainText().strip()):
+                d.directory = self.Output_Folder_textEdit.toPlainText().strip()
+            else:
+                d.directory = os.getcwd()
+                
             d.filters = ['pdb Files (*.pdb)', 'Tüm Dosyalar (*.*)']
             d.default_filter_index = 0
             d.exec(load=True)

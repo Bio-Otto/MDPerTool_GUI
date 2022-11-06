@@ -222,7 +222,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tab_count_on_analysis = self.analysis_TabWidget.count()
 
     def handle_tabbar_clicked(self, index_of_tab):
-        print(index_of_tab)
+        pass
 
     # #################################################### TRAIL ##################################################### #
     def run_btn_clicked(self):
