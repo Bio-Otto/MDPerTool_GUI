@@ -235,7 +235,7 @@ class Advanced(QtCore.QThread):
                                 perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in
                                                     range(self.selected_residues_listWidget.count())],
                                 speed_factor=[int(r) if r.strip().isdigit() else r for r in
-                                              self.R_factor_lineEdit.text().split(',')],
+                                              self.R_factor_ComboBox.currentText()],
                                 perturb_simulation_time=self.run_duration_spinBox.value(),
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),
 

@@ -146,6 +146,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.minimize_checkBox.stateChanged.connect(lambda: UIF.Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.DCD_Reporter_Changed(self))
+        self.equilubrate_checkBox.stateChanged.connect(lambda: UIF.Functions.Equilibration_On_Off_Changed(self))
+        self.Device_ID_checkBox.stateChanged.connect(lambda: UIF.Functions.UseDeviceID_On_Off_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
         self.load_sim_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_simulation(self))
@@ -413,7 +415,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def finish_message(self, alert_message):
         self.r_factor_count += 1
-        if self.r_factor_count == len(str(self.R_factor_lineEdit.text()).split(',')):
+        if self.r_factor_count == len(str(self.R_factor_ComboBox.currentText())):
             UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
 
