@@ -184,7 +184,7 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
     # properties = {'CpuThreads': '4'}
     if logger_object is not None:
         logger_object.info("The %s platform will be used for the decomposition process with %s precision."
-                           % (simulation.context.getPlatform().getName(), precision))
+                           % (platform_name, precision))
 
     nonbonded_group = None
     for i, f in enumerate(system.getForces()):
@@ -200,26 +200,31 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
             # force.setSwitchingDistance(10.0*u.angstrom)
             f.setUseDispersionCorrection(False)
             f.setReactionFieldDielectric(1.0)
+        else:
+            f.setForceGroup(i)
+    """
+    for i, f in enumerate(system.getForces()):
 
         if isinstance(f, HarmonicBondForce):
             # print("Harmonic Bond Force deleted")
             system.removeForce(i)
-        if isinstance(f, HarmonicAngleForce):
+
+        elif isinstance(f, HarmonicAngleForce):
             # print("Harmonic Angle Force deleted")
             system.removeForce(i)
 
-        if isinstance(f, PeriodicTorsionForce):
+        elif isinstance(f, PeriodicTorsionForce):
             # print("Periodic Torsion Force deleted")
             system.removeForce(i)
 
-        if isinstance(f, CustomTorsionForce):
+        elif isinstance(f, CustomTorsionForce):
             # print("Custom Torsion Force deleted")
             system.removeForce(i)
 
-        if isinstance(f, CMAPTorsionForce):
+        elif isinstance(f, CMAPTorsionForce):
             # print("CMAP Torsion Force deleted")
             system.removeForce(i)
-
+    """
     # for force in system.getForces():
     #     force.setForceGroup(0)  # all forces default to group 0
     #     if force.__class__.__name__ == 'NonbondedForce':
@@ -348,8 +353,11 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
                 else:
                     modified_df.loc[i - int(len(trj_pos_list) / 2)][res_num] = float(st)
-        if que is not None:
-            que.put([res_num, res_number, st])  # res_num = current residue  -  res_number = all residues number
+        #if que is not None:
+        #    que.put([res_num, res_number, st])  # res_num = current residue  -  res_number = all residues number
+
+        if logger_object is not None:
+            logger_object.info("Res Num: %s, Res Num: %s, Decomposition Progress: %s" % (res_num, res_number, res_num/res_number*100))
 
         # print("#################### %s #####################" % res_num)
 
@@ -362,10 +370,10 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
         reference_df.to_csv(os.path.join(output_directory, ref_energy_name), index=False)
         modified_df.to_csv(os.path.join(output_directory, modif_energy_name), index=False)
 
-    if que is not None:
-        que.put("Progress Finished Succesfully :)")  # res_num = current residue  -  res_number = all residues number
-        if logger_object is not None:
-            logger_object.info("Progress Finished Succesfully :)")
+    #if que is not None:
+    #    que.put("Progress Finished Succesfully :)")  # res_num = current residue  -  res_number = all residues number
+    if logger_object is not None:
+        logger_object.info("Progress Finished Succesfully :)")
 # from get_positions_from_trajectory_file import get_openmm_pos_from_traj_with_mdtraj
 #
 # position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(

@@ -262,6 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__stop = True
         try:
             self.Real_Time_Graphs.stop_th()
+            self.Run.setEnabled(True)
 
         except Exception as ins:
             QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))

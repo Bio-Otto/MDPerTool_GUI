@@ -320,7 +320,7 @@ class Advanced_Helper_Functions(QtCore.QThread):
     def update_display(self, script_structure):
         renderer = pystache.Renderer()
 
-        template = pystache.parse(open('src/template_sctipt.txt').read())
+        template = pystache.parse(open('src/template_script.txt').read())
         self.contents = renderer.render(template, script_structure)
 
         with open('readme.txt', 'w') as f:

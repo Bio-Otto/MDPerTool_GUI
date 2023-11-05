@@ -82,7 +82,7 @@ def create_restrained_atoms_topology(pdb_file):
 
 
 def get_openmm_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_atoms='protein',
-                                         write_pdb_for_selection=True, start=None, stop=None, stride=1):
+                                         write_pdb_for_selection=True, start=None, stop=None, stride=1, logger_object=None):
     global first_snapshot_name
     positions = []
     save_directory = os.path.dirname(modif_traj)
@@ -101,7 +101,9 @@ def get_openmm_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_ato
     # set atom selection for all atoms of interest
     wanted_atoms_traj = trajectory_collector.atom_slice(trajectory_collector.topology.select(selected_atoms))
 
-    print("Started to convert Traj positions for OpenMM..")
+    if logger_object is not None:
+        logger_object.info("Started to convert Traj positions for OpenMM.".format())
+
     for i in range(wanted_atoms_traj.n_frames):
         positions.append(wanted_atoms_traj.openmm_positions(i))
 

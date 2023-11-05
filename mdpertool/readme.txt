@@ -12,7 +12,7 @@ from no_gui.write_outputs import *
 from openmm import unit
 from openmm import *
 from openmm import app
-from openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter
+from openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter, StateDataReporter
 import openmm as mm
 from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
 
@@ -51,34 +51,27 @@ log_obj.handlers.clear()
 
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
-__queue.put('pdb file fixing and preparing for simulation ...')
-fixed_pdb_name = fix_pdb('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download/2j0w_example_fixed_ph7.pdb', fixed_pdb_out_path='C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output')
+fixed_pdb_name = fix_pdb('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download/2j0w_example_fixed_ph7.pdb', fixed_pdb_out_path='C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output', logger_object=log_obj)
 
 log_obj.info("Loading pdb to simulation engine ...".format())
-__queue.put('Loading pdb to simulation engine ...')
 pdb = app.PDBFile(fixed_pdb_name)
 
 box = pdb.topology.getUnitCellDimensions()
 
 log_obj.info("Modeller of pdb file is preparing ...".format())
-__queue.put('Modeller of pdb file is preparing ...')
 modeller = mm.app.Modeller(pdb.topology, pdb.positions)
 modeller.topology.setUnitCellDimensions(box)
 
 log_obj.info("Forcefield parameters loading to the simulation system ...".format())
-__queue.put('Forcefield parameters loading to the simulation system ...')
 forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
 
 log_obj.critical("Adding missing hydrogens to the model ...".format())
-__queue.put('Adding missing hydrogens to the model ...')
 modeller.addHydrogens(forcefield)
 
 log_obj.info("Adding solvent (both water and ions) to the model to fill a rectangular box ...".format())
-__queue.put('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
 modeller.addSolvent(forcefield, model='tip3p', padding=10 * angstrom)
 
 log_obj.info("Constructing an OpenMM System ...".format())
-__queue.put('Constructing an OpenMM System')
 system = forcefield.createSystem(modeller.topology, nonbondedMethod=PME,
                                       nonbondedCutoff=1.2*nanometer,
                                       constraints=None, rigidWater=True,
@@ -108,7 +101,6 @@ simulation.context.setPositions(modeller.positions)
 simulation.context.computeVirtualSites()
 
 log_obj.info('Minimizing for %s steps ...' % 500)
-__queue.put('Minimizing for %s steps ...' % 500)
 simulation.minimizeEnergy(maxIterations=int(500))
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
@@ -118,27 +110,23 @@ app.PDBFile.writeModel(modeller.topology, positions, open('C:/Users/law5_/Deskto
 simulation.context.setVelocitiesToTemperature(310.0*kelvin)
 
 log_obj.info('Equilibrating for %s steps ...' % 500)
-__queue.put('Equilibrating for %s steps ...' % 500)
 simulation.step(int(500))
 
 simulation.currentStep = simulation_last_time
 
 log_obj.info('The trajectories will be saved in DCD file format.')
-__queue.put('Saving DCD File for every 100 period')
 simulation.reporters.append(DCDReporter('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/output.dcd', 100))
 log_obj.info("Saving DCD File for every 100 period")
 
 log_obj.info("Saving XTC File for every 100 period")
 
 log_obj.info("State Report will tell you.")
-__queue.put('State Report will tell you.')
 simulation.reporters.append(StateDataReporter(stdout, 100, step=True,
 time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True,
-remainingTime=True, speed=True, volume=True, density=True, totalSteps=300000))
+remainingTime=True, speed=True, volume=True, density=True, totalSteps=3000))
 
 log_obj.info("Running Production...")
-__queue.put('Running Production...')
-simulation.step(300000)
+simulation.step(3000)
 log_obj.info("Done!".format())
 
 lastpositions = simulation.context.getState(getPositions=True).getPositions()
@@ -166,7 +154,6 @@ with open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/state.xml', 'w'
 #######################################################################################################################
 # ## --> VARIABLES
 simulation_last_step = simulation.currentStep
-print("LAST TIME", simulation_last_time)
 state_file_name = 'state.xml'
 last_pdb = 'last.pdb'
 dissipated_trajectory_name = 'energy_perturbation_trajectory'
@@ -213,13 +200,13 @@ for i in range(len([4])):
             precision = 'double'
 
         if 'CUDA' == 'CPU' and False == True:
-            print("The CPU platform always uses 'mixed' precision.")
-            print("Simulation process will use %s Thread(s)" % 2)
+            log_obj.info("The CPU platform always uses 'mixed' precision.".format())
+            log_obj.info("Simulation process will use %s Thread(s)" % 2)
             properties = {'CpuThreads': '2'}
             precision = 'mixed'
 
         if 'CUDA' == 'Reference':
-            print("The Reference platform always uses 'double' precision.")
+            log_obj.info("The Reference platform always uses 'double' precision.".format())
             properties = None
             precision= 'double'
 
@@ -289,9 +276,9 @@ for i in range(len([4])):
         log_obj.info("State Report will tell you ...".format())
         ref_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                  density=True, remainingTime=True, speed=True, totalSteps=1000))
+                                  density=True, remainingTime=True, speed=True, totalSteps=10))
 
-        ref_simulation.step(1000)
+        ref_simulation.step(10)
 
         simulation_last_step = ref_simulation.currentStep
 
@@ -322,7 +309,6 @@ for i in range(len([4])):
         precision = 'mixed'
 
     if 'CUDA' == 'Reference':
-        print("")
         log_obj.info("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
@@ -395,9 +381,9 @@ for i in range(len([4])):
     log_obj.info("State Report will tell you ...")
     dis_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                               kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                              density=True, remainingTime=True, speed=True, totalSteps=1000))
+                              density=True, remainingTime=True, speed=True, totalSteps=10))
 
-    dis_simulation.step(1000)
+    dis_simulation.step(10)
 
     simulation_last_step = dis_simulation.currentStep
 
@@ -429,18 +415,20 @@ for i in range(len([4])):
     if i == 0:
         position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
                                                                          ref_traj=reference_traj_file_for_pos,
-                                                                         modif_traj=dissipation_traj_file_for_pos)
+                                                                         modif_traj=dissipation_traj_file_for_pos,
+                                                                         logger_object=log_obj)
 
 
     if i != 0:
         position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
                                                                  ref_traj=None,
-                                                                 modif_traj=dissipation_traj_file_for_pos)
+                                                                 modif_traj=dissipation_traj_file_for_pos,
+                                                                 logger_object=log_obj)
 
      # --> RESIDUE BASED DECOMPOSITION
     if i == 0:
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='CUDA',
+                                    output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
                                     ref_energy_name='reference_energy_file.csv', device_id_active=False,
                                     num_of_threads=2,
                                     modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
@@ -449,11 +437,11 @@ for i in range(len([4])):
     if i != 0:
         # --> RESIDUE BASED DECOMPOSITION
         residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='CUDA',
+                                    output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
                                     ref_energy_name=None, device_id_active=False, num_of_threads=2,
                                     modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
                                     origin_last_pdb=last_pdb_file_path,
-                                    ff='amber03.xml')
+                                    ff='amber03.xml', logger_object=log_obj)
 
     # --> RESPONSE TIME CSV EXPORTER
     getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
