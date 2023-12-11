@@ -30,6 +30,29 @@ from src.logger import Logger
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
 #######################################################################################################################
 
+
+class Reporter(openmm.MinimizationReporter):
+    interval = 10 # report interval
+    energies = [] # array to record progress
+    def report(self, iteration, x, grad, args):
+        # print current system energy to screen
+        if iteration % self.interval == 0:
+            print(iteration, args['system energy'])
+
+        # save energy at each iteration to an array we can use later
+        self.energies.append(args['system energy'])
+
+        # The report method must return a bool specifying if minimization should be stopped.
+        # You can use this functionality for early termination.
+        return False
+
+
+
+
+
+
+
+
 # ---------------- LOGGER ---------------- #
 file_name = 'out.log'
 log_path = os.path.join('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output', file_name)
@@ -101,6 +124,17 @@ simulation.context.setPositions(modeller.positions)
 simulation.context.computeVirtualSites()
 
 log_obj.info('Minimizing for %s steps ...' % 500)
+
+
+"""
+# Create an instance of our reporter
+reporter = Reporter()
+# Perform local energy minimization
+print("Minimizing energy...")
+simulation.minimizeEnergy(reporter=reporter)
+"""
+
+
 simulation.minimizeEnergy(maxIterations=int(500))
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
@@ -123,10 +157,10 @@ log_obj.info("Saving XTC File for every 100 period")
 log_obj.info("State Report will tell you.")
 simulation.reporters.append(StateDataReporter(stdout, 100, step=True,
 time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True,
-remainingTime=True, speed=True, volume=True, density=True, totalSteps=3000))
+remainingTime=True, speed=True, volume=True, density=True, totalSteps=500))
 
 log_obj.info("Running Production...")
-simulation.step(3000)
+simulation.step(500)
 log_obj.info("Done!".format())
 
 lastpositions = simulation.context.getState(getPositions=True).getPositions()
@@ -249,15 +283,15 @@ for i in range(len([4])):
         ref_simulation.context.setVelocities(velocities)
 
 
-        #ref_simulation.currentStep = simulation_last_step
-        ref_simulation.context.setTime(0)
-
+        ref_simulation.currentStep = simulation_last_step
+        #ref_simulation.context.setTime(0)
+        """
         if pl.system() == 'Windows':
             log_obj.info("Saving XTC File for every 1 period".format())
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
             ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
-
-        else:
+        """
+        try:
             if True == False and False == False:
                 log_obj.info("Saving DCD File for every 1 period".format())
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
@@ -272,6 +306,9 @@ for i in range(len([4])):
                 log_obj.info("Saving XTC File for every 1 period".format())
                 XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
+
+        except Exception as e:
+            log_obj.error(e, stack_info=True, exc_info=True)
 
         log_obj.info("State Report will tell you ...".format())
         ref_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
@@ -357,12 +394,14 @@ for i in range(len([4])):
     #dis_simulation.currentStep = simulation_last_step
     dis_simulation.context.setTime(0)
 
+    """
     if pl.system() == 'Windows':
         log_obj.info("Saving XTC File for every 1 period")
         XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
         dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
+    """
 
-    else:
+    try:
         if True == False and False == False:
             log_obj.info("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
@@ -378,6 +417,9 @@ for i in range(len([4])):
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
+    except Exception as e:
+        log_obj.error(e, stack_info=True, exc_info=True)
+
     log_obj.info("State Report will tell you ...")
     dis_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                               kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
@@ -386,68 +428,79 @@ for i in range(len([4])):
     dis_simulation.step(10)
 
     simulation_last_step = dis_simulation.currentStep
-
+    del dis_simulation, ref_simulation
     ################################################################################################################
     ############################# PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ##############################
     ################################################################################################################
+    """
     if pl.system() == 'Windows':
         log_obj.info("Decompose started using XTC File ...".format())
         reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
         dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
-
-    else:
+    """
+    try:
         if True == False and False == False:
             log_obj.info("Decompose started using DCD File ...".format())
-            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
-            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
 
         if True == True:
-            log_obj.info("Decompose started using DCD File ...".format())
-            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
-            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
+            log_obj.info("Decompose started using DCD File ....".format())
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
+            print(reference_traj_file_for_pos)
+            print(dissipation_traj_file_for_pos)
+            print(last_pdb_file_path)
 
         if False == True:
-            log_obj.info("Decompose started using XTC File".format())
-            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
-            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
+            log_obj.info("Decompose started using XTC File ....".format())
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc').replace('\\','/')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc').replace('\\','/')
+
+    except Exception as e:
+        print("ERROR: ", e)
+        log_obj.error(e, stack_info=True, exc_info=True)
+
+    try:
+        if i == 0:
+            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+                                                                             ref_traj=reference_traj_file_for_pos,
+                                                                             modif_traj=dissipation_traj_file_for_pos,
+                                                                             logger_object=log_obj)
 
 
-    if i == 0:
-        position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                         ref_traj=reference_traj_file_for_pos,
-                                                                         modif_traj=dissipation_traj_file_for_pos,
-                                                                         logger_object=log_obj)
+        if i != 0:
+            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+                                                                     ref_traj=None,
+                                                                     modif_traj=dissipation_traj_file_for_pos,
+                                                                     logger_object=log_obj)
 
+         # --> RESIDUE BASED DECOMPOSITION
+        if i == 0:
+            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+                                        ref_energy_name='reference_energy_file.csv', device_id_active=False,
+                                        num_of_threads=2,
+                                        modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
+                                        origin_last_pdb=last_pdb_file_path, ff='amber03.xml', logger_object=log_obj)
 
-    if i != 0:
-        position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                 ref_traj=None,
-                                                                 modif_traj=dissipation_traj_file_for_pos,
-                                                                 logger_object=log_obj)
+        if i != 0:
+            # --> RESIDUE BASED DECOMPOSITION
+            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+                                        ref_energy_name=None, device_id_active=False, num_of_threads=2,
+                                        modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
+                                        origin_last_pdb=last_pdb_file_path,
+                                        ff='amber03.xml', logger_object=log_obj)
 
-     # --> RESIDUE BASED DECOMPOSITION
-    if i == 0:
-        residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
-                                    ref_energy_name='reference_energy_file.csv', device_id_active=False,
-                                    num_of_threads=2,
-                                    modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
-                                    origin_last_pdb=last_pdb_file_path, ff='amber03.xml', logger_object=log_obj)
+        # --> RESPONSE TIME CSV EXPORTER
+        getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
+                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([4][i])),
+                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([4][i])))
 
-    if i != 0:
-        # --> RESIDUE BASED DECOMPOSITION
-        residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
-                                    ref_energy_name=None, device_id_active=False, num_of_threads=2,
-                                    modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
-                                    origin_last_pdb=last_pdb_file_path,
-                                    ff='amber03.xml', logger_object=log_obj)
-
-    # --> RESPONSE TIME CSV EXPORTER
-    getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
-                            os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([4][i])),
-                            outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([4][i])))
-
+    except Exception as e:
+        print("ERROR: ", e)
+        log_obj.error(e, stack_info=True, exc_info=True)
 
     try:
         del XTC_file_path, ref_simulation, dis_simulation, simulation

@@ -43,23 +43,23 @@ def fix_pdb(pdb_id, output=None, log_obj=None):
         return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], 7)
 
     if len(pdb_id) != 4 and log_obj is None:
-        print("Creating PDBFixer...")
+        log_obj.info("Creating PDBFixer...".format())
         fixer = PDBFixer(pdb_id)
-        print("Finding missing residues...")
+        log_obj.info("Finding missing residues...".format())
         fixer.findMissingResidues()
-        print("Finding nonstandard residues...")
+        log_obj.info("Finding nonstandard residues...".format())
         fixer.findNonstandardResidues()
-        print("Replacing nonstandard residues...")
+        log_obj.info("Replacing nonstandard residues...".format())
         fixer.replaceNonstandardResidues()
-        print("Removing heterogens...")
+        log_obj.info("Removing heterogens...".format())
         fixer.removeHeterogens(keepWater=False)
-        print("Finding missing atoms...")
+        log_obj.info("Finding missing atoms...".format())
         fixer.findMissingAtoms()
-        print("Adding missing atoms...")
+        log_obj.info("Adding missing atoms...".format())
         fixer.addMissingAtoms()
-        print("Adding missing hydrogens...")
+        log_obj.info("Adding missing hydrogens...".format())
         fixer.addMissingHydrogens(7)
-        print("Writing PDB file...")
+        log_obj.info("Writing PDB file...".format())
 
         PDBFile.writeFile(
             fixer.topology,

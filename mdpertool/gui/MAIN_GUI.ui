@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>1</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2800,7 +2800,7 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
 </string>
                                    </property>
                                    <property name="currentText">
-                                    <string>4</string>
+                                    <string>2</string>
                                    </property>
                                    <item>
                                     <property name="text">
@@ -3497,7 +3497,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                              <enum>QTabWidget::Rounded</enum>
                             </property>
                             <property name="currentIndex">
-                             <number>0</number>
+                             <number>1</number>
                             </property>
                             <property name="movable">
                              <bool>true</bool>
@@ -11433,19 +11433,21 @@ QPushButton:pressed {
                          <property name="minimumSize">
                           <size>
                            <width>0</width>
-                           <height>70</height>
+                           <height>60</height>
                           </size>
                          </property>
                          <property name="maximumSize">
                           <size>
                            <width>16777215</width>
-                           <height>70</height>
+                           <height>60</height>
                           </size>
                          </property>
                          <property name="font">
                           <font>
-                           <family>Segoe UI Semibold</family>
+                           <family>Segoe UI</family>
                            <pointsize>10</pointsize>
+                           <weight>75</weight>
+                           <bold>true</bold>
                           </font>
                          </property>
                          <property name="styleSheet">
@@ -11476,43 +11478,46 @@ QGroupBox::indicator {
                          <property name="title">
                           <string>Each Residue Energy Calculation</string>
                          </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_15">
+                         <layout class="QVBoxLayout" name="verticalLayout_15" stretch="0">
+                          <property name="spacing">
+                           <number>5</number>
+                          </property>
+                          <property name="leftMargin">
+                           <number>7</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>7</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>7</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>7</number>
+                          </property>
                           <item>
-                           <layout class="QFormLayout" name="formLayout_7">
-                            <property name="leftMargin">
-                             <number>1</number>
+                           <widget class="QProgressBar" name="progressBar_decomp">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
                             </property>
-                            <property name="topMargin">
-                             <number>3</number>
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>40</height>
+                             </size>
                             </property>
-                            <property name="rightMargin">
-                             <number>1</number>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>10</pointsize>
+                              <weight>75</weight>
+                              <bold>true</bold>
+                             </font>
                             </property>
-                            <property name="bottomMargin">
-                             <number>3</number>
-                            </property>
-                            <item row="0" column="1">
-                             <widget class="QProgressBar" name="progressBar_decomp">
-                              <property name="sizePolicy">
-                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                               </sizepolicy>
-                              </property>
-                              <property name="maximumSize">
-                               <size>
-                                <width>16777215</width>
-                                <height>35</height>
-                               </size>
-                              </property>
-                              <property name="font">
-                               <font>
-                                <family>Segoe UI</family>
-                                <pointsize>10</pointsize>
-                               </font>
-                              </property>
-                              <property name="styleSheet">
-                               <string notr="true">QProgressBar {
+                            <property name="styleSheet">
+                             <string notr="true">QProgressBar {
     border: 2px solid grey;
     border-radius: 5px;
 	text-align: center;
@@ -11526,13 +11531,126 @@ QProgressBar::chunk
 
 
 }</string>
-                              </property>
-                              <property name="value">
-                               <number>0</number>
-                              </property>
-                             </widget>
-                            </item>
-                           </layout>
+                            </property>
+                            <property name="value">
+                             <number>0</number>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QGroupBox" name="groupBox_13">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>60</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>16777215</width>
+                           <height>60</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <family>Segoe UI</family>
+                           <pointsize>10</pointsize>
+                           <weight>75</weight>
+                           <bold>true</bold>
+                          </font>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">QGroupBox {
+  
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 10px;
+  padding: 2px;
+  margin-top: 16px;
+}
+
+QGroupBox::title {
+  subcontrol-origin: margin;
+  subcontrol-position: top left;
+  left: 10px;
+  padding-left: 3px;
+  padding-right: 5px;
+  padding-top: 8px;
+  padding-bottom: 16px;
+}
+
+QGroupBox::indicator {
+  margin-left: 2px;
+  height: 16px;
+  width: 16px;
+}</string>
+                         </property>
+                         <property name="title">
+                          <string>Remaining Time (sec)</string>
+                         </property>
+                         <layout class="QFormLayout" name="formLayout_5">
+                          <property name="horizontalSpacing">
+                           <number>5</number>
+                          </property>
+                          <property name="verticalSpacing">
+                           <number>5</number>
+                          </property>
+                          <property name="leftMargin">
+                           <number>7</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>7</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>7</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>7</number>
+                          </property>
+                          <item row="0" column="0" colspan="2">
+                           <widget class="QProgressBar" name="progressBar_remaining_time">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>40</height>
+                             </size>
+                            </property>
+                            <property name="font">
+                             <font>
+                              <family>Segoe UI</family>
+                              <pointsize>10</pointsize>
+                              <weight>75</weight>
+                              <bold>true</bold>
+                             </font>
+                            </property>
+                            <property name="styleSheet">
+                             <string notr="true">QProgressBar {
+    border: 2px solid grey;
+    border-radius: 5px;
+	text-align: center;
+}
+
+QProgressBar::chunk 
+{
+  	border-radius: 5px;
+	background: #007AA5;
+	margin: 3px;
+
+
+}</string>
+                            </property>
+                            <property name="value">
+                             <number>0</number>
+                            </property>
+                           </widget>
                           </item>
                          </layout>
                         </widget>

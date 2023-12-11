@@ -1,4 +1,5 @@
 import os
+import re
 import queue
 import threading
 import time
@@ -170,28 +171,55 @@ class OpenMMScriptRunner(QtCore.QObject):
                     break
 
                 else:
-                    print("======================================================================")
-                    print("MESSAGE: %s" % msg)
-                    print("TYPE: %s" % type(msg))
-                    print("======================================================================")
-                    outs.write(msg)
-                """
-                if '#"Progress (%)"' in msg:
+                    #print("======================================================================")
+                    #print("MESSAGE: %s" % msg)
+                    #print("TYPE: %s" % type(msg))
+                    #print("======================================================================")
+                    if type(msg) is str:
+                        outs.write(msg)
+
+                if 'INFO |' in msg:
+                    info_log = re.search(r'INFO \| (.+)', msg)
+                    print("INFO: %s" % info_log.group(1))
+
+                elif 'CRITICAL |' in msg:
+                    critic_log = re.search(r'CRITICAL \| (.+)', msg)
+                    print("CRITICAL: %s" % critic_log.group(1))
+
+                elif 'WARNING |' in msg:
+                    warning_log = re.search(r'WARNING \| (.+)', msg)
+                    print("WARNING: %s" % warning_log.group(1))
+
+                elif 'ERROR |' in msg:
+                    error_log = re.search(r'ERROR \| (.+)', msg)
+                    print("ERROR: %s" % error_log.group(1))
+
+                elif '#"Progress (%)"' in msg:
                     # the first report has two lines on it -- we want to look at the first, as it contains the headers
                     # print(self._out.getvalue())
                     headers = msg.strip().split(',')
                     # filter out some extra quotation marks and comment characters
                     _headers = [e.strip('#"\'') for e in headers]
+                    print("HEADERS: ", _headers)
 
-                elif 'INFO' in msg:
-                    print("INFO: %s" % msg)
+                elif type(msg) is not dict:
+                    t = [e.strip('%"\'') for e in msg.strip().split(',')]
+                    if len(_headers) == len(t):
+                        print("TTTT: ", t)
+                        msg = dict(zip(_headers, t))
+                        q.put(msg)
+                        self.update_plot(msg)
 
-                elif 'CRITICAL' in msg:
-                    print("CRITICAL: %s" % msg)
+                elif 'Decomposition Progress:' in msg:
+                    decomp_info_log = re.search(r"Decomposition Progress: ([\d.]+)", msg)
 
-                elif 'WARNING' in msg:
-                    print("WARNING: %s" % msg)
+                    if decomp_info_log:
+                        decompose_started = True
+                        extracted_number = float(decomp_info_log.group(1))
+                        formatted_number = round(extracted_number, 2)
+                        print(formatted_number)
 
+                """
                 elif type(msg) is not dict:
                     if decompose_started:
                         print("NEW MESSAGE: %s" % msg)
@@ -452,7 +480,7 @@ class Graphs(QWidget):
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
         self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
-        # self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
+        self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
 
     def stop_th(self):
         self.runner.stop_threads()

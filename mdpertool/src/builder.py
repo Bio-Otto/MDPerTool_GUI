@@ -58,27 +58,20 @@ class Advanced(QtCore.QThread):
             water_active = True
 
         if self.protein_forcefield_comboBox.currentText() == 'charmm36':
-            print("Protein FF: %s" % self.protein_ff)
             self.water_ff = '%s/%s.xml' % (
                 self.protein_forcefield_comboBox.currentText(), self.water_forcefield_comboBox.currentText())
-            print("Water FF: %s" % self.water_ff)
         else:
             self.water_ff = '%s.xml' % self.water_forcefield_comboBox.currentText()
-            print("Protein FF: %s" % self.protein_ff)
-            print("Water FF: %s" % self.water_ff)
 
         ## SOLUTION WATER MODEL
         if len((self.water_ff.split('/')[-1]).split('.')[0]) <= 5:
             self.water_model = (self.water_ff.split('/')[-1]).split('.')[0]
-            print("Water Model for Solution 1: %s" % self.water_model)
 
         elif (self.water_ff.split('/')[-1]).split('.')[0] == 'tip4pew':
             self.water_model = (self.water_ff.split('/')[-1]).split('.')[0]
-            print("Water Model for Solution 2: %s" % self.water_model)
 
         else:
             self.water_model = (self.water_ff.split('/')[-1]).split('.')[0][0:5]
-            print("Water Model for Solution 3: %s" % self.water_model)
 
         try:
             self.out_dir = self.Output_Folder_textEdit.toPlainText()
@@ -212,7 +205,7 @@ class Advanced(QtCore.QThread):
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-        print("Parameters Sending to Runner...")
+        print("Parameters have been sent to OMM-Runner...")
         script_structure = dict(pdb=pdb_pfile,
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
                                 long_simulation_time=self.Number_of_steps_spinBox.value(),
