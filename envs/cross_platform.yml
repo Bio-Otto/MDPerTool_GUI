@@ -1,20 +1,23 @@
 name: mdpertool
 channels:
+  - conda-forge
   - defaults
 dependencies:
-  - python=3.7
-  - pymol-open-source
+  - python=3.10
   - pyside2
   - matplotlib
   - pandas
   - pyqtgraph
-  - openmm
-  - pystache
-  - networkx
   - pdbfixer
-  - parmed
-  - prody
-  - pyvis
+  - openmm
+  - networkx
   - pyopengl
+  - pymol-open-source
+  - biopython
+  - prody
+  - pyqtwebengine
+  - pyyaml
+  - pystache
   - mdtraj
-prefix: C:\Users\HIbrahim\anaconda3\envs\mdpertool
+  - parmed
+prefix: C:\ProgramData\anaconda3\envs\mdpertool

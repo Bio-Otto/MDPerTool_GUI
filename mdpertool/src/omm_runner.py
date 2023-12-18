@@ -69,6 +69,7 @@ class Communicate(QtCore.QObject):
     main_signal = QtCore.Signal(dict)
     thread_id_keeper = QtCore.Signal(int)
     decomp_process = QtCore.Signal(list)
+    run_speed = QtCore.Signal(float)
     finish_alert = QtCore.Signal(str)
     inform_about_situation = QtCore.Signal(str)
 
@@ -81,12 +82,14 @@ class OpenMMScriptRunner(QtCore.QObject):
     Signals = Communicate()
     plotdata = dict
     process = None
-
+    decomp_data = []
+    speed_data = []
     def __init__(self, script):
         super(OpenMMScriptRunner, self).__init__()
         # self.plotdata = dict
         self.plots_created = False
-        self.decomp_data = []
+        #self.decomp_data = []
+        #self.speed_data = []
         self.process = None
 
         self.openmm_script_code = script
@@ -117,11 +120,9 @@ class OpenMMScriptRunner(QtCore.QObject):
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
 
-        # Yazılan kodu bir geçici dosyaya yaz
         with open('temp_script.py', 'w') as f:
             f.write(code)
 
-        # subprocess ile geçici dosyayı çalıştır
         self.process = subprocess.Popen(['python', 'temp_script.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         while True:
@@ -131,7 +132,6 @@ class OpenMMScriptRunner(QtCore.QObject):
             if output:
                 queue.put(output.decode().strip())
 
-        # Hata çıktılarını da okuyabilirsiniz
         while True:
             error_output = self.process.stderr.readline()
             if error_output == b'' and self.process.poll() is not None:
@@ -141,11 +141,9 @@ class OpenMMScriptRunner(QtCore.QObject):
 
         self.process.wait()
 
-        # Hata olup olmadığını kontrol et
         if self.process.returncode != 0:
             raise ValueError('Script execution failed!')
 
-        # Geçici dosyayı sil
         os.remove('temp_script.py')
 
     # =============================================
@@ -161,7 +159,6 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.status = 'Running...'
         _headers = []
         decompose_started = None
-        outs = open('out.log', 'a')
 
         while True:
             try:
@@ -171,28 +168,27 @@ class OpenMMScriptRunner(QtCore.QObject):
                     break
 
                 else:
-                    #print("======================================================================")
-                    #print("MESSAGE: %s" % msg)
-                    #print("TYPE: %s" % type(msg))
-                    #print("======================================================================")
-                    if type(msg) is str:
-                        outs.write(msg)
+                    pass
+                    # print("======================================================================")
+                    # print("MESSAGE: %s" % msg)
+                    # print("TYPE: %s" % type(msg))
+                    # print("======================================================================")
 
                 if 'INFO |' in msg:
                     info_log = re.search(r'INFO \| (.+)', msg)
-                    print("INFO: %s" % info_log.group(1))
+                    self.update_plot(info_log.group(1))
 
                 elif 'CRITICAL |' in msg:
                     critic_log = re.search(r'CRITICAL \| (.+)', msg)
-                    print("CRITICAL: %s" % critic_log.group(1))
+                    self.update_plot(critic_log.group(1))
 
                 elif 'WARNING |' in msg:
                     warning_log = re.search(r'WARNING \| (.+)', msg)
-                    print("WARNING: %s" % warning_log.group(1))
+                    self.update_plot(warning_log.group(1))
 
                 elif 'ERROR |' in msg:
                     error_log = re.search(r'ERROR \| (.+)', msg)
-                    print("ERROR: %s" % error_log.group(1))
+                    self.update_plot(error_log.group(1))
 
                 elif '#"Progress (%)"' in msg:
                     # the first report has two lines on it -- we want to look at the first, as it contains the headers
@@ -200,24 +196,25 @@ class OpenMMScriptRunner(QtCore.QObject):
                     headers = msg.strip().split(',')
                     # filter out some extra quotation marks and comment characters
                     _headers = [e.strip('#"\'') for e in headers]
-                    print("HEADERS: ", _headers)
 
                 elif type(msg) is not dict:
                     t = [e.strip('%"\'') for e in msg.strip().split(',')]
                     if len(_headers) == len(t):
-                        print("TTTT: ", t)
                         msg = dict(zip(_headers, t))
                         q.put(msg)
                         self.update_plot(msg)
 
-                elif 'Decomposition Progress:' in msg:
+                if 'DECOMPOSE |' in msg:
                     decomp_info_log = re.search(r"Decomposition Progress: ([\d.]+)", msg)
 
                     if decomp_info_log:
                         decompose_started = True
                         extracted_number = float(decomp_info_log.group(1))
                         formatted_number = round(extracted_number, 2)
-                        print(formatted_number)
+                        self.decomp_data.append(formatted_number)
+                        #self.Signals.decomp_process.emit(self.decomp_data)
+                        self.update_plot(self.decomp_data)
+
 
                 """
                 elif type(msg) is not dict:
@@ -251,30 +248,30 @@ class OpenMMScriptRunner(QtCore.QObject):
         if 'Step' not in keys:
             raise ValueError('The reporter has not step information, so there is no x-axis to plot graphs!')
 
-    def decomp_progress(self, data):
-        self.decomp_data.append(data)
+    def speed_reporter(self, data):
+        self.speed_data.append(data)
 
     def update_plot(self, msg):
 
         if self.plots_created and type(msg) == dict:
             for k, v in msg.items():
                 current = self.plotdata.get(k)
-                print("Current: %s" % current)
-                print("k: %s and v: %s" % (k, v))
+
                 self.plotdata.update({k: np.concatenate((current, v), axis=None)})
-            # print("111")
             self.Signals.dataSignal.emit(self.plotdata)
 
         if not self.plots_created and type(msg) == dict:
             self.create_plots(msg.keys())
             self.plots_created = True
-            # print("222")
+
         if type(msg) == list:
-            # print("333")
             self.Signals.decomp_process.emit(msg)
 
+        if type(msg) == float:
+            print("here speed")
+            self.Signals.run_speed.emit(msg)
+
         if type(msg) == str:
-            print("444")
             if msg == "Progress Finished Succesfully :)":
                 self.Signals.finish_alert.emit(msg)
             else:
@@ -389,16 +386,14 @@ class Graphs(QWidget):
 
             if speed_style[0] == '--':
                 return self.real_speed.append(float(0))
-            print("BURADA 1")
+
             return self.real_speed.append(float(speed_style[0]))
 
         if len(speed_style) == 2:
             if speed_style[0] == '--' or speed_style[1] == '--':
                 return self.real_speed.append(float(0))
-            print("BURADA 2")
-            return self.real_speed.append(float(ins_speed))
 
-        print("SPEED REMAINING: %s" % ins_speed)
+            return self.real_speed.append(float(ins_speed))
 
     def pretty_time(self, t_remaining):
         """Format the time as minute"""
@@ -460,8 +455,8 @@ class Graphs(QWidget):
                     self.kinetic_energy_graph.setData(x=x, y=y_kinetic)
                     self.total_energy_graph.setData(x=x, y=y_total)
 
-                    #self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute)
-                    #self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
+                    # self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute)
+                    # self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
 
                     self.current_step_keeper = x
 
@@ -476,11 +471,16 @@ class Graphs(QWidget):
     def updating_decomposion(self, data_decomp):
         pass
 
+    def updating_current_speed(self, data_speed):
+        print("SPEEEEEEDDDDD: ", data_speed)
+        pass
+
     def run_script(self, contents):
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
         self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
-        self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
+        #self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
+        self.runner.Signals.run_speed.connect(lambda speed_data: self.updating_current_speed(speed_data))
 
     def stop_th(self):
         self.runner.stop_threads()

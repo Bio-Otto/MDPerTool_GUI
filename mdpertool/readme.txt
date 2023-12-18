@@ -25,22 +25,27 @@ from pathlib import Path, PureWindowsPath
 from mdtraj import reporters
 from mdtraj.reporters import XTCReporter
 from src.logger import Logger
+from datetime import datetime
 
 #######################################################################################################################
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
 #######################################################################################################################
 
+class Minimization_Reporter(openmm.MinimizationReporter):
+    energies = []  # array to record progress
+    logger_object = object
 
-class Reporter(openmm.MinimizationReporter):
-    interval = 10 # report interval
-    energies = [] # array to record progress
+    def __init__(self, logger_object, *args):
+        super().__init__(*args)
+        self.energies = []  # array to record progress
+        self.logger_object = logger_object
+
     def report(self, iteration, x, grad, args):
         # print current system energy to screen
-        if iteration % self.interval == 0:
-            print(iteration, args['system energy'])
+        self.logger_object.info("Iteration: {} - Energy (kJ/mole): {}".format(iteration, args['system energy']))
 
         # save energy at each iteration to an array we can use later
-        self.energies.append(args['system energy'])
+        #self.energies.append(args['system energy'])
 
         # The report method must return a bool specifying if minimization should be stopped.
         # You can use this functionality for early termination.
@@ -49,12 +54,9 @@ class Reporter(openmm.MinimizationReporter):
 
 
 
-
-
-
-
 # ---------------- LOGGER ---------------- #
-file_name = 'out.log'
+current_date = datetime.now().strftime("%Y-%m-%d")
+file_name = f"out_{current_date}.log"
 log_path = os.path.join('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output', file_name)
 
 log_obj = Logger(log_path)
@@ -124,18 +126,8 @@ simulation.context.setPositions(modeller.positions)
 simulation.context.computeVirtualSites()
 
 log_obj.info('Minimizing for %s steps ...' % 500)
-
-
-"""
-# Create an instance of our reporter
-reporter = Reporter()
-# Perform local energy minimization
-print("Minimizing energy...")
-simulation.minimizeEnergy(reporter=reporter)
-"""
-
-
-simulation.minimizeEnergy(maxIterations=int(500))
+min_reporter = Minimization_Reporter(logger_object=log_obj)
+simulation.minimizeEnergy(maxIterations=int(500), reporter=min_reporter)
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 log_obj.info("Minimized geometry is written to 'minimized.pdb'")
@@ -146,7 +138,8 @@ simulation.context.setVelocitiesToTemperature(310.0*kelvin)
 log_obj.info('Equilibrating for %s steps ...' % 500)
 simulation.step(int(500))
 
-simulation.currentStep = simulation_last_time
+simulation.currentStep = 0
+simulation.context.setTime(0)
 
 log_obj.info('The trajectories will be saved in DCD file format.')
 simulation.reporters.append(DCDReporter('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/output.dcd', 100))
@@ -181,13 +174,18 @@ with open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/integrator.xml'
 with open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/state.xml', 'w') as f:
     f.write(mm.XmlSerializer.serialize(state))
 
-#simulation.currentStep = simulation_last_time
+try:
+    for reporter in simulation.reporters[:]:
+        print("REPORTER: ", reporter)
+        simulation.reporters.remove(reporter)
+except Exception as E:
+    print("EEEERRRORRRR: ", E)
 
 #######################################################################################################################
 #################################### PERTURBATION MD PROCESS USING MDPerTool v0.1 #####################################
 #######################################################################################################################
 # ## --> VARIABLES
-simulation_last_step = simulation.currentStep
+simulation_last_step = 0
 state_file_name = 'state.xml'
 last_pdb = 'last.pdb'
 dissipated_trajectory_name = 'energy_perturbation_trajectory'
@@ -317,7 +315,14 @@ for i in range(len([4])):
 
         ref_simulation.step(10)
 
-        simulation_last_step = ref_simulation.currentStep
+        simulation_last_step = 0
+
+    try:
+        for reporter in ref_simulation.reporters[:]:
+            print("REPORTER: ", reporter)
+            ref_simulation.reporters.remove(reporter)
+    except Exception as E:
+        print("EEEERRRORRRR: ", E)
 
     ################################################################################################################
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
@@ -391,7 +396,7 @@ for i in range(len([4])):
     dis_simulation.context.setVelocities(velocities)
     log_obj.info("Will the perturbed system use periodic boundary conditions? --> %s" % perturbed_system.usesPeriodicBoundaryConditions())
 
-    #dis_simulation.currentStep = simulation_last_step
+    dis_simulation.currentStep = 0
     dis_simulation.context.setTime(0)
 
     """
@@ -427,11 +432,19 @@ for i in range(len([4])):
 
     dis_simulation.step(10)
 
-    simulation_last_step = dis_simulation.currentStep
+    simulation_last_step = 0
+
+    try:
+        for reporter in dis_simulation.reporters[:]:
+            print("REPORTER: ", reporter)
+            dis_simulation.reporters.remove(reporter)
+    except Exception as E:
+        print("EEEERRRORRRR: ", E)
+
     del dis_simulation, ref_simulation
-    ################################################################################################################
-    ############################# PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ##############################
-    ################################################################################################################
+    ####################################################################################################################
+    ############################### PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ################################
+    ####################################################################################################################
     """
     if pl.system() == 'Windows':
         log_obj.info("Decompose started using XTC File ...".format())

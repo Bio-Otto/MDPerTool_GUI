@@ -1,4 +1,4 @@
-REMARK   1 CREATED WITH OPENMM 8.1, 2023-12-12
+REMARK   1 CREATED WITH OPENMM 8.1, 2023-12-18
 ATOM      1  N   GLU A   3     -37.754  38.649 157.237  1.00  0.00           N  
 ATOM      2  H   GLU A   3     -36.849  39.435 157.232  1.00  0.00           H  
 ATOM      3  H2  GLU A   3     -37.334  37.761 156.559  1.00  0.00           H  

@@ -13,6 +13,7 @@ import numpy as np
 import time
 import os
 import pandas as pd
+import logging
 
 # from ui_main import *
 # from src.builder import *
@@ -353,11 +354,16 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
 
                 else:
                     modified_df.loc[i - int(len(trj_pos_list) / 2)][res_num] = float(st)
-        #if que is not None:
+        # if que is not None:
         #    que.put([res_num, res_number, st])  # res_num = current residue  -  res_number = all residues number
 
         if logger_object is not None:
-            logger_object.info("Res Num: %s, Res Num: %s, Decomposition Progress: %s" % (res_num, res_number, res_num/res_number*100))
+            """
+            logger_object.info("Decomposed Res Num: %s, Total Res Num: %s, Decomposition Progress: %s"
+                               % (res_num, res_number, res_num/res_number*100))
+                               """
+            logger_object.log(35, "Decomposed Res Num: %s, Total Res Num: %s, Decomposition Progress: %s"
+                              % (res_num, res_number, res_num / res_number * 100))
 
         # print("#################### %s #####################" % res_num)
 
@@ -370,7 +376,7 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
         reference_df.to_csv(os.path.join(output_directory, ref_energy_name), index=False)
         modified_df.to_csv(os.path.join(output_directory, modif_energy_name), index=False)
 
-    #if que is not None:
+    # if que is not None:
     #    que.put("Progress Finished Succesfully :)")  # res_num = current residue  -  res_number = all residues number
     if logger_object is not None:
         logger_object.info("Progress Finished Succesfully :)")
