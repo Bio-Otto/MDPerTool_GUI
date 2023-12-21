@@ -13,7 +13,7 @@ def config_template():
             'run duration unit': 'nanosecond',
             'threading number': 2,
             'all cpu is active': False,
-            'r factor': '3,4',
+            'r factor': '4',
             'selected residue': list,
             'perturbation run duration': 1000,
             'perturbation run duration unit': 'step',

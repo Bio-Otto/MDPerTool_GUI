@@ -146,6 +146,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.minimize_checkBox.stateChanged.connect(lambda: UIF.Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.DCD_Reporter_Changed(self))
+        self.equilubrate_checkBox.stateChanged.connect(lambda: UIF.Functions.Equilibration_On_Off_Changed(self))
+        self.Device_ID_checkBox.stateChanged.connect(lambda: UIF.Functions.UseDeviceID_On_Off_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
         self.load_sim_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_simulation(self))
@@ -161,8 +163,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Number_of_steps_spinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
         self.run = OpenMMScriptRunner
-        self.run.Signals.decomp_process.connect(
-            lambda decomp_data: self.progressBar_decomp.setValue(((decomp_data[0] + 1) * 100) / decomp_data[1]))
+
+        self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(decomp_data[-1]))
+
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
         self.run.Signals.inform_about_situation.connect(
             lambda inform_message: self.inform_about_progress(inform_message))
@@ -260,6 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.__stop = True
         try:
             self.Real_Time_Graphs.stop_th()
+            self.Run.setEnabled(True)
 
         except Exception as ins:
             QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))
@@ -413,7 +417,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def finish_message(self, alert_message):
         self.r_factor_count += 1
-        if self.r_factor_count == len(str(self.R_factor_lineEdit.text()).split(',')):
+        if self.r_factor_count == len(str(self.R_factor_ComboBox.currentText())):
             UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
 

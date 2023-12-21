@@ -76,7 +76,7 @@ print('Creating a %sIntegrator with %s %s .' %('Langevin', 2.0, 'femtosecond'))
 integrator = mm.LangevinIntegrator(310.0*kelvin, 91.0/picosecond, 2.0*femtosecond)
 
 if True == True:
-    platform = mm.Platform.getPlatformByName('CUDA')
+    platform = mm.Platform.getPlatformByName('OpenCL')
     properties = {'CudaPrecision': 'single'}
 else:
     platform = mm.Platform.getPlatformByName('CUDA')

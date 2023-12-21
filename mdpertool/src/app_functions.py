@@ -1585,14 +1585,18 @@ class Functions(MainWindow):
                 self.selected_residues_listWidget.addItem('SER345A')
                 self.target_res_comboBox.setCurrentIndex(342)
 
-            self.R_factor_lineEdit.setText("4, 5")
+            self.R_factor_ComboBox.setCurrentText("4")
             self.run_duration_spinBox.blockSignals(True)
             self.run_duration_doubleSpinBox.blockSignals(True)
             self.Number_of_steps_spinBox.blockSignals(True)
             self.long_simulation_time_unit.blockSignals(True)
-            self.run_duration_spinBox.setValue(int(1000))
-            self.run_duration_doubleSpinBox.setValue(float(600.000))
-            self.Number_of_steps_spinBox.setValue(int(300000))
+            #self.run_duration_spinBox.setValue(int(1000))
+            #self.run_duration_doubleSpinBox.setValue(float(600.000))
+            #self.Number_of_steps_spinBox.setValue(int(300000))
+            self.run_duration_spinBox.setValue(int(10))
+            self.run_duration_doubleSpinBox.setValue(float(1.000))
+            self.Number_of_steps_spinBox.setValue(int(500))
+
             self.long_simulation_time_unit.setCurrentIndex(1)
             self.run_duration_spinBox.blockSignals(False)
             self.run_duration_doubleSpinBox.blockSignals(False)
@@ -1664,7 +1668,7 @@ class Functions(MainWindow):
             template['Inputs']['run duration unit'] = self.long_simulation_time_unit.currentText()
             template['Inputs']['threading number'] = int(self.Number_CPU_spinBox_2.value())
             template['Inputs']['all cpu is active'] = self.All_CPU_checkBox.isChecked()
-            template['Inputs']['r factor'] = self.R_factor_lineEdit.text().strip()
+            template['Inputs']['r factor'] = self.R_factor_ComboBox.currentText().strip()
             template['Inputs']['selected residue'] = [self.selected_residues_listWidget.item(x).text() for x in
                                                       range(self.selected_residues_listWidget.count())]
             template['Inputs']['perturbation run duration'] = int(self.run_duration_spinBox.value())
@@ -1739,7 +1743,7 @@ class Functions(MainWindow):
                     str(template['Inputs']['run duration unit']), QtCore.Qt.MatchFixedString))
             self.Number_CPU_spinBox_2.setValue(int(template['Inputs']['threading number']))
             self.All_CPU_checkBox.setChecked(template['Inputs']['all cpu is active'])
-            self.R_factor_lineEdit.setText(str(template['Inputs']['r factor']))
+            self.R_factor_ComboBox.setCurrentText(str(template['Inputs']['r factor']))
             self.selected_residues_listWidget.addItems(template['Inputs']['selected residue'])
             self.run_duration_spinBox.setValue(int(template['Inputs']['perturbation run duration']))
             self.perturb_time_unit_comboBox.setCurrentIndex(
@@ -1848,6 +1852,24 @@ class Functions(MainWindow):
             self.Additional_Integrator_groupBox.setEnabled(False)
             self.Additional_Integrators_checkBox.setChecked(False)
             self.Additional_Integrators_checkBox.setEnabled(False)
+
+    @staticmethod
+    def Equilibration_On_Off_Changed(self):
+        if not self.equilubrate_checkBox.isChecked():
+            self.MD_Run_Time_GroupBox.setEnabled(False)
+            self.groupBox_18.setEnabled(False)
+
+        if self.equilubrate_checkBox.isChecked():
+            self.MD_Run_Time_GroupBox.setEnabled(True)
+            self.groupBox_18.setEnabled(True)
+
+    @staticmethod
+    def UseDeviceID_On_Off_Changed(self):
+        if not self.Device_ID_checkBox.isChecked():
+            self.Device_Number_comboBox.setEnabled(False)
+
+        if self.Device_ID_checkBox.isChecked():
+            self.Device_Number_comboBox.setEnabled(True)
 
     @staticmethod
     def minimize_Step_isVisible(self):
