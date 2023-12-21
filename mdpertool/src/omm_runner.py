@@ -84,12 +84,10 @@ class OpenMMScriptRunner(QtCore.QObject):
     process = None
     decomp_data = []
     speed_data = []
+
     def __init__(self, script):
         super(OpenMMScriptRunner, self).__init__()
-        # self.plotdata = dict
         self.plots_created = False
-        #self.decomp_data = []
-        #self.speed_data = []
         self.process = None
 
         self.openmm_script_code = script
@@ -123,28 +121,35 @@ class OpenMMScriptRunner(QtCore.QObject):
         with open('temp_script.py', 'w') as f:
             f.write(code)
 
-        self.process = subprocess.Popen(['python', 'temp_script.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            self.process = subprocess.Popen(['python', 'temp_script.py'], stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
 
-        while True:
-            output = self.process.stdout.readline()
-            if output == b'' and self.process.poll() is not None:
-                break
-            if output:
-                queue.put(output.decode().strip())
+            while True:
+                output = self.process.stdout.readline()
+                if output == b'' and self.process.poll() is not None:
+                    break
+                if output:
+                    queue.put(output.decode().strip())
 
-        while True:
-            error_output = self.process.stderr.readline()
-            if error_output == b'' and self.process.poll() is not None:
-                break
-            if error_output:
-                queue.put(error_output.decode().strip())
+            while True:
+                error_output = self.process.stderr.readline()
+                if error_output == b'' and self.process.poll() is not None:
+                    break
+                if error_output:
+                    print("Standard Error:", error_output.decode().strip())
+                    queue.put(error_output.decode().strip())
 
-        self.process.wait()
+            self.process.wait()
 
-        if self.process.returncode != 0:
-            raise ValueError('Script execution failed!')
+            if self.process.returncode != 0:
+                raise ValueError('Script execution failed!')
 
-        os.remove('temp_script.py')
+            os.remove('temp_script.py')
+        except Exception as e:
+            # Print the exception details for debugging
+            print("Exception:", str(e))
+            raise
 
     # =============================================
 
@@ -212,9 +217,8 @@ class OpenMMScriptRunner(QtCore.QObject):
                         extracted_number = float(decomp_info_log.group(1))
                         formatted_number = round(extracted_number, 2)
                         self.decomp_data.append(formatted_number)
-                        #self.Signals.decomp_process.emit(self.decomp_data)
+                        # self.Signals.decomp_process.emit(self.decomp_data)
                         self.update_plot(self.decomp_data)
-
 
                 """
                 elif type(msg) is not dict:
@@ -272,10 +276,13 @@ class OpenMMScriptRunner(QtCore.QObject):
             self.Signals.run_speed.emit(msg)
 
         if type(msg) == str:
-            if msg == "Progress Finished Succesfully :)":
-                self.Signals.finish_alert.emit(msg)
-            else:
+            if msg != "Progress Finished Succesfully :)":
                 self.Signals.inform_about_situation.emit(msg)
+            else:
+                self.decomp_data.append(int(100))
+                # self.Signals.decomp_process.emit(self.decomp_data)
+                self.update_plot(self.decomp_data)
+                self.Signals.finish_alert.emit(msg)
 
 
 class Graphs(QWidget):
@@ -479,7 +486,7 @@ class Graphs(QWidget):
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
         self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
-        #self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
+        # self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
         self.runner.Signals.run_speed.connect(lambda speed_data: self.updating_current_speed(speed_data))
 
     def stop_th(self):

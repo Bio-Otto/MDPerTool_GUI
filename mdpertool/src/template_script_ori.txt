@@ -12,7 +12,7 @@ from no_gui.write_outputs import *
 from openmm import unit
 from openmm import *
 from openmm import app
-from openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter
+from openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter, StateDataReporter
 import openmm as mm
 from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
 
@@ -25,13 +25,38 @@ from pathlib import Path, PureWindowsPath
 from mdtraj import reporters
 from mdtraj.reporters import XTCReporter
 from src.logger import Logger
+from datetime import datetime
 
 #######################################################################################################################
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
 #######################################################################################################################
 
+class Minimization_Reporter(openmm.MinimizationReporter):
+    energies = []  # array to record progress
+    logger_object = object
+
+    def __init__(self, logger_object, *args):
+        super().__init__(*args)
+        self.energies = []  # array to record progress
+        self.logger_object = logger_object
+
+    def report(self, iteration, x, grad, args):
+        # print current system energy to screen
+        self.logger_object.info("Iteration: {} - Energy (kJ/mole): {}".format(iteration, args['system energy']))
+
+        # save energy at each iteration to an array we can use later
+        #self.energies.append(args['system energy'])
+
+        # The report method must return a bool specifying if minimization should be stopped.
+        # You can use this functionality for early termination.
+        return False
+
+
+
+
 # ---------------- LOGGER ---------------- #
-file_name = 'out.log'
+current_date = datetime.now().strftime("%Y-%m-%d")
+file_name = f"out_{current_date}.log"
 log_path = os.path.join('{{output_folder}}', file_name)
 
 log_obj = Logger(log_path)
@@ -51,34 +76,27 @@ log_obj.handlers.clear()
 
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
-__queue.put('pdb file fixing and preparing for simulation ...')
-fixed_pdb_name = fix_pdb('{{pdb}}', fixed_pdb_out_path='{{output_folder}}')
+fixed_pdb_name = fix_pdb('{{pdb}}', fixed_pdb_out_path='{{output_folder}}', logger_object=log_obj)
 
 log_obj.info("Loading pdb to simulation engine ...".format())
-__queue.put('Loading pdb to simulation engine ...')
 pdb = app.PDBFile(fixed_pdb_name)
 
 box = pdb.topology.getUnitCellDimensions()
 
 log_obj.info("Modeller of pdb file is preparing ...".format())
-__queue.put('Modeller of pdb file is preparing ...')
 modeller = mm.app.Modeller(pdb.topology, pdb.positions)
 modeller.topology.setUnitCellDimensions(box)
 
 log_obj.info("Forcefield parameters loading to the simulation system ...".format())
-__queue.put('Forcefield parameters loading to the simulation system ...')
 forcefield = app.ForceField('{{protein_ff}}'{{#water_active}}, '{{water_ff}}'{{/water_active}})
 
 log_obj.critical("Adding missing hydrogens to the model ...".format())
-__queue.put('Adding missing hydrogens to the model ...')
 modeller.addHydrogens(forcefield)
 
 log_obj.info("Adding solvent (both water and ions) to the model to fill a rectangular box ...".format())
-__queue.put('Adding solvent (both water and ions) to the model to fill a rectangular box ...')
 modeller.addSolvent(forcefield, model='{{model_water}}', padding={{water_padding}})
 
 log_obj.info("Constructing an OpenMM System ...".format())
-__queue.put('Constructing an OpenMM System')
 system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
                                       {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
                                       constraints={{Constraints}}, rigidWater={{Rigid_Water}},
@@ -111,8 +129,8 @@ simulation.context.computeVirtualSites()
 
 {{#Minimize}}
 log_obj.info('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
-__queue.put('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
-simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}})
+min_reporter = Minimization_Reporter(logger_object=log_obj)
+simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}}, reporter=min_reporter)
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 log_obj.info("Minimized geometry is written to 'minimized.pdb'")
@@ -122,36 +140,32 @@ simulation.context.setVelocitiesToTemperature({{Temperature}})
 
 {{#Equilubrate}}
 log_obj.info('Equilibrating for %s steps ...' % {{Equilubrate_steps}})
-__queue.put('Equilibrating for %s steps ...' % {{Equilubrate_steps}})
 simulation.step(int({{Equilubrate_steps}}))
 {{/Equilubrate}}
 
-simulation.currentStep = simulation_last_time
+simulation.currentStep = 0
+simulation.context.setTime(0)
 
 {{#DCDReporter}}
 log_obj.info('The trajectories will be saved in DCD file format.')
-__queue.put('Saving DCD File for every {{DCD_write_freq}} period')
 simulation.reporters.append(DCDReporter('{{output_folder}}/{{DCD_output_name}}', {{DCD_write_freq}}))
 {{/DCDReporter}}
 log_obj.info("Saving DCD File for every {{DCD_write_freq}} period")
 
 {{#XTCReporter}}
 log_obj.info('The trajectories will be saved in XTC file format.')
-__queue.put('The trajectories will be saved in XTC file format.')
 simulation.reporters.append(reporters.XTCReporter('{{output_folder}}/{{XTC_output_name}}', {{XTC_write_freq}}))
 {{/XTCReporter}}
 log_obj.info("Saving XTC File for every {{XTC_write_freq}} period")
 
 {{#State_Data_Reporter}}
 log_obj.info("State Report will tell you.")
-__queue.put('State Report will tell you.')
 simulation.reporters.append(StateDataReporter(stdout, {{StateData_freq}}, step=True,
 time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True,
 remainingTime=True, speed=True, volume=True, density=True, totalSteps={{Number_of_steps}}))
 {{/State_Data_Reporter}}
 
 log_obj.info("Running Production...")
-__queue.put('Running Production...')
 simulation.step({{Number_of_steps}})
 log_obj.info("Done!".format())
 
@@ -173,14 +187,18 @@ with open('{{output_folder}}/integrator.xml', 'w') as f:
 with open('{{output_folder}}/state.xml', 'w') as f:
     f.write(mm.XmlSerializer.serialize(state))
 
-#simulation.currentStep = simulation_last_time
+try:
+    for reporter in simulation.reporters[:]:
+        print("REPORTER: ", reporter)
+        simulation.reporters.remove(reporter)
+except Exception as E:
+    print("EEEERRRORRRR: ", E)
 
 #######################################################################################################################
 #################################### PERTURBATION MD PROCESS USING MDPerTool v0.1 #####################################
 #######################################################################################################################
 # ## --> VARIABLES
-simulation_last_step = simulation.currentStep
-print("LAST TIME", simulation_last_time)
+simulation_last_step = 0
 state_file_name = 'state.xml'
 last_pdb = 'last.pdb'
 dissipated_trajectory_name = 'energy_perturbation_trajectory'
@@ -227,13 +245,13 @@ for i in range(len({{speed_factor}})):
             precision = 'double'
 
         if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
-            print("The CPU platform always uses 'mixed' precision.")
-            print("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
+            log_obj.info("The CPU platform always uses 'mixed' precision.".format())
+            log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
             properties = {'CpuThreads': '{{Number_of_CPU}}'}
             precision = 'mixed'
 
         if '{{platform}}' == 'Reference':
-            print("The Reference platform always uses 'double' precision.")
+            log_obj.info("The Reference platform always uses 'double' precision.".format())
             properties = None
             precision= 'double'
 
@@ -276,15 +294,15 @@ for i in range(len({{speed_factor}})):
         ref_simulation.context.setVelocities(velocities)
 
 
-        #ref_simulation.currentStep = simulation_last_step
-        ref_simulation.context.setTime(0)
-
+        ref_simulation.currentStep = simulation_last_step
+        #ref_simulation.context.setTime(0)
+        """
         if pl.system() == 'Windows':
             log_obj.info("Saving XTC File for every 1 period".format())
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
             ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
-
-        else:
+        """
+        try:
             if {{DCDReporter}} == False and {{XTCReporter}} == False:
                 log_obj.info("Saving DCD File for every 1 period".format())
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
@@ -300,6 +318,9 @@ for i in range(len({{speed_factor}})):
                 XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
+        except Exception as e:
+            log_obj.error(e, stack_info=True, exc_info=True)
+
         {{#State_Data_Reporter}}
         log_obj.info("State Report will tell you ...".format())
         ref_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
@@ -309,7 +330,14 @@ for i in range(len({{speed_factor}})):
 
         ref_simulation.step({{perturb_simulation_time}})
 
-        simulation_last_step = ref_simulation.currentStep
+        simulation_last_step = 0
+
+    try:
+        for reporter in ref_simulation.reporters[:]:
+            print("REPORTER: ", reporter)
+            ref_simulation.reporters.remove(reporter)
+    except Exception as E:
+        print("EEEERRRORRRR: ", E)
 
     ################################################################################################################
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
@@ -338,7 +366,6 @@ for i in range(len({{speed_factor}})):
         precision = 'mixed'
 
     if '{{platform}}' == 'Reference':
-        print("")
         log_obj.info("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
@@ -384,15 +411,17 @@ for i in range(len({{speed_factor}})):
     dis_simulation.context.setVelocities(velocities)
     log_obj.info("Will the perturbed system use periodic boundary conditions? --> %s" % perturbed_system.usesPeriodicBoundaryConditions())
 
-    #dis_simulation.currentStep = simulation_last_step
+    dis_simulation.currentStep = 0
     dis_simulation.context.setTime(0)
 
+    """
     if pl.system() == 'Windows':
         log_obj.info("Saving XTC File for every 1 period")
         XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
         dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
+    """
 
-    else:
+    try:
         if {{DCDReporter}} == False and {{XTCReporter}} == False:
             log_obj.info("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
@@ -408,6 +437,9 @@ for i in range(len({{speed_factor}})):
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
 
+    except Exception as e:
+        log_obj.error(e, stack_info=True, exc_info=True)
+
     {{#State_Data_Reporter}}
     log_obj.info("State Report will tell you ...")
     dis_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
@@ -417,67 +449,88 @@ for i in range(len({{speed_factor}})):
 
     dis_simulation.step({{perturb_simulation_time}})
 
-    simulation_last_step = dis_simulation.currentStep
+    simulation_last_step = 0
 
-    ################################################################################################################
-    ############################# PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ##############################
-    ################################################################################################################
+    try:
+        for reporter in dis_simulation.reporters[:]:
+            print("REPORTER: ", reporter)
+            dis_simulation.reporters.remove(reporter)
+    except Exception as E:
+        print("EEEERRRORRRR: ", E)
+
+    del dis_simulation, ref_simulation
+    ####################################################################################################################
+    ############################### PER RESIDUE ENERGY CALCULATION USING MDPerTool v0.1 ################################
+    ####################################################################################################################
+    """
     if pl.system() == 'Windows':
         log_obj.info("Decompose started using XTC File ...".format())
         reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
         dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
-
-    else:
+    """
+    try:
         if {{DCDReporter}} == False and {{XTCReporter}} == False:
             log_obj.info("Decompose started using DCD File ...".format())
-            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
-            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
 
         if {{DCDReporter}} == True:
-            log_obj.info("Decompose started using DCD File ...".format())
-            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd')
-            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd')
+            log_obj.info("Decompose started using DCD File ....".format())
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
+            print(reference_traj_file_for_pos)
+            print(dissipation_traj_file_for_pos)
+            print(last_pdb_file_path)
 
         if {{XTCReporter}} == True:
-            log_obj.info("Decompose started using XTC File".format())
-            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc')
-            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
+            log_obj.info("Decompose started using XTC File ....".format())
+            reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc').replace('\\','/')
+            dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc').replace('\\','/')
+
+    except Exception as e:
+        print("ERROR: ", e)
+        log_obj.error(e, stack_info=True, exc_info=True)
+
+    try:
+        if i == 0:
+            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+                                                                             ref_traj=reference_traj_file_for_pos,
+                                                                             modif_traj=dissipation_traj_file_for_pos,
+                                                                             logger_object=log_obj)
 
 
-    if i == 0:
-        position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                         ref_traj=reference_traj_file_for_pos,
-                                                                         modif_traj=dissipation_traj_file_for_pos)
+        if i != 0:
+            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+                                                                     ref_traj=None,
+                                                                     modif_traj=dissipation_traj_file_for_pos,
+                                                                     logger_object=log_obj)
 
+         # --> RESIDUE BASED DECOMPOSITION
+        if i == 0:
+            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='{{platform}}',
+                                        ref_energy_name='reference_energy_file.csv', device_id_active={{Device_ID_active}},
+                                        num_of_threads={{Number_of_CPU}},
+                                        modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
+                                        origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}', logger_object=log_obj)
 
-    if i != 0:
-        position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                 ref_traj=None,
-                                                                 modif_traj=dissipation_traj_file_for_pos)
+        if i != 0:
+            # --> RESIDUE BASED DECOMPOSITION
+            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='{{platform}}',
+                                        ref_energy_name=None, device_id_active={{Device_ID_active}}, num_of_threads={{Number_of_CPU}},
+                                        modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
+                                        origin_last_pdb=last_pdb_file_path,
+                                        ff='{{protein_ff}}', logger_object=log_obj)
 
-     # --> RESIDUE BASED DECOMPOSITION
-    if i == 0:
-        residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='{{platform}}',
-                                    ref_energy_name='reference_energy_file.csv', device_id_active={{Device_ID_active}},
-                                    num_of_threads={{Number_of_CPU}},
-                                    modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
-                                    origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}', logger_object=log_obj)
+        # --> RESPONSE TIME CSV EXPORTER
+        getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
+                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
+                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
 
-    if i != 0:
-        # --> RESIDUE BASED DECOMPOSITION
-        residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                    output_directory=OUTPUT_DIRECTORY, que=__queue, platform_name='{{platform}}',
-                                    ref_energy_name=None, device_id_active={{Device_ID_active}}, num_of_threads={{Number_of_CPU}},
-                                    modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
-                                    origin_last_pdb=last_pdb_file_path,
-                                    ff='{{protein_ff}}')
-
-    # --> RESPONSE TIME CSV EXPORTER
-    getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
-                            os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
-                            outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
-
+    except Exception as e:
+        print("ERROR: ", e)
+        log_obj.error(e, stack_info=True, exc_info=True)
 
     try:
         del XTC_file_path, ref_simulation, dis_simulation, simulation

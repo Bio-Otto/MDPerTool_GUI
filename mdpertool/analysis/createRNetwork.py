@@ -285,7 +285,9 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
                 print('End of out-degree check')
                 break
 
-        nx.write_gml(clean_network, '%s' % pairNetworkName)
+        #nx.write_gml(clean_network, '%s' % pairNetworkName)
+        nx.write_gml(clean_network, os.path.join(out_directory, '%s' % pairNetworkName))
+
 
     else:
         print("YOUR TARGET RESIDUE ALREADY DELETED")
