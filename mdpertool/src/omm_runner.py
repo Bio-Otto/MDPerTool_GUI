@@ -217,7 +217,6 @@ class OpenMMScriptRunner(QtCore.QObject):
                         extracted_number = float(decomp_info_log.group(1))
                         formatted_number = round(extracted_number, 2)
                         self.decomp_data.append(formatted_number)
-                        # self.Signals.decomp_process.emit(self.decomp_data)
                         self.update_plot(self.decomp_data)
 
                 """
@@ -479,7 +478,6 @@ class Graphs(QWidget):
         pass
 
     def updating_current_speed(self, data_speed):
-        print("SPEEEEEEDDDDD: ", data_speed)
         pass
 
     def run_script(self, contents):

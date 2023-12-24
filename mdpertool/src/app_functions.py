@@ -19,6 +19,7 @@ from .config import write_output_configuration_file, read_output_configuration_f
 from ui_main import *
 from src.file_dialog import Dialog as file_dialog
 
+
 class Helper_Functions():
 
     def fill_residue_combobox(self, pdb_path):
@@ -67,8 +68,9 @@ class Helper_Functions():
 
     def visualization_Handel_buttons_changing_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                           hide_navigation_button):
-        Helper_Functions.hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
-                                                hide_navigation_button)
+        Helper_Functions.hide_visualization_settings_on_analysis(self, analysis_settings_groupBox,
+                                                                 show_navigation_button,
+                                                                 hide_navigation_button)
 
     def hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                 hide_navigation_button):
@@ -78,11 +80,15 @@ class Helper_Functions():
 
     def Handel_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button, hide_navigation_button):
         show_navigation_button.clicked.connect(lambda:
-            Helper_Functions.show_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
-                                                    hide_navigation_button))
+                                               Helper_Functions.show_visualization_settings_on_analysis(self,
+                                                                                                        analysis_settings_groupBox,
+                                                                                                        show_navigation_button,
+                                                                                                        hide_navigation_button))
         hide_navigation_button.clicked.connect(lambda:
-            Helper_Functions.hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
-                                                    hide_navigation_button))
+                                               Helper_Functions.hide_visualization_settings_on_analysis(self,
+                                                                                                        analysis_settings_groupBox,
+                                                                                                        show_navigation_button,
+                                                                                                        hide_navigation_button))
 
     # def clear_residue_labels(self):
     #     self.ProteinView.clear_all_labels()
@@ -128,9 +134,9 @@ class Helper_Functions():
 
         try:
             created_pymol_widget.get_png_figure(filename, width=width_horizontalSlider.value(),
-                                            height=height_horizontalSlider.value(),
-                                            dpi=dpi_horizontalSlider.value(),
-                                            ray=ray_horizontalSlider.value())
+                                                height=height_horizontalSlider.value(),
+                                                dpi=dpi_horizontalSlider.value(),
+                                                ray=ray_horizontalSlider.value())
             created_pymol_widget.update()
 
         except Exception as save_err:
@@ -145,12 +151,18 @@ class Helper_Functions():
                                                ray_horizontalSlider, figure_settings_groupBox_on_analysis,
                                                pymol_width_label, pymol_height_label, pymol_dpi_label, pymol_ray_label):
 
-        save_as_png_pushButton.clicked.connect(lambda: Helper_Functions.show_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis))
-        hide_figure_settings_pushButton.clicked.connect(lambda: Helper_Functions.hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis))
-        width_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_width_label_on_analysis(self, width_horizontalSlider, pymol_width_label))
-        height_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_height_label_on_analysis(self, height_horizontalSlider, pymol_height_label))
-        dpi_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_dpi_label_on_analysis(self, dpi_horizontalSlider, pymol_dpi_label))
-        ray_horizontalSlider.valueChanged.connect(lambda: Helper_Functions.figure_ray_label_on_analysis(self, ray_horizontalSlider, pymol_ray_label))
+        save_as_png_pushButton.clicked.connect(
+            lambda: Helper_Functions.show_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis))
+        hide_figure_settings_pushButton.clicked.connect(
+            lambda: Helper_Functions.hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis))
+        width_horizontalSlider.valueChanged.connect(
+            lambda: Helper_Functions.figure_width_label_on_analysis(self, width_horizontalSlider, pymol_width_label))
+        height_horizontalSlider.valueChanged.connect(
+            lambda: Helper_Functions.figure_height_label_on_analysis(self, height_horizontalSlider, pymol_height_label))
+        dpi_horizontalSlider.valueChanged.connect(
+            lambda: Helper_Functions.figure_dpi_label_on_analysis(self, dpi_horizontalSlider, pymol_dpi_label))
+        ray_horizontalSlider.valueChanged.connect(
+            lambda: Helper_Functions.figure_ray_label_on_analysis(self, ray_horizontalSlider, pymol_ray_label))
 
     def show_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis):
         figure_settings_groupBox_on_analysis.show()
@@ -440,7 +452,7 @@ class Functions(MainWindow):
             show_navigation_button.setIcon(icon11)
             show_navigation_button.setObjectName("show_navigation_button")
             gridLayout.addWidget(show_navigation_button, 0, 1, 6, 1)
-                                                        # 0  2  6  1
+            # 0  2  6  1
             hide_navigation_button = QtWidgets.QPushButton(tab)
             hide_navigation_button.setMaximumSize(QtCore.QSize(20, 61))
             hide_navigation_button.setStyleSheet(" QPushButton \n"
@@ -1321,9 +1333,9 @@ class Functions(MainWindow):
 
         for arrow_coord in arrows_cordinates:
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                             radius=0.05, name='pairNet',
-                                                             gap=0.4, hradius=0.4, hlength=0.8,
-                                                             color='orange')
+                                                radius=0.05, name='pairNet',
+                                                gap=0.4, hradius=0.4, hlength=0.8,
+                                                color='orange')
 
         for arrow_coord in shortest_path_arrow_coords:
             PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
@@ -1371,7 +1383,8 @@ class Functions(MainWindow):
         """
         try:
             d = file_dialog(self)
-            if self.Output_Folder_textEdit.toPlainText().strip() != '' and os.path.exists(self.Output_Folder_textEdit.toPlainText().strip()):
+            if self.Output_Folder_textEdit.toPlainText().strip() != '' and os.path.exists(
+                    self.Output_Folder_textEdit.toPlainText().strip()):
                 d.directory = self.Output_Folder_textEdit.toPlainText().strip()
             else:
                 d.directory = os.getcwd()
@@ -1396,7 +1409,8 @@ class Functions(MainWindow):
         """
         try:
             d = file_dialog(self)
-            if self.Output_Folder_textEdit.toPlainText().strip() != '' and os.path.exists(self.Output_Folder_textEdit.toPlainText().strip()):
+            if self.Output_Folder_textEdit.toPlainText().strip() != '' and os.path.exists(
+                    self.Output_Folder_textEdit.toPlainText().strip()):
                 d.directory = self.Output_Folder_textEdit.toPlainText().strip()
             else:
                 d.directory = os.getcwd()
@@ -1554,54 +1568,66 @@ class Functions(MainWindow):
             Message_Boxes.Warning_message(self, "Fatal Error!", str(exp), Style.MessageBox_stylesheet)
 
     def load_sample_for_simulation(self):
-        from pathlib import Path
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        path = os.path.join(Path(current_path).parent, 'Download', '2j0w_example.pdb')
-        output_directory = os.path.join(Path(current_path).parent, 'output')
+        try:
+            from pathlib import Path
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            path = os.path.join(Path(current_path).parent, 'Download', '2j0w_example.pdb')
+            output_directory = os.path.join(Path(current_path).parent, 'output')
 
-        if os.path.exists(path):
-            self.upload_pdb_lineEdit.setText(path)
-            self.upload_pdb_from_local(manuel=False)
-            try:
-                os.mkdir(output_directory)
-                print("Directory ", output_directory, " Created ")
-            except FileExistsError:
-                print("Directory ", output_directory, " already exists")
-            if not os.path.exists(output_directory):
-                os.mkdir(output_directory)
-                print("Directory ", output_directory, " Created ")
-            else:
-                print("Directory ", output_directory, " already exists")
-            self.Output_Folder_textEdit.setPlainText("")
+            if os.path.exists(path):
+                self.upload_pdb_lineEdit.setText(path)
+                self.upload_pdb_from_local(manuel=False)
+                try:
+                    os.mkdir(output_directory)
+                    print("Directory ", output_directory, " Created ")
+                except FileExistsError:
+                    print("Directory ", output_directory, " already exists")
+                if not os.path.exists(output_directory):
+                    os.mkdir(output_directory)
+                    print("Directory ", output_directory, " Created ")
+                else:
+                    print("Directory ", output_directory, " already exists")
+                self.Output_Folder_textEdit.setPlainText("")
 
-            self.PDB_ID_lineEdit.setText("")
-            self.Output_Folder_textEdit.setPlainText(output_directory)
+                self.PDB_ID_lineEdit.setText("")
+                self.Output_Folder_textEdit.setPlainText(output_directory)
 
-            if self.selected_residues_listWidget.count() == 0:
-                self.selected_residues_listWidget.addItem('SER345A')
-                self.res1_comboBox.setCurrentIndex(342)
-            else:
-                self.selected_residues_listWidget.clear()
-                self.selected_residues_listWidget.addItem('SER345A')
-                self.target_res_comboBox.setCurrentIndex(342)
+                if self.selected_residues_listWidget.count() == 0:
+                    self.selected_residues_listWidget.addItem('SER345A')
+                    self.res1_comboBox.setCurrentIndex(342)
+                else:
+                    self.selected_residues_listWidget.clear()
+                    self.selected_residues_listWidget.addItem('SER345A')
+                    self.target_res_comboBox.setCurrentIndex(342)
 
-            self.R_factor_ComboBox.setCurrentText("4")
-            self.run_duration_spinBox.blockSignals(True)
-            self.run_duration_doubleSpinBox.blockSignals(True)
-            self.Number_of_steps_spinBox.blockSignals(True)
-            self.long_simulation_time_unit.blockSignals(True)
-            #self.run_duration_spinBox.setValue(int(1000))
-            #self.run_duration_doubleSpinBox.setValue(float(600.000))
-            #self.Number_of_steps_spinBox.setValue(int(300000))
-            self.run_duration_spinBox.setValue(int(10))
-            self.run_duration_doubleSpinBox.setValue(float(1.000))
-            self.Number_of_steps_spinBox.setValue(int(500))
+                self.R_factor_ComboBox.setCurrentText("4")
+                self.run_duration_spinBox.blockSignals(True)
+                self.run_duration_doubleSpinBox.blockSignals(True)
+                self.Number_of_steps_spinBox.blockSignals(True)
+                self.long_simulation_time_unit.blockSignals(True)
+                # self.run_duration_spinBox.setValue(int(1000))
+                # self.run_duration_doubleSpinBox.setValue(float(600.000))
+                # self.Number_of_steps_spinBox.setValue(int(300000))
+                self.run_duration_spinBox.setValue(int(3))
+                self.run_duration_doubleSpinBox.setValue(float(1.000))
+                self.Number_of_steps_spinBox.setValue(int(500))
 
-            self.long_simulation_time_unit.setCurrentIndex(1)
-            self.run_duration_spinBox.blockSignals(False)
-            self.run_duration_doubleSpinBox.blockSignals(False)
-            self.Number_of_steps_spinBox.blockSignals(False)
-            self.long_simulation_time_unit.blockSignals(False)
+                self.long_simulation_time_unit.setCurrentIndex(1)
+                self.run_duration_spinBox.blockSignals(False)
+                self.run_duration_doubleSpinBox.blockSignals(False)
+                self.Number_of_steps_spinBox.blockSignals(False)
+                self.long_simulation_time_unit.blockSignals(False)
+
+            elif not os.path.exists(path):
+                answer = Message_Boxes.Information_message(self, "Test PDB File Not Found",
+                                                           "The system couldn't find the test PDB file at the "
+                                                           "specified location.", Style.MessageBox_stylesheet)
+
+                if answer == QMessageBox.Ok:
+                    print("Ok")
+
+        except Exception as Error_info:
+            print(Error_info)
 
     def load_sample_for_analysis(self):
         from pathlib import Path
@@ -1628,11 +1654,13 @@ class Functions(MainWindow):
             self.net_output_directory_lineedit.setText(output_directory)
 
             if self.selected_target_residues_listWidget.count() == 0:
-                self.selected_target_residues_listWidget.addItems(['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
+                self.selected_target_residues_listWidget.addItems(
+                    ['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
                 self.target_res_comboBox.setCurrentIndex(255)
             else:
                 self.selected_target_residues_listWidget.clear()
-                self.selected_target_residues_listWidget.addItems(['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
+                self.selected_target_residues_listWidget.addItems(
+                    ['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
                 self.target_res_comboBox.setCurrentIndex(255)
 
             self.source_res_comboBox.setCurrentIndex(342)

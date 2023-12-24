@@ -344,7 +344,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 UIF.UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
-        except TypeError:
+        except Exception as Error:
+            print("ERROR: ", Error)
             pass
 
     def upload_boundForm_pdb_from_local(self, manuel=False):
