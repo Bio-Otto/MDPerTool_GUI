@@ -34,6 +34,10 @@ def Logger(file_name):
 
     # Add a custom logging level
     logging.addLevelName(35, "DECOMPOSE")
+    logging.addLevelName(37, "PREPARATION")
+    logging.addLevelName(39, "REFERENCE_MD")
+    logging.addLevelName(41, "PERTURBATION_MD")
+
 
     # Log a message indicating that the logger object was created successfully
     logger.info("Logger object created successfully.")

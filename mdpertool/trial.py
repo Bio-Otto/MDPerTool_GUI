@@ -102,9 +102,14 @@ class MainWindow(QMainWindow):
         self.stop_button.setEnabled(False)
         self.run_button.setEnabled(True)
 
-
+"""
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
+"""
+
+import numpy as np
+new_equilizer_data = np.column_stack((range(100, 200), np.arange(10, 0, -0.1)))
+print(new_equilizer_data)

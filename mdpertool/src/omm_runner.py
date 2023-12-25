@@ -251,7 +251,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         if 'Step' not in keys:
             raise ValueError('The reporter has not step information, so there is no x-axis to plot graphs!')
 
-    def speed_reporter(self, data):
+    def remaining_time_reporter(self, data):
         self.speed_data.append(data)
 
     def update_plot(self, msg):
@@ -285,102 +285,86 @@ class OpenMMScriptRunner(QtCore.QObject):
 
 
 class Graphs(QWidget):
-    pg.setConfigOption('background', None)
-    pg.setConfigOption('foreground', (197, 198, 199))
-    pg.setConfigOptions(antialias=True)
-    global current_step_keeper
+    TEMPERATURE_PEN = pg.mkPen((255, 0, 0), width=2)
+    ENERGY_PEN = [pg.mkPen((255, 0, 0), width=2), pg.mkPen((0, 255, 0), width=2), pg.mkPen((0, 0, 255), width=2)]
+    SPEED_PEN = pg.mkPen((200, 200, 200), width=2)
+    TIME_PEN = pg.mkPen((255, 255, 0), width=2)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.win = pg.GraphicsLayoutWidget(show=False, title="RMSD Plotting Region")
-
         self.real_time_as_minute = []
         self.real_speed = []
         self.current_step_keeper = None
-        # self.win = pg.GraphicsWindow(show=False, title="Basic plotting examples")
-        self.win.setStyleSheet("border : 2px solid green; padding: -5px; border-radius: 10px; """)
+        self.elapsed_time = 0.0
+
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.initialize_graph_layout()
+        self.setup_temperature_graph()
+        self.setup_energy_graph()
+        self.setup_simulation_speed_graph()
+        self.setup_simulation_time_graph()
+
+    def initialize_graph_layout(self):
+        self.configure_graph_options()
+        self.win = pg.GraphicsLayoutWidget(show=False, title="RMSD Plotting Region")
+        self.win.setStyleSheet("border: 2px solid green; padding: -5px; border-radius: 10px;")
         self.win.setWindowTitle('Real Time Simulation Monitoring')
 
-        self.temperature_graph = self.win.addPlot(title="Temperature")
+    def configure_graph_options(self):
+        pg.setConfigOption('background', None)
+        pg.setConfigOption('foreground', (197, 198, 199))
+        pg.setConfigOptions(antialias=True)
 
-        # self.temperature_graph.disableAutoRange()
-        self.temperature_graph.addLegend()
-        self.temperature_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
-        self.temperature_graph.setLabel('left', "Temperature", units='K')
-        self.temperature_graph.setLabel('bottom', "Step")
-        # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
-        self.temperature_graph.setLogMode(x=False, y=False)
-        # self.temperature_graph.setYRange(200, 400, padding=0)
-        self.temperature_graph.showGrid(x=True, y=True)
-        self.temperature_graph.getAxis('left').enableAutoSIPrefix(False)
-        self.temperature_graph_plot = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 0, 0), width=3),
+    def setup_temperature_graph(self):
+        self.temperature_graph = self.win.addPlot(title="Temperature")
+        self.configure_graph(self.temperature_graph, 'Temperature', 'K')
+        self.temperature_graph_plot = pg.PlotDataItem(clear=True, pen=self.TEMPERATURE_PEN,
                                                       name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
         self.temperature_graph.addItem(self.temperature_graph_plot)
-        # self.temperature_graph_plot = self.temperature_graph.plot(name='Temperature')
 
-        # self.win.nextRow()
+    def setup_energy_graph(self):
         self.energy_graph = self.win.addPlot(title="Energy")
-        # self.energy_graph.disableAutoRange()
-        self.energy_graph.addLegend()
-        self.energy_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
-        self.energy_graph.setLabel('left', "Energy", units='kJ/mole')
-        self.energy_graph.setLabel('bottom', "Step")
-        # self.temperature_graph.setLogMode(x=True, y=False) #logaritmik mode
-        self.energy_graph.setLogMode(x=False, y=False)
-        # self.energy_graph.setYRange(200, 400, padding=0)
-        self.energy_graph.showGrid(x=True, y=True)
-        self.energy_graph.getAxis('left').enableAutoSIPrefix(False)
-
-        self.potential_energy_graph = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 0, 0), width=2),
+        self.configure_graph(self.energy_graph, 'Energy', 'kJ/mole')
+        self.potential_energy_graph = pg.PlotDataItem(clear=True, pen=self.ENERGY_PEN[0],
                                                       name="Potential", fillLevel=0.0, brush=(150, 150, 50, 30))
-        self.kinetic_energy_graph = pg.PlotDataItem(clear=True, pen=pg.mkPen((0, 255, 0), width=2),
+        self.kinetic_energy_graph = pg.PlotDataItem(clear=True, pen=self.ENERGY_PEN[1],
                                                     name="Kinetic", fillLevel=0.0, brush=(150, 150, 50, 30))
-        self.total_energy_graph = pg.PlotDataItem(clear=True, pen=pg.mkPen((0, 0, 255), width=2),
+        self.total_energy_graph = pg.PlotDataItem(clear=True, pen=self.ENERGY_PEN[2],
                                                   name="Total", fillLevel=0.0, brush=(150, 150, 50, 30))
         self.energy_graph.addItem(self.potential_energy_graph)
         self.energy_graph.addItem(self.kinetic_energy_graph)
         self.energy_graph.addItem(self.total_energy_graph)
-        # self.energy_graph.addLegend()
-
         self.win.nextRow()
-        self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=2)
-        # self.simulation_speed_graph.disableAutoRange()
-        self.simulation_speed_graph.addLegend()
-        self.simulation_speed_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
-        self.simulation_speed_graph.setLabel('left', "Speed", units='ns/day')
-        self.simulation_speed_graph.setLabel('bottom', "Step")
-        self.simulation_speed_graph.setLogMode(x=False, y=False)
-        # self.simulation_speed_graph.setYRange(200, 400, padding=0)
-        self.simulation_speed_graph.showGrid(x=True, y=True)
-        self.simulation_speed_graph.getAxis('left').enableAutoSIPrefix(False)
 
+    def setup_simulation_speed_graph(self):
+        self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=1)
+        self.configure_graph(self.simulation_speed_graph, 'Speed', 'ns/day')
         self.simulation_speed_graph_plot = pg.PlotDataItem(clear=True, name="Speed (ns/day)", fillLevel=0.0,
-                                                           brush=(150, 150, 50, 30),
-                                                           pen=pg.mkPen((200, 200, 200), width=2),
-                                                           symbolBrush=(255, 0, 0), symbolPen='w',
-                                                           )
+                                                           brush=(150, 150, 50, 30), pen=self.SPEED_PEN,
+                                                           symbolBrush=(255, 0, 0), symbolPen='w')
         self.simulation_speed_graph.addItem(self.simulation_speed_graph_plot)
+        # self.win.nextRow()
 
-        self.win.nextRow()
-        self.simulation_time_graph = self.win.addPlot(title="Remaining Time", row=2, colspan=2)
-        # self.simulation_time_graph.disableAutoRange()
-        self.simulation_time_graph.addLegend()
-        self.simulation_time_graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
-        self.simulation_time_graph.setLabel('left', "Remaining Time", units='sec')
-        self.simulation_time_graph.setLabel('bottom', "Step")
-        self.simulation_time_graph.setLogMode(x=False, y=False)
-        # self.simulation_time_graph.setYRange(200, 400, padding=0)
-        self.simulation_time_graph.showGrid(x=True, y=True)
-        # self.simulation_time_graph.setLogMode(x=False, y=False)  # logaritmik mode
-        # self.simulation_time_graph.enableAutoRange(axis='y')
-        self.simulation_time_graph.getAxis('left').enableAutoSIPrefix(False)
-
-        self.simulation_time_graph_plot = pg.PlotDataItem(clear=True, pen=pg.mkPen((255, 255, 0), width=2),
+    def setup_simulation_time_graph(self):
+        self.simulation_time_graph = self.win.addPlot(title="Remaining Time", row=1, colspan=1)
+        self.configure_graph(self.simulation_time_graph, 'Remaining Time', 'sec')
+        self.simulation_time_graph_plot = pg.PlotDataItem(clear=True, pen=self.TIME_PEN,
                                                           fillLevel=0.0, name="Remaining Time (sec)",
                                                           brush=(150, 150, 50, 10))
         self.simulation_time_graph.addItem(self.simulation_time_graph_plot)
-        self.first_entrance = 0
+        #self.win.nextRow()
+
+    def configure_graph(self, graph, title, units):
+        graph.addLegend()
+        graph.getViewBox().setBackgroundColor((129, 105, 161, 20))
+        graph.setLabel('left', title, units=units)
+        graph.setLabel('bottom', "Step")
+        graph.setLogMode(x=False, y=False)
+        graph.showGrid(x=True, y=True)
+        graph.getAxis('left').enableAutoSIPrefix(False)
 
     def pretty_speed(self, ins_speed):
         """Format the speed (ns/day) as pretty"""
@@ -442,7 +426,7 @@ class Graphs(QWidget):
             self.pretty_speed(y_speed)
 
             y_time_remaining = np.array(data["Time Remaining"])[-1]
-            self.pretty_time(y_time_remaining)
+            #self.pretty_time(y_time_remaining)
 
             if x.shape == y_temp.shape:
 
@@ -462,7 +446,7 @@ class Graphs(QWidget):
                     self.total_energy_graph.setData(x=x, y=y_total)
 
                     # self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute)
-                    # self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
+                    self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
 
                     self.current_step_keeper = x
 
