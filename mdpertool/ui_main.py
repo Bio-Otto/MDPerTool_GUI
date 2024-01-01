@@ -162,13 +162,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.integrator_time_step.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
+
+        # ============================================================================================================ #
         self.run = OpenMMScriptRunner
 
         self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(decomp_data[-1]))
+        self.run.Signals.classic_md_remain_time.connect(
+            lambda classic_md_remain_data: self.update_classic_md_remaining_time(classic_md_remain_data[-1]))
+        self.run.Signals.reference_md_remain_time.connect(
+            lambda reference_md_remain_data: self.update_reference_md_remaining_time(reference_md_remain_data[-1]))
+        self.run.Signals.dissipation_md_remain_time.connect(
+            lambda dissipation_md_remain_data: self.update_dissipation_md_remaining_time(dissipation_md_remain_data[-1]))
+
+        self.run.Signals.run_speed.connect(lambda speed_data: print(speed_data))
 
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
         self.run.Signals.inform_about_situation.connect(
             lambda inform_message: self.inform_about_progress(inform_message))
+        # ============================================================================================================ #
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: UIF.Functions.browse_responseTimeFile(self))
@@ -264,6 +275,13 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.Real_Time_Graphs.stop_th()
             self.Run.setEnabled(True)
+
+            self.Real_Time_Graphs.temperature_graph_plot.clear()
+            self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
+
+            self.Real_Time_Graphs.potential_energy_graph.clear()
+            self.Real_Time_Graphs.kinetic_energy_graph.clear()
+            self.Real_Time_Graphs.total_energy_graph.clear()
 
         except Exception as ins:
             QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))
@@ -426,6 +444,29 @@ class MainWindow(QtWidgets.QMainWindow):
         message_regular = '<font color="yellow">%s</font>' % message
         self.label_top_info_1.setText(message_regular)
 
+    def update_classic_md_remaining_time(self, time):
+        font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
+        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+        self.label_56.setText(remainingTime_regular)
+        self.label_56.setFont(font)
+        self.label_56.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+    def update_reference_md_remaining_time(self, time):
+        font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
+        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+        self.label_57.setText(remainingTime_regular)
+        self.label_57.setFont(font)
+        self.label_57.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+    def update_dissipation_md_remaining_time(self, time):
+        font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
+        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+        self.label_58.setText(remainingTime_regular)
+        self.label_58.setFont(font)
+        self.label_58.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################

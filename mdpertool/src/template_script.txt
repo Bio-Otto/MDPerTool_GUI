@@ -26,6 +26,7 @@ from mdtraj import reporters
 from mdtraj.reporters import XTCReporter
 from src.logger import Logger
 from datetime import datetime
+from src.CustomReporters import Perturb_StateDataReporter
 
 #######################################################################################################################
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
@@ -160,9 +161,11 @@ log_obj.info("Saving XTC File for every {{XTC_write_freq}} period")
 
 {{#State_Data_Reporter}}
 log_obj.info("State Report will tell you.")
-simulation.reporters.append(StateDataReporter(stdout, {{StateData_freq}}, step=True,
-time=True, potentialEnergy=True, kineticEnergy=True, totalEnergy=True, temperature=True, progress=True,
-remainingTime=True, speed=True, volume=True, density=True, totalSteps={{Number_of_steps}}))
+simulation.reporters.append(Perturb_StateDataReporter(stdout, {{StateData_freq}}, step=True, time=True,
+                                                      potentialEnergy=True, kineticEnergy=True, totalEnergy=True,
+                                                      temperature=True, progress=True, remainingTime=True, speed=True,
+                                                      volume=True, density=True, totalSteps={{Number_of_steps}},
+                                                      report_type='Progress (%)'))
 {{/State_Data_Reporter}}
 
 log_obj.info("Running Production...")
@@ -323,9 +326,10 @@ for i in range(len({{speed_factor}})):
 
         {{#State_Data_Reporter}}
         log_obj.info("State Report will tell you ...".format())
-        ref_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
+        ref_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                  density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}}))
+                                  density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}},
+                                  report_type='Reference MD Progress (%)'))
         {{/State_Data_Reporter}}
 
         ref_simulation.step({{perturb_simulation_time}})
@@ -442,9 +446,10 @@ for i in range(len({{speed_factor}})):
 
     {{#State_Data_Reporter}}
     log_obj.info("State Report will tell you ...")
-    dis_simulation.reporters.append(StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
+    dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                               kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                              density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}}))
+                              density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}},
+                              report_type='Dissipation MD Progress (%)'))
     {{/State_Data_Reporter}}
 
     dis_simulation.step({{perturb_simulation_time}})

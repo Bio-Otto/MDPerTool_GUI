@@ -2097,7 +2097,8 @@ class pdb_Tools:
             :param output_path: the manipulated pdb file will return as full path if specified
                                 otherwise will return already exist path
         """
-        ## get name of pdb file ##
+
+        # get name of pdb file
         name_of_pdb = os.path.basename(file_pathway).split('.')[0]
 
         print("Creating PDBFixer...")
@@ -2133,7 +2134,7 @@ class pdb_Tools:
         """
         print("Writing PDB file...")
 
-        ####  FOR DELETE WITH MODELLER USE FOLLOWING SCRIPT
+        #  FOR DELETE WITH MODELLER USE FOLLOWING SCRIPT  #
 
         # if chains_to_remove is not None:
         #     toDelete = [r for r in modeller.topology.chains() if r.id in chains_to_remove]
