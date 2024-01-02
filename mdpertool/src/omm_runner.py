@@ -234,7 +234,7 @@ class OpenMMScriptRunner(QtCore.QObject):
 
                 current = self.plotdata.get(k)
                 self.plotdata.update({k: np.concatenate((current, v), axis=None)})
-                #print(self.plotdata)
+
             self.Signals.dataSignal.emit(self.plotdata)
 
         if not self.plots_created and type(msg) == dict:
@@ -413,23 +413,23 @@ class Graphs(QWidget):
                 self.runner.Signals.dissipation_md_remain_time.emit(data["Time Remaining"])
 
             if x.shape == y_temp.shape:
-
-                if self.current_step_keeper is not None and self.current_step_keeper[-1] > x[-1]:
-                    if self.current_step_keeper[-1] - self.current_step_keeper[-2] > 1:
-                        ticks = pg.VTickGroup(xvals=[self.current_step_keeper[-1]], yrange=[0, 2.5],
-                                              pen={'color': 'g', 'width': 2.5})
-                        self.simulation_time_graph_plot.getViewBox().addItem(ticks)
-                    x = np.append(self.current_step_keeper, self.current_step_keeper[-1] + 1)
+                if self.current_step_keeper is not None and len(self.current_step_keeper) > 1:
+                    if self.current_step_keeper[-1] > x[-1]:
+                        # if self.current_step_keeper[-1] - self.current_step_keeper[-2] > 1:
+                        #     ticks = pg.VTickGroup(xvals=[self.current_step_keeper[-1]], yrange=[0, 2.5],
+                        #                           pen={'color': 'g', 'width': 2.0, 'style': QtCore.Qt.DashLine})
+                        #     self.temperature_graph_plot.getViewBox().addItem(ticks)
+                        #x = np.append(self.current_step_keeper, self.current_step_keeper[-1] + 1)
+                        length = max(len(x), len(self.current_step_keeper))
+                        array1 = np.pad(x, (0, length - len(x)))
+                        array2 = np.pad(self.current_step_keeper, (0, length - len(self.current_step_keeper)))
+                        # Combine arrays using numpy.where
+                        x = np.where(array2 > array1, array2, array1)
+                        x[-1] = self.current_step_keeper[-1] + 1
 
                 try:
-                    print("====================")
-                    print(x)
-                    print(y_temp)
-                    print(self.real_speed)
-                    print("====================")
-
                     self.temperature_graph_plot.setData(x=x, y=y_temp)
-                    # self.temperature_graph.autoRange()
+                    self.temperature_graph.autoRange()
                     self.potential_energy_graph.setData(x=x, y=y_potential)
                     self.kinetic_energy_graph.setData(x=x, y=y_kinetic)
                     self.total_energy_graph.setData(x=x, y=y_total)
@@ -443,6 +443,8 @@ class Graphs(QWidget):
                     import traceback
                     print("ERROR 1: %s" % err)
                     traceback.print_exc()
+            else:
+                pass
 
         except Exception as e:
             print("ERROR 2: %s" % e)

@@ -1,13 +1,13 @@
+import numpy as np
 
-my_dict = {'anahtar1': 'değer1', 'anahtar2': 'değer2', 'anahtar3': 'değer3', 'anahtar4': 'değer4'}
+array1 = np.array([200., 300., 400., 500., 1., 2.])
+array2 = np.array([200., 300., 400., 500., 501.])
 
-eski_deger = my_dict.pop('anahtar1')
+# Pad the shorter array with zeros to make their shapes equal
+length = max(len(array1), len(array2))
+array1 = np.pad(array1, (0, length - len(array1)))
+array2 = np.pad(array2, (0, length - len(array2)))
 
-print(my_dict)
-
-
-
-my_dict = {**{'anahtar1': 'yeni_değer1'}, **my_dict}
-
-print(my_dict)
-
+# Combine arrays using numpy.where
+result = np.where(array2 > array1, array2, array1)
+print(result)
