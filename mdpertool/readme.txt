@@ -8,6 +8,7 @@ from no_gui.Velocity_Changer import *
 from no_gui.response_time_creator import *
 from no_gui.apply_pdbfixer import fix_pdb
 from no_gui.write_outputs import *
+from no_gui.energy_component import *
 
 from openmm import unit
 from openmm import *
@@ -480,36 +481,63 @@ for i in range(len([4])):
         log_obj.error(e, stack_info=True, exc_info=True)
 
     try:
-        if i == 0:
-            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                             ref_traj=reference_traj_file_for_pos,
-                                                                             modif_traj=dissipation_traj_file_for_pos,
-                                                                             logger_object=log_obj)
+
+        #if i == 0:
+        #    position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+        #                                                                     ref_traj=reference_traj_file_for_pos,
+        #                                                                     modif_traj=dissipation_traj_file_for_pos,
+        #                                                                     logger_object=log_obj)
 
 
-        if i != 0:
-            position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
-                                                                     ref_traj=None,
-                                                                     modif_traj=dissipation_traj_file_for_pos,
-                                                                     logger_object=log_obj)
+        #if i != 0:
+        #    position_list, unwrap_pdb = get_openmm_pos_from_traj_with_mdtraj(top=last_pdb_file_path,
+        #                                                             ref_traj=None,
+        #                                                             modif_traj=dissipation_traj_file_for_pos,
+        #                                                             logger_object=log_obj)
 
          # --> RESIDUE BASED DECOMPOSITION
         if i == 0:
-            residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
-                                        ref_energy_name='reference_energy_file.csv', device_id_active=False,
-                                        num_of_threads=2,
-                                        modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
-                                        origin_last_pdb=last_pdb_file_path, ff='amber03.xml', logger_object=log_obj)
+
+            #residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
+            #                            output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+            #                            ref_energy_name='reference_energy_file.csv', device_id_active=False,
+            #                            num_of_threads=2,
+            #                            modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
+            #                            origin_last_pdb=last_pdb_file_path, ff='amber03.xml', logger_object=log_obj)
+
+            process_energy_data(topology_file=last_pdb_file_path, protein_ff='amber03.xml', water_ff='tip3p.xml',
+                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active=False,
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='CUDA',
+                                nonbonded_cutoff=1.2*nanometer, ref_energy_name = 'reference_energy_file.csv',
+                                modif_energy_name='modified_energy_file_%s.csv' % int([4][i]), 
+                                output_directory=OUTPUT_DIRECTORY, num_of_threads=2, que=None, 
+                                logger_object=log_obj)
+	
+
+
 
         if i != 0:
             # --> RESIDUE BASED DECOMPOSITION
+            """
             residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
                                         output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
                                         ref_energy_name=None, device_id_active=False, num_of_threads=2,
                                         modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
                                         origin_last_pdb=last_pdb_file_path,
                                         ff='amber03.xml', logger_object=log_obj)
+
+            """
+
+            process_energy_data(topology_file=last_pdb_file_path, protein_ff='amber03.xml', water_ff='tip3p.xml',
+                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active=False,
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='CUDA',
+                                nonbonded_cutoff=1.2*nanometer, ref_energy_name = 'reference_energy_file.csv',
+                                modif_energy_name='modified_energy_file_%s.csv' % int([4][i]), 
+                                output_directory=OUTPUT_DIRECTORY, num_of_threads=2, que=None, 
+                                logger_object=log_obj)
+
+
+
 
         # --> RESPONSE TIME CSV EXPORTER
         getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),

@@ -781,11 +781,11 @@ class SplashScreen(QMainWindow):
         self.timer.start(19)
 
         # ----- > Change Description on Splash Screen
-        self.label_title.setText("MDPerTool v0.1")
+        self.label_title.setText("MDPerTool v0.0.1")
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
 
         # ----- > Initial Text on Splash Screen
-        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")
+        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.0.1 PLATFORM")
 
         # ----- > CHANGE TEXT ON SPLASH SCREEN
         QtCore.QTimer.singleShot(1500, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
