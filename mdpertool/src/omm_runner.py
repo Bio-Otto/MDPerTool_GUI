@@ -11,6 +11,9 @@ from PySide2 import QtCore
 from PySide2.QtWidgets import *
 from openmm.app import StateDataReporter
 import subprocess
+import tempfile
+from .message import Message_Boxes
+from gui.ui_styles import Style
 
 
 ##############################################################################
@@ -25,7 +28,7 @@ class Communicate(QtCore.QObject):
     classic_md_remain_time = QtCore.Signal(list)
     reference_md_remain_time = QtCore.Signal(list)
     dissipation_md_remain_time = QtCore.Signal(list)
-    run_speed = QtCore.Signal(float)
+    run_speed = QtCore.Signal(list)
     finish_alert = QtCore.Signal(str)
     inform_about_situation = QtCore.Signal(str)
 
@@ -77,11 +80,12 @@ class OpenMMScriptRunner(QtCore.QObject):
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
 
-        with open('temp/temp_script.py', 'w') as f:
-            f.write(code)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp_script:
+            temp_script.write(code)
+            temp_script_path = temp_script.name
 
         try:
-            self.process = subprocess.Popen(['python', 'temp/temp_script.py'], stdout=subprocess.PIPE,
+            self.process = subprocess.Popen(['python', temp_script_path], stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE)
 
             while True:
@@ -96,28 +100,46 @@ class OpenMMScriptRunner(QtCore.QObject):
                 if error_output == b'' and self.process.poll() is not None:
                     break
                 if error_output:
+
                     print("Standard Error:", error_output.decode().strip())
                     queue.put(error_output.decode().strip())
 
             self.process.wait()
 
             if self.process.returncode != 0:
-                raise ValueError('Script execution failed!')
+                raise subprocess.CalledProcessError(self.process.returncode, 'Script execution has been stoped by the '
+                                                                             'User!')
 
-            os.remove('temp/temp_script.py')
-        except Exception as e:
-            # Print the exception details for debugging
+        except (subprocess.CalledProcessError, OSError) as e:
             print("Exception:", str(e))
             raise
 
-    # =============================================
+        finally:
+            os.remove(temp_script_path)
 
     def stop_process(self):
-        try:
-            self.process.terminate()
-            self.process.wait()
-        except Exception as err:
-            print("ERROR IN STOP PROCESS: %s" % err)
+
+        if self.process.poll() is None:
+            try:
+                """Close Application Question Message Box."""
+                close_answer = Message_Boxes.Question_message(self, "Are you sure!", "Do you really want to stop the "
+                                                                                    "run?", Style.MessageBox_stylesheet)
+
+                if close_answer == QMessageBox.Yes:
+                    try:
+                        self.process.terminate()
+                        self.process.wait()
+                    except (subprocess.CalledProcessError, OSError) as err:
+                        print("ERROR IN STOP PROCESS: %s" % err)
+
+                if close_answer == QMessageBox.No:
+                    pass
+
+            except Exception as inst:
+                Message_Boxes.Critical_message(self, 'An unexpected error has occurred!', str(inst),
+                                               Style.MessageBox_stylesheet)
+        else:
+            Message_Boxes.Information_message(self, "Info", "There is no an active run", Style.MessageBox_stylesheet)
 
     def queue_consumer(self, q):
         self.status = 'Running...'
@@ -243,11 +265,11 @@ class OpenMMScriptRunner(QtCore.QObject):
 
         if type(msg) == list:
             self.Signals.decomp_process.emit(msg)
-
+        """
         if type(msg) == float:
             print("here speed")
             self.Signals.run_speed.emit(msg)
-
+        """
         if type(msg) == str:
             if msg != "Progress Finished Succesfully :)":
                 self.Signals.inform_about_situation.emit(msg)
@@ -279,8 +301,8 @@ class Graphs(QWidget):
         self.initialize_graph_layout()
         self.setup_temperature_graph()
         self.setup_energy_graph()
-        self.setup_simulation_speed_graph()
-        self.setup_simulation_time_graph()
+        # self.setup_simulation_speed_graph()
+        # self.setup_simulation_time_graph()
 
     def initialize_graph_layout(self):
         self.configure_graph_options()
@@ -397,11 +419,12 @@ class Graphs(QWidget):
             y_kinetic = np.array(data["Kinetic Energy (kJ/mole)"], dtype=np.float64)
             y_total = np.array(data["Total Energy (kJ/mole)"], dtype=np.float64)
 
-            y_speed = np.array(data["Speed (ns/day)"])[-1]
-            self.pretty_speed(y_speed)
+            #y_speed = np.array(data["Speed (ns/day)"])[-1]
+            #real_speed = self.pretty_speed(y_speed)
 
             # time_remaining = np.array(data["Time Remaining"])[-1]
-            #print(list(data.keys()))
+            # print(list(data.keys()))
+            self.runner.Signals.run_speed.emit(data["Speed (ns/day)"])
 
             if list(data.keys())[0] == 'Progress (%)':
                 self.runner.Signals.classic_md_remain_time.emit(data["Time Remaining"])
@@ -412,6 +435,9 @@ class Graphs(QWidget):
             if list(data.keys())[0] == 'Dissipation MD Progress (%)':
                 self.runner.Signals.dissipation_md_remain_time.emit(data["Time Remaining"])
 
+                if data["Time Remaining"][-1] == "0:00":
+                    self.runner.Signals.run_speed.emit("--")
+
             if x.shape == y_temp.shape:
                 if self.current_step_keeper is not None and len(self.current_step_keeper) > 1:
                     if self.current_step_keeper[-1] > x[-1]:
@@ -419,7 +445,7 @@ class Graphs(QWidget):
                         #     ticks = pg.VTickGroup(xvals=[self.current_step_keeper[-1]], yrange=[0, 2.5],
                         #                           pen={'color': 'g', 'width': 2.0, 'style': QtCore.Qt.DashLine})
                         #     self.temperature_graph_plot.getViewBox().addItem(ticks)
-                        #x = np.append(self.current_step_keeper, self.current_step_keeper[-1] + 1)
+                        # x = np.append(self.current_step_keeper, self.current_step_keeper[-1] + 1)
                         length = max(len(x), len(self.current_step_keeper))
                         array1 = np.pad(x, (0, length - len(x)))
                         array2 = np.pad(self.current_step_keeper, (0, length - len(self.current_step_keeper)))
@@ -435,7 +461,7 @@ class Graphs(QWidget):
                     self.total_energy_graph.setData(x=x, y=y_total)
 
                     # self.simulation_time_graph_plot.setData(x=x, y=self.real_time_as_minute)
-                    #self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
+                    # self.simulation_speed_graph_plot.setData(x=x, y=self.real_speed)
 
                     self.current_step_keeper = x
 
@@ -463,14 +489,19 @@ class Graphs(QWidget):
         # self.runner.Signals.run_speed.connect(lambda speed_data: self.updating_current_speed(speed_data))
 
     def stop_th(self):
-        self.runner.stop_threads()
-        self.runner.plotdata.clear()
+        try:
+            self.runner.stop_threads()
+            self.runner.plotdata.clear()
 
-        self.real_time_as_minute = []
-        self.real_speed = []
-        self.current_step_keeper = None
-        self.elapsed_time = 0.0
+            self.real_time_as_minute = []
+            self.real_speed = []
+            self.current_step_keeper = None
+            self.elapsed_time = 0.0
 
+        except Exception as Run_Stop_Error:
+            Message_Boxes.Information_message(self, "There is no an active run!", str(Run_Stop_Error), Style.MessageBox_stylesheet)
+
+            pass
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)
 #     main = Graphs(contents)

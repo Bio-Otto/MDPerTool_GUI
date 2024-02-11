@@ -174,7 +174,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run.Signals.dissipation_md_remain_time.connect(
             lambda dissipation_md_remain_data: self.update_dissipation_md_remaining_time(dissipation_md_remain_data[-1]))
 
-        self.run.Signals.run_speed.connect(lambda speed_data: print(speed_data))
+        self.run.Signals.run_speed.connect(lambda speed_data: self.update_simulation_speed(speed_data[-1]))
+
 
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
         self.run.Signals.inform_about_situation.connect(
@@ -284,7 +285,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Real_Time_Graphs.total_energy_graph.clear()
 
         except Exception as ins:
-            QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))
+            pass
+            # Message_Boxes.Information_message(self, "Info", str(ins), Style.MessageBox_stylesheet)
 
     def show_simulation_monitoring(self):
         # self.stackedWidget.setCurrentIndex(1)
@@ -467,6 +469,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_58.setText(remainingTime_regular)
         self.label_58.setFont(font)
         self.label_58.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+    def update_simulation_speed(self, speed):
+        try:
+            speed_float = float(speed)
+            formatted_speed = '{:.2f} ns/day'.format(speed_float)
+        except ValueError:
+            formatted_speed = '-- ns/day'
+
+        font = QFont("Segoe UI", 10, QFont.Bold)
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)
+        run_realtime_speed = '<font color="red"><b>{}</b></font>'.format(formatted_speed)
+
+        self.label_59.setText(run_realtime_speed)
+        self.label_59.setFont(font)
+        self.label_59.setAlignment(Qt.AlignVCenter)
+
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################
