@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1459,7 +1459,7 @@ background-color: rgb(68, 72, 76);</string>
                         </property>
                         <property name="font">
                          <font>
-                          <family>Segoe UI Semibold</family>
+                          <family>Segoe UI</family>
                           <pointsize>8</pointsize>
                          </font>
                         </property>
@@ -3361,6 +3361,175 @@ QCheckBox::indicator:checked {
                               </property>
                              </spacer>
                             </item>
+                            <item>
+                             <widget class="QGroupBox" name="groupBox_20">
+                              <property name="minimumSize">
+                               <size>
+                                <width>0</width>
+                                <height>0</height>
+                               </size>
+                              </property>
+                              <property name="maximumSize">
+                               <size>
+                                <width>16777215</width>
+                                <height>16777215</height>
+                               </size>
+                              </property>
+                              <property name="styleSheet">
+                               <string notr="true">QGroupBox {
+  
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 10px;
+  padding: 4px;
+  margin-top: 16px;
+}
+
+QGroupBox::title {
+  subcontrol-origin: margin;
+  subcontrol-position: top left;
+  left: 10px;
+  padding-left: 3px;
+  padding-right: 5px;
+  padding-top: 8px;
+  padding-bottom: 16px;
+}
+
+QGroupBox::indicator {
+  margin-left: 2px;
+  height: 16px;
+  width: 16px;
+}</string>
+                              </property>
+                              <property name="title">
+                               <string/>
+                              </property>
+                              <layout class="QHBoxLayout" name="horizontalLayout_27">
+                               <property name="topMargin">
+                                <number>6</number>
+                               </property>
+                               <property name="rightMargin">
+                                <number>3</number>
+                               </property>
+                               <property name="bottomMargin">
+                                <number>6</number>
+                               </property>
+                               <item>
+                                <layout class="QHBoxLayout" name="horizontalLayout_25">
+                                 <item>
+                                  <spacer name="horizontalSpacer_8">
+                                   <property name="orientation">
+                                    <enum>Qt::Horizontal</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>40</width>
+                                     <height>20</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
+                                 </item>
+                                 <item>
+                                  <widget class="QCheckBox" name="Save_Script_checkBox">
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>120</width>
+                                     <height>0</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+	border-radius: 5px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+
+QCheckBox:disabled {
+    color: #f5f5f5;
+	border: 2px solid rgb(27, 29, 35);
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+	margin-left: 0px;
+	padding-left: 13px;
+}
+
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Save the Script</string>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item>
+                                  <widget class="QLineEdit" name="script_name_lineEdit">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>200</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>16777215</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QLineEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding-left: 10px;
+
+}
+QLineEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QLineEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>temp.py</string>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                </layout>
+                               </item>
+                              </layout>
+                             </widget>
+                            </item>
                            </layout>
                           </item>
                          </layout>
@@ -3374,7 +3543,7 @@ QCheckBox::indicator:checked {
                            <widget class="QTabWidget" name="tabWidget">
                             <property name="font">
                              <font>
-                              <family>Segoe UI Semibold</family>
+                              <family>Segoe UI</family>
                               <pointsize>8</pointsize>
                              </font>
                             </property>
@@ -3497,7 +3666,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                              <enum>QTabWidget::Rounded</enum>
                             </property>
                             <property name="currentIndex">
-                             <number>1</number>
+                             <number>3</number>
                             </property>
                             <property name="movable">
                              <bool>true</bool>
@@ -6013,6 +6182,11 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                         </item>
                                         <item>
                                          <property name="text">
+                                          <string>LangevinMiddle</string>
+                                         </property>
+                                        </item>
+                                        <item>
+                                         <property name="text">
                                           <string>Brownian</string>
                                          </property>
                                         </item>
@@ -6021,56 +6195,6 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                           <string>Verlet</string>
                                          </property>
                                         </item>
-                                       </widget>
-                                      </item>
-                                      <item row="3" column="1">
-                                       <widget class="QTextEdit" name="integrator_time_step">
-                                        <property name="sizePolicy">
-                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                          <horstretch>0</horstretch>
-                                          <verstretch>0</verstretch>
-                                         </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                         <size>
-                                          <width>0</width>
-                                          <height>38</height>
-                                         </size>
-                                        </property>
-                                        <property name="maximumSize">
-                                         <size>
-                                          <width>230</width>
-                                          <height>38</height>
-                                         </size>
-                                        </property>
-                                        <property name="font">
-                                         <font>
-                                          <family>Segoe UI</family>
-                                          <pointsize>10</pointsize>
-                                         </font>
-                                        </property>
-                                        <property name="styleSheet">
-                                         <string notr="true">QTextEdit {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	padding: 10px;
-	
-	color: rgb(255, 255, 255);
-}
-QTextEdit:hover {
-	border: 2px solid rgb(64, 71, 88);
-}
-QTextEdit:focus {
-	border: 2px solid rgb(91, 101, 124);
-}</string>
-                                        </property>
-                                        <property name="html">
-                                         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;2.0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                                        </property>
                                        </widget>
                                       </item>
                                       <item row="3" column="0">
@@ -6263,6 +6387,51 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                         </item>
                                        </widget>
                                       </item>
+                                      <item row="3" column="1">
+                                       <widget class="QLineEdit" name="integrator_time_step_lineEdit">
+                                        <property name="sizePolicy">
+                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                          <horstretch>0</horstretch>
+                                          <verstretch>0</verstretch>
+                                         </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                         <size>
+                                          <width>110</width>
+                                          <height>38</height>
+                                         </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                         <size>
+                                          <width>16777215</width>
+                                          <height>38</height>
+                                         </size>
+                                        </property>
+                                        <property name="font">
+                                         <font>
+                                          <family>Segoe UI</family>
+                                          <pointsize>10</pointsize>
+                                         </font>
+                                        </property>
+                                        <property name="styleSheet">
+                                         <string notr="true">QLineEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding-left: 10px;
+
+}
+QLineEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QLineEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}</string>
+                                        </property>
+                                        <property name="text">
+                                         <string>2.0</string>
+                                        </property>
+                                       </widget>
+                                      </item>
                                      </layout>
                                     </item>
                                    </layout>
@@ -6334,23 +6503,14 @@ QWidget:disabled {
                                    <layout class="QVBoxLayout" name="verticalLayout_25">
                                     <item>
                                      <layout class="QFormLayout" name="formLayout_3">
-                                      <property name="verticalSpacing">
-                                       <number>6</number>
-                                      </property>
-                                      <property name="leftMargin">
-                                       <number>3</number>
-                                      </property>
-                                      <property name="topMargin">
-                                       <number>4</number>
-                                      </property>
-                                      <property name="rightMargin">
-                                       <number>3</number>
-                                      </property>
-                                      <property name="bottomMargin">
-                                       <number>4</number>
-                                      </property>
                                       <item row="0" column="0">
                                        <widget class="QLabel" name="label_13">
+                                        <property name="sizePolicy">
+                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                          <horstretch>0</horstretch>
+                                          <verstretch>0</verstretch>
+                                         </sizepolicy>
+                                        </property>
                                         <property name="minimumSize">
                                          <size>
                                           <width>85</width>
@@ -6365,6 +6525,7 @@ QWidget:disabled {
                                         </property>
                                         <property name="font">
                                          <font>
+                                          <family>Segoe UI</family>
                                           <pointsize>10</pointsize>
                                          </font>
                                         </property>
@@ -6373,8 +6534,59 @@ QWidget:disabled {
                                         </property>
                                        </widget>
                                       </item>
+                                      <item row="0" column="1">
+                                       <widget class="QLineEdit" name="friction_lineEdit">
+                                        <property name="sizePolicy">
+                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                          <horstretch>0</horstretch>
+                                          <verstretch>0</verstretch>
+                                         </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                         <size>
+                                          <width>0</width>
+                                          <height>38</height>
+                                         </size>
+                                        </property>
+                                        <property name="maximumSize">
+                                         <size>
+                                          <width>200</width>
+                                          <height>38</height>
+                                         </size>
+                                        </property>
+                                        <property name="font">
+                                         <font>
+                                          <family>Segoe UI</family>
+                                          <pointsize>10</pointsize>
+                                         </font>
+                                        </property>
+                                        <property name="styleSheet">
+                                         <string notr="true">QLineEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding-left: 10px;
+
+}
+QLineEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QLineEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}</string>
+                                        </property>
+                                        <property name="text">
+                                         <string>91.0/picosecond</string>
+                                        </property>
+                                       </widget>
+                                      </item>
                                       <item row="1" column="0">
                                        <widget class="QLabel" name="label_14">
+                                        <property name="sizePolicy">
+                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                          <horstretch>0</horstretch>
+                                          <verstretch>0</verstretch>
+                                         </sizepolicy>
+                                        </property>
                                         <property name="minimumSize">
                                          <size>
                                           <width>85</width>
@@ -6389,6 +6601,7 @@ QWidget:disabled {
                                         </property>
                                         <property name="font">
                                          <font>
+                                          <family>Segoe UI</family>
                                           <pointsize>10</pointsize>
                                          </font>
                                         </property>
@@ -6397,52 +6610,14 @@ QWidget:disabled {
                                         </property>
                                        </widget>
                                       </item>
-                                      <item row="0" column="1">
-                                       <widget class="QTextEdit" name="friction_textEdit">
-                                        <property name="minimumSize">
-                                         <size>
-                                          <width>0</width>
-                                          <height>38</height>
-                                         </size>
-                                        </property>
-                                        <property name="maximumSize">
-                                         <size>
-                                          <width>230</width>
-                                          <height>38</height>
-                                         </size>
-                                        </property>
-                                        <property name="font">
-                                         <font>
-                                          <family>Segoe UI</family>
-                                          <pointsize>10</pointsize>
-                                         </font>
-                                        </property>
-                                        <property name="styleSheet">
-                                         <string notr="true">QTextEdit {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	padding: 10px;
-	
-	color: rgb(255, 255, 255);
-}
-QTextEdit:hover {
-	border: 2px solid rgb(64, 71, 88);
-}
-QTextEdit:focus {
-	border: 2px solid rgb(91, 101, 124);
-}</string>
-                                        </property>
-                                        <property name="html">
-                                         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;91.0/picosecond&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                                        </property>
-                                       </widget>
-                                      </item>
                                       <item row="1" column="1">
-                                       <widget class="QTextEdit" name="temperature_textEdit">
+                                       <widget class="QLineEdit" name="temperature_lineEdit">
+                                        <property name="sizePolicy">
+                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                          <horstretch>0</horstretch>
+                                          <verstretch>0</verstretch>
+                                         </sizepolicy>
+                                        </property>
                                         <property name="minimumSize">
                                          <size>
                                           <width>0</width>
@@ -6451,7 +6626,7 @@ p, li { white-space: pre-wrap; }
                                         </property>
                                         <property name="maximumSize">
                                          <size>
-                                          <width>230</width>
+                                          <width>200</width>
                                           <height>38</height>
                                          </size>
                                         </property>
@@ -6462,26 +6637,21 @@ p, li { white-space: pre-wrap; }
                                          </font>
                                         </property>
                                         <property name="styleSheet">
-                                         <string notr="true">QTextEdit {
+                                         <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
-	
-	color: rgb(255, 255, 255);
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                         </property>
-                                        <property name="html">
-                                         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;310.0*kelvin&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                        <property name="text">
+                                         <string>310.0*kelvin</string>
                                         </property>
                                        </widget>
                                       </item>
@@ -6585,6 +6755,12 @@ QGroupBox::indicator {
                                     <verstretch>0</verstretch>
                                    </sizepolicy>
                                   </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>200</width>
+                                    <height>0</height>
+                                   </size>
+                                  </property>
                                   <property name="font">
                                    <font>
                                     <family>Segoe UI</family>
@@ -6685,6 +6861,12 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                     <verstretch>0</verstretch>
                                    </sizepolicy>
                                   </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>200</width>
+                                    <height>0</height>
+                                   </size>
+                                  </property>
                                   <property name="styleSheet">
                                    <string notr="true">QCheckBox {
     spacing: 5px;
@@ -6755,7 +6937,7 @@ QCheckBox::indicator:checked {
                                   </property>
                                   <property name="maximumSize">
                                    <size>
-                                    <width>160</width>
+                                    <width>140</width>
                                     <height>16777215</height>
                                    </size>
                                   </property>
@@ -6780,7 +6962,7 @@ QCheckBox::indicator:checked {
                                   </property>
                                   <property name="maximumSize">
                                    <size>
-                                    <width>160</width>
+                                    <width>140</width>
                                     <height>16777215</height>
                                    </size>
                                   </property>
@@ -6805,7 +6987,7 @@ QCheckBox::indicator:checked {
                                   </property>
                                   <property name="maximumSize">
                                    <size>
-                                    <width>160</width>
+                                    <width>140</width>
                                     <height>16777215</height>
                                    </size>
                                   </property>
@@ -6820,48 +7002,6 @@ QCheckBox::indicator:checked {
                                   </property>
                                  </widget>
                                 </item>
-                                <item row="3" column="1">
-                                 <widget class="QTextEdit" name="nonbounded_CutOff_textEdit">
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>175</width>
-                                    <height>38</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>180</width>
-                                    <height>38</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <family>Segoe UI</family>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QTextEdit {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	padding: 10px;
-}
-QTextEdit:hover {
-	border: 2px solid rgb(64, 71, 88);
-}
-QTextEdit:focus {
-	border: 2px solid rgb(91, 101, 124);
-}</string>
-                                  </property>
-                                  <property name="html">
-                                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;1.2*nanometer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                                  </property>
-                                 </widget>
-                                </item>
                                 <item row="0" column="1">
                                  <widget class="QComboBox" name="nonBounded_Method_comboBox">
                                   <property name="sizePolicy">
@@ -6869,6 +7009,12 @@ p, li { white-space: pre-wrap; }
                                     <horstretch>0</horstretch>
                                     <verstretch>0</verstretch>
                                    </sizepolicy>
+                                  </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>200</width>
+                                    <height>0</height>
+                                   </size>
                                   </property>
                                   <property name="font">
                                    <font>
@@ -6964,48 +7110,6 @@ QComboBox::down-arrow:on { /* shift the arrow when popup is open */
                                   </item>
                                  </widget>
                                 </item>
-                                <item row="4" column="1">
-                                 <widget class="QTextEdit" name="switching_distance_textEdit">
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>0</width>
-                                    <height>38</height>
-                                   </size>
-                                  </property>
-                                  <property name="maximumSize">
-                                   <size>
-                                    <width>180</width>
-                                    <height>38</height>
-                                   </size>
-                                  </property>
-                                  <property name="font">
-                                   <font>
-                                    <family>Segoe UI</family>
-                                    <pointsize>10</pointsize>
-                                   </font>
-                                  </property>
-                                  <property name="styleSheet">
-                                   <string notr="true">QTextEdit {
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	padding: 10px;
-}
-QTextEdit:hover {
-	border: 2px solid rgb(64, 71, 88);
-}
-QTextEdit:focus {
-	border: 2px solid rgb(91, 101, 124);
-}</string>
-                                  </property>
-                                  <property name="html">
-                                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;1*nanometer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                                  </property>
-                                 </widget>
-                                </item>
                                 <item row="4" column="0">
                                  <widget class="QLabel" name="label_45">
                                   <property name="sizePolicy">
@@ -7016,7 +7120,7 @@ p, li { white-space: pre-wrap; }
                                   </property>
                                   <property name="maximumSize">
                                    <size>
-                                    <width>160</width>
+                                    <width>140</width>
                                     <height>16777215</height>
                                    </size>
                                   </property>
@@ -7083,6 +7187,90 @@ QCheckBox::indicator:checked {
                                   </property>
                                  </widget>
                                 </item>
+                                <item row="3" column="1">
+                                 <widget class="QLineEdit" name="nonbounded_CutOff_lineEdit">
+                                  <property name="sizePolicy">
+                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                   </sizepolicy>
+                                  </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>200</width>
+                                    <height>0</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <family>Segoe UI</family>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QLineEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding-left: 10px;
+
+}
+QLineEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QLineEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>1.2*nanometer</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="4" column="1">
+                                 <widget class="QLineEdit" name="switching_distance_lineEdit">
+                                  <property name="sizePolicy">
+                                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                   </sizepolicy>
+                                  </property>
+                                  <property name="minimumSize">
+                                   <size>
+                                    <width>200</width>
+                                    <height>0</height>
+                                   </size>
+                                  </property>
+                                  <property name="maximumSize">
+                                   <size>
+                                    <width>16777215</width>
+                                    <height>16777215</height>
+                                   </size>
+                                  </property>
+                                  <property name="font">
+                                   <font>
+                                    <family>Segoe UI</family>
+                                    <pointsize>10</pointsize>
+                                   </font>
+                                  </property>
+                                  <property name="styleSheet">
+                                   <string notr="true">QLineEdit {
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	padding-left: 10px;
+
+}
+QLineEdit:hover {
+	border: 2px solid rgb(64, 71, 88);
+}
+QLineEdit:focus {
+	border: 2px solid rgb(91, 101, 124);
+}</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>1.0*nanometer</string>
+                                  </property>
+                                 </widget>
+                                </item>
                                </layout>
                               </widget>
                              </widget>
@@ -7123,7 +7311,7 @@ QCheckBox::indicator:checked {
   border: 1px solid rgb(220, 220, 220);
   border-radius: 10px;
   padding: 4px;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 QGroupBox::title {
@@ -7205,13 +7393,13 @@ QGroupBox::indicator {
                                        <property name="minimumSize">
                                         <size>
                                          <width>0</width>
-                                         <height>38</height>
+                                         <height>35</height>
                                         </size>
                                        </property>
                                        <property name="maximumSize">
                                         <size>
                                          <width>16777215</width>
-                                         <height>38</height>
+                                         <height>16777215</height>
                                         </size>
                                        </property>
                                        <property name="font">
@@ -7281,16 +7469,38 @@ QSpinBox::down-button { width: 20px; }</string>
                                       </font>
                                      </property>
                                      <property name="styleSheet">
-                                      <string notr="true">padding-top: 8px;</string>
+                                      <string notr="true">QGroupBox {
+  
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 10px;
+  padding: 4px;
+  margin-top: 16px;
+}
+
+QGroupBox::title {
+  subcontrol-origin: margin;
+  subcontrol-position: top left;
+  left: 10px;
+  padding-left: 3px;
+  padding-right: 5px;
+  padding-top: 8px;
+  padding-bottom: 16px;
+}
+
+QGroupBox::indicator {
+  margin-left: 2px;
+  height: 16px;
+  width: 16px;
+}</string>
                                      </property>
                                      <property name="title">
                                       <string>Minimization Options</string>
                                      </property>
-                                     <layout class="QHBoxLayout" name="horizontalLayout_21">
+                                     <layout class="QHBoxLayout" name="horizontalLayout_32">
                                       <item>
                                        <widget class="QLabel" name="label_21">
                                         <property name="sizePolicy">
-                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                                           <horstretch>0</horstretch>
                                           <verstretch>0</verstretch>
                                          </sizepolicy>
@@ -7298,13 +7508,13 @@ QSpinBox::down-button { width: 20px; }</string>
                                         <property name="minimumSize">
                                          <size>
                                           <width>115</width>
-                                          <height>0</height>
+                                          <height>38</height>
                                          </size>
                                         </property>
                                         <property name="maximumSize">
                                          <size>
                                           <width>115</width>
-                                          <height>16777215</height>
+                                          <height>38</height>
                                          </size>
                                         </property>
                                         <property name="font">
@@ -7316,51 +7526,50 @@ QSpinBox::down-button { width: 20px; }</string>
                                         <property name="text">
                                          <string>Max iterations: </string>
                                         </property>
+                                        <property name="alignment">
+                                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                        </property>
                                        </widget>
                                       </item>
                                       <item>
-                                       <widget class="QTextEdit" name="Max_minimize_iter_textEdit">
+                                       <widget class="QLineEdit" name="Max_minimize_iter_lineEdit">
+                                        <property name="sizePolicy">
+                                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                          <horstretch>0</horstretch>
+                                          <verstretch>0</verstretch>
+                                         </sizepolicy>
+                                        </property>
                                         <property name="minimumSize">
                                          <size>
-                                          <width>0</width>
-                                          <height>38</height>
+                                          <width>221</width>
+                                          <height>35</height>
                                          </size>
                                         </property>
                                         <property name="maximumSize">
                                          <size>
-                                          <width>16777215</width>
-                                          <height>38</height>
+                                          <width>221</width>
+                                          <height>16777215</height>
                                          </size>
                                         </property>
-                                        <property name="font">
-                                         <font>
-                                          <family>Segoe UI</family>
-                                          <pointsize>10</pointsize>
-                                         </font>
-                                        </property>
                                         <property name="styleSheet">
-                                         <string notr="true">QTextEdit {
+                                         <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
-}
-
-QTextEdit:disabled {
-background-color: rgb(93, 83, 91);
 }</string>
                                         </property>
-                                        <property name="html">
-                                         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;500&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                        <property name="text">
+                                         <string>500</string>
+                                        </property>
+                                        <property name="alignment">
+                                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                                         </property>
                                        </widget>
                                       </item>
@@ -7375,13 +7584,13 @@ p, li { white-space: pre-wrap; }
                                         <property name="minimumSize">
                                          <size>
                                           <width>100</width>
-                                          <height>0</height>
+                                          <height>38</height>
                                          </size>
                                         </property>
                                         <property name="maximumSize">
                                          <size>
                                           <width>110</width>
-                                          <height>16777215</height>
+                                          <height>38</height>
                                          </size>
                                         </property>
                                         <property name="font">
@@ -7452,7 +7661,7 @@ QCheckBox::indicator:checked {
                                   <property name="minimumSize">
                                    <size>
                                     <width>0</width>
-                                    <height>490</height>
+                                    <height>480</height>
                                    </size>
                                   </property>
                                   <property name="font">
@@ -7467,7 +7676,7 @@ QCheckBox::indicator:checked {
   border: 1px solid rgb(220, 220, 220);
   border-radius: 10px;
   padding: 4px;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 QGroupBox::title {
@@ -7490,6 +7699,15 @@ QGroupBox::indicator {
                                    <string>Reporters</string>
                                   </property>
                                   <layout class="QVBoxLayout" name="verticalLayout_34">
+                                   <property name="spacing">
+                                    <number>3</number>
+                                   </property>
+                                   <property name="topMargin">
+                                    <number>6</number>
+                                   </property>
+                                   <property name="bottomMargin">
+                                    <number>6</number>
+                                   </property>
                                    <item>
                                     <widget class="QGroupBox" name="groupBox_12">
                                      <property name="minimumSize">
@@ -7790,19 +8008,25 @@ QCheckBox::indicator:checked {
                                       <string>DCD Reporter Options</string>
                                      </property>
                                      <layout class="QFormLayout" name="formLayout_4">
+                                      <property name="topMargin">
+                                       <number>7</number>
+                                      </property>
+                                      <property name="bottomMargin">
+                                       <number>7</number>
+                                      </property>
                                       <item row="0" column="0">
                                        <layout class="QFormLayout" name="formLayout_6">
                                         <property name="leftMargin">
                                          <number>3</number>
                                         </property>
                                         <property name="topMargin">
-                                         <number>3</number>
+                                         <number>0</number>
                                         </property>
                                         <property name="rightMargin">
                                          <number>3</number>
                                         </property>
                                         <property name="bottomMargin">
-                                         <number>3</number>
+                                         <number>0</number>
                                         </property>
                                         <item row="0" column="0">
                                          <widget class="QLabel" name="label_24">
@@ -7843,17 +8067,23 @@ QCheckBox::indicator:checked {
                                          </widget>
                                         </item>
                                         <item row="0" column="1">
-                                         <widget class="QTextEdit" name="DCD_write_freq_textEdit">
+                                         <widget class="QLineEdit" name="DCD_write_freq_lineEdit">
+                                          <property name="sizePolicy">
+                                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                           </sizepolicy>
+                                          </property>
                                           <property name="minimumSize">
                                            <size>
                                             <width>0</width>
-                                            <height>38</height>
+                                            <height>35</height>
                                            </size>
                                           </property>
                                           <property name="maximumSize">
                                            <size>
                                             <width>16777215</width>
-                                            <height>38</height>
+                                            <height>35</height>
                                            </size>
                                           </property>
                                           <property name="font">
@@ -7863,39 +8093,36 @@ QCheckBox::indicator:checked {
                                            </font>
                                           </property>
                                           <property name="styleSheet">
-                                           <string notr="true">QTextEdit {
+                                           <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                           </property>
-                                          <property name="html">
-                                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;100&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                          <property name="text">
+                                           <string>100</string>
                                           </property>
                                          </widget>
                                         </item>
                                         <item row="1" column="1">
-                                         <widget class="QTextEdit" name="DCD_Output_Name_textEdit">
+                                         <widget class="QLineEdit" name="DCD_Output_Name_lineEdit">
                                           <property name="minimumSize">
                                            <size>
-                                            <width>0</width>
-                                            <height>38</height>
+                                            <width>255</width>
+                                            <height>35</height>
                                            </size>
                                           </property>
                                           <property name="maximumSize">
                                            <size>
                                             <width>16777215</width>
-                                            <height>38</height>
+                                            <height>35</height>
                                            </size>
                                           </property>
                                           <property name="font">
@@ -7905,24 +8132,21 @@ p, li { white-space: pre-wrap; }
                                            </font>
                                           </property>
                                           <property name="styleSheet">
-                                           <string notr="true">QTextEdit {
+                                           <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                           </property>
-                                          <property name="html">
-                                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;output.dcd&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                          <property name="text">
+                                           <string>output.dcd</string>
                                           </property>
                                          </widget>
                                         </item>
@@ -8019,17 +8243,11 @@ p, li { white-space: pre-wrap; }
                                          </widget>
                                         </item>
                                         <item row="0" column="1">
-                                         <widget class="QTextEdit" name="XTC_write_freq_textEdit">
+                                         <widget class="QLineEdit" name="XTC_write_freq_lineEdit">
                                           <property name="minimumSize">
                                            <size>
-                                            <width>0</width>
-                                            <height>38</height>
-                                           </size>
-                                          </property>
-                                          <property name="maximumSize">
-                                           <size>
-                                            <width>16777215</width>
-                                            <height>38</height>
+                                            <width>255</width>
+                                            <height>35</height>
                                            </size>
                                           </property>
                                           <property name="font">
@@ -8039,39 +8257,30 @@ p, li { white-space: pre-wrap; }
                                            </font>
                                           </property>
                                           <property name="styleSheet">
-                                           <string notr="true">QTextEdit {
+                                           <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                           </property>
-                                          <property name="html">
-                                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;100&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                          <property name="text">
+                                           <string>100</string>
                                           </property>
                                          </widget>
                                         </item>
                                         <item row="1" column="1">
-                                         <widget class="QTextEdit" name="XTC_Output_Name_textEdit">
+                                         <widget class="QLineEdit" name="XTC_Output_Name_lineEdit">
                                           <property name="minimumSize">
                                            <size>
                                             <width>0</width>
-                                            <height>38</height>
-                                           </size>
-                                          </property>
-                                          <property name="maximumSize">
-                                           <size>
-                                            <width>16777215</width>
-                                            <height>38</height>
+                                            <height>35</height>
                                            </size>
                                           </property>
                                           <property name="font">
@@ -8081,24 +8290,21 @@ p, li { white-space: pre-wrap; }
                                            </font>
                                           </property>
                                           <property name="styleSheet">
-                                           <string notr="true">QTextEdit {
+                                           <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                           </property>
-                                          <property name="html">
-                                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;output.xtc&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                          <property name="text">
+                                           <string>output.xtc</string>
                                           </property>
                                          </widget>
                                         </item>
@@ -8155,6 +8361,12 @@ p, li { white-space: pre-wrap; }
                                             <verstretch>0</verstretch>
                                            </sizepolicy>
                                           </property>
+                                          <property name="maximumSize">
+                                           <size>
+                                            <width>131</width>
+                                            <height>16777215</height>
+                                           </size>
+                                          </property>
                                           <property name="font">
                                            <font>
                                             <family>Segoe UI</family>
@@ -8167,40 +8379,56 @@ p, li { white-space: pre-wrap; }
                                          </widget>
                                         </item>
                                         <item>
-                                         <widget class="QTextEdit" name="StateData_frequency_textEdit">
+                                         <widget class="QLineEdit" name="StateData_frequency_lineEdit">
+                                          <property name="sizePolicy">
+                                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                           </sizepolicy>
+                                          </property>
                                           <property name="minimumSize">
                                            <size>
-                                            <width>0</width>
-                                            <height>38</height>
+                                            <width>256</width>
+                                            <height>35</height>
                                            </size>
                                           </property>
-                                          <property name="sizeIncrement">
-                                           <size>
-                                            <width>0</width>
-                                            <height>38</height>
-                                           </size>
+                                          <property name="font">
+                                           <font>
+                                            <family>Segoe UI</family>
+                                            <pointsize>10</pointsize>
+                                           </font>
                                           </property>
                                           <property name="styleSheet">
-                                           <string notr="true">QTextEdit {
+                                           <string notr="true">QLineEdit {
 	background-color: rgb(27, 29, 35);
 	border-radius: 5px;
-	padding: 10px;
+	padding-left: 10px;
+
 }
-QTextEdit:hover {
+QLineEdit:hover {
 	border: 2px solid rgb(64, 71, 88);
 }
-QTextEdit:focus {
+QLineEdit:focus {
 	border: 2px solid rgb(91, 101, 124);
 }</string>
                                           </property>
-                                          <property name="html">
-                                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;100&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                          <property name="text">
+                                           <string>100</string>
                                           </property>
                                          </widget>
+                                        </item>
+                                        <item>
+                                         <spacer name="horizontalSpacer_13">
+                                          <property name="orientation">
+                                           <enum>Qt::Horizontal</enum>
+                                          </property>
+                                          <property name="sizeHint" stdset="0">
+                                           <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                           </size>
+                                          </property>
+                                         </spacer>
                                         </item>
                                        </layout>
                                       </item>

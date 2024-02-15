@@ -47,7 +47,7 @@ class Advanced(QtCore.QThread):
         precision = 'single'
         water_active = False
         equilubrate_steps = self.Max_equilubrate_steps_textEdit.toPlainText()
-        StateData_freq = int(self.StateData_frequency_textEdit.toPlainText())
+        StateData_freq = int(self.StateData_frequency_lineEdit.text())
         # global selected_platform
 
         print("Simulation parameters preparing for the start ...")
@@ -114,8 +114,8 @@ class Advanced(QtCore.QThread):
 
         try:
             if use_switching_distance:
-                if float(self.switching_distance_textEdit.toPlainText().split('*')[0]) >= float(
-                        self.nonbounded_CutOff_textEdit.toPlainText().split('*')[0]):
+                if float(self.switching_distance_lineEdit.text().split('*')[0]) >= float(
+                        self.nonbounded_CutOff_lineEdit.text().split('*')[0]):
 
                     """Display help."""
                     msg = QMessageBox()
@@ -138,7 +138,7 @@ class Advanced(QtCore.QThread):
             QMessageBox.critical(self, "Error", "An error occured while getting Nonbonded Parameters")
 
         try:
-            if self.Max_minimize_iter_textEdit.toPlainText() == "":
+            if self.Max_minimize_iter_lineEdit.text() == "":
                 no_minimize_value = False
 
             if not self.minimize_checkBox.isChecked():
@@ -233,33 +233,35 @@ class Advanced(QtCore.QThread):
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),
 
                                 integrator_kind=self.integrator_kind_comboBox.currentText(),  # INTEGRATOR
-                                integrator_time_step=self.integrator_time_step.toPlainText(),  # INTEGRATOR
+                                integrator_time_step=self.integrator_time_step_lineEdit.text().strip(),  # INTEGRATOR
                                 integrator_time_step_unit=self.integrator_time_step_unit.currentText(),  # INTEGRATOR
-                                friction=self.friction_textEdit.toPlainText(),  # ADDITIONAL INTEGRATOR
-                                Temperature=self.temperature_textEdit.toPlainText(),  # ADDITIONAL INTEGRATOR
+                                friction=self.friction_lineEdit.text().strip(),  # ADDITIONAL INTEGRATOR
+                                Temperature=self.temperature_lineEdit.text().strip(),  # ADDITIONAL INTEGRATOR
                                 Additional_Integrator=Additional_Integrator,
 
                                 NonBoundedMethod=self.nonBounded_Method_comboBox.currentText(),
                                 Constraints=self.system_constraints_comboBox.currentText(),
                                 Rigid_Water=rigid_water,
-                                NonBounded_cutoff=self.nonbounded_CutOff_textEdit.toPlainText(),
+                                NonBounded_cutoff=self.nonbounded_CutOff_lineEdit.text(),
                                 Nonbounded_cutoff_active=Nonbounded_cutoff_active,
                                 use_switching_distance=use_switching_distance,
-                                switching_distance=self.switching_distance_textEdit.toPlainText(),
+                                switching_distance=self.switching_distance_lineEdit.text(),
 
                                 Number_of_steps=self.Number_of_steps_spinBox.value(),
                                 Minimize=minimize,
                                 no_minimize_value=no_minimize_value,
-                                Max_minimization_iteration=self.Max_minimize_iter_textEdit.toPlainText(),
+                                Max_minimization_iteration=self.Max_minimize_iter_lineEdit.text(),
                                 Equilubrate=equilubrate, Equilubrate_steps=equilubrate_steps,
                                 DCDReporter=DCD_Reporter, XTCReporter=XTC_Reporter,
-                                DCD_write_freq=self.DCD_write_freq_textEdit.toPlainText(),
-                                DCD_output_name=self.DCD_Output_Name_textEdit.toPlainText(),
-                                XTC_write_freq=self.XTC_write_freq_textEdit.toPlainText(),
-                                XTC_output_name=self.XTC_Output_Name_textEdit.toPlainText(),
+                                DCD_write_freq=self.DCD_write_freq_lineEdit.text(),
+                                DCD_output_name=self.DCD_Output_Name_lineEdit.text(),
+                                XTC_write_freq=self.XTC_write_freq_lineEdit.text(),
+                                XTC_output_name=self.XTC_Output_Name_lineEdit.text(),
                                 State_Data_Reporter=State_Data_Reporter,
                                 StateData_freq=StateData_freq,
-                                output_directory=self.out_dir
+                                output_directory=self.out_dir,
+                                save_script=self.Save_Script_checkBox.isChecked(),
+                                script_save_directory=self.script_name_lineEdit.text()
                                 )
 
         self.created_script = Advanced_Helper_Functions.update_display(self, script_structure)
@@ -318,6 +320,20 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
         with open('readme.txt', 'w') as f:
             f.write(self.contents)
+
+        if script_structure.get('save_script'):
+            save_filename = script_structure.get('script_save_directory')
+            # Check if the file already exists in the specified directory
+            file_counter = 1
+            while os.path.exists(os.path.join('temp', save_filename)):
+                # If the file already exists, generate a new filename with a suffix
+                save_filename, extension = os.path.splitext(save_filename)
+                save_filename = f"{save_filename}_{file_counter}{extension}"
+                file_counter += 1
+
+            # Create or open a Python script file and write the content
+            with open(os.path.join('temp', save_filename), 'w') as py_file:
+                py_file.write(self.contents)
 
         return self.contents
 

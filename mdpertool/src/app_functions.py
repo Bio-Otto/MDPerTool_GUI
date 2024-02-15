@@ -1717,31 +1717,31 @@ class Functions(MainWindow):
             template['Simulation']['water forcefield'] = self.water_forcefield_comboBox.currentText()
             template['Simulation']['water geometry padding'] = self.water_padding_lineEdit.text().strip()
             template['Simulation']['equilibrium integrator'] = self.integrator_kind_comboBox.currentText()
-            template['Simulation']['equilibrium time step'] = self.integrator_time_step.toPlainText().strip()
+            template['Simulation']['equilibrium time step'] = self.integrator_time_step_lineEdit.text().strip()
             template['Simulation']['equilibrium time step unit'] = self.integrator_time_step_unit.currentText()
             template['Simulation'][
                 'equilibrium additional integrator parameters'] = self.Additional_Integrators_checkBox.isChecked()
-            template['Simulation']['friction'] = self.friction_textEdit.toPlainText().strip()
-            template['Simulation']['temperature'] = self.temperature_textEdit.toPlainText().strip()
+            template['Simulation']['friction'] = self.friction_lineEdit.text().strip()
+            template['Simulation']['temperature'] = self.temperature_lineEdit.text().strip()
             template['Simulation']['nonbonded method'] = self.nonBounded_Method_comboBox.currentText()
             template['Simulation']['constraints'] = self.system_constraints_comboBox.currentText()
             template['Simulation']['rigid water is active'] = self.rigid_water_checkBox.isChecked()
-            template['Simulation']['nonbonded cutoff'] = self.nonbounded_CutOff_textEdit.toPlainText()
-            template['Simulation']['switching distance'] = self.switching_distance_textEdit.toPlainText()
+            template['Simulation']['nonbonded cutoff'] = self.nonbounded_CutOff_lineEdit.text()
+            template['Simulation']['switching distance'] = self.switching_distance_lineEdit.text()
             template['Simulation']['use switching distance'] = self.use_switching_checkBox.isChecked()
             template['Simulation']['number of simulation steps'] = self.Number_of_steps_spinBox.value()
             template['Simulation']['minimize'] = self.minimize_checkBox.isChecked()
-            template['Simulation']['minimization max iterations'] = self.Max_minimize_iter_textEdit.toPlainText()
+            template['Simulation']['minimization max iterations'] = self.Max_minimize_iter_lineEdit.text()
             template['Simulation']['Equilibrate'] = self.equilubrate_checkBox.isChecked()
             template['Simulation']['Equilibration steps'] = self.Max_equilubrate_steps_textEdit.toPlainText()
             template['Simulation']['DCD report'] = self.DCD_Reporter_checkBox.isChecked()
             template['Simulation']['XTC report'] = self.XTC_Reporter_checkBox.isChecked()
             template['Simulation']['state data report'] = self.State_Data_Reporter_checkBox.isChecked()
-            template['Simulation']['DCD writing frequency'] = self.DCD_write_freq_textEdit.toPlainText()
-            template['Simulation']['DCD output name'] = self.DCD_Output_Name_textEdit.toPlainText()
-            template['Simulation']['XTC writing frequency'] = self.XTC_write_freq_textEdit.toPlainText()
-            template['Simulation']['XTC output name'] = self.XTC_Output_Name_textEdit.toPlainText()
-            template['Simulation']['state data frequency'] = self.StateData_frequency_textEdit.toPlainText()
+            template['Simulation']['DCD writing frequency'] = self.DCD_write_freq_lineEdit.text()
+            template['Simulation']['DCD output name'] = self.DCD_Output_Name_lineEdit.text()
+            template['Simulation']['XTC writing frequency'] = self.XTC_write_freq_lineEdit.text()
+            template['Simulation']['XTC output name'] = self.XTC_Output_Name_lineEdit.text()
+            template['Simulation']['state data frequency'] = self.StateData_frequency_lineEdit.text()
 
             write_output_configuration_file(file_path=output_file_directory, template_yml=template)
 
@@ -1872,7 +1872,7 @@ class Functions(MainWindow):
         """
         self.kind_of_integrator = self.integrator_kind_comboBox.currentText()
 
-        if self.kind_of_integrator in ["Langevin", "Brownian"]:
+        if self.kind_of_integrator in ["Langevin", "LangevinMiddle", "Brownian"]:
             self.Additional_Integrator_groupBox.setEnabled(True)
             self.Additional_Integrators_checkBox.setChecked(True)
             self.Additional_Integrators_checkBox.setEnabled(True)
@@ -1902,9 +1902,9 @@ class Functions(MainWindow):
     @staticmethod
     def minimize_Step_isVisible(self):
         if not self.minimize_checkBox.isChecked():
-            self.Max_minimize_iter_textEdit.setEnabled(False)
+            self.Max_minimize_iter_lineEdit.setEnabled(False)
         else:
-            self.Max_minimize_iter_textEdit.setEnabled(True)
+            self.Max_minimize_iter_lineEdit.setEnabled(True)
 
     @staticmethod
     def DCD_Reporter_Changed(self):
@@ -2000,7 +2000,7 @@ class Functions(MainWindow):
 
         current_step = self.run_duration_doubleSpinBox.value()
         current_time_unit = self.long_simulation_time_unit.currentText()
-        current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())
+        current_integrator_time_step_value = float(self.integrator_time_step_lineEdit.text())
 
         if current_time_unit == 'nanosecond':
             new_step = int((current_step / current_integrator_time_step_value) * 1000000)
@@ -2014,7 +2014,7 @@ class Functions(MainWindow):
         global new_time
         current_step = int(self.Number_of_steps_spinBox.value())  # 1 ns
         current_time_unit = self.long_simulation_time_unit.currentText()  # ns
-        current_integrator_time_step_value = float(self.integrator_time_step.toPlainText())  # 2 fs
+        current_integrator_time_step_value = float(self.integrator_time_step_lineEdit.text())  # 2 fs
 
         if current_time_unit == 'nanosecond':
             new_time = float((current_step * current_integrator_time_step_value) / 1000000)

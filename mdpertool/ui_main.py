@@ -159,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.long_simulation_time_unit.currentTextChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
-        self.integrator_time_step.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        self.integrator_time_step_lineEdit.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
 

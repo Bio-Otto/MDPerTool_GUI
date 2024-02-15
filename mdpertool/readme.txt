@@ -108,7 +108,7 @@ system.addForce(mm.MonteCarloBarostat(1 * atmospheres, 310.0*kelvin, 25))
 
 nonbonded = [f for f in system.getForces() if isinstance(f, NonbondedForce)][0]
 nonbonded.setUseSwitchingFunction(use=True)
-nonbonded.setSwitchingDistance(1*nanometer)
+nonbonded.setSwitchingDistance(1.0*nanometer)
 nonbonded.setUseDispersionCorrection(True)
 
 log_obj.info('Creating a %sIntegrator with %s %s . time step' %('Langevin', 2.0, 'femtosecond'))
@@ -143,10 +143,10 @@ simulation.step(int(500))
 simulation.currentStep = 0
 simulation.context.setTime(0)
 
-log_obj.info('The trajectories will be saved in DCD file format.')
-simulation.reporters.append(DCDReporter('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/output.dcd', 100))
 log_obj.info("Saving DCD File for every 100 period")
 
+log_obj.info('The trajectories will be saved in XTC file format.')
+simulation.reporters.append(reporters.XTCReporter('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/output.xtc', 100))
 log_obj.info("Saving XTC File for every 100 period")
 
 log_obj.info("State Report will tell you.")
@@ -211,7 +211,7 @@ for i in range(len([4])):
     name_of_changed_state_xml = change_velocity(state_file_path, [4][i], modify_atoms)
     new_dissipated_trajectory_name = dissipated_trajectory_name + str([4][i])
 
-    if True == False and False == False:
+    if False == False and True == False:
         write_dcd_cond = True
 
     if i == 0:
@@ -261,7 +261,7 @@ for i in range(len([4])):
             log_obj.info("System will use Switching Distance".format())
             nonbonded = [f for f in reference_system.getForces() if isinstance(f, NonbondedForce)][0]
             nonbonded.setUseSwitchingFunction(use=True)
-            nonbonded.setSwitchingDistance(1*nanometer)
+            nonbonded.setSwitchingDistance(1.0*nanometer)
 
         integrator = VerletIntegrator(1.0*femtosecond)
         integrator.setConstraintTolerance(1e-8)
@@ -294,17 +294,17 @@ for i in range(len([4])):
             ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
         """
         try:
-            if True == False and False == False:
-                log_obj.info("Saving DCD File for every 1 period".format())
-                DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
-                ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
-
-            if True == True:
+            if False == False and True == False:
                 log_obj.info("Saving DCD File for every 1 period".format())
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
             if False == True:
+                log_obj.info("Saving DCD File for every 1 period".format())
+                DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
+                ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
+
+            if True == True:
                 log_obj.info("Saving XTC File for every 1 period".format())
                 XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
@@ -377,7 +377,7 @@ for i in range(len([4])):
         log_obj.info("System will use Switching Distance".format())
         nonbonded = [f for f in perturbed_system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
-        nonbonded.setSwitchingDistance(1*nanometer)
+        nonbonded.setSwitchingDistance(1.0*nanometer)
 
     integrator = VerletIntegrator(1.0*femtosecond)
     integrator.setConstraintTolerance(1e-8)
@@ -412,17 +412,17 @@ for i in range(len([4])):
     """
 
     try:
-        if True == False and False == False:
-            log_obj.info("Saving DCD File for every 1 period")
-            DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
-            dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
-
-        if True == True:
+        if False == False and True == False:
             log_obj.info("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
         if False == True:
+            log_obj.info("Saving DCD File for every 1 period")
+            DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
+            dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
+
+        if True == True:
             log_obj.info("Saving XTC File for every 1 period")
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
@@ -458,12 +458,12 @@ for i in range(len([4])):
         dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
     """
     try:
-        if True == False and False == False:
+        if False == False and True == False:
             log_obj.info("Decompose started using DCD File ...".format())
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
 
-        if True == True:
+        if False == True:
             log_obj.info("Decompose started using DCD File ....".format())
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
@@ -471,7 +471,7 @@ for i in range(len([4])):
             print(dissipation_traj_file_for_pos)
             print(last_pdb_file_path)
 
-        if False == True:
+        if True == True:
             log_obj.info("Decompose started using XTC File ....".format())
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc').replace('\\','/')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc').replace('\\','/')

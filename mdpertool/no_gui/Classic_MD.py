@@ -198,7 +198,7 @@ class Classic_MD_Engine:
             nonbonded.setUseDispersionCorrection(False)
 
         print('Creating a LangevinIntegrator.')
-        integrator = mm.LangevinIntegrator(self.temp, self.friction_cofficient, self.time_step)
+        integrator = mm.LangevinMiddleIntegrator(self.temp, self.friction_cofficient, self.time_step)
 
         platform = mm.Platform.getPlatformByName(self.platform_name)
 
