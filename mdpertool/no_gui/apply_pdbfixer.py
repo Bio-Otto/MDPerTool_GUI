@@ -41,7 +41,13 @@ def fix_pdb(pdb_id, fixed_pdb_out_path, pH=7.4, logger_object=None):
         logger_object.info("Adding missing atoms...".format())
         fixer.addMissingAtoms()
         logger_object.info("Adding missing hydrogens...".format())
-        #fixer.addMissingHydrogens(pH)
+
+        try:
+            print("adding hydrogens")
+            fixer.addMissingHydrogens(pH)
+        except:
+            print("passed..")
+            pass
 
         logger_object.info("Writing PDB file...".format())
         fixed_pdb_out_path = os.path.join(fixed_pdb_out_path, "%s_fixed_pH_%s.pdb" % (os.path.basename(pdb_id).split('.')[0], pH))

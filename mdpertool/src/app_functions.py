@@ -1456,6 +1456,14 @@ class Functions(MainWindow):
             self.target_res_comboBox.setEnabled(False)
             self.residues_conservation_tableWidget.setEnabled(False)
 
+    @staticmethod
+    def All_CPU_Usage_State(self):
+        if not self.All_CPU_checkBox.isChecked():
+            self.Number_CPU_spinBox_2.setEnabled(True)
+
+        if self.All_CPU_checkBox.isChecked():
+            self.Number_CPU_spinBox_2.setEnabled(False)
+
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
 
     # ######################################### PERTURBATION WINDOW FUNCTIONS ##########################################
@@ -1824,7 +1832,8 @@ class Functions(MainWindow):
                             selected_chains = [str(s) for s in checked_list.choices]
                             delete_chains = list(set(chains) - set(selected_chains))
                             fetched_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
-                                                                    self.Output_Folder_textEdit.toPlainText(), ph=7,
+                                                                    self.Output_Folder_textEdit.toPlainText(),
+                                                                    ph=self.pH_doubleSpinBox.value(),
                                                                     chains_to_remove=delete_chains)
 
                             self.upload_pdb_lineEdit.setText(fetched_pdb)
@@ -1839,7 +1848,7 @@ class Functions(MainWindow):
                         elif pdb_fix_dialog_answer == QDialog.Rejected:
                             modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
                                                                      self.Output_Folder_textEdit.toPlainText(),
-                                                                     ph=7, chains_to_remove=None)
+                                                                     ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
 
                             self.upload_pdb_lineEdit.setText(modified_pdb)
 

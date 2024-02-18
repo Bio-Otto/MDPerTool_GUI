@@ -187,6 +187,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.response_time_lineEdit.textChanged.connect(self.response_time_graph_path_changed)
         self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
         self.all_targets_checkBox.stateChanged.connect(lambda: UIF.Functions.All_Residues_as_target_Changed(self))
+        self.All_CPU_checkBox.stateChanged.connect(lambda: UIF.Functions.All_CPU_Usage_State(self))
         self.output_directory_button.clicked.connect(lambda: UIF.Functions.analysis_output_directory(self))
         self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local(manuel=True))
         self.add_residue_to_targets_pushButton.clicked.connect(lambda: UIF.Functions.add_residue_to_target_List(self))
@@ -339,7 +340,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=delete_chains)
+                                                                 ph=self.pH_doubleSpinBox.value(),
+                                                                 chains_to_remove=delete_chains)
 
                     self.upload_pdb_lineEdit.setText(modified_pdb)
 
@@ -352,7 +354,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=None)
+                                                                 ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
 
                     self.upload_pdb_textEdit.setText(modified_pdb)
 
@@ -393,7 +395,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=delete_chains)
+                                                                 ph=self.pH_doubleSpinBox.value(),
+                                                                 chains_to_remove=delete_chains)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
@@ -411,7 +414,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=None)
+                                                                 ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
