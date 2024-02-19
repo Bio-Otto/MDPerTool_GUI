@@ -59,7 +59,7 @@ class Minimization_Reporter(openmm.MinimizationReporter):
 # ---------------- LOGGER ---------------- #
 current_date = datetime.now().strftime("%Y-%m-%d")
 file_name = f"out_{current_date}.log"
-log_path = os.path.join('{{output_folder}}', file_name)
+log_path = os.path.join('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output', file_name)
 
 log_obj = Logger(log_path)
 """
@@ -78,7 +78,7 @@ log_obj.handlers.clear()
 
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
-fixed_pdb_name = fix_pdb('{{pdb}}', fixed_pdb_out_path='{{output_folder}}', logger_object=log_obj)
+fixed_pdb_name = fix_pdb('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download/2j0w_example_fixed_ph7.4.pdb', fixed_pdb_out_path='C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output', logger_object=log_obj)
 
 log_obj.info("Loading pdb to simulation engine ...".format())
 pdb = app.PDBFile(fixed_pdb_name)
@@ -90,105 +90,92 @@ modeller = mm.app.Modeller(pdb.topology, pdb.positions)
 modeller.topology.setUnitCellDimensions(box)
 
 log_obj.info("Forcefield parameters loading to the simulation system ...".format())
-forcefield = app.ForceField('{{protein_ff}}'{{#water_active}}, '{{water_ff}}'{{/water_active}})
+forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
 
 log_obj.critical("Adding missing hydrogens to the model ...".format())
 modeller.addHydrogens(forcefield)
 
 log_obj.info("Adding solvent (both water and ions) to the model to fill a rectangular box ...".format())
-modeller.addSolvent(forcefield, model='{{model_water}}', padding={{water_padding}}, ionicStrength={{solvent_ionic_strength}})
+modeller.addSolvent(forcefield, model='tip3p', padding=10*angstrom, ionicStrength=0.5*molar)
 
 log_obj.info("Constructing an OpenMM System ...".format())
-system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
-                                      {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
-                                      constraints={{Constraints}}, rigidWater={{Rigid_Water}},
+system = forcefield.createSystem(modeller.topology, nonbondedMethod=PME,
+                                      nonbondedCutoff=1.2*nanometer,
+                                      constraints=None, rigidWater=True,
                                       ewaldErrorTolerance=0.005)
 
-system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
+system.addForce(mm.MonteCarloBarostat(1 * atmospheres, 310.0*kelvin, 25))
 
-{{#use_switching_distance}}
 nonbonded = [f for f in system.getForces() if isinstance(f, NonbondedForce)][0]
 nonbonded.setUseSwitchingFunction(use=True)
-nonbonded.setSwitchingDistance({{switching_distance}})
+nonbonded.setSwitchingDistance(1.0*nanometer)
 nonbonded.setUseDispersionCorrection(True)
-{{/use_switching_distance}}
 
-log_obj.info('Creating a %sIntegrator with %s %s . time step' %('{{integrator_kind}}', {{integrator_time_step}}, '{{integrator_time_step_unit}}'))
-integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}}*{{integrator_time_step_unit}})
+log_obj.info('Creating a %sIntegrator with %s %s . time step' %('Langevin', 2.0, 'femtosecond'))
+integrator = mm.LangevinIntegrator(310.0*kelvin, 91.0/picosecond, 2.0*femtosecond)
 
-if {{cuda_active}} == True:
-    platform = mm.Platform.getPlatformByName('{{platform}}')
-    {{#properties_active}}properties = {'{{cuda_precision_prefix}}Precision': '{{precision}}'{{#Device_ID_active}},'{{cuda_precision_prefix}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
+if True == True:
+    platform = mm.Platform.getPlatformByName('CUDA')
+    properties = {'CudaPrecision': 'single'}
 else:
-    platform = mm.Platform.getPlatformByName('{{platform}}')
-    {{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
+    platform = mm.Platform.getPlatformByName('CUDA')
+    properties = {'CUDAPrecision': 'single'}
 
-{{#CPU_properties_active}}properties = {'CpuThreads': '{{Number_of_CPU}}'}{{/CPU_properties_active}}
 
-simulation = app.Simulation(modeller.topology, system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
+
+simulation = app.Simulation(modeller.topology, system, integrator, platform, properties)
 simulation.context.setPositions(modeller.positions)
 simulation.context.computeVirtualSites()
 
-{{#Minimize}}
-log_obj.info('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
+log_obj.info('Minimizing for %s steps ...' % 500)
 min_reporter = Minimization_Reporter(logger_object=log_obj)
-simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}}, reporter=min_reporter)
+simulation.minimizeEnergy(maxIterations=int(500), reporter=min_reporter)
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 log_obj.info("Minimized geometry is written to 'minimized.pdb'")
-app.PDBFile.writeModel(modeller.topology, positions, open('{{output_folder}}/minimized.pdb', 'w'), keepIds=True){{/Minimize}}
+app.PDBFile.writeModel(modeller.topology, positions, open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/minimized.pdb', 'w'), keepIds=True)
 
-simulation.context.setVelocitiesToTemperature({{Temperature}})
+simulation.context.setVelocitiesToTemperature(310.0*kelvin)
 
-{{#Equilubrate}}
-log_obj.info('Equilibrating for %s steps ...' % {{Equilubrate_steps}})
-simulation.step(int({{Equilubrate_steps}}))
-{{/Equilubrate}}
+log_obj.info('Equilibrating for %s steps ...' % 500)
+simulation.step(int(500))
 
 simulation.currentStep = 0
 simulation.context.setTime(0)
 
-{{#DCDReporter}}
 log_obj.info('The trajectories will be saved in DCD file format.')
-simulation.reporters.append(DCDReporter('{{output_folder}}/{{DCD_output_name}}', {{DCD_write_freq}}))
-{{/DCDReporter}}
-log_obj.info("Saving DCD File for every {{DCD_write_freq}} period")
+simulation.reporters.append(DCDReporter('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/output.dcd', 100))
+log_obj.info("Saving DCD File for every 100 period")
 
-{{#XTCReporter}}
-log_obj.info('The trajectories will be saved in XTC file format.')
-simulation.reporters.append(reporters.XTCReporter('{{output_folder}}/{{XTC_output_name}}', {{XTC_write_freq}}))
-{{/XTCReporter}}
-log_obj.info("Saving XTC File for every {{XTC_write_freq}} period")
+log_obj.info("Saving XTC File for every 100 period")
 
-{{#State_Data_Reporter}}
 log_obj.info("State Report will tell you.")
-simulation.reporters.append(Perturb_StateDataReporter(stdout, {{StateData_freq}}, step=True, time=True,
+simulation.reporters.append(Perturb_StateDataReporter(stdout, 100, step=True, time=True,
                                                       potentialEnergy=True, kineticEnergy=True, totalEnergy=True,
                                                       temperature=True, progress=True, remainingTime=True, speed=True,
-                                                      volume=True, density=True, totalSteps={{Number_of_steps}},
+                                                      volume=True, density=True, totalSteps=500,
                                                       report_type='Progress (%)'))
-{{/State_Data_Reporter}}
 
 log_obj.info("Running Production...")
-simulation.step({{Number_of_steps}})
+simulation.step(500)
 log_obj.info("Done!".format())
 
 lastpositions = simulation.context.getState(getPositions=True).getPositions()
 
-last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('{{output_folder}}/last.pdb', 'w'), keepIds=True)
+last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/last.pdb', 'w'), keepIds=True)
 
 
 state = simulation.context.getState(getPositions=True, getVelocities=True)
 
-with open('{{output_folder}}/system.xml', 'w') as f:
+with open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/system.xml', 'w') as f:
     system_xml = mm.XmlSerializer.serialize(system)
     f.write(system_xml)
 
-with open('{{output_folder}}/integrator.xml', 'w') as f:
+with open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/integrator.xml', 'w') as f:
     integrator_xml = mm.XmlSerializer.serialize(integrator)
     f.write(integrator_xml)
 
-with open('{{output_folder}}/state.xml', 'w') as f:
+with open('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output/state.xml', 'w') as f:
     f.write(mm.XmlSerializer.serialize(state))
 
 try:
@@ -214,17 +201,17 @@ created_file_for_work = str
 OUTPUT_FOLDER_NAME = str
 
 
-OUTPUT_DIRECTORY = Path('{{output_folder}}')
+OUTPUT_DIRECTORY = Path('C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/output')
 
 last_pdb_file_path = os.path.join(OUTPUT_DIRECTORY, last_pdb)
-modify_atoms = convert_res_to_atoms(last_pdb_file_path, {{{perturbed_res_list}}}, 'CA')
+modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['SER345'], 'CA')
 state_file_path = os.path.join(OUTPUT_DIRECTORY, state_file_name)
 
-for i in range(len({{speed_factor}})):
-    name_of_changed_state_xml = change_velocity(state_file_path, {{speed_factor}}[i], modify_atoms)
-    new_dissipated_trajectory_name = dissipated_trajectory_name + str({{speed_factor}}[i])
+for i in range(len([4])):
+    name_of_changed_state_xml = change_velocity(state_file_path, [4][i], modify_atoms)
+    new_dissipated_trajectory_name = dissipated_trajectory_name + str([4][i])
 
-    if {{DCDReporter}} == False and {{XTCReporter}} == False:
+    if True == False and False == False:
         write_dcd_cond = True
 
     if i == 0:
@@ -232,29 +219,29 @@ for i in range(len({{speed_factor}})):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+        if 'CUDA' == 'OpenCL' and False == True:
+            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
             precision = 'double'
 
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
+        if 'CUDA' == 'OpenCL' and False == False:
             properties = {'OpenCLPrecision': 'double'}
             precision = 'double'
 
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
+        if 'CUDA' == 'CUDA' and False == True:
+            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
             precision = 'double'
 
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
+        if 'CUDA' == 'CUDA' and False == False:
             properties = {'CudaPrecision': 'double'}
             precision = 'double'
 
-        if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
+        if 'CUDA' == 'CPU' and False == True:
             log_obj.info("The CPU platform always uses 'mixed' precision.".format())
-            log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
-            properties = {'CpuThreads': '{{Number_of_CPU}}'}
+            log_obj.info("Simulation process will use %s Thread(s)" % 2)
+            properties = {'CpuThreads': '2'}
             precision = 'mixed'
 
-        if '{{platform}}' == 'Reference':
+        if 'CUDA' == 'Reference':
             log_obj.info("The Reference platform always uses 'double' precision.".format())
             properties = None
             precision= 'double'
@@ -264,23 +251,23 @@ for i in range(len({{speed_factor}})):
         topology = pdb.topology
 
         log_obj.info("Forcefield parameters loading to the simulation system for NVE simulation ...".format())
-        forcefield = app.ForceField('{{protein_ff}}', '{{water_ff}}')
+        forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
 
         log_obj.info("Constructing NVE System".format())
-        reference_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
+        reference_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff=1.2*nanometer,
                                                    constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
 
-        if {{use_switching_distance}} == True:
+        if True == True:
             log_obj.info("System will use Switching Distance".format())
             nonbonded = [f for f in reference_system.getForces() if isinstance(f, NonbondedForce)][0]
             nonbonded.setUseSwitchingFunction(use=True)
-            nonbonded.setSwitchingDistance({{switching_distance}})
+            nonbonded.setSwitchingDistance(1.0*nanometer)
 
         integrator = VerletIntegrator(1.0*femtosecond)
         integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('{{platform}}')
+        platform = mm.Platform.getPlatformByName('CUDA')
 
         # ok now let's do some simulation using this restraint
         if properties is None:
@@ -307,17 +294,17 @@ for i in range(len({{speed_factor}})):
             ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
         """
         try:
-            if {{DCDReporter}} == False and {{XTCReporter}} == False:
+            if True == False and False == False:
                 log_obj.info("Saving DCD File for every 1 period".format())
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-            if {{DCDReporter}} == True:
+            if True == True:
                 log_obj.info("Saving DCD File for every 1 period".format())
                 DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-            if {{XTCReporter}} == True:
+            if False == True:
                 log_obj.info("Saving XTC File for every 1 period".format())
                 XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % undissipated_trajectory_name)
                 ref_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
@@ -325,15 +312,13 @@ for i in range(len({{speed_factor}})):
         except Exception as e:
             log_obj.error(e, stack_info=True, exc_info=True)
 
-        {{#State_Data_Reporter}}
         log_obj.info("State Report will tell you ...".format())
         ref_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                  density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}},
+                                  density=True, remainingTime=True, speed=True, totalSteps=3,
                                   report_type='Reference MD Progress (%)'))
-        {{/State_Data_Reporter}}
 
-        ref_simulation.step({{perturb_simulation_time}})
+        ref_simulation.step(3)
 
         simulation_last_step = 0
 
@@ -348,57 +333,57 @@ for i in range(len({{speed_factor}})):
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
     ################################################################################################################
 
-    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+    if 'CUDA' == 'OpenCL' and False == True:
+        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
         precision = 'double'
 
-    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
+    if 'CUDA' == 'OpenCL' and False == False:
         properties = {'OpenCLPrecision': 'double'}
         precision = 'double'
 
-    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
+    if 'CUDA' == 'CUDA' and False == True:
+        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
         precision = 'double'
 
-    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
+    if 'CUDA' == 'CUDA' and False == False:
         properties = {'CudaPrecision': 'double'}
         precision = 'double'
 
-    if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
+    if 'CUDA' == 'CPU' and False == True:
         log_obj.info("The CPU platform always uses 'mixed' precision.".format())
-        log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
-        properties = {'CpuThreads': '{{Number_of_CPU}}'}
+        log_obj.info("Simulation process will use %s Thread(s)" % 2)
+        properties = {'CpuThreads': '2'}
         precision = 'mixed'
 
-    if '{{platform}}' == 'Reference':
+    if 'CUDA' == 'Reference':
         log_obj.info("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
 
-    log_obj.info("System will use %s Platform with %s Precision" % ('{{platform}}', precision))
+    log_obj.info("System will use %s Platform with %s Precision" % ('CUDA', precision))
 
     # we'll just take the topology from here...
     pdb = app.PDBFile(last_pdb_file_path)
     topology = pdb.topology
 
     log_obj.info("Forcefield parameters loading to the simulation system ...".format())
-    forcefield = app.ForceField('{{protein_ff}}', '{{water_ff}}')
+    forcefield = app.ForceField('amber03.xml', 'tip3p.xml')
 
     log_obj.info("Constructing an OpenMM System".format())
-    perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
+    perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff=1.2*nanometer,
                                                constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
 
-    if {{use_switching_distance}} == True:
+    if True == True:
         log_obj.info("System will use Switching Distance".format())
         nonbonded = [f for f in perturbed_system.getForces() if isinstance(f, NonbondedForce)][0]
         nonbonded.setUseSwitchingFunction(use=True)
-        nonbonded.setSwitchingDistance({{switching_distance}})
+        nonbonded.setSwitchingDistance(1.0*nanometer)
 
     integrator = VerletIntegrator(1.0*femtosecond)
     integrator.setConstraintTolerance(1e-8)
 
     # let's specify our simulation platform again
-    platform = mm.Platform.getPlatformByName('{{platform}}')
+    platform = mm.Platform.getPlatformByName('CUDA')
 
     # ok now let's do some simulation using this restraint
     if properties is None:
@@ -427,17 +412,17 @@ for i in range(len({{speed_factor}})):
     """
 
     try:
-        if {{DCDReporter}} == False and {{XTCReporter}} == False:
+        if True == False and False == False:
             log_obj.info("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-        if {{DCDReporter}} == True:
+        if True == True:
             log_obj.info("Saving DCD File for every 1 period")
             DCD_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(app.DCDReporter(DCD_file_path, 1))
 
-        if {{XTCReporter}} == True:
+        if False == True:
             log_obj.info("Saving XTC File for every 1 period")
             XTC_file_path = os.path.join(OUTPUT_DIRECTORY, '%s.xtc' % new_dissipated_trajectory_name)
             dis_simulation.reporters.append(XTCReporter(XTC_file_path, 1))
@@ -445,15 +430,13 @@ for i in range(len({{speed_factor}})):
     except Exception as e:
         log_obj.error(e, stack_info=True, exc_info=True)
 
-    {{#State_Data_Reporter}}
     log_obj.info("State Report will tell you ...")
     dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                               kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                              density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}},
+                              density=True, remainingTime=True, speed=True, totalSteps=3,
                               report_type='Dissipation MD Progress (%)'))
-    {{/State_Data_Reporter}}
 
-    dis_simulation.step({{perturb_simulation_time}})
+    dis_simulation.step(3)
 
     simulation_last_step = 0
 
@@ -475,12 +458,12 @@ for i in range(len({{speed_factor}})):
         dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc')
     """
     try:
-        if {{DCDReporter}} == False and {{XTCReporter}} == False:
+        if True == False and False == False:
             log_obj.info("Decompose started using DCD File ...".format())
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
 
-        if {{DCDReporter}} == True:
+        if True == True:
             log_obj.info("Decompose started using DCD File ....".format())
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.dcd').replace('\\','/')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.dcd').replace('\\','/')
@@ -488,7 +471,7 @@ for i in range(len({{speed_factor}})):
             print(dissipation_traj_file_for_pos)
             print(last_pdb_file_path)
 
-        if {{XTCReporter}} == True:
+        if False == True:
             log_obj.info("Decompose started using XTC File ....".format())
             reference_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, undissipated_trajectory_name + '.xtc').replace('\\','/')
             dissipation_traj_file_for_pos = os.path.join(OUTPUT_DIRECTORY, new_dissipated_trajectory_name + '.xtc').replace('\\','/')
@@ -516,18 +499,18 @@ for i in range(len({{speed_factor}})):
         if i == 0:
 
             #residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-            #                            output_directory=OUTPUT_DIRECTORY, que=None, platform_name='{{platform}}',
-            #                            ref_energy_name='reference_energy_file.csv', device_id_active={{Device_ID_active}},
-            #                            num_of_threads={{Number_of_CPU}},
-            #                            modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
-            #                            origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}', logger_object=log_obj)
+            #                            output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+            #                            ref_energy_name='reference_energy_file.csv', device_id_active=False,
+            #                            num_of_threads=2,
+            #                            modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
+            #                            origin_last_pdb=last_pdb_file_path, ff='amber03.xml', logger_object=log_obj)
 
-            process_energy_data(topology_file=last_pdb_file_path, protein_ff='{{protein_ff}}', water_ff='{{water_ff}}',
-                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active={{Device_ID_active}},
-                                ref_trajectory=reference_traj_file_for_pos, platform_type='{{platform}}',
-                                nonbonded_cutoff={{NonBounded_cutoff}}, ref_energy_name = 'reference_energy_file.csv',
-                                modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]), 
-                                output_directory=OUTPUT_DIRECTORY, num_of_threads={{Number_of_CPU}}, que=None, 
+            process_energy_data(topology_file=last_pdb_file_path, protein_ff='amber03.xml', water_ff='tip3p.xml',
+                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active=False,
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='CUDA',
+                                nonbonded_cutoff=1.2*nanometer, ref_energy_name = 'reference_energy_file.csv',
+                                modif_energy_name='modified_energy_file_%s.csv' % int([4][i]), 
+                                output_directory=OUTPUT_DIRECTORY, num_of_threads=2, que=None, 
                                 logger_object=log_obj)
 	
 
@@ -537,20 +520,20 @@ for i in range(len({{speed_factor}})):
             # --> RESIDUE BASED DECOMPOSITION
             """
             residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='{{platform}}',
-                                        ref_energy_name=None, device_id_active={{Device_ID_active}}, num_of_threads={{Number_of_CPU}},
-                                        modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]),
+                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+                                        ref_energy_name=None, device_id_active=False, num_of_threads=2,
+                                        modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
                                         origin_last_pdb=last_pdb_file_path,
-                                        ff='{{protein_ff}}', logger_object=log_obj)
+                                        ff='amber03.xml', logger_object=log_obj)
 
             """
 
-            process_energy_data(topology_file=last_pdb_file_path, protein_ff='{{protein_ff}}', water_ff='{{water_ff}}',
-                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active={{Device_ID_active}},
-                                ref_trajectory=reference_traj_file_for_pos, platform_type='{{platform}}',
-                                nonbonded_cutoff={{NonBounded_cutoff}}, ref_energy_name = 'reference_energy_file.csv',
-                                modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]), 
-                                output_directory=OUTPUT_DIRECTORY, num_of_threads={{Number_of_CPU}}, que=None, 
+            process_energy_data(topology_file=last_pdb_file_path, protein_ff='amber03.xml', water_ff='tip3p.xml',
+                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active=False,
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='CUDA',
+                                nonbonded_cutoff=1.2*nanometer, ref_energy_name = 'reference_energy_file.csv',
+                                modif_energy_name='modified_energy_file_%s.csv' % int([4][i]), 
+                                output_directory=OUTPUT_DIRECTORY, num_of_threads=2, que=None, 
                                 logger_object=log_obj)
 
 
@@ -558,8 +541,8 @@ for i in range(len({{speed_factor}})):
 
         # --> RESPONSE TIME CSV EXPORTER
         getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
-                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
-                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
+                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([4][i])),
+                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([4][i])))
 
     except Exception as e:
         print("ERROR: ", e)

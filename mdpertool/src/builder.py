@@ -246,6 +246,7 @@ class Advanced(QtCore.QThread):
                                 Nonbounded_cutoff_active=Nonbounded_cutoff_active,
                                 use_switching_distance=use_switching_distance,
                                 switching_distance=self.switching_distance_lineEdit.text(),
+                                solvent_ionic_strength=self.ionic_strength_lineEdit.text(),
 
                                 Number_of_steps=self.Number_of_steps_spinBox.value(),
                                 Minimize=minimize,
