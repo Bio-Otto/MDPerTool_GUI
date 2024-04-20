@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="big_icon">
+    <file>icons/big_icons/logo_for_contacts.jpg</file>
+    <file>icons/big_icons/MDPerTool_for_contact.jpg</file>
+  </qresource>
+</RCC>

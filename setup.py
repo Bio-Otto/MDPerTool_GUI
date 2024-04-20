@@ -17,9 +17,18 @@ install_requires = [
     'pyopengl',
     'pyqtgraph',
     'pyqtwebengine',
-    'pyside2',
     'pystache',
-    'pyvis'
+    'pyvis',
+    ]
+
+# Conda-forge ile yüklenen paketleri, dependency_links kullanarak belirtebilirsiniz.
+dependency_links=[
+    "git+https://github.com/conda-forge/mdtraj-feedstock",
+    "git+https://github.com/conda-forge/openmm-feedstock",
+    "git+https://github.com/conda-forge/pymol-open-source-feedstock",
+    "git+https://github.com/conda-forge/pyside2-feedstock",
+    "git+https://github.com/conda-forge/cudatoolkit-feedstock",
+    "git+https://github.com/conda-forge/mdanalysis-feedstock"
 ]
 
 tests_require = [
@@ -30,14 +39,13 @@ tests_require = [
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
 setup_requires = ['pytest-runner'] if needs_pytest else []
 
-
 def find_package_data():
     files = []
     for root, dirnames, filenames in os.walk('mdpertool'):
         for fn in filenames:
             files.append(os.path.relpath(os.path.join(root, fn), 'mdpertool'))
-    return files
 
+    return files
 
 setup(
     name='mdpertool',
@@ -65,7 +73,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        "Topic :: Scientific/Engineering",
+        'Programming Language :: Python :: 3.10',
         "Topic :: Scientific/Engineering :: Visualization",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: User Interfaces",
@@ -76,22 +84,12 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'mdpertool=mdpertool.__main__:run_mdpertool',
+            'mdpertool=mdpertool.ui_main:run_mdpertool',
         ],
     },
+
     install_requires=install_requires,
     tests_require=tests_require,
     setup_requires=setup_requires,
-    # dependency_links=[
-    #     "openmm @ git+https://github.com/openmm/openmm",
-    #     #               "parmed @ git+https://github.com/ParmEd/ParmEd",
-    #     # 'pdbfixer @ git+https://github.com/openmm/pdbfixer@master',
-    #     # "pdbfixer @ git+https://github.com/openmm/pdbfixer",
-    #     # "pymol-open-source @ git+https://github.com/schrodinger/pymol-open-source"
-    # ]
-    # dependency_links=['https://github.com/openmm/pdbfixer/master#egg=pdbfixer-1.8.1',
-    #                   'https://github.com/schrodinger/pymol-open-source/master#egg=pymol-2.5.0',
-    #                   'https://github.com/openmm/openmm/master#egg=openmm-7.6.0',
-    #                   'https://github.com/ParmEd/ParmEd/master#egg=parmed-3.4.3',
-    #                   'https://github.com/mdtraj/mdtraj/master#egg=mdtraj-1.9.7']
+    dependency_links=dependency_links
 )
