@@ -40,27 +40,29 @@ from mdpertool.src.CustomReporters import Perturb_StateDataReporter
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
 #######################################################################################################################
 
-class Minimization_Reporter(openmm.MinimizationReporter):
-    energies = []  # array to record progress
-    logger_object = object
+def use_minimization_reporter():
+    class Minimization_Reporter(mm.MinimizationReporter):
+        energies = []  # array to record progress
+        logger_object = object
 
-    def __init__(self, logger_object, *args):
-        super().__init__(*args)
-        self.energies = []  # array to record progress
-        self.logger_object = logger_object
+        def __init__(self, logger_object, *args):
+            super().__init__(*args)
+            self.energies = []  # array to record progress
+            self.logger_object = logger_object
 
-    def report(self, iteration, x, grad, args):
-        # print current system energy to screen
-        self.logger_object.info("Iteration: {} - Energy (kJ/mole): {}".format(iteration, args['system energy']))
+        def report(self, iteration, x, grad, args):
+            # print current system energy to screen
+            self.logger_object.info("Iteration: {} - Energy (kJ/mole): {}".format(iteration, args['system energy']))
 
-        # save energy at each iteration to an array we can use later
-        #self.energies.append(args['system energy'])
+            # save energy at each iteration to an array we can use later
+            #self.energies.append(args['system energy'])
 
-        # The report method must return a bool specifying if minimization should be stopped.
-        # You can use this functionality for early termination.
-        return False
+            # The report method must return a bool specifying if minimization should be stopped.
+            # You can use this functionality for early termination.
+            return False
 
-
+if mm.version.short_version >= 8:
+    use_minimization_reporter()
 
 
 # ---------------- LOGGER ---------------- #
@@ -138,8 +140,12 @@ simulation.context.computeVirtualSites()
 
 {{#Minimize}}
 log_obj.info('Minimizing for %s steps ...' % {{Max_minimization_iteration}})
-min_reporter = Minimization_Reporter(logger_object=log_obj)
-simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}}, reporter=min_reporter)
+if mm.version.short_version >= 8:
+    min_reporter = Minimization_Reporter(logger_object=log_obj)
+    simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}}, reporter=min_reporter)
+else:
+    simulation.minimizeEnergy({{#no_minimize_value}}maxIterations=int({{Max_minimization_iteration}}){{/no_minimize_value}})
+
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 log_obj.info("Minimized geometry is written to 'minimized.pdb'")

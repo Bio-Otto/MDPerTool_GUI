@@ -1,34 +1,37 @@
 from setuptools import setup, find_packages
 import os
+import os.path as op
 import sys
+
 
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
     exec(version_file.read())
 
+
 install_requires = [
     'numpy',
-    'biopython',
-    'matplotlib',
-    'mdtraj',
-    'networkx',
-    'pandas',
-    'parmed',
-    'prody',
-    'pyopengl',
-    'pyqtgraph',
-    'pyqtwebengine',
-    'pystache',
     'pyvis',
-    ]
+    'matplotlib',
+    'pandas',
+    'networkx',
+    'pyopengl',
+    'biopython',
+    'prody',
+    'pyqtwebengine',
+    'pyyaml',
+    'pystache',  
+]
 
-# Conda-forge ile yüklenen paketleri, dependency_links kullanarak belirtebilirsiniz.
-dependency_links=[
-    "git+https://github.com/conda-forge/mdtraj-feedstock",
-    "git+https://github.com/conda-forge/openmm-feedstock",
-    "git+https://github.com/conda-forge/pymol-open-source-feedstock",
-    "git+https://github.com/conda-forge/pyside2-feedstock",
-    "git+https://github.com/conda-forge/cudatoolkit-feedstock",
-    "git+https://github.com/conda-forge/mdanalysis-feedstock"
+# Conda-forge ile yüklenen paketler
+conda_packages = [
+    "mdtraj",
+    "openmm",
+    "pymol-open-source",
+    "pyside2",
+    "cudatoolkit",
+    "mdanalysis",
+    "pyqtgraph",
+    "parmed",
 ]
 
 tests_require = [
@@ -57,30 +60,20 @@ setup(
     author_email=__author_email__,
     license='MIT',
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
-        "Development Status :: 4 - Beta",
-        "Environment :: GPU",
-        "Environment :: GPU :: NVIDIA CUDA",
-        "Environment :: MacOS X",
         "License :: OSI Approved :: MIT License",
         "License :: OSI Approved :: Academic Free License (AFL)",
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: Unix",
         "Operating System :: OS Independent",
         "Natural Language :: English",
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python',
         "Topic :: Scientific/Engineering :: Visualization",
-        "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: User Interfaces",
-        "Topic :: Software Development :: Widget Sets",
+        "Topic :: Scientific/Engineering :: Chemistry",
     ],
     packages=find_packages(),
     package_data={'mdpertool': find_package_data()},
+    platform='any',
     include_package_data=True,
     entry_points={
         'console_scripts': [
@@ -91,5 +84,7 @@ setup(
     install_requires=install_requires,
     tests_require=tests_require,
     setup_requires=setup_requires,
-    dependency_links=dependency_links
+    extras_require={
+        'conda': conda_packages
+    }
 )

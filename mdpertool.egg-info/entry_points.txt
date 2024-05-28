@@ -1,2 +1,0 @@
-[console_scripts]
-mdpertool = mdpertool.ui_main:run_mdpertool

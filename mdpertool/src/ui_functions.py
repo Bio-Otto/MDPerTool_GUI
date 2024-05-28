@@ -2,7 +2,10 @@
 from PySide2.QtCore import QPropertyAnimation, QSize
 from PySide2.QtWidgets import QPushButton, QSizePolicy, QSizeGrip
 
-from ..gui.ui_styles import Style
+try:
+    from ..gui.ui_styles import Style
+except:
+    from mdpertool.gui.ui_styles import Style
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0
@@ -12,7 +15,7 @@ GLOBAL_TITLE_BAR = True
 count = 1
 from .app_functions import *
 from .PyMolWidget import PymolQtWidget
-from ..analysis import VisJS_Widget
+from mdpertool.analysis import VisJS_Widget
 from .message import Message_Boxes
 
 

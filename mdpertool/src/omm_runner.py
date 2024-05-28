@@ -13,7 +13,10 @@ from openmm.app import StateDataReporter
 import subprocess
 import tempfile
 from .message import Message_Boxes
-from ..gui.ui_styles import Style
+try:
+    from ..gui.ui_styles import Style
+except:
+    from mdpertool.gui.ui_styles import Style
 
 
 ##############################################################################

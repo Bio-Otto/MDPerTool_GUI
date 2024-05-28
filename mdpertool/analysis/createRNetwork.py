@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 from PySide2 import QtCore, QtWidgets
-from ..src.PyMolWidget import PymolQtWidget
+from mdpertool.src.PyMolWidget import PymolQtWidget
 from .VisJS_Widget import VisJS_QtWidget
 import multiprocessing as mp
 from .pdbsum_conservation_puller import *

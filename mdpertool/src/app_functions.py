@@ -15,8 +15,10 @@ from .checkBox_menu import *
 from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
 import multiprocessing as mp
-from ..analysis.pdbsum_conservation_puller import get_conservation_scores
-from ..analysis.createRNetwork import (Multi_Task_Engine, Pymol_Visualize_Path, Shortest_Path_Visualize)
+
+from mdpertool.analysis.pdbsum_conservation_puller import get_conservation_scores
+from mdpertool.analysis.createRNetwork import (Multi_Task_Engine, Pymol_Visualize_Path, Shortest_Path_Visualize)
+
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
 
 from .file_dialog import Dialog as file_dialog
@@ -26,7 +28,7 @@ from pathlib import Path
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
 
-from .. import ui_main
+from mdpertool import ui_main
 
 
 class Helper_Functions():

@@ -1,4 +1,4 @@
-from ..gui.ui_styles import Style
+from mdpertool.gui.ui_styles import Style
 from .mplwidget import *
 from .omm_runner import *
 from .ui_functions import UIFunctions as UIF
@@ -13,7 +13,7 @@ import queue
 import threading
 import itertools
 import tokenize
-from ..ui_main import *
+from mdpertool.ui_main import *
 
 
 class Advanced(QThread):

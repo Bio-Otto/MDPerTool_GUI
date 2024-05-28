@@ -1,6 +1,0 @@
-git+https://github.com/conda-forge/mdtraj-feedstock
-git+https://github.com/conda-forge/openmm-feedstock
-git+https://github.com/conda-forge/pymol-open-source-feedstock
-git+https://github.com/conda-forge/pyside2-feedstock
-git+https://github.com/conda-forge/cudatoolkit-feedstock
-git+https://github.com/conda-forge/mdanalysis-feedstock

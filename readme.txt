@@ -40,7 +40,7 @@ from mdpertool.src.CustomReporters import Perturb_StateDataReporter
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
 #######################################################################################################################
 
-class Minimization_Reporter(openmm.MinimizationReporter):
+class Minimization_Reporter(mm.MinimizationReporter):
     energies = []  # array to record progress
     logger_object = object
 
@@ -66,7 +66,7 @@ class Minimization_Reporter(openmm.MinimizationReporter):
 # ---------------- LOGGER ---------------- #
 current_date = datetime.now().strftime("%Y-%m-%d")
 file_name = f"out_{current_date}.log"
-log_path = os.path.join('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output', file_name)
+log_path = os.path.join('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output', file_name)
 
 log_obj = Logger(log_path)
 """
@@ -85,7 +85,7 @@ log_obj.handlers.clear()
 
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
-fixed_pdb_name = fix_pdb('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/Download/2j0w_example_fixed_ph7.4.pdb', fixed_pdb_out_path='C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output', logger_object=log_obj)
+fixed_pdb_name = fix_pdb('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/2j0w_example_fixed_ph7.4.pdb', fixed_pdb_out_path='C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output', logger_object=log_obj)
 
 log_obj.info("Loading pdb to simulation engine ...".format())
 pdb = app.PDBFile(fixed_pdb_name)
@@ -140,7 +140,7 @@ simulation.minimizeEnergy(maxIterations=int(500), reporter=min_reporter)
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 log_obj.info("Minimized geometry is written to 'minimized.pdb'")
-app.PDBFile.writeModel(modeller.topology, positions, open('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output/minimized.pdb', 'w'), keepIds=True)
+app.PDBFile.writeModel(modeller.topology, positions, open('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/minimized.pdb', 'w'), keepIds=True)
 
 simulation.context.setVelocitiesToTemperature(310.0*kelvin)
 
@@ -151,7 +151,7 @@ simulation.currentStep = 0
 simulation.context.setTime(0)
 
 log_obj.info('The trajectories will be saved in DCD file format.')
-simulation.reporters.append(DCDReporter('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output/output.dcd', 100))
+simulation.reporters.append(DCDReporter('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/output.dcd', 100))
 log_obj.info("Saving DCD File for every 100 period")
 
 log_obj.info("Saving XTC File for every 100 period")
@@ -169,20 +169,20 @@ log_obj.info("Done!".format())
 
 lastpositions = simulation.context.getState(getPositions=True).getPositions()
 
-last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output/last.pdb', 'w'), keepIds=True)
+last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/last.pdb', 'w'), keepIds=True)
 
 
 state = simulation.context.getState(getPositions=True, getVelocities=True)
 
-with open('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output/system.xml', 'w') as f:
+with open('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/system.xml', 'w') as f:
     system_xml = mm.XmlSerializer.serialize(system)
     f.write(system_xml)
 
-with open('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output/integrator.xml', 'w') as f:
+with open('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/integrator.xml', 'w') as f:
     integrator_xml = mm.XmlSerializer.serialize(integrator)
     f.write(integrator_xml)
 
-with open('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output/state.xml', 'w') as f:
+with open('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output/state.xml', 'w') as f:
     f.write(mm.XmlSerializer.serialize(state))
 
 try:
@@ -208,10 +208,10 @@ created_file_for_work = str
 OUTPUT_FOLDER_NAME = str
 
 
-OUTPUT_DIRECTORY = Path('C:/ProgramData/anaconda3/envs/mdpertool/Lib/site-packages/mdpertool/output')
+OUTPUT_DIRECTORY = Path('C:/Users/law5_/anaconda3/envs/pertool/lib/site-packages/mdpertool/output')
 
 last_pdb_file_path = os.path.join(OUTPUT_DIRECTORY, last_pdb)
-modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['SER345'], 'CA')
+modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['SER345', 'GLU3'], 'CA')
 state_file_path = os.path.join(OUTPUT_DIRECTORY, state_file_name)
 
 for i in range(len([4])):

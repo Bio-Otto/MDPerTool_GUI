@@ -3,6 +3,13 @@ import os
 import sys
 import platform
 import argparse
+import os
+import PySide2
+
+dirname = os.path.dirname(PySide2.__file__)
+plugin_path = os.path.join(dirname, 'plugins', 'platforms')
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
+
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
@@ -16,7 +23,7 @@ from .src.builder import *
 from .src.app_functions import *
 from .src.checkBox_menu import *
 # =================== > IMPORTS < =================== #
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from openmm.app import Modeller
 from pdbfixer import PDBFixer
 import multiprocessing as mp
@@ -792,9 +799,6 @@ class SplashScreen(QMainWindow):
         current_dir = os.path.dirname(os.path.realpath(__file__))
         # UI file path
         ui_file = os.path.join(current_dir, 'gui', 'splash_screen.ui')
-        print("===============")
-        print(ui_file)
-        print("===============")
         self.ui = loadUi(ui_file, self)
 
         # ----- > Set App Icon
