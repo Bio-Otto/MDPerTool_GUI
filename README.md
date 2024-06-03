@@ -37,7 +37,7 @@ cd mdpertool
 python ui_main.py
 ```
 <p align="right">
-	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/windows-logo.png" width="55" title="Available on Windows">
+	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/windows-logo.png" width="60" title="Available on Windows">
 </p>
 
 
@@ -51,7 +51,7 @@ cd mdpertool
 python ui_main.py
 ```
 <p align="right">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/orange-logo-linux.png" width="40" title="Available on Ubuntu 20.10">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/orange-logo-linux.png" width="35" title="Available on Ubuntu 20.10">
 </p>
 
 ---
