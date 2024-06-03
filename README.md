@@ -93,9 +93,9 @@ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
 * __ProDy__ - Protein Dynamics and Sequence Analysis
 * __Parmed__ - Parameter/topology editor and molecular simulator
 
-And of course MDPERTOOL v0.0.1 itself is an open source [public repository][MDPERTOOL] on GitHub.
+And of course MDPERTOOL itself is an open source public repository.
 
-### Also you can check full functional parameters with: 
+#### Also you can check full functional parameters with: 
 
 ```sh
 python no_gui.py -h
@@ -165,7 +165,6 @@ Want to contribute? Get a branch and join us to make MDPERTOOL even greater!
  - Write MORE Tests
  - Add Light Mode
 
----
 
 ## 📝 License
 
