@@ -10,7 +10,7 @@ import time
 import os
 
 
-def fix_pdb(pdb_id, output=None, log_obj=None):
+def fix_pdb(pdb_id, pH=7.4, output=None, log_obj=None):
     if output is not None:
         path = output
     else:
@@ -32,15 +32,15 @@ def fix_pdb(pdb_id, output=None, log_obj=None):
         log_obj.info("Adding missing atoms...".format())
         fixer.addMissingAtoms()
         log_obj.info("Adding missing hydrogens...".format())
-        fixer.addMissingHydrogens(7)
+        fixer.addMissingHydrogens(pH)
         log_obj.info("Writing PDB file...".format())
 
         PDBFile.writeFile(
             fixer.topology,
             fixer.positions,
-            open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], 7)), "w"), keepIds=True)
+            open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)), "w"), keepIds=True)
 
-        return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], 7)
+        return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)
 
     if len(pdb_id) != 4 and log_obj is None:
         log_obj.info("Creating PDBFixer...".format())
@@ -58,12 +58,12 @@ def fix_pdb(pdb_id, output=None, log_obj=None):
         log_obj.info("Adding missing atoms...".format())
         fixer.addMissingAtoms()
         log_obj.info("Adding missing hydrogens...".format())
-        fixer.addMissingHydrogens(7)
+        fixer.addMissingHydrogens(pH)
         log_obj.info("Writing PDB file...".format())
 
         PDBFile.writeFile(
             fixer.topology,
             fixer.positions,
-            open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], 7)), "w"), keepIds=True)
+            open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)), "w"), keepIds=True)
 
-        return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], 7)
+        return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)

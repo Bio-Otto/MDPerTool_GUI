@@ -1,9 +1,20 @@
-from src.builder import *
 
+import argparse
 from importlib import resources
 import os
 import sys
 import platform
+
+this_directory = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(this_directory)
+
+from src.builder import *
+from src.pyside_dynamic import loadUi
+from gui.ui_styles import Style
+from src.builder import *
+from src.app_functions import *
+from src.checkBox_menu import *
+
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
@@ -43,7 +54,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
         self.dragPos = None
-        self.ui = loadUi('gui/MAIN_GUI.ui', self)
+
+        # Current directory
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        # UI file path
+        main_ui_file = os.path.join(current_dir, 'gui', 'MAIN_GUI.ui')
+        self.ui = loadUi(main_ui_file, self)
 
         ################################################################################################################
         #                                       ==> START OF WINDOW ATTRIBUTES <==                                     #
@@ -159,22 +175,35 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.long_simulation_time_unit.currentTextChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
-        self.integrator_time_step.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        self.integrator_time_step_lineEdit.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
+
+        # ============================================================================================================ #
         self.run = OpenMMScriptRunner
 
         self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(decomp_data[-1]))
+        self.run.Signals.classic_md_remain_time.connect(
+            lambda classic_md_remain_data: self.update_classic_md_remaining_time(classic_md_remain_data[-1]))
+        self.run.Signals.reference_md_remain_time.connect(
+            lambda reference_md_remain_data: self.update_reference_md_remaining_time(reference_md_remain_data[-1]))
+        self.run.Signals.dissipation_md_remain_time.connect(
+            lambda dissipation_md_remain_data: self.update_dissipation_md_remaining_time(dissipation_md_remain_data[-1]))
+
+        self.run.Signals.run_speed.connect(lambda speed_data: self.update_simulation_speed(speed_data[-1]))
+
 
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
         self.run.Signals.inform_about_situation.connect(
             lambda inform_message: self.inform_about_progress(inform_message))
+        # ============================================================================================================ #
 
         # ------------------------------ > START OF ANALYSIS WINDOW RELEATED BUTTONS < ------------------------------- #
         self.response_time_upload_Button.clicked.connect(lambda: UIF.Functions.browse_responseTimeFile(self))
         self.response_time_lineEdit.textChanged.connect(self.response_time_graph_path_changed)
         self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
         self.all_targets_checkBox.stateChanged.connect(lambda: UIF.Functions.All_Residues_as_target_Changed(self))
+        self.All_CPU_checkBox.stateChanged.connect(lambda: UIF.Functions.All_CPU_Usage_State(self))
         self.output_directory_button.clicked.connect(lambda: UIF.Functions.analysis_output_directory(self))
         self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local(manuel=True))
         self.add_residue_to_targets_pushButton.clicked.connect(lambda: UIF.Functions.add_residue_to_target_List(self))
@@ -265,8 +294,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Real_Time_Graphs.stop_th()
             self.Run.setEnabled(True)
 
+            self.Real_Time_Graphs.temperature_graph_plot.clear()
+            self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
+
+            self.Real_Time_Graphs.potential_energy_graph.clear()
+            self.Real_Time_Graphs.kinetic_energy_graph.clear()
+            self.Real_Time_Graphs.total_energy_graph.clear()
+
         except Exception as ins:
-            QMessageBox.warning(self, "The program can't stop the running Simulation", str(ins))
+            pass
+            # Message_Boxes.Information_message(self, "Info", str(ins), Style.MessageBox_stylesheet)
 
     def show_simulation_monitoring(self):
         # self.stackedWidget.setCurrentIndex(1)
@@ -319,7 +356,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=delete_chains)
+                                                                 ph=self.pH_doubleSpinBox.value(),
+                                                                 chains_to_remove=delete_chains)
 
                     self.upload_pdb_lineEdit.setText(modified_pdb)
 
@@ -332,7 +370,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=None)
+                                                                 ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
 
                     self.upload_pdb_textEdit.setText(modified_pdb)
 
@@ -344,7 +382,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 UIF.UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
-        except TypeError:
+        except Exception as Error:
+            print("ERROR: ", Error)
             pass
 
     def upload_boundForm_pdb_from_local(self, manuel=False):
@@ -372,7 +411,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=delete_chains)
+                                                                 ph=self.pH_doubleSpinBox.value(),
+                                                                 chains_to_remove=delete_chains)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
@@ -390,7 +430,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=7, chains_to_remove=None)
+                                                                 ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
@@ -424,6 +464,45 @@ class MainWindow(QtWidgets.QMainWindow):
     def inform_about_progress(self, message):
         message_regular = '<font color="yellow">%s</font>' % message
         self.label_top_info_1.setText(message_regular)
+
+    def update_classic_md_remaining_time(self, time):
+        font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
+        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+        self.label_56.setText(remainingTime_regular)
+        self.label_56.setFont(font)
+        self.label_56.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+    def update_reference_md_remaining_time(self, time):
+        font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
+        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+        self.label_57.setText(remainingTime_regular)
+        self.label_57.setFont(font)
+        self.label_57.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+    def update_dissipation_md_remaining_time(self, time):
+        font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
+        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+        self.label_58.setText(remainingTime_regular)
+        self.label_58.setFont(font)
+        self.label_58.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+    def update_simulation_speed(self, speed):
+        try:
+            speed_float = float(speed)
+            formatted_speed = '{:.2f} ns/day'.format(speed_float)
+        except ValueError:
+            formatted_speed = '-- ns/day'
+
+        font = QFont("Segoe UI", 10, QFont.Bold)
+        font.setLetterSpacing(QFont.AbsoluteSpacing, 1)
+        run_realtime_speed = '<font color="red"><b>{}</b></font>'.format(formatted_speed)
+
+        self.label_59.setText(run_realtime_speed)
+        self.label_59.setFont(font)
+        self.label_59.setAlignment(Qt.AlignVCenter)
 
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
@@ -714,7 +793,12 @@ class SplashScreen(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        self.ui = loadUi('gui/splash_screen.ui', self)
+
+        # Current directory
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        # UI file path
+        ui_file = os.path.join(current_dir, 'gui', 'splash_screen.ui')
+        self.ui = loadUi(ui_file, self)
 
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
@@ -739,11 +823,11 @@ class SplashScreen(QMainWindow):
         self.timer.start(19)
 
         # ----- > Change Description on Splash Screen
-        self.label_title.setText("MDPerTool v0.1")
+        self.label_title.setText("MDPerTool v0.0.1")
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
 
         # ----- > Initial Text on Splash Screen
-        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.1 PLATFORM")
+        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.0.1 PLATFORM")
 
         # ----- > CHANGE TEXT ON SPLASH SCREEN
         QtCore.QTimer.singleShot(1500, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
@@ -772,15 +856,45 @@ class SplashScreen(QMainWindow):
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
+def run_mdpertool():
 
+    parser = argparse.ArgumentParser(description="WELCOME TO MDPERTOOL ENTRY WINDOW")
+    parser.add_argument("-gui", "--show_gui", action='store_true')
+    parser.add_argument("-cli", "--commandline", action='store_true')
+    args = parser.parse_args()
+
+    if args.show_gui:
+        print("===== GUI APP WILL COME HERE =====")
+        mp.freeze_support()
+        QtWidgets.QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        app = QtWidgets.QApplication(sys.argv)
+        app.setStyleSheet(Style.QToolTip_stylesheet)
+        window = SplashScreen()
+        QtCore.QTimer.singleShot(0, lambda: center_window(window))
+        sys.exit(app.exec_())
+
+    if args.commandline:
+        print("===== CLI MODE WILL COME HERE =====")
+        pass
+
+    else:
+        parser.print_help()
+        sys.exit()
+
+
+if __name__ == "__main__":
+    run_mdpertool()
+
+"""
 def run_gui():
+
     mp.freeze_support()
+    QtWidgets.QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)
     window = SplashScreen()
     QtCore.QTimer.singleShot(0, lambda: center_window(window))
     sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
     if os.name == 'nt':
@@ -796,3 +910,4 @@ if __name__ == "__main__":
     window = SplashScreen()
     QtCore.QTimer.singleShot(0, lambda: center_window(window))
     sys.exit(app.exec_())
+"""

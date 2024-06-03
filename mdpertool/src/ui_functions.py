@@ -226,17 +226,17 @@ class UIFunctions(MainWindow):
         # self.frame_main.setGraphicsEffect(self.shadow)
         # DROP SHADOW EFFECT
 
-        ## ==> RESIZE WINDOW
+        # ==> RESIZE WINDOW
         self.sizegrip = QSizeGrip(self.frame_size_grip)
         self.sizegrip.setStyleSheet("width: 20px; height: 20px; margin 0px; padding: 0px;")
 
-        ### ==> MINIMIZE
+        # ==> MINIMIZE
         self.btn_minimize.clicked.connect(lambda: self.showMinimized())
 
-        ## ==> MAXIMIZE/RESTORE
+        # ==> MAXIMIZE/RESTORE
         self.btn_maximize_restore.clicked.connect(lambda: UIFunctions.maximize_restore(self))
 
-        ## SHOW ==> CLOSE APPLICATION
+        # SHOW ==> CLOSE APPLICATION
         self.btn_close.clicked.connect(lambda: UIFunctions.close_application(self))
 
     ####################################################################################################################

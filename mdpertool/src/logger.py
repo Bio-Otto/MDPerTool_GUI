@@ -2,48 +2,43 @@ import sys
 import logging
 import logging.config
 
-"""
+
 def Logger(file_name):
+    """
+    Creates and configures a logger with both file and console handlers.
 
-    formatter = logging.Formatter(fmt='%(asctime)s %(module)s,line: %(lineno)d %(levelname)8s | %(message)s',
-                                  datefmt='%Y/%m/%d %H:%M:%S')  # %I:%M:%S %p AM|PM format
-    logging.basicConfig(filename=file_name,
-                        format='%(asctime)s %(module)s,line: %(lineno)d %(levelname)8s | %(message)s',
-                        datefmt='%Y/%m/%d %H:%M:%S', filemode='w', level=logging.INFO)
-    log_obj = logging.getLogger()
-
-    log_obj.addLevelName(35, "DECOMPOSE")
-
-    log_obj.setLevel(logging.DEBUG)
-    # log_obj = logging.getLogger().addHandler(logging.StreamHandler())
-
-    # console printer
-    screen_handler = logging.StreamHandler(stream=sys.stdout)  # stream=sys.stdout is similar to normal print
-    screen_handler.setFormatter(formatter)
-    logging.getLogger().addHandler(screen_handler)
-
-    log_obj.info("Logger object created successfully..")
-    return log_obj
+    :param file_name: The name of the log file.
+    :return: The configured logger object.
     """
 
+    # Define the log format
+    log_format = '%(asctime)s %(module)s,line: %(lineno)d %(levelname)8s | %(message)s'
+    date_format = '%Y/%m/%d %H:%M:%S'
 
-def Logger(file_name):
-    formatter = logging.Formatter(fmt='%(asctime)s %(module)s,line: %(lineno)d %(levelname)8s | %(message)s',
-                                  datefmt='%Y/%m/%d %H:%M:%S')  # %I:%M:%S %p AM|PM format
-    logging.basicConfig(filename=file_name,
-                        format='%(asctime)s %(module)s,line: %(lineno)d %(levelname)8s | %(message)s',
-                        datefmt='%Y/%m/%d %H:%M:%S', filemode='a', level=logging.INFO)
-    log_obj = logging.getLogger()
+    # Configure the formatter
+    formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
 
+    # Configure the file handler
+    file_handler = logging.FileHandler(filename=file_name, mode='a')
+    file_handler.setFormatter(formatter)
+
+    # Configure the console handler
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setFormatter(formatter)
+
+    # Create and configure the logger
+    logger = logging.getLogger()
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+    logger.setLevel(logging.INFO)  # Set the logging level to INFO
+
+    # Add a custom logging level
     logging.addLevelName(35, "DECOMPOSE")
+    logging.addLevelName(36, "PREPARATION")
+    logging.addLevelName(37, "REFERENCE_MD")
+    logging.addLevelName(38, "PERTURBATION_MD")
 
-    log_obj.setLevel(logging.INFO)  # DEBUG yerine INFO
-    # log_obj = logging.getLogger().addHandler(logging.StreamHandler())
+    # Log a message indicating that the logger object was created successfully
+    logger.info("Logger object created successfully.")
 
-    # console printer
-    screen_handler = logging.StreamHandler(stream=sys.stdout)  # stream=sys.stdout is similar to normal print
-    screen_handler.setFormatter(formatter)
-    logging.getLogger().addHandler(screen_handler)
-
-    log_obj.info("Logger object created successfully..")
-    return log_obj
+    return logger
