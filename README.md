@@ -27,7 +27,20 @@
 
 ## 📥 Installation
 
-### For Windows Users
+To install MDPERTOOL using Conda, simply run the following commands:
+
+```sh
+conda install bio-otto::mdpertool
+```
+This will install MDPERTOOL and all of its dependencies. Once the installation is completed, you can access the Command Line Interface by typing 'mdpertool' in your terminal.
+
+---
+
+### Manual Installation
+
+To manually install MDPERTOOL, follow the instructions below:
+
+#### For Windows Users
 ```cmd
 git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
@@ -41,7 +54,7 @@ python ui_main.py
 </p>
 
 
-### For Linux Users
+#### For Linux Users
 ```sh
 git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
