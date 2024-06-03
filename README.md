@@ -39,7 +39,7 @@ python ui_main.py
 <p align="right">
 	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/windows-logo.png" width="45" title="Available on Windows">
 </p>
----
+
 
 ### For Linux Users
 ```sh
