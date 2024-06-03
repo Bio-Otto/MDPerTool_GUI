@@ -3,7 +3,7 @@ import os.path as op
 global readme, changelog, __citation__, __long_description__, __url__, __author_email__
 
 
-__version_info__ = ('0', '0', '1', 'dev')
+__version_info__ = ('0', '0', '1', 'dev3')
 
 __author__ = 'Halil I. Ozdemir'
 

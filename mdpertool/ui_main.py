@@ -1,9 +1,20 @@
-from src.builder import *
 
+import argparse
 from importlib import resources
 import os
 import sys
 import platform
+
+this_directory = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(this_directory)
+
+from src.builder import *
+from src.pyside_dynamic import loadUi
+from gui.ui_styles import Style
+from src.builder import *
+from src.app_functions import *
+from src.checkBox_menu import *
+
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
@@ -43,7 +54,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
         self.dragPos = None
-        self.ui = loadUi('gui/MAIN_GUI.ui', self)
+
+        # Current directory
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        # UI file path
+        main_ui_file = os.path.join(current_dir, 'gui', 'MAIN_GUI.ui')
+        self.ui = loadUi(main_ui_file, self)
 
         ################################################################################################################
         #                                       ==> START OF WINDOW ATTRIBUTES <==                                     #
@@ -777,7 +793,12 @@ class SplashScreen(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        self.ui = loadUi('gui/splash_screen.ui', self)
+
+        # Current directory
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        # UI file path
+        ui_file = os.path.join(current_dir, 'gui', 'splash_screen.ui')
+        self.ui = loadUi(ui_file, self)
 
         # ----- > Set App Icon
         app_icon = QtGui.QIcon()
@@ -835,15 +856,45 @@ class SplashScreen(QMainWindow):
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
+def run_mdpertool():
 
+    parser = argparse.ArgumentParser(description="WELCOME TO MDPERTOOL ENTRY WINDOW")
+    parser.add_argument("-gui", "--show_gui", action='store_true')
+    parser.add_argument("-cli", "--commandline", action='store_true')
+    args = parser.parse_args()
+
+    if args.show_gui:
+        print("===== GUI APP WILL COME HERE =====")
+        mp.freeze_support()
+        QtWidgets.QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        app = QtWidgets.QApplication(sys.argv)
+        app.setStyleSheet(Style.QToolTip_stylesheet)
+        window = SplashScreen()
+        QtCore.QTimer.singleShot(0, lambda: center_window(window))
+        sys.exit(app.exec_())
+
+    if args.commandline:
+        print("===== CLI MODE WILL COME HERE =====")
+        pass
+
+    else:
+        parser.print_help()
+        sys.exit()
+
+
+if __name__ == "__main__":
+    run_mdpertool()
+
+"""
 def run_gui():
+
     mp.freeze_support()
+    QtWidgets.QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(Style.QToolTip_stylesheet)
     window = SplashScreen()
     QtCore.QTimer.singleShot(0, lambda: center_window(window))
     sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
     if os.name == 'nt':
@@ -859,3 +910,4 @@ if __name__ == "__main__":
     window = SplashScreen()
     QtCore.QTimer.singleShot(0, lambda: center_window(window))
     sys.exit(app.exec_())
+"""

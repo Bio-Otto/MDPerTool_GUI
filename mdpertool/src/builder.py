@@ -207,6 +207,7 @@ class Advanced(QtCore.QThread):
 
         print("Parameters have been sent to OMM-Runner...")
         script_structure = dict(pdb=pdb_pfile,
+                                parent_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
                                 long_simulation_time=self.Number_of_steps_spinBox.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
@@ -316,7 +317,13 @@ class Advanced_Helper_Functions(QtCore.QThread):
     def update_display(self, script_structure):
         renderer = pystache.Renderer()
 
-        template = pystache.parse(open('src/template_script.txt').read())
+
+        # Current directory
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        # template file path
+        template_file_path = os.path.join(curr_dir, 'template_script.txt')
+
+        template = pystache.parse(open(template_file_path).read())
         self.contents = renderer.render(template, script_structure)
 
         with open('readme.txt', 'w') as f:
