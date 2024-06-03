@@ -77,7 +77,6 @@ For terminal usage, run:
 python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
 ```
 
----
 
 ## 📦 Dependencies
 
@@ -109,7 +108,6 @@ python no_gui.py -p <pdb file> -pff <charmm36> -wff <tip5p> -wdcd <True>
 
 MDPerTool applies Energy Dissipation Concept using OpenMM Molecular Dynamic Toolkit, which also supports the CUDA platform.
 
----
 
 ## ✨ Features
 
@@ -158,7 +156,6 @@ This version of mdpertool includes the following features.
 
 Want to contribute? Get a branch and join us to make MDPERTOOL even greater!
 
----
 
 ## 📋 Todos
 
