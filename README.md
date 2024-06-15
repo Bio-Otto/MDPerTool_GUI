@@ -50,7 +50,7 @@ cd mdpertool
 python ui_main.py
 ```
 <p align="right">
-	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="60" title="Available on Windows">
+	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="70" title="Available on Windows">
 </p>
 
 
@@ -65,7 +65,7 @@ python ui_main.py
 ```
 <p align="right">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/orange-logo-linux.png" width="35" title="Available on Ubuntu">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="70" title="Available on macOS">
 </p>
 
 ---
@@ -173,6 +173,6 @@ Free Software, Hell Yeah!
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
     <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/gui_development/PoweredByOzbekLab.png" width="250" height="40" /></a>
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/orange-logo-linux.png" width="40" title="Available on Ubuntu">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="40" title="Available on Windows">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="70" title="Available on Windows">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="70" title="Available on macOS">
 </p>
