@@ -171,7 +171,7 @@ MDPERTOOL is licensed under the MIT License. See the LICENSE file for more detai
 Free Software, Hell Yeah!
 <p align="center">
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/gui_development/PoweredByOzbekLab.png" width="250" height="40" /></a>
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/PoweredByOzbekLab.png" width="250" height="40" /></a>
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/orange-logo-linux.png" width="40" title="Available on Ubuntu">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="70" title="Available on Windows">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="50" title="Available on macOS">
