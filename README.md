@@ -50,7 +50,7 @@ cd mdpertool
 python ui_main.py
 ```
 <p align="right">
-	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/windows-logo.png" width="60" title="Available on Windows">
+	<img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="60" title="Available on Windows">
 </p>
 
 
@@ -64,8 +64,8 @@ cd mdpertool
 python ui_main.py
 ```
 <p align="right">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/orange-logo-linux.png" width="35" title="Available on Ubuntu 20.10">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/orange-logo-linux.png" width="35" title="Available on Ubuntu">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
 </p>
 
 ---
@@ -171,8 +171,8 @@ MDPERTOOL is licensed under the MIT License. See the LICENSE file for more detai
 Free Software, Hell Yeah!
 <p align="center">
     <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
-    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" width="250" height="40" /></a>
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/orange-logo-linux.png" width="40" title="Available on Ubuntu 20.10">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/windows-logo.png" width="40" title="Available on Windows">
-    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
+    <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/gui_development/PoweredByOzbekLab.png" width="250" height="40" /></a>
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/orange-logo-linux.png" width="40" title="Available on Ubuntu">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/windows-logo.png" width="40" title="Available on Windows">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
 </p>
