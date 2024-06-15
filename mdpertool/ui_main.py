@@ -1,4 +1,3 @@
-
 import argparse
 from importlib import resources
 import os
@@ -14,6 +13,8 @@ from gui.ui_styles import Style
 from src.builder import *
 from src.app_functions import *
 from src.checkBox_menu import *
+import _version as current_version
+from no_gui import run_mdpertool_from_cli, add_arguments_tu_subparsers
 
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
@@ -86,7 +87,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
         # ----- > Set Window Title
-        self.setWindowTitle('MDPerTool v0.1')
+        self.setWindowTitle('MDPerTool v%s' % current_version.__version__)
+        self.label_version.setText('Version %s' % current_version.__version__)
         # self.setWindowIcon(QIcon('%s/icons/MDPerTool.ico' % os.getcwd()))
         UIF.UIFunctions.labelTitle(self, 'MDPerTool - %s %s' % (platform.system(), platform.release()))
         UIF.UIFunctions.labelDescription(self, str(os.getcwd()))
@@ -115,11 +117,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                    "url(:/20x20/icons/20x20/cil-monitor.png)", True)
         UIF.UIFunctions.addNewMenu(self, "Analysis", "btn_analysis",
                                    "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
-        """
-        UIF.UIFunctions.addNewMenu(self, "Settings", "btn_settings",
-                                   "url(:/20x20/icons/20x20/cil-equalizer.png)", False)
-        """
-        UIF.UIFunctions.addNewMenu(self, "About & Contact", "btn_about", "url(:/20x20/icons/20x20/cil-tag.png)", False)
+        UIF.UIFunctions.addNewMenu(self, "About&Contact", "btn_about",
+                                   "url(:/20x20/icons/20x20/cil-comment-bubble.png)", False)
 
         # ----- > Start Menu Selection
         UIF.UIFunctions.selectStandardMenu(self, "btn_perturbation")
@@ -175,7 +174,8 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.long_simulation_time_unit.currentTextChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
-        self.integrator_time_step_lineEdit.textChanged.connect(lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        self.integrator_time_step_lineEdit.textChanged.connect(
+            lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
 
@@ -188,10 +188,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run.Signals.reference_md_remain_time.connect(
             lambda reference_md_remain_data: self.update_reference_md_remaining_time(reference_md_remain_data[-1]))
         self.run.Signals.dissipation_md_remain_time.connect(
-            lambda dissipation_md_remain_data: self.update_dissipation_md_remaining_time(dissipation_md_remain_data[-1]))
+            lambda dissipation_md_remain_data: self.update_dissipation_md_remaining_time(
+                dissipation_md_remain_data[-1]))
 
         self.run.Signals.run_speed.connect(lambda speed_data: self.update_simulation_speed(speed_data[-1]))
-
 
         self.run.Signals.finish_alert.connect(lambda finish_signal: self.finish_message(finish_signal))
         self.run.Signals.inform_about_situation.connect(
@@ -370,7 +370,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
+                                                                 ph=self.pH_doubleSpinBox.value(),
+                                                                 chains_to_remove=None)
 
                     self.upload_pdb_textEdit.setText(modified_pdb)
 
@@ -430,7 +431,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
+                                                                 ph=self.pH_doubleSpinBox.value(),
+                                                                 chains_to_remove=None)
 
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
@@ -823,11 +825,11 @@ class SplashScreen(QMainWindow):
         self.timer.start(19)
 
         # ----- > Change Description on Splash Screen
-        self.label_title.setText("MDPerTool v0.0.1")
+        self.label_title.setText('MDPerTool <span style="font-size:20px;">v%s</span>' % current_version.__version__)
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
 
         # ----- > Initial Text on Splash Screen
-        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool V0.0.1 PLATFORM")
+        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool v%s PLATFORM" % current_version.__version__)
 
         # ----- > CHANGE TEXT ON SPLASH SCREEN
         QtCore.QTimer.singleShot(1500, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
@@ -856,14 +858,17 @@ class SplashScreen(QMainWindow):
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
-def run_mdpertool():
 
+def run_mdpertool():
     parser = argparse.ArgumentParser(description="WELCOME TO MDPERTOOL ENTRY WINDOW")
-    parser.add_argument("-gui", "--show_gui", action='store_true')
-    parser.add_argument("-cli", "--commandline", action='store_true')
+    subparsers = parser.add_subparsers(dest='mode', required=True)
+    gui_parser = subparsers.add_parser('gui', help='Graphical User Interface')
+    cli_parser = subparsers.add_parser('cli', help='Command line interface')
+
+    add_arguments_tu_subparsers(cli_parser)
     args = parser.parse_args()
 
-    if args.show_gui:
+    if args.mode == 'gui':
         print("===== GUI APP WILL COME HERE =====")
         mp.freeze_support()
         QtWidgets.QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
@@ -873,14 +878,13 @@ def run_mdpertool():
         QtCore.QTimer.singleShot(0, lambda: center_window(window))
         sys.exit(app.exec_())
 
-    if args.commandline:
+    elif args.mode == 'cli':
         print("===== CLI MODE WILL COME HERE =====")
-        pass
+        run_mdpertool_from_cli(args)
 
     else:
         parser.print_help()
         sys.exit()
-
 
 if __name__ == "__main__":
     run_mdpertool()

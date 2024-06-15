@@ -1915,63 +1915,6 @@ background-color: rgb(93, 83, 91);
                                    </property>
                                   </widget>
                                  </item>
-                                 <item row="3" column="2">
-                                  <widget class="QCheckBox" name="pdb_fix_clean">
-                                   <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                     <horstretch>0</horstretch>
-                                     <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                   </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>105</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>105</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="styleSheet">
-                                    <string notr="true">QCheckBox {
-    spacing: 5px;
-}
-
-QCheckBox::indicator {
-    width: 15px;
-    height: 15px;
-}
-
-QCheckBox::indicator:unchecked {
-border-image: url(:/16x16/icons/16x16/cil-circle.png);
-
-}
-
-
-QCheckBox::indicator:checked {
-	border-image: url(:/20x20/icons/20x20/cil-check.png);
-}
-
-
-</string>
-                                   </property>
-                                   <property name="text">
-                                    <string>fix and clean</string>
-                                   </property>
-                                   <property name="checked">
-                                    <bool>true</bool>
-                                   </property>
-                                  </widget>
-                                 </item>
                                  <item row="2" column="0">
                                   <widget class="QLabel" name="label_32">
                                    <property name="minimumSize">

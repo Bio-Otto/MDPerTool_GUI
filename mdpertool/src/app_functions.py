@@ -1161,6 +1161,8 @@ class Functions(MainWindow):
                                                   "   border-right-color: rgb(157, 90, 198);\n"
                                                   "   margin-top: 5px;\n"
                                                   "}")
+
+
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
             sizePolicy.setHorizontalStretch(0)
             sizePolicy.setVerticalStretch(0)

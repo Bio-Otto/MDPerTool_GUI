@@ -41,7 +41,7 @@ This will install MDPERTOOL and all of its dependencies. Once the installation i
 To manually install MDPERTOOL, follow the instructions below:
 
 #### For Windows Users
-```cmd
+```sh
 git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
 conda env create -f envs/winx64_env.yml
@@ -54,7 +54,7 @@ python ui_main.py
 </p>
 
 
-#### For Linux Users
+#### For Linux and macOS Users
 ```sh
 git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
@@ -65,6 +65,7 @@ python ui_main.py
 ```
 <p align="right">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/orange-logo-linux.png" width="35" title="Available on Ubuntu 20.10">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
 </p>
 
 ---
@@ -173,4 +174,5 @@ Free Software, Hell Yeah!
     <img src="https://github.com/Bio-Otto/Example_MD_Scripts/blob/master/PoweredByOzbekLab.png" width="250" height="40" /></a>
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/orange-logo-linux.png" width="40" title="Available on Ubuntu 20.10">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/windows-logo.png" width="40" title="Available on Windows">
+    <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/mdpertool/gui/icons/macOS-logo.png" width="40" title="Available on macOS">
 </p>

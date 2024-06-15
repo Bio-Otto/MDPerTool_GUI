@@ -251,6 +251,7 @@ class UIFunctions(MainWindow):
             self.ProteinView = PymolQtWidget(self)
             verticalLayoutProteinView = QVBoxLayout(self.Pymol_Widget)
             verticalLayoutProteinView.addWidget(self.ProteinView)
+            self.ProteinView.change_default_background()
             self.setLayout(verticalLayoutProteinView)
             self.ProteinView.update()
             self.ProteinView.show()
@@ -258,6 +259,7 @@ class UIFunctions(MainWindow):
             self.ProteinView.initial_pymol_visual()
 
             self.Protein3DNetworkView = PymolQtWidget(self)
+            self.Protein3DNetworkView.change_default_background()
             verticalLayoutProteinNetworkView = QVBoxLayout(self.PyMOL_3D_network_Widget)
             verticalLayoutProteinNetworkView.addWidget(self.Protein3DNetworkView)
             self.setLayout(verticalLayoutProteinNetworkView)
@@ -304,7 +306,6 @@ class UIFunctions(MainWindow):
         self.ProteinView.show()
 
     def show_residue_labels(self):
-        print("AAAAAA")
         itemsTextList = self.selected_residues_listWidget.currentItem().text()
         # [str(self.selected_residues_listWidget.item(i).text()) for i in
         #              range(self.selected_residues_listWidget.count())]

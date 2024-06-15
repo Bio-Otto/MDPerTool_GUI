@@ -100,15 +100,14 @@ class OpenMMScriptRunner(QtCore.QObject):
                 if error_output == b'' and self.process.poll() is not None:
                     break
                 if error_output:
-
-                    print("Standard Error:", error_output.decode().strip())
                     queue.put(error_output.decode().strip())
 
             self.process.wait()
 
             if self.process.returncode != 0:
-                raise subprocess.CalledProcessError(self.process.returncode, 'Script execution has been stoped by the '
-                                                                             'User!')
+                queue.put(str(self.process.returncode) + '\nScript execution has been stoped by the User!')
+                # raise subprocess.CalledProcessError(self.process.returncode, 'Script execution has been stoped by the '
+                #                                                             'User!')
 
         except (subprocess.CalledProcessError, OSError) as e:
             print("Exception:", str(e))
@@ -123,7 +122,8 @@ class OpenMMScriptRunner(QtCore.QObject):
             try:
                 """Close Application Question Message Box."""
                 close_answer = Message_Boxes.Question_message(self, "Are you sure!", "Do you really want to stop the "
-                                                                                    "run?", Style.MessageBox_stylesheet)
+                                                                                     "run?",
+                                                              Style.MessageBox_stylesheet)
 
                 if close_answer == QMessageBox.Yes:
                     try:
@@ -419,8 +419,8 @@ class Graphs(QWidget):
             y_kinetic = np.array(data["Kinetic Energy (kJ/mole)"], dtype=np.float64)
             y_total = np.array(data["Total Energy (kJ/mole)"], dtype=np.float64)
 
-            #y_speed = np.array(data["Speed (ns/day)"])[-1]
-            #real_speed = self.pretty_speed(y_speed)
+            # y_speed = np.array(data["Speed (ns/day)"])[-1]
+            # real_speed = self.pretty_speed(y_speed)
 
             # time_remaining = np.array(data["Time Remaining"])[-1]
             # print(list(data.keys()))
@@ -499,7 +499,8 @@ class Graphs(QWidget):
             self.elapsed_time = 0.0
 
         except Exception as Run_Stop_Error:
-            Message_Boxes.Information_message(self, "There is no an active run!", str(Run_Stop_Error), Style.MessageBox_stylesheet)
+            Message_Boxes.Information_message(self, "There is no an active run!", str(Run_Stop_Error),
+                                              Style.MessageBox_stylesheet)
 
             pass
 # if __name__ == '__main__':
