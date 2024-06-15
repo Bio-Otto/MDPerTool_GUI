@@ -32,7 +32,7 @@ To install MDPERTOOL using Conda, simply run the following commands:
 ```sh
 conda install bio-otto::mdpertool
 ```
-This will install MDPERTOOL and all of its dependencies. Once the installation is completed, you can access the Command Line Interface by typing 'mdpertool' in your terminal.
+This will install MDPERTOOL and all of its dependencies. Once the installation is completed, you can access the Command Line Interface by typing mdpertool cli in your terminal or the Graphical User Interface by typing mdpertool gui.
 
 ---
 
@@ -70,14 +70,39 @@ python ui_main.py
 
 ---
 
-## 🖥️ Terminal Usage
+## 🖥️ Usage
 
-For terminal usage, run:
+### Graphical User Interface (GUI)
+
+To launch the GUI, simply run:
 
 ```sh
-python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
+mdpertool gui
 ```
 
+### Command Line Interface (CLI)
+
+To run the CLI mode, you need to provide additional arguments. The basic command structure is:
+
+```sh
+mdpertool cli -p <topology_file> [optional arguments]
+```
+
+#### Example Usage
+
+Running in CLI Mode
+```sh
+mdpertool cli -p path/to/topology.pdb -pff amber99sb -wff spce
+```
+This command will run MDPERTOOL in command line mode with the specified topology file, protein forcefield, and water forcefield.
+
+#### Full CLI Options
+
+For a complete list of CLI options, you can refer to the help command:
+```sh
+mdpertool cli -h
+```
+This will display all the available options and their descriptions for running MDPERTOOL in CLI mode.
 
 ## 📦 Dependencies
 
@@ -93,19 +118,6 @@ python no_gui.py -p pdb_file -wdcd True -pert_res 'SER345' -speed_factor 4
 * __ProDy__ - Protein Dynamics and Sequence Analysis
 * __Parmed__ - Parameter/topology editor and molecular simulator
 
-And of course MDPERTOOL itself is an open source public repository.
-
-#### Also you can check full functional parameters with: 
-
-```sh
-python no_gui.py -h
-```
-
-For Molecular Dynamic Simulation production
-
-```sh
-python no_gui.py -p <pdb file> -pff <charmm36> -wff <tip5p> -wdcd <True>
-```
 
 MDPerTool applies Energy Dissipation Concept using OpenMM Molecular Dynamic Toolkit, which also supports the CUDA platform.
 
