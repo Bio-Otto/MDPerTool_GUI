@@ -315,16 +315,20 @@ class Graphs(QWidget):
         pg.setConfigOption('foreground', (197, 198, 199))
         pg.setConfigOptions(antialias=True)
 
-    def setup_temperature_graph(self):
-        self.temperature_graph = self.win.addPlot(title="Temperature")
-        self.configure_graph(self.temperature_graph, 'Temperature', 'K')
+    def setup_temperature_graph(self, reset=None):
+        if reset is None:
+            self.temperature_graph = self.win.addPlot(title="Temperature")
+            self.configure_graph(self.temperature_graph, 'Temperature', 'K')
+
         self.temperature_graph_plot = pg.PlotDataItem(clear=True, pen=self.TEMPERATURE_PEN,
                                                       name="Temperature", fillLevel=0.0, brush=(150, 150, 50, 30))
         self.temperature_graph.addItem(self.temperature_graph_plot)
 
-    def setup_energy_graph(self):
-        self.energy_graph = self.win.addPlot(title="Energy")
-        self.configure_graph(self.energy_graph, 'Energy', 'kJ/mole')
+    def setup_energy_graph(self, reset=None):
+        if reset is None:
+            self.energy_graph = self.win.addPlot(title="Energy")
+            self.configure_graph(self.energy_graph, 'Energy', 'kJ/mole')
+
         self.potential_energy_graph = pg.PlotDataItem(clear=True, pen=self.ENERGY_PEN[0],
                                                       name="Potential", fillLevel=0.0, brush=(150, 150, 50, 30))
         self.kinetic_energy_graph = pg.PlotDataItem(clear=True, pen=self.ENERGY_PEN[1],
@@ -334,7 +338,7 @@ class Graphs(QWidget):
         self.energy_graph.addItem(self.potential_energy_graph)
         self.energy_graph.addItem(self.kinetic_energy_graph)
         self.energy_graph.addItem(self.total_energy_graph)
-        self.win.nextRow()
+        #self.win.nextRow()
 
     def setup_simulation_speed_graph(self):
         self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=1)

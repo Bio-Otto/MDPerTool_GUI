@@ -290,17 +290,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def stop_button_clicked(self):
         self.__stop = True
+
         try:
             self.Real_Time_Graphs.stop_th()
             self.Run.setEnabled(True)
 
             self.Real_Time_Graphs.temperature_graph_plot.clear()
-            self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
+            self.Real_Time_Graphs.temperature_graph.clear()
+            self.Real_Time_Graphs.setup_temperature_graph(reset=True)
 
             self.Real_Time_Graphs.potential_energy_graph.clear()
             self.Real_Time_Graphs.kinetic_energy_graph.clear()
             self.Real_Time_Graphs.total_energy_graph.clear()
+            self.Real_Time_Graphs.energy_graph.clear()
+            self.Real_Time_Graphs.setup_energy_graph(reset=True)
 
+            #self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
         except Exception as ins:
             pass
             # Message_Boxes.Information_message(self, "Info", str(ins), Style.MessageBox_stylesheet)
@@ -308,13 +313,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def show_simulation_monitoring(self):
         # self.stackedWidget.setCurrentIndex(1)
         self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
-
         UIF.UIFunctions.resetStyle(self, "btn_monitoring")
         UIF.UIFunctions.labelPage(self, "MONITORING THE PROCESS")
         widget = self.findChild(QPushButton, "btn_monitoring")
         widget.setStyleSheet(UIF.UIFunctions.selectMenu(widget.styleSheet()))
 
         self.Real_Time_Graphs.run_script(self.created_script)
+
+    def show_analysis_window(self):
+        self.stackedWidget.setCurrentWidget(self.Analysis)
+        UIF.UIFunctions.resetStyle(self, "btn_analysis")
+        UIF.UIFunctions.labelPage(self, "ENERGY DISSIPATION ANALYSIS")
+        widget = self.findChild(QPushButton, "btn_analysis")
+        widget.setStyleSheet(UIF.UIFunctions.selectMenu(widget.styleSheet()))
 
     def fetch_and_load_pdbfile(self):
         """
@@ -492,7 +503,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.response_time_lineEdit.setText(os.path.join(self.Output_Folder_textEdit.toPlainText(),
                                                              'responseTimes_%s.csv' % int(self.R_factor_ComboBox.currentText())))
             self.upload_boundForm_pdb_from_local(manuel=False)
-            self.stackedWidget.setCurrentWidget(self.Analysis)
+            self.show_analysis_window()
 
     def inform_about_progress(self, message):
         message_regular = '<font color="yellow">%s</font>' % message
