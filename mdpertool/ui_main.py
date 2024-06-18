@@ -402,33 +402,54 @@ class MainWindow(QtWidgets.QMainWindow):
                 modeller = Modeller(fixer.topology, fixer.positions)
                 chains = [r.id for r in modeller.topology.chains()]
 
-                checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                                   checked=True)
-                pdb_fix_dialog_answer = checked_list.exec_()
-                if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
-                    selected_chains = [str(s) for s in checked_list.choices]
+                if manuel:
+                    checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
+                                                       checked=True)
+                    pdb_fix_dialog_answer = checked_list.exec_()
+                    if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
+                        selected_chains = [str(s) for s in checked_list.choices]
 
-                    delete_chains = list(set(chains) - set(selected_chains))
+                        delete_chains = list(set(chains) - set(selected_chains))
 
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
-                                                                 self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=self.pH_doubleSpinBox.value(),
-                                                                 chains_to_remove=delete_chains)
+                        modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
+                                                                     self.Output_Folder_textEdit.toPlainText(),
+                                                                     ph=self.pH_doubleSpinBox.value(),
+                                                                     chains_to_remove=delete_chains)
 
-                    self.boundForm_pdb_lineedit.setText(modified_pdb)
+                        self.boundForm_pdb_lineedit.setText(modified_pdb)
 
-                    self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                        self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
 
-                    for i in self.target_combobox:
-                        self.target_res_comboBox.addItem(str(i))
-                        self.source_res_comboBox.addItem(str(i))
+                        for i in self.target_combobox:
+                            self.target_res_comboBox.addItem(str(i))
+                            self.source_res_comboBox.addItem(str(i))
 
-                    self.target_res_comboBox.clear()  # delete all items from comboBox
-                    self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
-                    self.source_res_comboBox.clear()  # delete all items from comboBox
-                    self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.target_res_comboBox.clear()  # delete all items from comboBox
+                        self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.source_res_comboBox.clear()  # delete all items from comboBox
+                        self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
 
-                elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                    elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
+                        modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
+                                                                     self.Output_Folder_textEdit.toPlainText(),
+                                                                     ph=self.pH_doubleSpinBox.value(),
+                                                                     chains_to_remove=None)
+
+                        self.boundForm_pdb_lineedit.setText(modified_pdb)
+
+                        self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
+                        for i in self.target_combobox:
+                            self.target_res_comboBox.addItem(str(i))
+                            self.source_res_comboBox.addItem(str(i))
+
+                        self.target_res_comboBox.clear()  # delete all items from comboBox
+                        self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.source_res_comboBox.clear()  # delete all items from comboBox
+                        self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+
+                    UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
+
+                if not manuel:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
                                                                  self.Output_Folder_textEdit.toPlainText(),
                                                                  ph=self.pH_doubleSpinBox.value(),
@@ -437,16 +458,19 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.boundForm_pdb_lineedit.setText(modified_pdb)
 
                     self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
+
                     for i in self.target_combobox:
                         self.target_res_comboBox.addItem(str(i))
                         self.source_res_comboBox.addItem(str(i))
 
                     self.target_res_comboBox.clear()  # delete all items from comboBox
-                    self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                    self.target_res_comboBox.addItems(
+                        self.target_combobox)  # add the actual content of self.comboData
                     self.source_res_comboBox.clear()  # delete all items from comboBox
-                    self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                    self.source_res_comboBox.addItems(
+                        self.target_combobox)  # add the actual content of self.comboData
 
-                UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
+                    UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
 
         except TypeError:
             pass
@@ -462,6 +486,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.r_factor_count == len(str(self.R_factor_ComboBox.currentText())):
             UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
+
+            self.net_output_directory_lineedit.setText(self.Output_Folder_textEdit.toPlainText())
+            self.boundForm_pdb_lineedit.setText(self.upload_pdb_lineEdit.text())
+            self.response_time_lineEdit.setText(os.path.join(self.Output_Folder_textEdit.toPlainText(),
+                                                             'responseTimes_%s.csv' % int(self.R_factor_ComboBox.currentText())))
+            self.upload_boundForm_pdb_from_local(manuel=False)
+            self.stackedWidget.setCurrentWidget(self.Analysis)
 
     def inform_about_progress(self, message):
         message_regular = '<font color="yellow">%s</font>' % message

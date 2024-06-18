@@ -284,6 +284,7 @@ class UIFunctions(MainWindow):
 
     def load_pdb_to_3DNetwork(self, pdb_file):
         self.Protein3DNetworkView.reinitialize()
+        self.Protein3DNetworkView.change_default_background()
         self.Protein3DNetworkView.loadMolFile(pdb_file)
         self.Protein3DNetworkView.update()
         self.Protein3DNetworkView.show()
