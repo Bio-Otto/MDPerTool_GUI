@@ -310,56 +310,87 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
     return clean_network, str(log)
 
 
-class Multi_Task_Engine(object):
+class MultiTaskEngine:
+    """
+    A class to handle multiple tasks related to network calculations based on PDB files.
+    """
 
-    def __init__(self, pdb_file, cutoff, reTimeFile, source, write_outputs, output_directory, node_threshold=None,
-                 CA_on=True, outputFileName='111.gml', conserv_thresh=0.0, pdb_id=None):
+    def __init__(self, pdb_file, cutoff, re_time_file, source, write_outputs, output_directory, node_threshold=None,
+                 ca_on=True, output_file_name='111.gml', conserv_thresh=0.0, pdb_id=None):
+        """
+        Initialize the MultiTaskEngine with the necessary parameters.
 
-        self.Work = []
+        :param pdb_file: Path to the PDB file
+        :param cutoff: Cutoff value for network calculations
+        :param re_time_file: File for re-time calculations
+        :param source: Source for network calculations
+        :param write_outputs: Boolean to decide whether to write outputs
+        :param output_directory: Directory to write outputs
+        :param node_threshold: Threshold for nodes in the network
+        :param ca_on: Boolean to decide if CA atoms should be considered
+        :param output_file_name: Name of the output file
+        :param conserv_thresh: Conservation threshold
+        :param pdb_id: PDB ID
+        """
+        self.work = []
         self.pdb_file = pdb_file
         self.cutoff = cutoff
-        self.reTimeFile = reTimeFile
-        self.outputFileName = outputFileName
+        self.re_time_file = re_time_file
+        self.output_file_name = output_file_name
         self.source = source
         self.write_outputs = write_outputs
         self.output_directory = output_directory
         self.node_threshold = node_threshold
         self.network = None
-        self.resId_List = None
-        self.CA_on = CA_on
+        self.res_id_list = None
+        self.ca_on = ca_on
         self.conserv_thresh = conserv_thresh
         self.pdb_id = pdb_id
 
     def calculate_general_network(self):
+        """
+        Calculate the general network based on the provided PDB file and parameters.
+
+        :return: A tuple containing the network, residue ID list, and length of re-times.
+        """
         try:
-            self.network, residue_list, self.resId_List, len_of_reTimes = createRNetwork(pdb=self.pdb_file,
-                                                                                         cutoff=self.cutoff,
-                                                                                         reTimeFile=self.reTimeFile,
-                                                                                         CA_on=self.CA_on,
-                                                                                         outputFileName=self.outputFileName,
-                                                                                         write_out=self.write_outputs,
-                                                                                         out_directory=self.output_directory)
-            return self.network, self.resId_List, len_of_reTimes
+            self.network, residue_list, self.res_id_list, len_of_re_times = createRNetwork(
+                pdb=self.pdb_file,
+                cutoff=self.cutoff,
+                reTimeFile=self.re_time_file,
+                CA_on=self.ca_on,
+                outputFileName=self.output_file_name,
+                write_out=self.write_outputs,
+                out_directory=self.output_directory
+            )
+            return self.network, self.res_id_list, len_of_re_times
 
-        except Exception as Error:
-            print(Error)
+        except Exception as error:
+            print(f"Error calculating general network: {error}")
 
-    def run_pairNet_calc(self, target):
+    def run_pair_network_calculation(self, targets):
+        """
+        Run pair network calculations for the given targets.
+
+        :param targets: List of target nodes for network calculations
+        """
         print("====================================")
-        print("TARGETS: ", target)
+        print("TARGETS:", targets)
         print("====================================")
         try:
+            for target in targets:
+                self.work.append(
+                    Calc_Net_Worker(
+                        pairNetworks,
+                        network=copy.deepcopy(self.network),
+                        source=self.source,
+                        target=target,
+                        pairNetworkName=f'{self.source}_{target}.gml',
+                        node_threshold=self.node_threshold,
+                        write_out=self.write_outputs,
+                        out_directory=self.output_directory
+                    )
+                )
 
-            for i in target:
-                self.Work.append(
-                    Calc_Net_Worker(pairNetworks, network=copy.deepcopy(self.network), source=self.source,
-                                    target=i,
-                                    pairNetworkName='%s_%s.gml' % (self.source, i),
-                                    node_threshold=self.node_threshold,
-                                    write_out=self.write_outputs,
-                                    out_directory=self.output_directory))
-
-        except IndexError as Err:
-            print(Err)
-
-
+        except IndexError as error:
+            print(f"Index error during pair network calculation: {error}")

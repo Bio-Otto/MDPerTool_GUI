@@ -458,6 +458,14 @@ class Graphs(QWidget):
                         x[-1] = self.current_step_keeper[-1] + 1
 
                 try:
+                    # Ensure x and y arrays have the same shape before setting data
+                    min_length = min(len(x), len(y_temp))
+                    x = x[:min_length]
+                    y_temp = y_temp[:min_length]
+                    y_potential = y_potential[:min_length]
+                    y_kinetic = y_kinetic[:min_length]
+                    y_total = y_total[:min_length]
+
                     self.temperature_graph_plot.setData(x=x, y=y_temp)
                     self.temperature_graph.autoRange()
                     self.potential_energy_graph.setData(x=x, y=y_potential)

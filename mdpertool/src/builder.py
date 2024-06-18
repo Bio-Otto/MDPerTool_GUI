@@ -325,10 +325,10 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
         template = pystache.parse(open(template_file_path).read())
         self.contents = renderer.render(template, script_structure)
-
+        """
         with open('readme.txt', 'w') as f:
             f.write(self.contents)
-
+        """
         if script_structure.get('save_script'):
             save_filename = script_structure.get('script_save_directory')
             # Check if the file already exists in the specified directory

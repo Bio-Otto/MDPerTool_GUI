@@ -14,7 +14,7 @@ from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Multi_Task_Engine, Pymol_Visualize_Path, Shortest_Path_Visualize)
+from analysis.createRNetwork import (MultiTaskEngine, Pymol_Visualize_Path, Shortest_Path_Visualize)
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
 from ui_main import *
 from src.file_dialog import Dialog as file_dialog
@@ -265,10 +265,10 @@ class Functions(MainWindow):
         output_folder_directory = os.path.join(general_output_folder, folder_name)
         Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
 
-        engine = Multi_Task_Engine(pdb_file=self.pdb, cutoff=self.cutoff, reTimeFile=self.retime_file,
+        engine = MultiTaskEngine(pdb_file=self.pdb, cutoff=self.cutoff, re_time_file=self.retime_file,
                                    source=self.source,
                                    node_threshold=self.node_threshold,
-                                   outputFileName=self.outputFileName, write_outputs=self.create_output,
+                                   output_file_name=self.outputFileName, write_outputs=self.create_output,
                                    output_directory=output_folder_directory)
 
         self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
@@ -287,8 +287,8 @@ class Functions(MainWindow):
                             writer.writerow(row)
                 intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
 
-                engine.run_pairNet_calc(intersection_resIDs)
-                for work in engine.Work:
+                engine.run_pair_network_calculation(intersection_resIDs)
+                for work in engine.work:
                     work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
                     work.signals.work_started.connect(lambda: Functions.on_started(self))
                     work.signals.result.connect(lambda x: Functions.print_output(self, x))
@@ -296,9 +296,9 @@ class Functions(MainWindow):
                     self.threadpool.start(work)
 
             if not use_conservation:
-                engine.run_pairNet_calc(target_residues)
+                engine.run_pair_network_calculation(target_residues)
 
-                for work in engine.Work:
+                for work in engine.work:
                     work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
                     work.signals.work_started.connect(lambda: Functions.on_started(self))
                     work.signals.result.connect(lambda x: Functions.print_output(self, x))

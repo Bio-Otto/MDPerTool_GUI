@@ -267,6 +267,16 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.start_monitoring:
             self.show_simulation_monitoring()
 
+            self.Real_Time_Graphs.temperature_graph_plot.clear()
+            self.Real_Time_Graphs.temperature_graph.clear()
+            self.Real_Time_Graphs.setup_temperature_graph(reset=True)
+
+            self.Real_Time_Graphs.potential_energy_graph.clear()
+            self.Real_Time_Graphs.kinetic_energy_graph.clear()
+            self.Real_Time_Graphs.total_energy_graph.clear()
+            self.Real_Time_Graphs.energy_graph.clear()
+            self.Real_Time_Graphs.setup_energy_graph(reset=True)
+
         if not self.start_monitoring:
             self.Run.setEnabled(True)
 
