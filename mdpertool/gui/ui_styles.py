@@ -5,9 +5,8 @@
 ########################################################################################################################
 
 class Style:
-
     style_bt_standard = (
-    """
+        """
     QPushButton {
         font-size: 10pt; font-family: Segoe UI;
         font: bold;
@@ -187,17 +186,46 @@ QMessageBox QPushButton
                 outline: none;
             }
 
-QMessageBox QPushButton:hover 
-            { 
-                background-color: rgb(255, 17, 100); 
-                border: 2px solid rgb(61, 70, 86);
-            }
+                QMessageBox QPushButton:hover 
+                { 
+                    background-color: rgb(255, 17, 100); 
+                    border: 2px solid rgb(61, 70, 86);
+                }
 
-QMessageBox QPushButton:pressed 
-            { 
-                background-color:  rgb(15, 133, 163); 
-                border: 2px solid rgb(43, 50, 61);
-            }
+                QMessageBox QPushButton:pressed 
+                { 
+                    background-color:  rgb(15, 133, 163); 
+                    border: 2px solid rgb(43, 50, 61);
+                }
     
             """
 
+    QProgressDialog_stylesheet = """
+        QProgressDialog {
+            background-color: #323232;
+            color: white;
+            border: 2px solid rgb(255, 170, 0);one;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        QLabel {
+            font: bold 12px;
+            color: white;
+            border: none;
+        }
+
+        QProgressBar {
+            border: 1px solid rgb(255, 170, 0); /* Transparent border */
+            border-radius: 2px;
+            text-align: center;
+            background: #cfcfcf;
+            color: white;
+            height: 10px;  /* Set the height of the progress bar */
+        }
+
+        QProgressBar::chunk {
+            background: #05b8cc;
+            width: 10px;
+        }
+    """

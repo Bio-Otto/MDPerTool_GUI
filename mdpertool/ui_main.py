@@ -29,6 +29,7 @@ from openmm.app import Modeller
 from pdbfixer import PDBFixer
 import multiprocessing as mp
 
+
 #  ==> GLOBALS
 counter = 0
 
@@ -276,6 +277,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Real_Time_Graphs.total_energy_graph.clear()
             self.Real_Time_Graphs.energy_graph.clear()
             self.Real_Time_Graphs.setup_energy_graph(reset=True)
+
+            self.progressBar_decomp.setValue(0)
 
         if not self.start_monitoring:
             self.Run.setEnabled(True)
@@ -770,13 +773,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=source_residue)
             """
 
+    """
     def run_network_analysis(self):
 
         # try:
         if os.path.exists(self.response_time_lineEdit.text()) and os.path.exists(self.boundForm_pdb_lineedit.text()):
             output_directory_for_network = self.net_output_directory_lineedit.text()
             if not os.path.exists(output_directory_for_network):
-                """Output Directory Help."""
+                
                 msgbox = QMessageBox(QMessageBox.Question, "There is no specified output directory",
                                      "There is no specified output directory\n\n"
                                      "If you want to specify, please click the 'Yes' button, "
@@ -810,6 +814,48 @@ class MainWindow(QtWidgets.QMainWindow):
         #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         #     print(exc_type, fname, exc_tb.tb_lineno)
         #     QMessageBox(QMessageBox.Critical, "Error", "Problem\nnAn error occured while getting output directory")
+    """
+
+    def run_network_analysis(self):
+        """
+        Run network analysis by checking the existence of required directories
+        and files, and handle the output directory creation if necessary.
+        """
+
+        response_time_path = self.response_time_lineEdit.text()
+        bound_form_pdb_path = self.boundForm_pdb_lineedit.text()
+
+        if os.path.exists(response_time_path) and os.path.exists(bound_form_pdb_path):
+            output_directory = self.net_output_directory_lineedit.text()
+
+            if not os.path.exists(output_directory):
+                msgbox = QMessageBox(QMessageBox.Question, "No Output Directory Specified",
+                                     ("No output directory specified.\n\n"
+                                      "Would you like to specify one? If not, "
+                                      "the system will create an output folder named 'out_for_net_analysis'."))
+
+                msgbox.setIcon(QMessageBox.Question)
+                msgbox.addButton(QMessageBox.Yes)
+                msgbox.addButton(QMessageBox.No)
+                msgbox.setDefaultButton(QMessageBox.Yes)
+                msgbox.setStyleSheet(Style.MessageBox_stylesheet)
+                msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+
+                user_response = msgbox.exec_()
+
+                if user_response == QMessageBox.Yes:
+                    return False
+
+                if user_response == QMessageBox.No:
+                    output_directory = os.path.join(os.getcwd(), "out_for_net_analysis")
+                    Path(output_directory).mkdir(parents=True, exist_ok=True)
+
+            output_directory = os.path.abspath(output_directory.strip()).replace('\\', '/')
+            self.net_output_directory_lineedit.setText(output_directory)
+
+            UIF.Functions.calculate_intersection_network(self)
+        else:
+            raise FileNotFoundError("The specified response time or bound form PDB file does not exist.")
 
     def network_calc_thread(self, x):
         # print('mycallback is called with {}'.format(x))

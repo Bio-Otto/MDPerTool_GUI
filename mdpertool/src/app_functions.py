@@ -1,8 +1,8 @@
 import os.path
-
+from functools import partial
 import networkx as nx
 from PySide2.QtWidgets import QFileDialog, QDialog, QTableWidgetItem
-from PySide2.QtCore import Qt, Slot
+from PySide2.QtCore import Qt, Slot, QMutexLocker, QMutex
 import csv
 from pathlib import Path
 from pdbfixer import PDBFixer
@@ -19,6 +19,17 @@ from .config import write_output_configuration_file, read_output_configuration_f
 from ui_main import *
 from src.file_dialog import Dialog as file_dialog
 
+# List of three-letter amino acid residue codes
+amino_acid_residues = [
+    "ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE",
+    "LYS", "LEU", "MET", "ASN", "PRO", "GLN", "ARG", "SER",
+    "THR", "VAL", "TRP", "TYR"
+]
+
+colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8abb5', '#77dd77', '#aa9499',
+          '#b39eb5', '#c6a4a4', '#ff694f', '#95b8d1', '#52b2cf', '#d3ab9e', '#fb6f92', '#872187',
+          '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
+
 
 class Helper_Functions():
 
@@ -32,12 +43,6 @@ class Helper_Functions():
             for chain in model:
                 combobox.append(str(chain).replace(" ", "") + str(model).split(" ")[1])
 
-        """
-        import csv
-        with open('output.csv', 'w') as result_file:
-            wr = csv.writer(result_file, dialect='excel')
-            wr.writerow(combobox)
-        """
         return combobox
 
     def available_platforms(self):
@@ -89,10 +94,6 @@ class Helper_Functions():
                                                                                                         analysis_settings_groupBox,
                                                                                                         show_navigation_button,
                                                                                                         hide_navigation_button))
-
-    # def clear_residue_labels(self):
-    #     self.ProteinView.clear_all_labels()
-    #     self.ProteinView.update()
 
     def activate_navigation_on_Pymol(self, created_pymol_widget):
         created_pymol_widget.activate_navigation_tool()
@@ -182,24 +183,105 @@ class Helper_Functions():
     def figure_ray_label_on_analysis(self, ray_horizontalSlider, ray_label):
         ray_label.setText("Ray: " + str(ray_horizontalSlider.value()))
 
+    def _initialize_parameters(self):
+        self.number_of_threads = self.Number_of_thread_for_network_spinBox.value()
+        self.pdb = self.boundForm_pdb_lineedit.text()
+        self.cutoff = self.network_cutoff_spinBox.value()
+        self.retime_file = self.response_time_lineEdit.text()
+        self.outputFileName = self.PPI_Network_name_lineedit.text()
+        self.output_directory = self.net_output_directory_lineedit.text()
+        self.source = self.source_res_comboBox.currentText()[:-1]
+        self.node_threshold = self.node_threshold_spinBox.value()
+        self.node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
+        self.all_residue_as_target = self.all_targets_checkBox.isChecked()
+        self.create_output = True
+
+        if self.node_threshold_use_condition:
+            self.node_threshold = None
+
+        return [
+            ('number_of_threads', self.number_of_threads),
+            ('pdb', self.pdb),
+            ('cutoff', self.cutoff),
+            ('retime_file', self.retime_file),
+            ('outputFileName', self.outputFileName),
+            ('output_directory', self.output_directory),
+            ('source', self.source),
+            ('node_threshold', self.node_threshold),
+            ('node_threshold_use_condition', self.node_threshold_use_condition),
+            ('all_residue_as_target', self.all_residue_as_target),
+            ('create_output', self.create_output)
+        ]
+
+    def _get_target_residues(self):
+        if self.all_residue_as_target:
+            return [self.target_res_comboBox.itemText(i)[:-1] for i in range(self.target_res_comboBox.count())]
+        else:
+            return [self.selected_target_residues_listWidget.item(x).text()[:-1]
+                    for x in range(self.selected_target_residues_listWidget.count())]
+
+    def _get_conservation_settings(self):
+        return {
+            'use_conservation': self.use_conservation_checkBox.isChecked(),
+            'pdb_id': self.conservation_PDB_ID_lineEdit.text(),
+            'chain': self.conservation_pdb_chain_id_lineedit.text(),
+            'conservation_threshold': self.conserv_score_doubleSpinBox.value(),
+            'save_conservation_scores': False
+        }
+
+    def _save_conservation_scores(self, res_IDs, con_scores, pdb_id):
+        rows = zip(res_IDs, con_scores)
+        with open(os.path.join(output_folder_directory, f'conservation_{pdb_id}.csv'), "w", newline='') as f:
+            writer = csv.writer(f)
+            for row in rows:
+                writer.writerow(row)
+
+    def create_shortest_path_string(self, sp):
+        shrotest_str_form = ''
+        for res_id in range(len(sp)):
+            if res_id == len(sp) - 1:
+                shrotest_str_form += '%s' % sp[res_id]
+            else:
+                shrotest_str_form += '%s --> ' % sp[res_id]
+        return shrotest_str_form
+
+    # Modify your _run_network_calculation method
+    def _run_network_calculation(self, engine, target_residues):
+        engine.run_pair_network_calculation(target_residues)
+
+        for i, work in enumerate(engine.work):
+            work.signals.progress_on_net_calc.connect(partial(Functions.progress_fn, self))
+            work.signals.work_started.connect(partial(Functions.on_started, self))
+            work.signals.result.connect(partial(Functions.print_output, self))
+            work.signals.finished.connect(partial(Functions.thread_complete, self))
+
+            self.threadpool.start(work)
+
+
+
+    def _handle_mismatch_error(self):
+        Message_Boxes.Warning_message(self, "Mismatch Error!",
+                                      "The number of residues in the topology file you have provided is not equal to the response time file.",
+                                      Style.MessageBox_stylesheet)
+
 
 class Functions(MainWindow):
     global active_workers
 
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
-
     @Slot()
     def on_started(self):
         if self.active_workers == 0:
-            self.active_workers += 1
-            self.progress = QProgressDialog('Work in progress...', None, 0, 0, self)
-            self.progress.setWindowTitle("Calculation")
+            self.progress = QProgressDialog('Work in progress...', None, 0, 0)
+            self.progress.setWindowTitle("Network Calculation")
             self.progress.setWindowModality(Qt.WindowModal)
+            self.progress.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+            self.progress.setStyleSheet(Style.QProgressDialog_stylesheet)
+            self.progress.setFixedSize(400, 100)
             self.progress.show()
             self.progress.setValue(0)
 
-        else:
-            self.active_workers += 1
+        self.active_workers += 1
 
     @Slot()
     def progress_fn(self, progress_on_net_calc):
@@ -218,6 +300,7 @@ class Functions(MainWindow):
         self.log_holder.append(s[1])
 
     def calculate_intersection_network(self):
+
         global output_folder_directory, network_holder
 
         self.active_workers = 0
@@ -225,94 +308,50 @@ class Functions(MainWindow):
         self.log_holder = []
         self.initial_network = None
 
-        self.number_of_threads = self.Number_of_thread_for_network_spinBox.value()
-        self.pdb = self.boundForm_pdb_lineedit.text()  # PDB file path --> "BOUND FORM OF STRUCTURE"
-        self.cutoff = self.network_cutoff_spinBox.value()  # Add edges between nodes if they are within cutoff range
-        self.retime_file = self.response_time_lineEdit.text()  # Response time file path
-        self.outputFileName = self.PPI_Network_name_lineedit.text()  # Protein general graph according to cut off value
-        self.output_directory = self.net_output_directory_lineedit.text()
-        self.source = self.source_res_comboBox.currentText()[:-1]  # One of the perturbed residues
-        self.node_threshold = self.node_threshold_spinBox.value()  # None or an Integer
-        self.node_threshold_use_condition = self.node_threshold_checkBox.isChecked()
-        self.all_residue_as_target = self.all_targets_checkBox.isChecked()
-
-        if self.node_threshold_use_condition:
-            self.node_threshold = None
-
-        verbose_condition = True  # True or False
-
-        if self.all_residue_as_target:
-            target_residues = [self.target_res_comboBox.itemText(i)[:-1] for i in
-                               range(self.target_res_comboBox.count())]
-
-        if not self.all_residue_as_target:
-            target_residues = [self.selected_target_residues_listWidget.item(x).text()[:-1]
-                               for x in range(self.selected_target_residues_listWidget.count())]  # None or residue list
-
-        use_conservation = self.use_conservation_checkBox.isChecked()
-
-        pdb_id = self.conservation_PDB_ID_lineEdit.text()  # FREE OR BOUND FORM OF PDB, like '2EB8'
-        chain = self.conservation_pdb_chain_id_lineedit.text()  # FOR PULLING CONS. SCORES INDICATE CHAIN ID OF PDB
-        conservation_threshold = self.conserv_score_doubleSpinBox.value()
-        save_conservation_scores = False
-
-        self.create_output = True  # Supports True or False Conditions for creation of all networks (*.gml) on a folder
+        self.network_params = dict(Helper_Functions._initialize_parameters(self))
+        target_residues = Helper_Functions._get_target_residues(self)
+        conservation_settings = Helper_Functions._get_conservation_settings(self)
 
         general_output_folder = os.path.join(self.output_directory, 'network_outputs')
         Path(general_output_folder).mkdir(parents=True, exist_ok=True)
 
-        folder_name = "output_%s" % self.source
+        folder_name = f"output_{self.source}"
         output_folder_directory = os.path.join(general_output_folder, folder_name)
         Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
 
-        engine = MultiTaskEngine(pdb_file=self.pdb, cutoff=self.cutoff, re_time_file=self.retime_file,
-                                   source=self.source,
-                                   node_threshold=self.node_threshold,
-                                   output_file_name=self.outputFileName, write_outputs=self.create_output,
-                                   output_directory=output_folder_directory)
+        engine = MultiTaskEngine(
+            pdb_file=self.pdb,
+            cutoff=self.cutoff,
+            re_time_file=self.retime_file,
+            source=self.source,
+            node_threshold=self.node_threshold,
+            output_file_name=self.outputFileName,
+            write_outputs=self.create_output,
+            output_directory=output_folder_directory
+        )
 
         self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
 
         if len(resId_List) == len_of_reTimes:
+            if conservation_settings['use_conservation']:
+                res_IDs, con_scores = get_conservation_scores(
+                    pdb_id=conservation_settings['pdb_id'],
+                    chain_id=conservation_settings['chain'],
+                    cutoff=conservation_settings['conservation_threshold'],
+                    bound_pdb=self.pdb
+                )
+                if conservation_settings['save_conservation_scores']:
+                    Helper_Functions._save_conservation_scores(self, res_IDs, con_scores,
+                                                               conservation_settings['pdb_id'])
 
-            if use_conservation:
-                res_IDs, con_scores = get_conservation_scores(pdb_id=pdb_id, chain_id=chain,
-                                                              cutoff=conservation_threshold, bound_pdb=self.pdb)
-                if save_conservation_scores:
-                    rows = zip(res_IDs, con_scores)
-                    with open(os.path.join(output_folder_directory, 'conservation_%s.csv' % pdb_id), "w",
-                              newline='') as f:
-                        writer = csv.writer(f)
-                        for row in rows:
-                            writer.writerow(row)
-                intersection_resIDs = set.intersection(set(res_IDs), set(target_residues))
-
-                engine.run_pair_network_calculation(intersection_resIDs)
-                for work in engine.work:
-                    work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
-                    work.signals.work_started.connect(lambda: Functions.on_started(self))
-                    work.signals.result.connect(lambda x: Functions.print_output(self, x))
-                    work.signals.finished.connect(lambda: Functions.thread_complete(self))
-                    self.threadpool.start(work)
-
-            if not use_conservation:
-                engine.run_pair_network_calculation(target_residues)
-
-                for work in engine.work:
-                    work.signals.progress_on_net_calc.connect(lambda complete: Functions.progress_fn(self, complete))
-                    work.signals.work_started.connect(lambda: Functions.on_started(self))
-                    work.signals.result.connect(lambda x: Functions.print_output(self, x))
-                    work.signals.finished.connect(lambda: Functions.thread_complete(self))
-
-                    self.threadpool.start(work)
-
-            del engine
-
+                intersection_resIDs = set(res_IDs).intersection(target_residues)
+                Helper_Functions._run_network_calculation(self, engine, intersection_resIDs)
+            else:
+                Helper_Functions._run_network_calculation(self, engine, target_residues)
         else:
-            Message_Boxes.Warning_message(self, "Mismatch Error!", "The number of residues in the topology file you "
-                                                                   "have provided is not equal to the response time file.",
-                                          Style.MessageBox_stylesheet)
-            del engine
+            Helper_Functions._handle_mismatch_error(self)
+
+        del engine
 
     def plot_networks(self):
 
@@ -328,6 +367,7 @@ class Functions(MainWindow):
 
         if self.node_threshold is None:
             # print("node threshold is --> NONE")
+
             for k, i in enumerate(self.network_holder):
                 if len(i.nodes()) > 0:
                     clean_log_list.append(self.log_holder[k])
@@ -398,20 +438,21 @@ class Functions(MainWindow):
 
             # --> Dissipation Widget
             dissipation_curve_widget = WidgetPlot(self)
+
+            toolbarSizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            dissipation_curve_widget.toolbar.setSizePolicy(toolbarSizePolicy)
+
             dissipationVerticalLayout = QtWidgets.QVBoxLayout()
+
             dissipationVerticalLayout.addWidget(dissipation_curve_widget.toolbar)
             dissipationVerticalLayout.addWidget(dissipation_curve_widget.canvas)
-            widget = QtWidgets.QWidget()
-            widget.setLayout(dissipationVerticalLayout)
+            dissipation_curve_widget.setLayout(dissipationVerticalLayout)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-            sizePolicy.setHorizontalStretch(0)
-            sizePolicy.setVerticalStretch(0)
-            sizePolicy.setHeightForWidth(widget.sizePolicy().hasHeightForWidth())
-            widget.setSizePolicy(sizePolicy)
-            widget.setMinimumSize(QtCore.QSize(0, 300))
-            widget.setMaximumSize(QtCore.QSize(450, 350))
+            dissipation_curve_widget.setSizePolicy(sizePolicy)
+            dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 400))
+            dissipation_curve_widget.setMaximumSize(QtCore.QSize(450, 450))
             dissipation_curve_widget.setObjectName("dissipation_curve_widget")
-            gridLayout.addWidget(widget, 5, 0, 1, 1)
+            gridLayout.addWidget(dissipation_curve_widget, 5, 0, 1, 2)
 
             ############################################################################################################
             show_navigation_button = QtWidgets.QPushButton(tab)
@@ -1162,7 +1203,6 @@ class Functions(MainWindow):
                                                   "   margin-top: 5px;\n"
                                                   "}")
 
-
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
             sizePolicy.setHorizontalStretch(0)
             sizePolicy.setVerticalStretch(0)
@@ -1227,104 +1267,154 @@ class Functions(MainWindow):
             ##########################################################################################################
 
             source_res = self.source_res_comboBox.currentText()[:-1]
-
+            all_residue_as_target_clean_graph_list = []
+            selected_residue_as_target_clean_graph_list = []
             target_res_list = []
-            if self.all_residue_as_target:
-                for log in clean_log_list:
-                    target_res_list.append(log.split('\n')[0].split(' ')[-1])
-
-            if not self.all_residue_as_target:
-                target_res_list = [self.selected_target_residues_listWidget.item(x).text()[:-1]
-                                   for x in range(self.selected_target_residues_listWidget.count())]
-
-            # #################################################
-            shrotest_str_form = ''
-
-            colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8abb5', '#77dd77', '#aa9499',
-                      '#b39eb5', '#c6a4a4', '#ff694f', '#95b8d1', '#52b2cf', '#d3ab9e', '#fb6f92', '#872187',
-                      '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
             all_paths = []
             clean_all_graps = []
-            for graph_i in all_graph_list:
-                if isinstance(graph_i, nx.classes.digraph.DiGraph):
-                    clean_all_graps.append(graph_i)
-                    for cnt, target_i in enumerate(target_res_list):
-                        try:
-                            if nx.has_path(graph_i, source_res, target_i):
-                                sp = nx.shortest_path(graph_i, source_res, target_i)
-                                for res_id in range(len(sp)):
-                                    if res_id == len(sp) - 1:
-                                        shrotest_str_form += '%s' % sp[res_id]
-                                    else:
-                                        shrotest_str_form += '%s --> ' % sp[res_id]
+
+            if self.all_residue_as_target:
+                for i, log in enumerate(clean_log_list):
+                    if "Target:" in log:
+                        target_residue = log.split("Target:")[1].split()[0]
+                        if target_residue[
+                           :3] in amino_acid_residues:  # Check if the first 3 characters are in the amino acid list
+                            target_res_list.append(target_residue)
+                            all_residue_as_target_clean_graph_list.append(all_graph_list[i])
+
+                for cnt, target_i in enumerate(target_res_list):
+                    try:
+                        if nx.has_path(all_residue_as_target_clean_graph_list[cnt], source_res, target_i):
+                            sp = nx.shortest_path(all_residue_as_target_clean_graph_list[cnt], source_res, target_i)
+                            shrotest_str_form = Helper_Functions.create_shortest_path_string(self, sp)
+
+                            item = QListWidgetItem(shrotest_str_form)
+                            item.setBackground(QColor(colors[cnt % len(colors)]))
+                            shortest_path_listWidget.addItem(item)
+
+                            all_paths.append(
+                                'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
+                                    source_res, target_i, len(all_residue_as_target_clean_graph_list[cnt].nodes()))
+                            )
+
+                    except Exception as err:
+                        import traceback
+                        exc_type, exc_obj, exc_tb = sys.exc_info()
+                        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                        lineno = exc_tb.tb_lineno  # Satır numarasını almak için
+                        print(f"Error finding shortest path: {err}")
+                        print(f"Exception Type: {exc_type}")
+                        print(f"File: {fname}")
+                        print(f"Line Number: {lineno}")
+                        print(f"Traceback: {traceback.format_exc()}")
+
+                all_path_string = ''
+                for j in all_paths:
+                    if j != '':
+                        all_path_string = all_path_string + '\n' + j
+                Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
+
+                shortest_path_listWidget.itemDoubleClicked.connect(
+                    lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
+                        self, item, Protein3DNetworkView,
+                        all_residue_as_target_clean_graph_list[shortest_path_listWidget.currentRow()]))
+
+            if not self.all_residue_as_target:
+                for i, log in enumerate(clean_log_list):
+                    if "Target:" in log:
+                        target_residue = log.split("Target:")[1].split()[0]
+                        if target_residue[
+                           :3] in amino_acid_residues:  # Check if the first 3 characters are in the amino acid list
+                            target_res_list.append(target_residue)
+                            selected_residue_as_target_clean_graph_list.append(all_graph_list[i])
+
+                for cnt, target_i in enumerate(target_res_list):
+                    try:
+                        graph = selected_residue_as_target_clean_graph_list[cnt]
+                        if source_res in graph and target_i in graph:
+                            if nx.has_path(graph, source_res, target_i):
+                                sp = nx.shortest_path(graph, source_res, target_i)
+                                shrotest_str_form = Helper_Functions.create_shortest_path_string(self, sp)
 
                                 item = QListWidgetItem(shrotest_str_form)
-                                item.setBackground(QColor(colors[cnt]))
-                                shortest_path_listWidget.addItem(item)  # print("SHORTEST PATH: ", sp)
-                                shrotest_str_form = ''
+                                item.setBackground(QColor(colors[cnt % len(colors)]))
+                                shortest_path_listWidget.addItem(item)
 
                                 all_paths.append(
                                     'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
-                                        source_res, target_i, len(graph_i.nodes())))
+                                        source_res, target_i, len(graph.nodes()))
+                                )
+                        else:
+                            print(f"Source {source_res} or target {target_i} not in graph {cnt}")
 
-                        except Exception as err:
-                            shrotest_str_form = ''
-                            # print("SHORTEST PATH LOG: ", err)
+                    except Exception as err:
+                        print(f"Error finding shortest path for target {target_i} in graph {cnt}: {err}")
 
-            all_path_string = ''
-            for j in all_paths:
-                if j != '':
-                    all_path_string = all_path_string + '\n' + j
-            Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
+                all_path_string = ''
+                for j in all_paths:
+                    if j != '':
+                        all_path_string = all_path_string + '\n' + j
+                Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
 
-            shortest_path_listWidget.itemDoubleClicked.connect(
-                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
-                    self, item, Protein3DNetworkView, clean_all_graps[shortest_path_listWidget.currentRow()]))
+                shortest_path_listWidget.itemDoubleClicked.connect(
+                    lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
+                        self, item, Protein3DNetworkView,
+                        selected_residue_as_target_clean_graph_list[shortest_path_listWidget.currentRow()]))
+            # #########################################################################################################
 
             # #########################################################################################################
+
             try:
-                if isinstance(graph_i, nx.classes.digraph.DiGraph):
-                    if len(self.initial_network.nodes()) > 0:
-                        try:
-                            arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=self.initial_network,
-                                                                                             pdb_file=self.pdb)
+                if len(self.initial_network.nodes()) > 0:
+                    try:
+                        arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=self.initial_network,
+                                                                                         pdb_file=self.pdb)
 
-                            # ------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
-                            Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
-                            for arrow_coord in arrows_cordinates:
-                                Protein3DNetworkView.create_interacting_Residues(atom1=arrow_coord[0],
-                                                                                 atom2=arrow_coord[1],
-                                                                                 radius=0.05, gap=0.4, hradius=0.4,
-                                                                                 hlength=0.8, color='cyan')
+                        # ------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
+                        Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
 
-                            # MAKE PYMOL VISUALIZATION BETTER
-                            Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
-                            Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
-                            Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
-                            Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
-                            Protein3DNetworkView.update()
-                            Protein3DNetworkView.show()
+                        for arrow_coord in arrows_cordinates:
+                            Protein3DNetworkView.create_interacting_Residues(atom1=arrow_coord[0],
+                                                                             atom2=arrow_coord[1],
+                                                                             radius=0.05, gap=0.4, hradius=0.4,
+                                                                             hlength=0.8, color='cyan')
 
-                            # --------------------> 2D NETWORK VISUALIZATION USING visJS / START <-------------------- #
-                        except Exception as error:
-                            exc_type, exc_obj, exc_tb = sys.exc_info()
-                            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                        # MAKE PYMOL VISUALIZATION BETTER
+                        Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                        Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
+                        Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                        Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+                        Protein3DNetworkView.update()
+                        Protein3DNetworkView.show()
 
-                        all = ''
-                        for j in clean_log_list:
-                            # if j != '':
-                            all = all + '\n' + j
-                        Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
-                        del self.log_holder, self.network_holder
+                        # --------------------> 2D NETWORK VISUALIZATION USING visJS / START <-------------------- #
+                    except Exception as error:
+                        import traceback
+                        exc_type, exc_obj, exc_tb = sys.exc_info()
+                        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                        lineno = exc_tb.tb_lineno  # Satır numarasını almak için
+                        print(f"Error: {error}")
+                        print(f"Exception Type: {exc_type}")
+                        print(f"File: {fname}")
+                        print(f"Line Number: {lineno}")
+                        print(f"Traceback: {traceback.format_exc()}")
 
-                    else:
-                        Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
-                                                          Style.MessageBox_stylesheet)
+                    all = ''
+                    for j in clean_log_list:
+                        # if j != '':
+                        all = all + '\n' + j
+                    Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
+                    del self.log_holder, self.network_holder
+
+                else:
+                    Message_Boxes.Information_message(self, "DONE !", "There is no Intersection Network :(",
+                                                      Style.MessageBox_stylesheet)
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print(exc_type, fname, exc_tb.tb_lineno)
+
         else:
             print("There is no suitable Graph for your search parameters")
 
@@ -1850,7 +1940,8 @@ class Functions(MainWindow):
                         elif pdb_fix_dialog_answer == QDialog.Rejected:
                             modified_pdb = pdb_Tools.fetched_pdb_fix(self, fetch_result,
                                                                      self.Output_Folder_textEdit.toPlainText(),
-                                                                     ph=self.pH_doubleSpinBox.value(), chains_to_remove=None)
+                                                                     ph=self.pH_doubleSpinBox.value(),
+                                                                     chains_to_remove=None)
 
                             self.upload_pdb_lineEdit.setText(modified_pdb)
 

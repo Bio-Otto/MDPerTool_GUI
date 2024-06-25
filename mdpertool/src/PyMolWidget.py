@@ -1,6 +1,8 @@
 # from pylab import *
 # from PySide2.QtOpenGL import *
 import os.path
+import sys
+
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt
 from OpenGL.GL import *
@@ -118,7 +120,7 @@ class PymolQtWidget(QGLWidget):
     def loadMolFile(self, mol_file):
         try:
             self._pymol.cmd.load(str(mol_file))
-            self.mol_name = os.path.basename(mol_file).split('.')[0]
+            self.mol_name = os.path.splitext(os.path.basename(mol_file))[0]
         except Exception as loadingError:
             print("An error occurred while loading the structure file :(\n", loadingError)
 
@@ -490,55 +492,66 @@ class PymolQtWidget(QGLWidget):
 
     def create_interacting_Residues(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
                                     color='red', name=''):
-
-        try:
-            aa = self._pymol.cmd.get_names("nongroup_objects", enabled_only=1)
-            clean_ls = [i for i in aa if i.startswith('interact')]
-            for i in clean_ls:
-                self._pymol.cmd.get_model('(%s)' % i, 1).get_coord_list()
-
-        except:
-            pass
+        # try:
+        #     # Get names of currently enabled nongroup objects
+        #     aa = self._pymol.cmd.get_names("nongroup_objects", enabled_only=1)
+        #     clean_ls = [i for i in aa if i.startswith('interact')]
+        #     for i in clean_ls:
+        #         self._pymol.cmd.get_model('(%s)' % i, 1).get_coord_list()
+        # except Exception as e:
+        #     print(f"Error getting model coordinates: {e}")
+        #     pass
 
         radius, gap = float(radius), float(gap)
         hlength = float(hlength)
 
         try:
             color1, color2 = color.split()
-        except:
+        except ValueError:
             color1 = color2 = color
         color1 = list(self._pymol.cmd.get_color_tuple(color1))
         color2 = list(self._pymol.cmd.get_color_tuple(color2))
 
         def get_coord(v):
-            if not isinstance(v, str):
-                return v
-            if v.startswith('['):
-                return cmd.safe_list_eval(v)
-            return cmd.get_atom_coords(v)
+            try:
+                if not isinstance(v, str):
+                    return v
+                if v.startswith('['):
+                    return cmd.safe_list_eval(v)
+                coords = cmd.get_atom_coords(v)
+                if coords is None:
+                    raise ValueError(f"Invalid selection or coordinates: {v}")
+                return coords
+            except Exception as e:
+                raise ValueError(f"Error retrieving coordinates for {v}: {e}")
 
-        xyz1 = get_coord(atom1)
-        xyz2 = get_coord(atom2)
-        normal = cpv.normalize(cpv.sub(xyz1, xyz2))
+        try:
+            xyz1 = get_coord(atom1)
+            xyz2 = get_coord(atom2)
+            normal = cpv.normalize(cpv.sub(xyz1, xyz2))
 
-        if hlength < 0:
-            hlength = radius * 3.0
+            if hlength < 0:
+                hlength = radius * 3.0
 
-        if gap:
-            diff = cpv.scale(normal, gap)
-            xyz1 = cpv.sub(xyz1, diff)
-            xyz2 = cpv.add(xyz2, diff)
+            if gap:
+                diff = cpv.scale(normal, gap)
+                xyz1 = cpv.sub(xyz1, diff)
+                xyz2 = cpv.add(xyz2, diff)
 
-        xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
-        obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2
+            xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
+            obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2
 
-        if not name:
-            name = self._pymol.cmd.get_unused_name('interact')
+            if not name:
+                name = self._pymol.cmd.get_unused_name('interact')
 
-        self._pymol.cmd.load_cgo(obj, name)
-        self._pymol.cmd.group("Interacts", name)
-
-        self.update()
+            self._pymol.cmd.load_cgo(obj, name)
+            self._pymol.cmd.group("Interacts", name)
+            self.update()
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            lineno = exc_tb.tb_lineno
+            print(f"Error: {e} in file {fname} at line {lineno}")
 
     def show_ligand_polar_interactions(self):
         self._pymol.preset.ligands(selection='all', _self=self._pymol.cmd)
