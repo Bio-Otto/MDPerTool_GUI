@@ -1285,19 +1285,22 @@ class Functions(MainWindow):
 
                 for cnt, target_i in enumerate(target_res_list):
                     try:
-                        if nx.has_path(all_residue_as_target_clean_graph_list[cnt], source_res, target_i):
-                            sp = nx.shortest_path(all_residue_as_target_clean_graph_list[cnt], source_res, target_i)
-                            shrotest_str_form = Helper_Functions.create_shortest_path_string(self, sp)
+                        graph = all_residue_as_target_clean_graph_list[cnt]
+                        if source_res in graph and target_i in graph:
+                            if nx.has_path(graph, source_res, target_i):
+                                sp = nx.shortest_path(graph, source_res, target_i)
+                                shrotest_str_form = Helper_Functions.create_shortest_path_string(self, sp)
 
-                            item = QListWidgetItem(shrotest_str_form)
-                            item.setBackground(QColor(colors[cnt % len(colors)]))
-                            shortest_path_listWidget.addItem(item)
+                                item = QListWidgetItem(shrotest_str_form)
+                                item.setBackground(QColor(colors[cnt % len(colors)]))
+                                shortest_path_listWidget.addItem(item)
 
-                            all_paths.append(
-                                'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
-                                    source_res, target_i, len(all_residue_as_target_clean_graph_list[cnt].nodes()))
-                            )
-
+                                all_paths.append(
+                                    'Source: %s  Target: %s\nTotal node number of source-target pair network is : %s' % (
+                                        source_res, target_i, len(graph.nodes()))
+                                )
+                        else:
+                            print(f"Source {source_res} or target {target_i} not in graph {cnt}")
                     except Exception as err:
                         import traceback
                         exc_type, exc_obj, exc_tb = sys.exc_info()

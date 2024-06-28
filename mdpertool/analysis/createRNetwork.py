@@ -266,136 +266,88 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_direc
         return None, None, None, 0
 
 
-def filter_nodes_by_retime(network, target, targetRetime):
+def filter_pair_network(network, source, target, node_threshold=None):
     """
-    Remove nodes from the network that have a residue response time greater than the target residue response time.
+    Filters and creates a pair network between a source and target residue.
 
-    Parameters:
-    network (nx.Graph): The network of residues.
-    target (str): The target residue name.
-    targetRetime (float): The response time of the target residue.
+    Args:
+        network (networkx.DiGraph): The input network.
+        source (str): The source residue.
+        target (str): The target residue.
+        node_threshold (int, optional): The maximum number of nodes allowed in the pair network.
 
     Returns:
-    nx.Graph: The network with filtered nodes.
+        networkx.DiGraph: The filtered pair network.
     """
-    nodes_to_remove = [node for node in network.nodes if
-                       network.nodes[node]['retime'] > targetRetime and node != target]
-    network.remove_nodes_from(nodes_to_remove)
-    return network
-
-
-def build_clean_network(network, res_list, source):
-    """
-    Create a directed clean network by adding nodes and edges based on response times.
-
-    Parameters:
-    network (nx.Graph): The original network.
-    res_list (list): List of residue names.
-    source (str): The source residue name.
-
-    Returns:
-    nx.DiGraph: The cleaned directed network.
-    """
+    # Filter out residues with a residue response time greater than the target residue response time
+    target_retime = network.nodes[target]['retime']
     clean_network = nx.DiGraph()
-    clean_network.add_nodes_from(network.nodes)
+    for node, data in network.nodes(data=True):
+        if data['retime'] <= target_retime or node == target:
+            clean_network.add_node(node, **data)
 
-    for i in res_list:
-        for j in res_list:
-            if i != j and network.has_edge(i, j):
-                retime1 = network.nodes[i]['retime']
-                retime2 = network.nodes[j]['retime']
-                if retime1 < retime2:
-                    clean_network.add_edge(i, j)
-                elif retime1 > retime2:
-                    clean_network.add_edge(j, i)
-                elif retime1 == retime2 and retime1 != 0:
-                    clean_network.add_edge(i, j)
-                elif retime1 == retime2 == 0:
-                    if not clean_network.has_edge(i, j):
-                        if i == source:
-                            clean_network.add_edge(i, j)
-                        elif j == source:
-                            clean_network.add_edge(j, i)
+    # Add edges to the clean network
+    for u, v, data in network.edges(data=True):
+        u_retime = network.nodes[u]['retime']
+        v_retime = network.nodes[v]['retime']
+        if u_retime < v_retime:
+            clean_network.add_edge(u, v, **data)
+        elif u_retime > v_retime:
+            clean_network.add_edge(v, u, **data)
+        elif (u_retime and v_retime) != 0:
+            clean_network.add_edge(u, v, **data)
+        elif (u_retime and v_retime) == 0 and (u == source or v == source):
+            clean_network.add_edge(u, v, **data)
 
-    return clean_network
-
-
-def filter_by_degree(clean_network, source, target, degree_type):
-    """
-    Filter out nodes with in-degree or out-degree equal to 0, except for source or target.
-
-    Parameters:
-    clean_network (nx.DiGraph): The cleaned directed network.
-    source (str): The source residue name.
-    target (str): The target residue name.
-    degree_type (str): The type of degree to check ('in' for in-degree, 'out' for out-degree).
-
-    Returns:
-    nx.DiGraph: The filtered network.
-    """
+    # Filter out residues with in-degree equal to 0, except the source residue
     while True:
-        nodes_to_remove = [node for node in clean_network.nodes if
-                           (clean_network.in_degree(node) == 0 if degree_type == 'in' else clean_network.out_degree(
-                               node) == 0) and
-                           node != (source if degree_type == 'in' else target)]
-
-        if not nodes_to_remove:
+        junk_nodes = [node for node in clean_network.nodes() if clean_network.in_degree(node) == 0 and node != source]
+        if not junk_nodes:
             break
+        clean_network.remove_nodes_from(junk_nodes)
 
-        clean_network.remove_nodes_from(nodes_to_remove)
-    return clean_network
+    # Filter out residues with out-degree equal to 0, except the target residue
+    while True:
+        junk_nodes = [node for node in clean_network.nodes() if clean_network.out_degree(node) == 0 and node != target]
+        if not junk_nodes:
+            break
+        clean_network.remove_nodes_from(junk_nodes)
+
+    # Apply the node threshold if specified
+    if node_threshold is not None and len(clean_network.nodes()) > node_threshold:
+        return None
+    else:
+        return clean_network
 
 
-def pairNetworks(network, source, target, pairNetworkName, write_out, out_directory, progress_callback,
-                 node_threshold=None):
+def pairNetworks(network, source, target, pairNetworkName, write_out, out_directory, progress_callback, node_threshold=None):
     """
-    Create a paired network from the given source and target residues, filtering nodes and edges based on residue response times.
+    Filters and creates a pair network between a source and target residue.
 
-    Parameters:
-    network (nx.Graph): The original network of residues.
-    source (str): The source residue name.
-    target (str): The target residue name.
-    pairNetworkName (str): The name of the output paired network file.
-    write_out (bool): Whether to write the output network to a file.
-    out_directory (str): The directory to write the output file to.
-    progress_callback (callable): A callback function to report progress.
-    node_threshold (int, optional): The threshold number of nodes for the paired network.
+    Args:
+        network (networkx.DiGraph): The input network.
+        source (str): The source residue.
+        target (str): The target residue.
+        pairNetworkName (str): The name of the pair network.
+        write_out (bool): Whether to write the pair network to a file.
+        out_directory (str): The directory to write the pair network file.
+        progress_callback (callable): A callback function to report progress.
+        node_threshold (int, optional): The maximum number of nodes allowed in the pair network.
 
     Returns:
-    tuple: The cleaned network and a log message.
+        networkx.DiGraph: The filtered pair network.
+        str: A log message with information about the pair network.
     """
-    try:
-        targetRetime = network.nodes[target]['retime']
-        sourceRetime = network.nodes[source]['retime']
+    clean_network = filter_pair_network(network, source, target, node_threshold)
+    if clean_network is not None:
+        log = f'Source: {source}  Target: {target}\nTotal node number of source-target pair network is: {len(clean_network.nodes())}'
+        if write_out:
+            nx.write_gml(clean_network, os.path.join(out_directory, pairNetworkName))
+    else:
+        log = f'Source: {source}  Target: {target}\nPair network not created due to node threshold.'
 
-        network = filter_nodes_by_retime(network, target, targetRetime)
-        res_list = list(network.nodes)
-
-        clean_network = build_clean_network(network, res_list, source)
-        clean_network = filter_by_degree(clean_network, source, target, 'in')
-
-        if clean_network.has_node(target):
-            clean_network = filter_by_degree(clean_network, source, target, 'out')
-
-        if clean_network.has_node(target):
-            if write_out:
-                nx.write_gml(clean_network, os.path.join(out_directory, pairNetworkName))
-            log = f'Source: {source}  Target: {target} - Total node number of source-target pair network is: {len(clean_network.nodes())}\n'
-        else:
-            log = f'Your target residue "{target}" was deleted.'
-
-        if node_threshold is None or (node_threshold is not None and len(clean_network.nodes()) > node_threshold):
-            if write_out and clean_network.has_node(target):
-                nx.write_gml(clean_network, os.path.join(out_directory, pairNetworkName))
-            progress_callback.emit([clean_network, log])
-            return clean_network, log
-        else:
-            progress_callback.emit([None, "Node threshold not met or target node removed."])
-            return None, "Node threshold not met or target node removed."
-    except Exception as e:
-        error_message = f"An error occurred: {e}"
-        progress_callback.emit([None, error_message])
-        return None, error_message
+    progress_callback.emit([clean_network, log])
+    return clean_network, log
 
 
 class MultiTaskEngine:
