@@ -29,7 +29,6 @@ from openmm.app import Modeller
 from pdbfixer import PDBFixer
 import multiprocessing as mp
 
-
 #  ==> GLOBALS
 counter = 0
 
@@ -318,7 +317,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Real_Time_Graphs.energy_graph.clear()
             self.Real_Time_Graphs.setup_energy_graph(reset=True)
 
-            #self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
+            # self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
         except Exception as ins:
             pass
             # Message_Boxes.Information_message(self, "Info", str(ins), Style.MessageBox_stylesheet)
@@ -449,9 +448,11 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.source_res_comboBox.addItem(str(i))
 
                         self.target_res_comboBox.clear()  # delete all items from comboBox
-                        self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.target_res_comboBox.addItems(
+                            self.target_combobox)  # add the actual content of self.comboData
                         self.source_res_comboBox.clear()  # delete all items from comboBox
-                        self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.source_res_comboBox.addItems(
+                            self.target_combobox)  # add the actual content of self.comboData
 
                     elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                         modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
@@ -467,9 +468,11 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.source_res_comboBox.addItem(str(i))
 
                         self.target_res_comboBox.clear()  # delete all items from comboBox
-                        self.target_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.target_res_comboBox.addItems(
+                            self.target_combobox)  # add the actual content of self.comboData
                         self.source_res_comboBox.clear()  # delete all items from comboBox
-                        self.source_res_comboBox.addItems(self.target_combobox)  # add the actual content of self.comboData
+                        self.source_res_comboBox.addItems(
+                            self.target_combobox)  # add the actual content of self.comboData
 
                     UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
 
@@ -514,8 +517,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.net_output_directory_lineedit.setText(self.Output_Folder_textEdit.toPlainText())
             self.boundForm_pdb_lineedit.setText(self.upload_pdb_lineEdit.text())
             self.response_time_lineEdit.setText(os.path.join(self.Output_Folder_textEdit.toPlainText(),
-                                                             'responseTimes_%s.csv' % int(self.R_factor_ComboBox.currentText())))
+                                                             'responseTimes_%s.csv' % int(
+                                                                 self.R_factor_ComboBox.currentText())))
+
             self.upload_boundForm_pdb_from_local(manuel=False)
+
+            index = self.source_res_comboBox.findText(self.res1_comboBox.currentText(), QtCore.Qt.MatchFixedString)
+            if index >= 0:
+                self.source_res_comboBox.setCurrentIndex(index)
+
             self.show_analysis_window()
 
     def inform_about_progress(self, message):
@@ -525,26 +535,59 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_classic_md_remaining_time(self, time):
         font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
         font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
-        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
-        self.label_56.setText(remainingTime_regular)
-        self.label_56.setFont(font)
-        self.label_56.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+        # Check if all numbers in the time string are 0
+        if time == "--:--" or all(char == '0' for char in time if char.isdigit()):
+            self.label_56.setText('<font color="red"><b>Done</b></font>')
+            self.label_56.setFont(font)
+            self.label_56.setAlignment(Qt.AlignVCenter)  # Set vertical alignment
+
+            # Add a completed icon (make sure the path to the image is correct)
+            completed_icon = QPixmap(u":/20x20/icons/20x20/cil-check.png")
+            self.label_56.setPixmap(completed_icon)
+        else:
+            remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+            self.label_56.setText(remainingTime_regular)
+            self.label_56.setFont(font)
+            self.label_56.setAlignment(Qt.AlignVCenter)  # Set vertical alignment
 
     def update_reference_md_remaining_time(self, time):
         font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
         font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
-        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
-        self.label_57.setText(remainingTime_regular)
-        self.label_57.setFont(font)
-        self.label_57.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+        # Check if all numbers in the time string are 0
+        if time == "--:--" or all(char == '0' for char in time if char.isdigit()):
+            self.label_57.setText('<font color="red"><b>Done</b></font>')
+            self.label_57.setFont(font)
+            self.label_57.setAlignment(Qt.AlignVCenter)  # Set vertical alignment
+
+            # Add a completed icon (make sure the path to the image is correct)
+            completed_icon = QPixmap(u":/20x20/icons/20x20/cil-check.png")
+            self.label_57.setPixmap(completed_icon)
+        else:
+            remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+            self.label_57.setText(remainingTime_regular)
+            self.label_57.setFont(font)
+            self.label_57.setAlignment(Qt.AlignVCenter)  # Set vertical alignment
 
     def update_dissipation_md_remaining_time(self, time):
         font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
         font.setLetterSpacing(QFont.AbsoluteSpacing, 1)  # Dikey hizalamayı ayarla
-        remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
-        self.label_58.setText(remainingTime_regular)
-        self.label_58.setFont(font)
-        self.label_58.setAlignment(Qt.AlignVCenter)  # Dikey hizalamayı ayarla
+
+        # Check if all numbers in the time string are 0
+        if time == "--:--" or all(char == '0' for char in time if char.isdigit()):
+            self.label_58.setText('<font color="red"><b>Done</b></font>')
+            self.label_58.setFont(font)
+            self.label_58.setAlignment(Qt.AlignVCenter)  # Set vertical alignment
+
+            # Add a completed icon (make sure the path to the image is correct)
+            completed_icon = QPixmap(u":/20x20/icons/20x20/cil-check.png")
+            self.label_58.setPixmap(completed_icon)
+        else:
+            remainingTime_regular = '<font color="red"><b>%s</b></font>' % time
+            self.label_58.setText(remainingTime_regular)
+            self.label_58.setFont(font)
+            self.label_58.setAlignment(Qt.AlignVCenter)  # Set vertical alignment
 
     def update_simulation_speed(self, speed):
         try:
@@ -927,7 +970,8 @@ class SplashScreen(QMainWindow):
         self.label_credits.setText("<strong>Devoloped</strong> by Ozbek's Lab")
 
         # ----- > Initial Text on Splash Screen
-        self.label_description.setText("<strong>WELCOME</strong> TO MDPerTool v%s PLATFORM" % current_version.__version__)
+        self.label_description.setText(
+            "<strong>WELCOME</strong> TO MDPerTool v%s PLATFORM" % current_version.__version__)
 
         # ----- > CHANGE TEXT ON SPLASH SCREEN
         QtCore.QTimer.singleShot(1500, lambda: self.label_description.setText("<strong>LOADING</strong> ENVIRONMENT"))
@@ -983,6 +1027,7 @@ def run_mdpertool():
     else:
         parser.print_help()
         sys.exit()
+
 
 if __name__ == "__main__":
     run_mdpertool()

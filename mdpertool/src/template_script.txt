@@ -20,7 +20,7 @@ from openmm import *
 from openmm import app
 from openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter, StateDataReporter
 import openmm as mm
-from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres, molar
+from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres, molar, amu
 
 from sys import stdout
 import platform as pl
@@ -107,7 +107,7 @@ log_obj.info("Constructing an OpenMM System ...".format())
 system = forcefield.createSystem(modeller.topology, nonbondedMethod={{NonBoundedMethod}},
                                       {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
                                       constraints={{Constraints}}, rigidWater={{Rigid_Water}},
-                                      ewaldErrorTolerance=0.005)
+                                      ewaldErrorTolerance=0.005, hydrogenMass={{Hydrogen_Mass}})
 
 system.addForce(mm.MonteCarloBarostat(1 * atmospheres, {{Temperature}}, 25))
 

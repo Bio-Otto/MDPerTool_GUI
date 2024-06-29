@@ -133,7 +133,6 @@ class PlotCanvas(FigureCanvas):
         self.draw()
 
 
-
 def getResponseTimeGraph(responseTimeFile):
     responses_file = pd.read_csv(responseTimeFile, header=None)
     response_time_column = responses_file.values.flatten()

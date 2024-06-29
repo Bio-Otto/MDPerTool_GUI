@@ -239,6 +239,7 @@ class Advanced(QtCore.QThread):
                                 friction=self.friction_lineEdit.text().strip(),  # ADDITIONAL INTEGRATOR
                                 Temperature=self.temperature_lineEdit.text().strip(),  # ADDITIONAL INTEGRATOR
                                 Additional_Integrator=Additional_Integrator,
+                                Hydrogen_Mass=self.Hydrogen_mass_lineEdit.text().strip(),
 
                                 NonBoundedMethod=self.nonBounded_Method_comboBox.currentText(),
                                 Constraints=self.system_constraints_comboBox.currentText(),
@@ -317,7 +318,6 @@ class Advanced_Helper_Functions(QtCore.QThread):
     def update_display(self, script_structure):
         renderer = pystache.Renderer()
 
-
         # Current directory
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # template file path
@@ -325,23 +325,21 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
         template = pystache.parse(open(template_file_path).read())
         self.contents = renderer.render(template, script_structure)
-        """
-        with open('readme.txt', 'w') as f:
-            f.write(self.contents)
-        """
+
         if script_structure.get('save_script'):
             save_filename = script_structure.get('script_save_directory')
+
             # Check if the file already exists in the specified directory
             file_counter = 1
-            while os.path.exists(os.path.join('temp', save_filename)):
+            original_save_filename = save_filename
+            while os.path.exists(os.path.join(script_structure.get('output_directory'), save_filename)):
                 # If the file already exists, generate a new filename with a suffix
-                save_filename, extension = os.path.splitext(save_filename)
+                save_filename, extension = os.path.splitext(original_save_filename)
                 save_filename = f"{save_filename}_{file_counter}{extension}"
                 file_counter += 1
 
             # Create or open a Python script file and write the content
-            with open(os.path.join('temp', save_filename), 'w') as py_file:
+            with open(os.path.join(script_structure.get('output_directory'), save_filename), 'w') as py_file:
                 py_file.write(self.contents)
 
         return self.contents
-

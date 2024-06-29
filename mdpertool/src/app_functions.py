@@ -1981,6 +1981,23 @@ class Functions(MainWindow):
             self.Additional_Integrator_groupBox.setEnabled(True)
             self.Additional_Integrators_checkBox.setChecked(True)
             self.Additional_Integrators_checkBox.setEnabled(True)
+
+            if self.kind_of_integrator == "LangevinMiddle":
+                self.integrator_time_step_lineEdit.setText("4.0")
+                self.Hydrogen_mass_lineEdit.setText("1.5*amu")
+
+                constraints_index = self.system_constraints_comboBox.findText("HBonds", QtCore.Qt.MatchFixedString)
+                if constraints_index >= 0:
+                    self.system_constraints_comboBox.setCurrentIndex(constraints_index)
+
+            else:
+                self.integrator_time_step_lineEdit.setText("2.0")
+                self.Hydrogen_mass_lineEdit.setText("1.0*amu")
+
+                constraints_index = self.system_constraints_comboBox.findText("None", QtCore.Qt.MatchFixedString)
+                if constraints_index >= 0:
+                    self.system_constraints_comboBox.setCurrentIndex(constraints_index)
+
         else:
             self.Additional_Integrator_groupBox.setEnabled(False)
             self.Additional_Integrators_checkBox.setChecked(False)
