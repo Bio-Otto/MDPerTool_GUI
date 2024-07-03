@@ -84,7 +84,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import pandas as pd
-
+import os
 import warnings
 from Bio import BiopythonWarning
 # Suppress specific warnings
@@ -99,6 +99,7 @@ class WidgetPlot(QWidget):
         self.canvas = PlotCanvas(self, width=10, height=5)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
+
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=10, height=5, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
@@ -107,10 +108,10 @@ class PlotCanvas(FigureCanvas):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.updateGeometry()
 
-    def plot(self, data, source_residue=None):
+    def plot(self, data, source_residue=None, plot_name=None):
         self.figure.clear()
         ax = self.figure.add_subplot(111)
-        ax.plot(data, 'r-', linewidth=0.5)
+        ax.plot(data, 'r-', linewidth=0.5, label=plot_name)
         ax.set_title('Response Time Graph')
         ax.set_xlabel('Time Step (Frame)')
         ax.set_ylabel('Responded Residue Count')
@@ -141,4 +142,10 @@ def getResponseTimeGraph(responseTimeFile):
     response_count = [sum(response_time_column <= i) for i in range(int(response_time_column_max) + 1)]
 
     row, col = responses_file.shape
-    return row, col, response_count
+    filename_parts = os.path.splitext(responseTimeFile)  # Split filename and extension
+    plot_name = "x%s" % str(filename_parts[0].split('_')[-1])  # Extract last segment after last underscore
+    return row, col, response_count, plot_name
+
+
+
+

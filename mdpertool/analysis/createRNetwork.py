@@ -10,9 +10,9 @@ import numpy as np
 import argparse
 from PySide2 import QtCore, QtWidgets
 from src.PyMolWidget import PymolQtWidget
-from .VisJS_Widget import VisJS_QtWidget
+#from .VisJS_Widget import VisJS_QtWidget
 import multiprocessing as mp
-from .pdbsum_conservation_puller import *
+#from .pdbsum_conservation_puller import *
 from Bio.PDB import Residue
 from collections import OrderedDict
 import math
@@ -24,7 +24,11 @@ import numpy as np
 import os
 # from analysis.multiproc_net_calc import Calc_Net_Worker
 from analysis.multiproc_net_calc import CalcNetWorker
-from .pdbsum_conservation_puller import *
+
+try:
+    from .pdbsum_conservation_puller import *
+except:
+    from analysis.pdbsum_conservation_puller import *
 
 import networkx as nx
 import copy
@@ -133,6 +137,146 @@ def Shortest_Path_Visualize(pdb_file, selected_path):
 
     return arrow_coordinates
 
+#
+# def get_distance(coord1, coord2):
+#     """
+#     Calculate the Euclidean distance between two coordinates.
+#
+#     Parameters:
+#     coord1 (array-like): Coordinates of the first point.
+#     coord2 (array-like): Coordinates of the second point.
+#
+#     Returns:
+#     float: The Euclidean distance between the two points.
+#     """
+#     return np.linalg.norm(coord1 - coord2)
+#
+#
+# def get_residues(pdb):
+#     """
+#     Get residue list from the pdb using PDBParser.
+#
+#     Parameters:
+#     pdb (str): Path to the PDB file.
+#
+#     Returns:
+#     tuple: A tuple containing:
+#         - list of residues (Bio.PDB.Residue.Residue)
+#         - list of residue identifiers (str)
+#     """
+#     parser = PDBParser()
+#     structure = parser.get_structure('prot', pdb)
+#     residue_list = [res for res in structure.get_residues() if res.get_id()[0] == ' ']
+#     res_id_list = [res.get_resname() + str(res.get_id()[1]) for res in residue_list]
+#     return residue_list, res_id_list
+#
+#
+# def within_cutoff(res1, res2, distance_cutoff, just_CA):
+#     """
+#     Calculate whether two residues have at least an atom pair within the specified cutoff distance.
+#
+#     Parameters:
+#     res1 (Bio.PDB.Residue.Residue): The first residue.
+#     res2 (Bio.PDB.Residue.Residue): The second residue.
+#     distance_cutoff (float): The cutoff distance in Angstroms.
+#     just_CA (bool): Whether to consider only CA atoms.
+#
+#     Returns:
+#     bool: True if the residues are within the cutoff distance, False otherwise.
+#     """
+#     if just_CA:
+#         ca1 = res1['CA'].get_coord()
+#         ca2 = res2['CA'].get_coord()
+#         return get_distance(ca1, ca2) <= distance_cutoff
+#
+#     for atom1 in res1:
+#         for atom2 in res2:
+#             if get_distance(atom1.get_coord(), atom2.get_coord()) <= distance_cutoff:
+#                 return True
+#
+#     return False
+#
+#
+# def load_response_times(reTimeFile):
+#     """
+#     Load response times from the specified file.
+#
+#     Parameters:
+#     reTimeFile (str): Path to the file containing response times.
+#
+#     Returns:
+#     list: A list of response times (float).
+#     """
+#     reTimeList = []
+#     with open(reTimeFile, 'r') as file:
+#         reTimeList = [float(line.strip()) for line in file]
+#     return reTimeList
+#
+#
+# def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_directory, CA_on=True):
+#     """
+#     Create a residue interaction network based on a distance cutoff and residue response times.
+#
+#     Parameters:
+#     pdb (str): Path to the PDB file.
+#     cutoff (float): Distance cutoff in Angstroms for edge inclusion between residues.
+#     reTimeFile (str): Path to the file containing residue response times.
+#     outputFileName (str): Name of the output file to save the network.
+#     write_out (bool): Whether to write the output network to a file.
+#     out_directory (str): Directory to write the output file to.
+#     CA_on (bool): Whether to consider only CA atoms for distance calculations.
+#
+#     Returns:
+#     tuple: A tuple containing:
+#         - network (nx.Graph): The residue interaction network.
+#         - structure_res_list (list): List of Bio.PDB.Residue.Residue objects.
+#         - res_list (list): List of residue identifiers.
+#         - len_of_retimes_on_file (int): The number of response times loaded from the file.
+#     """
+#     try:
+#         structure_res_list, res_list = get_residues(pdb)
+#         reTimeList = load_response_times(reTimeFile)
+#         distance_cutoff = float(cutoff)
+#         network = nx.Graph()
+#
+#         len_of_retimes_on_file = len(reTimeList)
+#
+#         # Add nodes and properties to the graph
+#         for idx, res in enumerate(structure_res_list):
+#             res_pos = res['CA'].get_coord()
+#             node_name = res_list[idx]
+#
+#             if network.has_node(node_name):
+#                 node_name += 'X'
+#                 res_list[idx] = node_name
+#                 print(f"Residue of the same name was found. Residue name changed to {node_name}.")
+#
+#             network.add_node(node_name, posx=str(res_pos[0]), posy=str(res_pos[1]), posz=str(res_pos[2]),
+#                              retime=reTimeList[idx])
+#
+#         # Add edges according to residue response time and cutoff distance
+#         for i, res1 in enumerate(structure_res_list):
+#             for j, res2 in enumerate(structure_res_list):
+#                 if i != j and within_cutoff(res1, res2, distance_cutoff, just_CA=CA_on):
+#                     network.add_edge(res_list[i], res_list[j])
+#
+#         if write_out:
+#             nx.write_gml(network, os.path.join(out_directory, outputFileName))
+#
+#         return network, structure_res_list, res_list, len_of_retimes_on_file
+#
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#         return None, None, None, 0
+#
+
+
+
+import os
+import numpy as np
+import networkx as nx
+from Bio.PDB import PDBParser
+import MDAnalysis as mda
 
 def get_distance(coord1, coord2):
     """
@@ -145,8 +289,23 @@ def get_distance(coord1, coord2):
     Returns:
     float: The Euclidean distance between the two points.
     """
-    return np.linalg.norm(coord1 - coord2)
+    return np.linalg.norm(np.array(coord1) - np.array(coord2))
 
+def calculate_center_of_mass(residue):
+    """
+    Calculate the center of mass of a residue using MDAnalysis.
+
+    Parameters:
+    residue (Bio.PDB.Residue.Residue): The residue object.
+
+    Returns:
+    array: The coordinates of the center of mass.
+    """
+    atoms = [atom for atom in residue]
+    positions = np.array([atom.get_coord() for atom in atoms])
+    masses = np.array([atom.mass for atom in atoms])
+    center_of_mass = np.average(positions, axis=0, weights=masses)
+    return center_of_mass
 
 def get_residues(pdb):
     """
@@ -160,12 +319,11 @@ def get_residues(pdb):
         - list of residues (Bio.PDB.Residue.Residue)
         - list of residue identifiers (str)
     """
-    parser = PDBParser()
+    parser = PDBParser(QUIET=True)
     structure = parser.get_structure('prot', pdb)
     residue_list = [res for res in structure.get_residues() if res.get_id()[0] == ' ']
     res_id_list = [res.get_resname() + str(res.get_id()[1]) for res in residue_list]
     return residue_list, res_id_list
-
 
 def within_cutoff(res1, res2, distance_cutoff, just_CA):
     """
@@ -180,18 +338,17 @@ def within_cutoff(res1, res2, distance_cutoff, just_CA):
     Returns:
     bool: True if the residues are within the cutoff distance, False otherwise.
     """
-    if just_CA:
-        ca1 = res1['CA'].get_coord()
-        ca2 = res2['CA'].get_coord()
-        return get_distance(ca1, ca2) <= distance_cutoff
-
-    for atom1 in res1:
-        for atom2 in res2:
-            if get_distance(atom1.get_coord(), atom2.get_coord()) <= distance_cutoff:
-                return True
-
-    return False
-
+    try:
+        if just_CA:
+            ca1 = res1['CA'].get_coord()
+            ca2 = res2['CA'].get_coord()
+            return get_distance(ca1, ca2) <= distance_cutoff
+        else:
+            com1 = calculate_center_of_mass(res1)
+            com2 = calculate_center_of_mass(res2)
+            return get_distance(com1, com2) <= distance_cutoff
+    except KeyError:
+        return False
 
 def load_response_times(reTimeFile):
     """
@@ -208,8 +365,7 @@ def load_response_times(reTimeFile):
         reTimeList = [float(line.strip()) for line in file]
     return reTimeList
 
-
-def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_directory, CA_on=True):
+def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out=False, out_directory='', CA_on=True):
     """
     Create a residue interaction network based on a distance cutoff and residue response times.
 
@@ -239,7 +395,7 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_direc
 
         # Add nodes and properties to the graph
         for idx, res in enumerate(structure_res_list):
-            res_pos = res['CA'].get_coord()
+            res_pos = res['CA'].get_coord() if CA_on else calculate_center_of_mass(res)
             node_name = res_list[idx]
 
             if network.has_node(node_name):
@@ -264,6 +420,10 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_direc
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None, None, 0
+
+
+
+
 
 
 def filter_pair_network(network, source, target, node_threshold=None):
@@ -435,3 +595,14 @@ class MultiTaskEngine:
 
         except IndexError as error:
             print(f"Index error during pair network calculation: {error}")
+
+"""
+pdb = "C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download/2j0w_example_fixed_ph7.4.pdb"
+cutoff = 7
+reTimeFile = "C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download/responseTimes_4.csv"
+outputFileName = "protein_general_cutoff_network.gml"
+write_out = True
+out_directory = "C:/Users/law5_/Desktop/MDPerTool_GUI/mdpertool/Download"
+
+createRNetwork(pdb, cutoff, reTimeFile, outputFileName, write_out, out_directory, CA_on=True)
+"""

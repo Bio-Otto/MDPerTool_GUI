@@ -808,7 +808,7 @@ class MainWindow(QtWidgets.QMainWindow):
         possible_path = str(self.response_time_lineEdit.text())
         if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
             source_residue = self.source_res_comboBox.currentText()
-            row, col, Response_Count = getResponseTimeGraph(possible_path)
+            row, col, Response_Count, plot_name = getResponseTimeGraph(possible_path)
             """
             if source_residue == '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=None)

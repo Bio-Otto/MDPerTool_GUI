@@ -1184,12 +1184,12 @@ class Functions(MainWindow):
             possible_path = str(self.response_time_lineEdit.text())
             if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
                 source_residue = self.source_res_comboBox.currentText()
-                row, col, Response_Count = getResponseTimeGraph(possible_path)
+                row, col, Response_Count, plot_name = getResponseTimeGraph(possible_path)
 
                 if source_residue == '':
-                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=None)
+                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=None, plot_name=plot_name)
                 if source_residue != '':
-                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue)
+                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue, plot_name=plot_name)
 
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
@@ -1711,7 +1711,7 @@ class Functions(MainWindow):
                 # self.run_duration_spinBox.setValue(int(1000))
                 # self.run_duration_doubleSpinBox.setValue(float(600.000))
                 # self.Number_of_steps_spinBox.setValue(int(300000))
-                self.run_duration_spinBox.setValue(int(3))
+                self.run_duration_spinBox.setValue(int(1000))
                 self.run_duration_doubleSpinBox.setValue(float(1.000))
                 self.Number_of_steps_spinBox.setValue(int(500))
 
