@@ -46,9 +46,9 @@ class Advanced(QtCore.QThread):
         Device_ID_active = False
         precision = 'single'
         water_active = False
-        equilubrate_steps = self.Max_equilubrate_steps_textEdit.toPlainText()
+        # equilubrate_steps = self.Max_equilubrate_steps_textEdit.toPlainText()
         StateData_freq = int(self.StateData_frequency_lineEdit.text())
-        # global selected_platform
+        global selected_platform
 
         print("Simulation parameters preparing for the start ...")
         ## FORCEFIELD CONFIGURATIONS
@@ -144,11 +144,12 @@ class Advanced(QtCore.QThread):
             if not self.minimize_checkBox.isChecked():
                 minimize = False
 
-            if not self.equilubrate_checkBox.isChecked():
-                equilubrate = False
+            # if not self.equilubrate_checkBox.isChecked():
+            #     equilubrate = False
 
-            if equilubrate_steps == "":
-                equilubrate_steps = 500
+            # if equilubrate_steps == "":
+            #     equilubrate_steps = 500
+            equilubrate_steps = 500
 
             if not self.DCD_Reporter_checkBox.isChecked():
                 DCD_Reporter = False
@@ -178,9 +179,9 @@ class Advanced(QtCore.QThread):
             if self.nonBounded_Method_comboBox.currentText == 'NoCutoff':
                 Nonbounded_cutoff_active = False
 
-            if self.Additional_Integrators_checkBox.isChecked():
-                Additional_Integrator = True
-
+            # if self.Additional_Integrators_checkBox.isChecked():
+            #     Additional_Integrator = True
+            Additional_Integrator = True
             if self.equ_platform_comboBox.currentText() in ["CUDA", "OpenCL"]:
                 properties_active = True
 
@@ -209,10 +210,6 @@ class Advanced(QtCore.QThread):
         script_structure = dict(pdb=pdb_pfile,
                                 parent_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
-                                mutation_isActive=self.mutator_checkBox.isChecked(),
-                                mutated_residue=np.array(self.mut_res_comboBox.currentText()[0:3].strip()+'-'+self.mut_res_comboBox.currentText()[3:-1].strip()+'-'+self.mut_res_comboBox_2.currentText().strip()),
-                                mutated_chain=self.mut_res_comboBox.currentText()[-1],
-
                                 long_simulation_time=self.Number_of_steps_spinBox.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
 
@@ -237,13 +234,13 @@ class Advanced(QtCore.QThread):
                                 perturb_simulation_time=self.run_duration_spinBox.value(),
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),
 
-                                integrator_kind=self.integrator_kind_comboBox.currentText(),  # INTEGRATOR
-                                integrator_time_step=self.integrator_time_step_lineEdit.text().strip(),  # INTEGRATOR
-                                integrator_time_step_unit=self.integrator_time_step_unit.currentText(),  # INTEGRATOR
-                                friction=self.friction_lineEdit.text().strip(),  # ADDITIONAL INTEGRATOR
-                                Temperature=self.temperature_lineEdit.text().strip(),  # ADDITIONAL INTEGRATOR
+                                integrator_kind="LangevinMiddle",  # INTEGRATOR
+                                integrator_time_step="2.0",  # INTEGRATOR
+                                integrator_time_step_unit="femtosecond",  # INTEGRATOR
+                                friction="5.0/picosecond",  # ADDITIONAL INTEGRATOR
+                                Temperature="310.0*kelvin",  # ADDITIONAL INTEGRATOR
                                 Additional_Integrator=Additional_Integrator,
-                                Hydrogen_Mass=self.Hydrogen_mass_lineEdit.text().strip(),
+                                Hydrogen_Mass="1.0*amu",
 
                                 NonBoundedMethod=self.nonBounded_Method_comboBox.currentText(),
                                 Constraints=self.system_constraints_comboBox.currentText(),
@@ -258,7 +255,7 @@ class Advanced(QtCore.QThread):
                                 Minimize=minimize,
                                 no_minimize_value=no_minimize_value,
                                 Max_minimization_iteration=self.Max_minimize_iter_lineEdit.text(),
-                                Equilubrate=equilubrate, Equilubrate_steps=equilubrate_steps,
+                                Equilubrate=True, Equilubrate_steps=equilubrate_steps,
                                 DCDReporter=DCD_Reporter, XTCReporter=XTC_Reporter,
                                 DCD_write_freq=self.DCD_write_freq_lineEdit.text(),
                                 DCD_output_name=self.DCD_Output_Name_lineEdit.text(),

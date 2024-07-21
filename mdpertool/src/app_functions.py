@@ -1576,19 +1576,10 @@ class Functions(MainWindow):
 
     # ######################################### PERTURBATION WINDOW FUNCTIONS ##########################################
     def maximum_thread_of_system(self):
-        self.Number_CPU_spinBox.setMaximum(mp.cpu_count())
+        # self.Number_CPU_spinBox.setMaximum(mp.cpu_count())
         self.Number_of_thread_for_network_spinBox.setMaximum(mp.cpu_count())
 
-    def mutator_isActive(self):
-        if self.mutator_checkBox.isChecked():
-            self.mut_res_comboBox.setEnabled(True)
-            self.mut_res_comboBox_2.setEnabled(True)
-
-        if not self.mutator_checkBox.isChecked():
-            self.mut_res_comboBox.setEnabled(False)
-            self.mut_res_comboBox_2.setEnabled(False)
-
-    def precision_combobox_settings(self, eq_md_indexes, per_md_indexes):
+    def precision_combobox_settings(self, eq_md_indexes, per_md_indexes=None):
 
         if eq_md_indexes is not None:
             if str(self.equ_platform_comboBox.currentText()) == 'CPU':
@@ -1598,7 +1589,7 @@ class Functions(MainWindow):
                 self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['mixed'])
                 self.All_CPU_checkBox.setEnabled(True)
                 self.Number_CPU_spinBox_2.setEnabled(True)
-                self.label_6.setEnabled(True)
+                # self.label_6.setEnabled(True)
 
             if str(self.equ_platform_comboBox.currentText()) == 'Reference':
                 self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(False)
@@ -1607,7 +1598,7 @@ class Functions(MainWindow):
                 self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['double'])
                 self.All_CPU_checkBox.setEnabled(False)
                 self.Number_CPU_spinBox_2.setEnabled(False)
-                self.label_6.setEnabled(False)
+                # self.label_6.setEnabled(False)
 
             if str(self.equ_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
                 self.eq_precision_comboBox.model().item(eq_md_indexes['single']).setEnabled(True)
@@ -1616,35 +1607,35 @@ class Functions(MainWindow):
                 self.eq_precision_comboBox.setCurrentIndex(eq_md_indexes['single'])
                 self.All_CPU_checkBox.setEnabled(False)
                 self.Number_CPU_spinBox_2.setEnabled(False)
-                self.label_6.setEnabled(False)
+                # self.label_6.setEnabled(False)
 
-        if per_md_indexes is not None:
-            if str(self.per_platform_comboBox.currentText()) == 'CPU':
-                self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
-                self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
-                self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(False)
-                self.per_precision_comboBox.setCurrentIndex(per_md_indexes['mixed'])
-                self.perturbation_All_CPU_checkBox.setEnabled(True)
-                self.Number_CPU_spinBox.setEnabled(True)
-                self.label_35.setEnabled(True)
-
-            if str(self.per_platform_comboBox.currentText()) == 'Reference':
-                self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
-                self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(False)
-                self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
-                self.per_precision_comboBox.setCurrentIndex(per_md_indexes['double'])
-                self.perturbation_All_CPU_checkBox.setEnabled(False)
-                self.Number_CPU_spinBox.setEnabled(False)
-                self.label_35.setEnabled(False)
-
-            if str(self.per_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
-                self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(True)
-                self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
-                self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
-                self.per_precision_comboBox.setCurrentIndex(per_md_indexes['single'])
-                self.perturbation_All_CPU_checkBox.setEnabled(False)
-                self.Number_CPU_spinBox.setEnabled(False)
-                self.label_35.setEnabled(False)
+        # if per_md_indexes is not None:
+        #     if str(self.per_platform_comboBox.currentText()) == 'CPU':
+        #         self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
+        #         self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
+        #         self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(False)
+        #         self.per_precision_comboBox.setCurrentIndex(per_md_indexes['mixed'])
+        #         self.perturbation_All_CPU_checkBox.setEnabled(True)
+        #         self.Number_CPU_spinBox.setEnabled(True)
+        #         self.label_35.setEnabled(True)
+        #
+        #     if str(self.per_platform_comboBox.currentText()) == 'Reference':
+        #         self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(False)
+        #         self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(False)
+        #         self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
+        #         self.per_precision_comboBox.setCurrentIndex(per_md_indexes['double'])
+        #         self.perturbation_All_CPU_checkBox.setEnabled(False)
+        #         self.Number_CPU_spinBox.setEnabled(False)
+        #         self.label_35.setEnabled(False)
+        #
+        #     if str(self.per_platform_comboBox.currentText()) in ['CUDA', 'OpenCL']:
+        #         self.per_precision_comboBox.model().item(per_md_indexes['single']).setEnabled(True)
+        #         self.per_precision_comboBox.model().item(per_md_indexes['mixed']).setEnabled(True)
+        #         self.per_precision_comboBox.model().item(per_md_indexes['double']).setEnabled(True)
+        #         self.per_precision_comboBox.setCurrentIndex(per_md_indexes['single'])
+        #         self.perturbation_All_CPU_checkBox.setEnabled(False)
+        #         self.Number_CPU_spinBox.setEnabled(False)
+        #         self.label_35.setEnabled(False)
 
     def output_file(self):
         try:
@@ -1984,37 +1975,37 @@ class Functions(MainWindow):
             Message_Boxes.Critical_message(self, 'An error occurred while fetching the pdb file.', repr(instance),
                                            Style.MessageBox_stylesheet)
 
-    def Stochastic_changed(self):
-        """
-             The function provides enable or disable of Stochastic Parameter menu according to İntegrator kind
-        """
-        self.kind_of_integrator = self.integrator_kind_comboBox.currentText()
-
-        if self.kind_of_integrator in ["Langevin", "LangevinMiddle", "Brownian"]:
-            self.Additional_Integrator_groupBox.setEnabled(True)
-            self.Additional_Integrators_checkBox.setChecked(True)
-            self.Additional_Integrators_checkBox.setEnabled(True)
-
-            if self.kind_of_integrator == "LangevinMiddle":
-                self.integrator_time_step_lineEdit.setText("4.0")
-                self.Hydrogen_mass_lineEdit.setText("1.5*amu")
-
-                constraints_index = self.system_constraints_comboBox.findText("HBonds", QtCore.Qt.MatchFixedString)
-                if constraints_index >= 0:
-                    self.system_constraints_comboBox.setCurrentIndex(constraints_index)
-
-            else:
-                self.integrator_time_step_lineEdit.setText("2.0")
-                self.Hydrogen_mass_lineEdit.setText("1.0*amu")
-
-                constraints_index = self.system_constraints_comboBox.findText("None", QtCore.Qt.MatchFixedString)
-                if constraints_index >= 0:
-                    self.system_constraints_comboBox.setCurrentIndex(constraints_index)
-
-        else:
-            self.Additional_Integrator_groupBox.setEnabled(False)
-            self.Additional_Integrators_checkBox.setChecked(False)
-            self.Additional_Integrators_checkBox.setEnabled(False)
+    # def Stochastic_changed(self):
+    #     """
+    #          The function provides enable or disable of Stochastic Parameter menu according to İntegrator kind
+    #     """
+    #     self.kind_of_integrator = self.integrator_kind_comboBox.currentText()
+    #
+    #     if self.kind_of_integrator in ["Langevin", "LangevinMiddle", "Brownian"]:
+    #         self.Additional_Integrator_groupBox.setEnabled(True)
+    #         self.Additional_Integrators_checkBox.setChecked(True)
+    #         self.Additional_Integrators_checkBox.setEnabled(True)
+    #
+    #         if self.kind_of_integrator == "LangevinMiddle":
+    #             self.integrator_time_step_lineEdit.setText("4.0")
+    #             self.Hydrogen_mass_lineEdit.setText("1.5*amu")
+    #
+    #             constraints_index = self.system_constraints_comboBox.findText("HBonds", QtCore.Qt.MatchFixedString)
+    #             if constraints_index >= 0:
+    #                 self.system_constraints_comboBox.setCurrentIndex(constraints_index)
+    #
+    #         else:
+    #             self.integrator_time_step_lineEdit.setText("2.0")
+    #             self.Hydrogen_mass_lineEdit.setText("1.0*amu")
+    #
+    #             constraints_index = self.system_constraints_comboBox.findText("None", QtCore.Qt.MatchFixedString)
+    #             if constraints_index >= 0:
+    #                 self.system_constraints_comboBox.setCurrentIndex(constraints_index)
+    #
+    #     else:
+    #         self.Additional_Integrator_groupBox.setEnabled(False)
+    #         self.Additional_Integrators_checkBox.setChecked(False)
+    #         self.Additional_Integrators_checkBox.setEnabled(False)
 
     @staticmethod
     def Equilibration_On_Off_Changed(self):

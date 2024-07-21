@@ -146,22 +146,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Browse_Output_button.clicked.connect(lambda: self.output_folder_browse())
         self.PDB_ID_lineEdit.textChanged.connect(lambda: UIF.Functions.PDB_ID_lineEdit(self))
         self.fetch_pdb_Button.clicked.connect(lambda: self.fetch_and_load_pdbfile())
-        self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
+        # self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         UIF.Functions.Send_Available_Platforms_to_GUI(self)
         UIF.Functions.maximum_thread_of_system(self)
-        self.mutator_checkBox.stateChanged.connect(lambda: UIF.Functions.mutator_isActive(self))
+        # self.mutator_checkBox.stateChanged.connect(lambda: UIF.Functions.mutator_isActive(self))
         self.platform_specific_precision_applying()
 
         self.node_threshold_checkBox.stateChanged.connect(lambda: UIF.Functions.node_threshold_use(self))
         self.equ_platform_comboBox.currentTextChanged.connect(
             lambda: UIF.Functions.platform_comboBox_Changed(self, eq_md=True, per_md=False))
-        self.per_platform_comboBox.currentTextChanged.connect(
-            lambda: UIF.Functions.platform_comboBox_Changed(self, eq_md=False, per_md=True))
+        # self.per_platform_comboBox.currentTextChanged.connect(
+        #     lambda: UIF.Functions.platform_comboBox_Changed(self, eq_md=False, per_md=True))
 
         self.minimize_checkBox.stateChanged.connect(lambda: UIF.Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.DCD_Reporter_Changed(self))
-        self.equilubrate_checkBox.stateChanged.connect(lambda: UIF.Functions.Equilibration_On_Off_Changed(self))
+        # self.equilubrate_checkBox.stateChanged.connect(lambda: UIF.Functions.Equilibration_On_Off_Changed(self))
         self.Device_ID_checkBox.stateChanged.connect(lambda: UIF.Functions.UseDeviceID_On_Off_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
         self.Run.clicked.connect(self.run_btn_clicked)
@@ -175,8 +175,8 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.long_simulation_time_unit.currentTextChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
-        self.integrator_time_step_lineEdit.textChanged.connect(
-            lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
+        # self.integrator_time_step_lineEdit.textChanged.connect(
+        #     lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
         self.Number_of_steps_spinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_advanced(self))
 
@@ -292,16 +292,16 @@ class MainWindow(QtWidgets.QMainWindow):
                                     'mixed': self.eq_precision_comboBox.findText('mixed'),
                                     'double': self.eq_precision_comboBox.findText('double')}
 
-        per_md_precission_indexes = {'single': self.per_precision_comboBox.findText('single'),
-                                     'mixed': self.per_precision_comboBox.findText('mixed'),
-                                     'double': self.per_precision_comboBox.findText('double')}
-
+        # per_md_precission_indexes = {'single': self.per_precision_comboBox.findText('single'),
+        #                              'mixed': self.per_precision_comboBox.findText('mixed'),
+        #                              'double': self.per_precision_comboBox.findText('double')}
+        per_md_precission_indexes=None
         self.equ_platform_comboBox.currentTextChanged.connect(
             lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
                                                               per_md_indexes=None))
-        self.per_platform_comboBox.currentTextChanged.connect(
-            lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=None,
-                                                              per_md_indexes=per_md_precission_indexes))
+        # self.per_platform_comboBox.currentTextChanged.connect(
+        #     lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=None,
+        #                                                       per_md_indexes=per_md_precission_indexes))
         UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
                                                   per_md_indexes=per_md_precission_indexes)
 
@@ -395,9 +395,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     # for i in self.combobox:
                     #     self.res1_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
-                    self.mut_res_comboBox.clear()  # delete all items from comboBox
+                    # self.mut_res_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    self.mut_res_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                    # self.mut_res_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
