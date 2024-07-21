@@ -209,6 +209,10 @@ class Advanced(QtCore.QThread):
         script_structure = dict(pdb=pdb_pfile,
                                 parent_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
                                 output_folder=self.Output_Folder_textEdit.toPlainText(),
+                                mutation_isActive=self.mutator_checkBox.isChecked(),
+                                mutated_residue=np.array(self.mut_res_comboBox.currentText()[0:3].strip()+'-'+self.mut_res_comboBox.currentText()[3:-1].strip()+'-'+self.mut_res_comboBox_2.currentText().strip()),
+                                mutated_chain=self.mut_res_comboBox.currentText()[-1],
+
                                 long_simulation_time=self.Number_of_steps_spinBox.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
 

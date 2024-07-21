@@ -52,17 +52,20 @@ requirements:
     - mdanalysis
     #- pyvis
 
-test:
-  imports:
-    - mdpertool
-
-  commands:
-    - mdpertool -gui
-#  requires:
-#    - pytest
+#test:
+#  imports:
+#    - mdpertool
 
 #  commands:
-#    - pytest -vv --pyargs mdpertool
+#    - mdpertool -gui
+test:
+  requires:
+    - pytest
+  commands:
+    - mdpertool cli --help  # To check the CLI help message
+    - mdpertool gui --help  # To check the GUI help message (this won't actually run the GUI, just test the CLI argument parsing)
+  imports:
+    - mdpertool
 
 about:
   home: "https://github.com/Bio-Otto/MDPerTool_GUI"

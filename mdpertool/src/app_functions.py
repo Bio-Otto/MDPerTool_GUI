@@ -257,8 +257,6 @@ class Helper_Functions():
 
             self.threadpool.start(work)
 
-
-
     def _handle_mismatch_error(self):
         Message_Boxes.Warning_message(self, "Mismatch Error!",
                                       "The number of residues in the topology file you have provided is not equal to the response time file.",
@@ -303,55 +301,69 @@ class Functions(MainWindow):
 
         global output_folder_directory, network_holder
 
-        self.active_workers = 0
-        self.network_holder = []
-        self.log_holder = []
-        self.initial_network = None
+        try:
+            self.active_workers = 0
+            self.network_holder = []
+            self.log_holder = []
+            self.initial_network = None
 
-        self.network_params = dict(Helper_Functions._initialize_parameters(self))
-        target_residues = Helper_Functions._get_target_residues(self)
-        conservation_settings = Helper_Functions._get_conservation_settings(self)
+            self.network_params = dict(Helper_Functions._initialize_parameters(self))
+            target_residues = Helper_Functions._get_target_residues(self)
+            conservation_settings = Helper_Functions._get_conservation_settings(self)
 
-        general_output_folder = os.path.join(self.output_directory, 'network_outputs')
-        Path(general_output_folder).mkdir(parents=True, exist_ok=True)
+            general_output_folder = os.path.join(self.output_directory, 'network_outputs')
+            Path(general_output_folder).mkdir(parents=True, exist_ok=True)
 
-        folder_name = f"output_{self.source}"
-        output_folder_directory = os.path.join(general_output_folder, folder_name)
-        Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
+            folder_name = f"output_{self.source}"
+            output_folder_directory = os.path.join(general_output_folder, folder_name)
+            Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
 
-        engine = MultiTaskEngine(
-            pdb_file=self.pdb,
-            cutoff=self.cutoff,
-            re_time_file=self.retime_file,
-            source=self.source,
-            node_threshold=self.node_threshold,
-            output_file_name=self.outputFileName,
-            write_outputs=self.create_output,
-            output_directory=output_folder_directory
-        )
+            method = ''
+            for checkbox, m in [(self.atomPair_checkBox, 'any'), (self.Calpha_checkBox, 'selected_atom'),
+                                (self.center_of_mass_checkBox, 'center_of_mass')]:
+                if checkbox.isChecked():
+                    method = m
+                    break
 
-        self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
+            engine = MultiTaskEngine(
+                pdb_file=self.pdb,
+                cutoff=self.cutoff,
+                re_time_file=self.retime_file,
+                source=self.source,
+                node_threshold=self.node_threshold,
+                output_file_name=self.outputFileName,
+                write_outputs=self.create_output,
+                output_directory=output_folder_directory,
+                method=method,
+                atom_type='CA'
 
-        if len(resId_List) == len_of_reTimes:
-            if conservation_settings['use_conservation']:
-                res_IDs, con_scores = get_conservation_scores(
-                    pdb_id=conservation_settings['pdb_id'],
-                    chain_id=conservation_settings['chain'],
-                    cutoff=conservation_settings['conservation_threshold'],
-                    bound_pdb=self.pdb
-                )
-                if conservation_settings['save_conservation_scores']:
-                    Helper_Functions._save_conservation_scores(self, res_IDs, con_scores,
-                                                               conservation_settings['pdb_id'])
+            )
 
-                intersection_resIDs = set(res_IDs).intersection(target_residues)
-                Helper_Functions._run_network_calculation(self, engine, intersection_resIDs)
+            self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
+
+            if len(resId_List) == len_of_reTimes:
+                if conservation_settings['use_conservation']:
+                    res_IDs, con_scores = get_conservation_scores(
+                        pdb_id=conservation_settings['pdb_id'],
+                        chain_id=conservation_settings['chain'],
+                        cutoff=conservation_settings['conservation_threshold'],
+                        bound_pdb=self.pdb
+                    )
+                    if conservation_settings['save_conservation_scores']:
+                        Helper_Functions._save_conservation_scores(self, res_IDs, con_scores,
+                                                                   conservation_settings['pdb_id'])
+
+                    intersection_resIDs = set(res_IDs).intersection(target_residues)
+                    Helper_Functions._run_network_calculation(self, engine, intersection_resIDs)
+                else:
+                    Helper_Functions._run_network_calculation(self, engine, target_residues)
             else:
-                Helper_Functions._run_network_calculation(self, engine, target_residues)
-        else:
-            Helper_Functions._handle_mismatch_error(self)
+                Helper_Functions._handle_mismatch_error(self)
 
-        del engine
+            del engine
+
+        except Exception as E:
+            print(E)
 
     def plot_networks(self):
 
@@ -1189,7 +1201,8 @@ class Functions(MainWindow):
                 if source_residue == '':
                     dissipation_curve_widget.canvas.plot(Response_Count, source_residue=None, plot_name=plot_name)
                 if source_residue != '':
-                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue, plot_name=plot_name)
+                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue,
+                                                         plot_name=plot_name)
 
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
@@ -1768,7 +1781,7 @@ class Functions(MainWindow):
 
             self.source_res_comboBox.setCurrentIndex(342)
 
-            self.network_cutoff_spinBox.setValue(int(7))
+            self.network_cutoff_spinBox.setValue(float(7.00))
             self.node_threshold_checkBox.setChecked(True)
             self.conservation_PDB_ID_lineEdit.setText("")
             self.conservation_pdb_chain_id_lineedit.setText("")

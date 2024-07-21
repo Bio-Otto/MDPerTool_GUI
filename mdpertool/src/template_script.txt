@@ -83,7 +83,15 @@ log_obj.handlers.clear()
 
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
-fixed_pdb_name = fix_pdb('{{pdb}}', fixed_pdb_out_path='{{output_folder}}', logger_object=log_obj)
+#fixed_pdb_name = fix_pdb('{{pdb}}', output='{{output_folder}}', log_obj=log_obj{{#mutation_isActive}}, mutate={{mutation_isActive}}, mut_region={{mutated_residue}}, chain_id={{mutated_chain}}{{/mutation_isActive}})
+
+fixed_pdb_name = fix_pdb('{{pdb}}',
+                         output='{{output_folder}}',
+                         log_obj=log_obj{{#mutation_isActive}},
+                         mutate={{mutation_isActive}},
+                         mut_region=['{{mutated_residue}}'],  # Liste formatında
+                         chain_id='{{mutated_chain}}'{{/mutation_isActive}})
+
 
 log_obj.info("Loading pdb to simulation engine ...".format())
 pdb = app.PDBFile(fixed_pdb_name)
@@ -118,7 +126,7 @@ nonbonded.setSwitchingDistance({{switching_distance}})
 nonbonded.setUseDispersionCorrection(True)
 {{/use_switching_distance}}
 
-log_obj.info('Creating a %sIntegrator with %s %s . time step' %('{{integrator_kind}}', {{integrator_time_step}}, '{{integrator_time_step_unit}}'))
+log_obj.info('Creating a %sIntegrator with %s %s time step' %('{{integrator_kind}}', {{integrator_time_step}}, '{{integrator_time_step_unit}}'))
 integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}}*{{integrator_time_step_unit}})
 
 if {{cuda_active}} == True:

@@ -169,6 +169,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.export_workspace_pushButton.clicked.connect(lambda: UIF.Functions.export_workspace(self))
         self.import_workspace_pushButton.clicked.connect(lambda: UIF.Functions.import_workspace(self))
 
+
         # --> RUN TIME SETTINGS
         self.run_duration_doubleSpinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
@@ -215,6 +216,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.load_analysis_sample_pushButton.clicked.connect(lambda: UIF.Functions.load_sample_for_analysis(self))
 
         self.network_calculate_pushButton.clicked.connect(self.run_network_analysis)
+
+        self.Calpha_checkBox.stateChanged.connect(self.network_method_checkbox_changed)
+        self.atomPair_checkBox.stateChanged.connect(self.network_method_checkbox_changed)
+        self.center_of_mass_checkBox.stateChanged.connect(self.network_method_checkbox_changed)
 
         # ----------------------------------- > START OF PYMOL RELEATED BUTTONS < ------------------------------------ #
         UIF.UIFunctions.start_pymol(self)
@@ -322,6 +327,8 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
             # Message_Boxes.Information_message(self, "Info", str(ins), Style.MessageBox_stylesheet)
 
+
+
     def show_simulation_monitoring(self):
         # self.stackedWidget.setCurrentIndex(1)
         self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
@@ -385,10 +392,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.upload_pdb_lineEdit.setText(modified_pdb)
 
                     self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
-                    for i in self.combobox:
-                        self.res1_comboBox.addItem(str(i))
+                    # for i in self.combobox:
+                    #     self.res1_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
+                    self.mut_res_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+                    self.mut_res_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
 
                 elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
                     modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
@@ -897,6 +906,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.net_output_directory_lineedit.setText(output_directory)
 
             UIF.Functions.calculate_intersection_network(self)
+
         else:
             raise FileNotFoundError("The specified response time or bound form PDB file does not exist.")
 
@@ -919,6 +929,21 @@ class MainWindow(QtWidgets.QMainWindow):
         # progress.close()
         # return True
         pass
+
+    def network_method_checkbox_changed(self, state):
+        if state == Qt.Checked:
+            sender = self.sender()
+            if sender == self.atomPair_checkBox:
+                self.Calpha_checkBox.setChecked(False)
+                self.center_of_mass_checkBox.setChecked(False)
+
+            elif sender == self.Calpha_checkBox:
+                self.atomPair_checkBox.setChecked(False)
+                self.center_of_mass_checkBox.setChecked(False)
+
+            elif sender == self.center_of_mass_checkBox:
+                self.Calpha_checkBox.setChecked(False)
+                self.atomPair_checkBox.setChecked(False)
 
     def load_nx_to_VisJS_2D_Network(self, intersection_graph_html='2d_network.html', intersection_gml_file=None):
         initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
