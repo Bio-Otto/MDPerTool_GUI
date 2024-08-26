@@ -20,7 +20,7 @@ from openmm import *
 from openmm import app
 from openmm.app import PME, NoCutoff, Ewald, CutoffPeriodic, CutoffNonPeriodic, HBonds, HAngles, AllBonds,DCDReporter, StateDataReporter
 import openmm as mm
-from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres, molar, amu
+from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres, molar, amu, kilojoules, mole, kilojoules_per_mole
 
 from sys import stdout
 import platform as pl
@@ -33,6 +33,7 @@ from mdtraj.reporters import XTCReporter
 from src.logger import Logger
 from datetime import datetime
 from src.CustomReporters import Perturb_StateDataReporter
+
 
 #######################################################################################################################
 ###################################### CLASSICAL MD PROCESS USING MDPerTool v0.1 ######################################
@@ -59,6 +60,77 @@ class Minimization_Reporter(openmm.MinimizationReporter):
         return False
 
 
+class ForceReporter:
+    def __init__(self, file_path, reportInterval, protein_selection):
+        self._file_path = file_path
+        self._reportInterval = reportInterval
+        self._protein_selection = protein_selection
+
+        self._file = open(self._file_path, 'w')
+        self._file.write("<Forces>\n")
+
+    def __del__(self):
+        self._file.write("</Forces>\n")
+        self._file.close()
+
+    def describeNextReport(self, simulation: Simulation):
+        steps = self._reportInterval - simulation.currentStep % self._reportInterval
+        return steps, False, False, True, False, None
+
+    def report(self, simulation: Simulation, state):
+        forces = state.getForces(asNumpy=True).value_in_unit(unit.kilojoules_per_mole / unit.nanometer)
+
+        # Step element oluştur
+        step_element = f'  <Force step="{simulation.currentStep}">\n'
+
+        # Her atom için kuvvetleri yazdır
+        for i, f in enumerate(forces):
+            if i in self._protein_selection:
+                force_line = f'    <Atom x="{f[0]}" y="{f[1]}" z="{f[2]}"/>\n'
+                step_element += force_line
+
+        step_element += '  </Force>\n'
+
+        # Step elementini dosyaya yazdır
+        self._file.write(step_element)
+
+
+class VelocityReporter:
+    def __init__(self, file_path, reportInterval, protein_selection):
+        self._file_path = file_path
+        self._reportInterval = reportInterval
+        self._protein_selection = protein_selection
+
+        self._file = open(self._file_path, 'w')
+        self._file.write("<Velocities>\n")
+
+    def __del__(self):
+        self._file.write("</Velocities>\n")
+        self._file.close()
+
+    def describeNextReport(self, simulation: Simulation):
+        steps = self._reportInterval - simulation.currentStep % self._reportInterval
+        return steps, False, True, False, False, None
+
+    def report(self, simulation: Simulation, state=None):
+        if state is None:
+            state = simulation.context.getState(getVelocities=True)
+
+        velocities = state.getVelocities(asNumpy=True).value_in_unit(unit.nanometer / unit.picosecond)
+
+        # Step element oluştur
+        step_element = f'  <Velocity step="{simulation.currentStep}">\n'
+
+        # Her atom için hızları yazdır
+        for i, v in enumerate(velocities):
+            if i in self._protein_selection:
+                velocity_line = f'    <Atom x="{v[0]}" y="{v[1]}" z="{v[2]}"/>\n'
+                step_element += velocity_line
+
+        step_element += '  </Velocity>\n'
+
+        # Step elementini dosyaya yazdır
+        self._file.write(step_element)
 
 
 # ---------------- LOGGER ---------------- #
@@ -67,17 +139,6 @@ file_name = f"out_{current_date}.log"
 log_path = os.path.join('{{output_folder}}', file_name)
 
 log_obj = Logger(log_path)
-"""
-log_obj.critical("CRIC".format())
-log_obj.error("ERR".format())
-log_obj.warning("WARN".format())
-log_obj.debug("debug".format())
-log_obj.info("qwerty".format())
-log_obj.info("asdfghjkl".format())
-log_obj.info("zxcvbnm".format())
-# closing file
-log_obj.handlers.clear()
-"""
 # ---------------- LOGGER ---------------- #
 
 
@@ -181,6 +242,7 @@ simulation.reporters.append(Perturb_StateDataReporter(stdout, {{StateData_freq}}
                                                       volume=True, density=True, totalSteps={{Number_of_steps}},
                                                       report_type='Progress (%)'))
 {{/State_Data_Reporter}}
+
 
 log_obj.info("Running Production...")
 simulation.step({{Number_of_steps}})
@@ -340,11 +402,19 @@ for i in range(len({{speed_factor}})):
 
         {{#State_Data_Reporter}}
         log_obj.info("State Report will tell you ...".format())
+
         ref_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
                                   density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}},
                                   report_type='Reference MD Progress (%)'))
+
         {{/State_Data_Reporter}}
+
+        # ref_simulation_forces = os.path.join(OUTPUT_DIRECTORY, 'ref_protein_forces.xml')
+        ref_simulation_velocities = os.path.join(OUTPUT_DIRECTORY, 'ref_protein_velocities.xml')
+        # ref_simulation.reporters.append(ForceReporter(ref_simulation_forces, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+        ref_simulation.reporters.append(VelocityReporter(ref_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+
 
         ref_simulation.step({{perturb_simulation_time}})
 
@@ -460,11 +530,19 @@ for i in range(len({{speed_factor}})):
 
     {{#State_Data_Reporter}}
     log_obj.info("State Report will tell you ...")
+
     dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                               kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
                               density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}},
                               report_type='Dissipation MD Progress (%)'))
+
     {{/State_Data_Reporter}}
+
+    # dis_simulation_forces = os.path.join(OUTPUT_DIRECTORY, 'dis_protein_forces.xml')
+    dis_simulation_velocities = os.path.join(OUTPUT_DIRECTORY, 'dis_protein_velocities.xml')
+    # dis_simulation.reporters.append(ForceReporter(dis_simulation_forces, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+    dis_simulation.reporters.append(VelocityReporter(dis_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+
 
     dis_simulation.step({{perturb_simulation_time}})
 

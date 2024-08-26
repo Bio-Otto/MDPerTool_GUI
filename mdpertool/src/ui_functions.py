@@ -249,9 +249,9 @@ class UIFunctions(MainWindow):
         # Creating the PyMolWidget
         try:
             self.ProteinView = PymolQtWidget(self)
+            self.ProteinView.change_default_background()
             verticalLayoutProteinView = QVBoxLayout(self.Pymol_Widget)
             verticalLayoutProteinView.addWidget(self.ProteinView)
-            self.ProteinView.change_default_background()
             self.setLayout(verticalLayoutProteinView)
             self.ProteinView.update()
             self.ProteinView.show()
@@ -266,7 +266,7 @@ class UIFunctions(MainWindow):
             self.Protein3DNetworkView.update()
             self.Protein3DNetworkView.show()
             verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
-            # self.Protein3DNetworkView.initial_pymol_visual()
+
 
         except Exception as instance:
             if self.Pymol_Widget.isVisible():
@@ -282,7 +282,22 @@ class UIFunctions(MainWindow):
                                      "Upgrading your graphics card drivers or reinstalling PyMol"
                                      "may solve this issue.")
 
+    def realtime_perturbation_monitoring_inPymol(self, statu, ref_velocity_file="ref_protein_velocities.xml",
+                                                 pert_velocity_file="dis_protein_velocities.xml",
+                                                 response_threshold=0.005):
+
+        if statu == "Started on PyMOL" and not self.live_PyMol_already_started:
+            self.ProteinView.set_reference_file(ref_file_path=ref_velocity_file)
+            self.ProteinView.monitor_live_file(pert_velocity_file, response_threshold=response_threshold)
+            self.live_PyMol_already_started = True
+
+        if statu == "Finished on PyMOL":
+            self.ProteinView.stop_monitoring()
+            self.live_PyMol_already_started = False
+
+
     def load_pdb_to_3DNetwork(self, pdb_file):
+
         self.Protein3DNetworkView.reinitialize()
         self.Protein3DNetworkView.change_default_background()
         self.Protein3DNetworkView.loadMolFile(pdb_file)

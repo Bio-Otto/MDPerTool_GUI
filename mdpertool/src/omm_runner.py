@@ -31,6 +31,7 @@ class Communicate(QtCore.QObject):
     run_speed = QtCore.Signal(list)
     finish_alert = QtCore.Signal(str)
     inform_about_situation = QtCore.Signal(str)
+    real_time_pertub_info = QtCore.Signal(str)
 
 
 class OpenMMScriptRunner(QtCore.QObject):
@@ -46,6 +47,8 @@ class OpenMMScriptRunner(QtCore.QObject):
     classic_md_remain_data = []
     reference_md_remain_data = []
     dissipation_md_remain_data = []
+    pymol_statu = str
+
 
     def __init__(self, script):
         super(OpenMMScriptRunner, self).__init__()
@@ -196,6 +199,8 @@ class OpenMMScriptRunner(QtCore.QObject):
                     headers = msg.strip().split(',')
                     # filter out some extra quotation marks and comment characters
                     _headers = [e.strip('#"\'') for e in headers]
+                    self.pymol_statu = "Started on PyMOL"
+
 
                 elif type(msg) is not dict:
                     t = [e.strip('%"\'') for e in msg.strip().split(',')]
@@ -214,6 +219,9 @@ class OpenMMScriptRunner(QtCore.QObject):
                         formatted_number = round(extracted_number, 2)
                         self.decomp_data.append(formatted_number)
                         self.update_plot(self.decomp_data)
+
+                    self.pymol_statu = "Finished on PyMOL"
+                    self.Signals.real_time_pertub_info.emit(self.pymol_statu)
 
             except queue.Empty:
                 time.sleep(0.1)
@@ -258,6 +266,7 @@ class OpenMMScriptRunner(QtCore.QObject):
                 self.plotdata.update({k: np.concatenate((current, v), axis=None)})
 
             self.Signals.dataSignal.emit(self.plotdata)
+            self.Signals.real_time_pertub_info.emit(self.pymol_statu)
 
         if not self.plots_created and type(msg) == dict:
             self.create_plots(msg.keys())
@@ -338,7 +347,7 @@ class Graphs(QWidget):
         self.energy_graph.addItem(self.potential_energy_graph)
         self.energy_graph.addItem(self.kinetic_energy_graph)
         self.energy_graph.addItem(self.total_energy_graph)
-        #self.win.nextRow()
+        # self.win.nextRow()
 
     def setup_simulation_speed_graph(self):
         self.simulation_speed_graph = self.win.addPlot(title="Speed", row=1, colspan=1)

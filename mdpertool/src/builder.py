@@ -107,6 +107,13 @@ class Advanced(QtCore.QThread):
         except:
             QMessageBox.critical(self, "Error", "An error occured while getting output directory")
 
+        if self.selected_residues_listWidget.count() == 0:
+            Message_Boxes.Warning_message(self, 'Selection Failed!', "There is no residue selected for perturbation.",
+                                          Style.MessageBox_stylesheet)
+            return False
+
+
+
         if not self.rigid_water_checkBox.isChecked():
             rigid_water = False
         if not self.use_switching_checkBox.isChecked():

@@ -2213,22 +2213,113 @@ class pdb_Tools:
                                            Style.MessageBox_stylesheet)
             return False
 
+    # def fetched_pdb_fix(self, file_pathway, output_path=None, ph=7, chains_to_remove=None):
+    #     """
+    #     Args:
+    #         :param file_pathway: pathway for manipulating your fetched pdb files
+    #         :param chains_to_remove: Selected chains will be deleted
+    #         :param ph: Selected pH value will be apply to the structure's Hydrogens
+    #     Returns:
+    #         :param output_path: the manipulated pdb file will return as full path if specified
+    #                             otherwise will return already exist path
+    #     """
+    #
+    #     # get name of pdb file
+    #     name_of_pdb = os.path.basename(file_pathway).split('.')[0]
+    #
+    #     print("Creating PDBFixer...")
+    #     fixer = PDBFixer(file_pathway)
+    #     print("Finding missing residues...")
+    #
+    #     if chains_to_remove is not None:
+    #         print("toDelete: %s" % chains_to_remove)
+    #         fixer.removeChains(chainIds=chains_to_remove)
+    #
+    #     fixer.findMissingResidues()
+    #
+    #     chains = list(fixer.topology.chains())
+    #     keys = fixer.missingResidues.keys()
+    #     for key in list(keys):
+    #         chain = chains[key[0]]
+    #         if key[1] == 0 or key[1] == len(list(chain.residues())):
+    #             del fixer.missingResidues[key]
+    #
+    #     print("Finding nonstandard residues...")
+    #     fixer.findNonstandardResidues()
+    #     print("Replacing nonstandard residues...")
+    #     fixer.replaceNonstandardResidues()
+    #     print("Removing heterogens...")
+    #     fixer.removeHeterogens(keepWater=False)
+    #     """
+    #     print("Finding missing atoms...")
+    #     fixer.findMissingAtoms()
+    #     print("Adding missing atoms...")
+    #     fixer.addMissingAtoms()
+    #     print("Adding missing hydrogens...")
+    #     fixer.addMissingHydrogens(pH=ph)
+    #     """
+    #     print("Writing PDB file...")
+    #
+    #     #  FOR DELETE WITH MODELLER USE FOLLOWING SCRIPT  #
+    #
+    #     # if chains_to_remove is not None:
+    #     #     toDelete = [r for r in modeller.topology.chains() if r.id in chains_to_remove]
+    #     #     modeller.delete(toDelete)
+    #
+    #     if output_path != "":
+    #         PDBFile.writeFile(
+    #             fixer.topology,
+    #             fixer.positions,
+    #             open(os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph)),
+    #                  "w"),
+    #             keepIds=True)
+    #         return os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
+    #
+    #     if output_path == "":
+    #         new_outpath_dir = os.path.dirname(file_pathway)
+    #         new_outpath = os.path.join(new_outpath_dir, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
+    #         PDBFile.writeFile(
+    #             fixer.topology,
+    #             fixer.positions,
+    #             open(new_outpath, "w"), keepIds=True)
+    #
+    #         return new_outpath
+
     def fetched_pdb_fix(self, file_pathway, output_path=None, ph=7, chains_to_remove=None):
         """
         Args:
-            :param file_pathway: pathway for manipulating your fetched pdb files
+            :param file_pathway: Pathway for manipulating your fetched PDB files
             :param chains_to_remove: Selected chains will be deleted
-            :param ph: Selected pH value will be apply to the structure's Hydrogens
+            :param ph: Selected pH value will be applied to the structure's Hydrogens
         Returns:
-            :param output_path: the manipulated pdb file will return as full path if specified
-                                otherwise will return already exist path
+            :param output_path: The manipulated PDB file will return as full path if specified
+                                otherwise will return the already existing path
         """
 
-        # get name of pdb file
-        name_of_pdb = os.path.basename(file_pathway).split('.')[0]
+        def remove_hetatoms_from_pdb(file_content):
+            """
+            Remove all HETATOM records from the PDB file content.
+
+            Args:
+                :param file_content: Content of the input PDB file as a string
+            Returns:
+                :return: Content of the PDB file with HETATOMs removed as a string
+            """
+            lines = file_content.splitlines()
+            filtered_lines = [line for line in lines if not line.startswith("HETATM")]
+            return '\n'.join(filtered_lines)
+
+        # Read the original PDB file
+        with open(file_pathway, 'r') as infile:
+            pdb_content = infile.read()
+
+        # Create a temporary file for the original PDB content
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.pdb') as temp_file:
+            temp_file.write(pdb_content)
+            temp_file_path = temp_file.name
 
         print("Creating PDBFixer...")
-        fixer = PDBFixer(file_pathway)
+        fixer = PDBFixer(temp_file_path)
         print("Finding missing residues...")
 
         if chains_to_remove is not None:
@@ -2250,40 +2341,40 @@ class pdb_Tools:
         fixer.replaceNonstandardResidues()
         print("Removing heterogens...")
         fixer.removeHeterogens(keepWater=False)
-        """
-        print("Finding missing atoms...")
-        fixer.findMissingAtoms()
+
+        # Remove HETATOM records directly from the PDB content
+        cleaned_pdb_content = remove_hetatoms_from_pdb(pdb_content)
+
+        # Create a temporary file for the cleaned PDB content
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.pdb') as temp_file:
+            temp_file.write(cleaned_pdb_content)
+            cleaned_pdb_path = temp_file.name
+
+        # Read the cleaned PDB content with HETATOM removed
+        fixer = PDBFixer(cleaned_pdb_path)
+
         print("Adding missing atoms...")
-        fixer.addMissingAtoms()
+        fixer.findMissingResidues()
         print("Adding missing hydrogens...")
         fixer.addMissingHydrogens(pH=ph)
-        """
+
         print("Writing PDB file...")
 
-        #  FOR DELETE WITH MODELLER USE FOLLOWING SCRIPT  #
+        if output_path:
+            path = os.path.join(output_path, f"{os.path.basename(file_pathway).split('.')[0]}_fixed_ph{ph}.pdb")
+            with open(path, "w") as outfile:
+                PDBFile.writeFile(fixer.topology, fixer.positions, outfile, keepIds=True)
+            return path
 
-        # if chains_to_remove is not None:
-        #     toDelete = [r for r in modeller.topology.chains() if r.id in chains_to_remove]
-        #     modeller.delete(toDelete)
-
-        if output_path != "":
-            PDBFile.writeFile(
-                fixer.topology,
-                fixer.positions,
-                open(os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph)),
-                     "w"),
-                keepIds=True)
-            return os.path.join(output_path, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
-
-        if output_path == "":
-            new_outpath_dir = os.path.dirname(file_pathway)
-            new_outpath = os.path.join(new_outpath_dir, "%s_fixed_ph%s.pdb" % (name_of_pdb, ph))
-            PDBFile.writeFile(
-                fixer.topology,
-                fixer.positions,
-                open(new_outpath, "w"), keepIds=True)
-
+        if not output_path:
+            new_outpath = os.path.join(os.path.dirname(file_pathway),
+                                       f"{os.path.basename(file_pathway).split('.')[0]}_fixed_ph{ph}.pdb")
+            with open(new_outpath, "w") as outfile:
+                PDBFile.writeFile(fixer.topology, fixer.positions, outfile, keepIds=True)
             return new_outpath
+
+
+
 
         # # Remove the ligand and write a pdb file
         # fixer.removeHeterogens(True)

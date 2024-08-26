@@ -55,6 +55,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent=parent)
         self.dragPos = None
+        self.live_PyMol_already_started = False
 
         # Current directory
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -184,6 +185,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run = OpenMMScriptRunner
 
         self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(decomp_data[-1]))
+        self.run.Signals.real_time_pertub_info.connect(lambda pymol_statu: self.update_live_perturbation_onPyMOL(pymol_statu))
         self.run.Signals.classic_md_remain_time.connect(
             lambda classic_md_remain_data: self.update_classic_md_remaining_time(classic_md_remain_data[-1]))
         self.run.Signals.reference_md_remain_time.connect(
@@ -613,6 +615,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_59.setFont(font)
         self.label_59.setAlignment(Qt.AlignVCenter)
 
+    def update_live_perturbation_onPyMOL(self, statu):
+        UIF.UIFunctions.realtime_perturbation_monitoring_inPymol(self, statu,
+                                                                 pert_velocity_file=os.path.join(self.Output_Folder_textEdit.toPlainText(), "dis_protein_velocities.xml"),
+                                                                 ref_velocity_file=os.path.join(self.Output_Folder_textEdit.toPlainText(), "ref_protein_velocities.xml"))
+
+
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #
     ####################################################################################################################
@@ -824,49 +832,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if source_residue != '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=source_residue)
             """
-
-    """
-    def run_network_analysis(self):
-
-        # try:
-        if os.path.exists(self.response_time_lineEdit.text()) and os.path.exists(self.boundForm_pdb_lineedit.text()):
-            output_directory_for_network = self.net_output_directory_lineedit.text()
-            if not os.path.exists(output_directory_for_network):
-                
-                msgbox = QMessageBox(QMessageBox.Question, "There is no specified output directory",
-                                     "There is no specified output directory\n\n"
-                                     "If you want to specify, please click the 'Yes' button, "
-                                     "otherwise the system will create an output folder named 'out_for_net_analysis'")
-
-                msgbox.setIcon(QMessageBox.Question)
-                msgbox.addButton(QMessageBox.Yes)
-                msgbox.addButton(QMessageBox.No)
-                msgbox.setDefaultButton(QMessageBox.Yes)
-                msgbox.setStyleSheet(Style.MessageBox_stylesheet)
-                msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-                output_answer = msgbox.exec_()
-
-                if output_answer == QMessageBox.Yes:
-                    return False
-
-                if output_answer == QMessageBox.No:
-                    from pathlib import Path
-                    path_out = os.getcwd() + "/out_for_net_analysis"
-                    Path(path_out).mkdir(parents=True, exist_ok=True)
-
-                    output_directory_for_network = os.path.abspath(path_out.strip()).replace('\\', '/')
-                    self.net_output_directory_lineedit.setText(output_directory_for_network)
-            else:
-                output_directory_for_network = os.path.abspath(output_directory_for_network.strip()).replace('\\', '/')
-                self.net_output_directory_lineedit.setText(output_directory_for_network)
-
-            UIF.Functions.calculate_intersection_network(self)
-        # except:
-        #     exc_type, exc_obj, exc_tb = sys.exc_info()
-        #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        #     print(exc_type, fname, exc_tb.tb_lineno)
-        #     QMessageBox(QMessageBox.Critical, "Error", "Problem\nnAn error occured while getting output directory")
-    """
 
     def run_network_analysis(self):
         """
