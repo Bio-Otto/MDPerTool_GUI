@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1872</width>
-    <height>1000</height>
+    <width>1652</width>
+    <height>1006</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -2666,6 +2666,18 @@ QGroupBox::indicator {
                             </property>
                             <item>
                              <widget class="QLabel" name="label_55">
+                              <property name="minimumSize">
+                               <size>
+                                <width>85</width>
+                                <height>0</height>
+                               </size>
+                              </property>
+                              <property name="maximumSize">
+                               <size>
+                                <width>16777215</width>
+                                <height>16777215</height>
+                               </size>
+                              </property>
                               <property name="font">
                                <font>
                                 <family>Segoe UI</family>
@@ -2681,6 +2693,12 @@ QGroupBox::indicator {
                             </item>
                             <item>
                              <widget class="QLabel" name="label_56">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
                               <property name="minimumSize">
                                <size>
                                 <width>80</width>
@@ -2701,20 +2719,19 @@ QGroupBox::indicator {
                              </widget>
                             </item>
                             <item>
-                             <spacer name="horizontalSpacer_10">
-                              <property name="orientation">
-                               <enum>Qt::Horizontal</enum>
-                              </property>
-                              <property name="sizeHint" stdset="0">
+                             <widget class="QLabel" name="label_54">
+                              <property name="minimumSize">
                                <size>
-                                <width>35</width>
-                                <height>20</height>
+                                <width>100</width>
+                                <height>0</height>
                                </size>
                               </property>
-                             </spacer>
-                            </item>
-                            <item>
-                             <widget class="QLabel" name="label_54">
+                              <property name="maximumSize">
+                               <size>
+                                <width>16777215</width>
+                                <height>16777215</height>
+                               </size>
+                              </property>
                               <property name="font">
                                <font>
                                 <family>Segoe UI</family>
@@ -2730,6 +2747,12 @@ QGroupBox::indicator {
                             </item>
                             <item>
                              <widget class="QLabel" name="label_57">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
                               <property name="minimumSize">
                                <size>
                                 <width>80</width>
@@ -2753,20 +2776,19 @@ QGroupBox::indicator {
                              </widget>
                             </item>
                             <item>
-                             <spacer name="horizontalSpacer_12">
-                              <property name="orientation">
-                               <enum>Qt::Horizontal</enum>
-                              </property>
-                              <property name="sizeHint" stdset="0">
+                             <widget class="QLabel" name="label_53">
+                              <property name="minimumSize">
                                <size>
-                                <width>35</width>
-                                <height>20</height>
+                                <width>116</width>
+                                <height>0</height>
                                </size>
                               </property>
-                             </spacer>
-                            </item>
-                            <item>
-                             <widget class="QLabel" name="label_53">
+                              <property name="maximumSize">
+                               <size>
+                                <width>16777215</width>
+                                <height>16777215</height>
+                               </size>
+                              </property>
                               <property name="font">
                                <font>
                                 <family>Segoe UI</family>
@@ -2782,6 +2804,12 @@ QGroupBox::indicator {
                             </item>
                             <item>
                              <widget class="QLabel" name="label_58">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
                               <property name="minimumSize">
                                <size>
                                 <width>80</width>
@@ -2817,13 +2845,13 @@ QGroupBox::indicator {
                            </property>
                            <property name="minimumSize">
                             <size>
-                             <width>290</width>
+                             <width>0</width>
                              <height>60</height>
                             </size>
                            </property>
                            <property name="maximumSize">
                             <size>
-                             <width>16777215</width>
+                             <width>290</width>
                              <height>60</height>
                             </size>
                            </property>
@@ -3205,13 +3233,13 @@ QGroupBox::indicator {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>106</width>
+                                     <width>90</width>
                                      <height>33</height>
                                     </size>
                                    </property>
                                    <property name="maximumSize">
                                     <size>
-                                     <width>106</width>
+                                     <width>90</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -3290,13 +3318,13 @@ background-color: rgb(93, 83, 91);
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>106</width>
+                                     <width>90</width>
                                      <height>33</height>
                                     </size>
                                    </property>
                                    <property name="maximumSize">
                                     <size>
-                                     <width>106</width>
+                                     <width>90</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -3666,13 +3694,13 @@ background-color: rgb(93, 83, 91);
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>106</width>
+                                     <width>90</width>
                                      <height>33</height>
                                     </size>
                                    </property>
                                    <property name="maximumSize">
                                     <size>
-                                     <width>106</width>
+                                     <width>90</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -4897,42 +4925,6 @@ QPushButton:pressed {
                              </widget>
                             </item>
                             <item row="0" column="2">
-                             <widget class="QPushButton" name="dissipation_pushButton">
-                              <property name="minimumSize">
-                               <size>
-                                <width>120</width>
-                                <height>33</height>
-                               </size>
-                              </property>
-                              <property name="font">
-                               <font>
-                                <family>Segoe UI</family>
-                                <pointsize>10</pointsize>
-                               </font>
-                              </property>
-                              <property name="styleSheet">
-                               <string notr="true">QPushButton {
-	border: 2px solid rgb(52, 59, 72);
-	border-radius: 5px;	
-	background-color: rgb(0, 180, 95);
-}
-QPushButton:hover {
-	background-color: rgb(255, 170, 0);
-	border: 2px solid rgb(61, 70, 86);
-}
-QPushButton:pressed {	
-	background-color: rgb(220, 5, 100);
-	border: 2px solid rgb(43, 50, 61);
-}
-
-</string>
-                              </property>
-                              <property name="text">
-                               <string>Show Dissipation</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="0" column="3">
                              <widget class="QPushButton" name="load_sim_sample_pushButton">
                               <property name="sizePolicy">
                                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -14138,6 +14130,30 @@ QCommandLinkButton:pressed {
                     </widget>
                    </item>
                    <item>
+                    <widget class="QLabel" name="label_9">
+                     <property name="minimumSize">
+                      <size>
+                       <width>300</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>400</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QLabel {
+	font-size: 10pt; color: yellow;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
                     <widget class="QLabel" name="label_59">
                      <property name="maximumSize">
                       <size>
@@ -14153,11 +14169,17 @@ QCommandLinkButton:pressed {
                        <bold>false</bold>
                       </font>
                      </property>
+                     <property name="layoutDirection">
+                      <enum>Qt::LeftToRight</enum>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">color: rgb(98, 103, 111);</string>
                      </property>
                      <property name="text">
                       <string>--.--  ns/day</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                      </property>
                     </widget>
                    </item>

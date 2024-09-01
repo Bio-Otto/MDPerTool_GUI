@@ -83,7 +83,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp_script:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as temp_script:
             temp_script.write(code)
             temp_script_path = temp_script.name
 
@@ -158,12 +158,7 @@ class OpenMMScriptRunner(QtCore.QObject):
 
                 else:
                     pass
-                """
-                print("======================================================================")
-                print("MESSAGE: %s" % msg)
-                print("TYPE: %s" % type(msg))
-                print("======================================================================")
-                """
+
                 if 'INFO |' in msg:
                     info_log = re.search(r'INFO \| (.+)', msg)
                     self.update_plot(info_log.group(1))
@@ -178,6 +173,7 @@ class OpenMMScriptRunner(QtCore.QObject):
 
                 elif 'ERROR |' in msg:
                     error_log = re.search(r'ERROR \| (.+)', msg)
+                    print(error_log.group(1))
                     self.update_plot(error_log.group(1))
 
                 elif '#"Progress (%)"' in msg:
@@ -200,7 +196,6 @@ class OpenMMScriptRunner(QtCore.QObject):
                     # filter out some extra quotation marks and comment characters
                     _headers = [e.strip('#"\'') for e in headers]
                     self.pymol_statu = "Started on PyMOL"
-
 
                 elif type(msg) is not dict:
                     t = [e.strip('%"\'') for e in msg.strip().split(',')]
@@ -274,11 +269,7 @@ class OpenMMScriptRunner(QtCore.QObject):
 
         if type(msg) == list:
             self.Signals.decomp_process.emit(msg)
-        """
-        if type(msg) == float:
-            print("here speed")
-            self.Signals.run_speed.emit(msg)
-        """
+
         if type(msg) == str:
             if msg != "Progress Finished Succesfully :)":
                 self.Signals.inform_about_situation.emit(msg)
@@ -421,7 +412,6 @@ class Graphs(QWidget):
             minute = float(time_style[1])
             second = float(time_style[2]) / 60
             return self.real_time_as_minute.append(hour + minute + second)
-        print("TIME REMAINING: %s" % t_remaining)
 
     def update_graph(self, data):
 

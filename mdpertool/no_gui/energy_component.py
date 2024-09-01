@@ -29,6 +29,7 @@ def get_residue_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_at
     trajectory_collector = object
     traj1 = object
     traj2 = object
+
     if ref_traj is not None:
         traj1 = md.join(md.iterload(ref_traj, chunk=100, stride=stride, atom_indices=None, top=top))
         traj2 = md.join(md.iterload(modif_traj, chunk=100, stride=stride, atom_indices=None, top=top))
@@ -49,9 +50,16 @@ def get_residue_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_at
             positions.append(wanted_atoms_traj.openmm_positions(i)),
 
         All_positions.append(positions)
+
+    # if write_pdb_for_selection:
+    #     first_snapshot_name = os.path.join(save_directory, '%s_first_snapshot.pdb' % selected_atoms)
+    #     wanted_atoms_traj[0].save_pdb(first_snapshot_name)
+
+    # Select all protein atoms from the initial topology and save to PDB if needed
     if write_pdb_for_selection:
+        full_protein_topology = md.load(top).atom_slice(md.load(top).topology.select('protein'))
         first_snapshot_name = os.path.join(save_directory, '%s_first_snapshot.pdb' % selected_atoms)
-        wanted_atoms_traj[0].save_pdb(first_snapshot_name)
+        full_protein_topology.save_pdb(first_snapshot_name)
 
     del traj1, traj2, trajectory_collector
 

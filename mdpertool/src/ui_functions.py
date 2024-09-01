@@ -284,17 +284,17 @@ class UIFunctions(MainWindow):
 
     def realtime_perturbation_monitoring_inPymol(self, statu, ref_velocity_file="ref_protein_velocities.xml",
                                                  pert_velocity_file="dis_protein_velocities.xml",
+                                                 perc_keper=None,
                                                  response_threshold=0.005):
 
         if statu == "Started on PyMOL" and not self.live_PyMol_already_started:
-            self.ProteinView.set_reference_file(ref_file_path=ref_velocity_file)
+            self.ProteinView.set_reference_file(ref_file_path=ref_velocity_file, effected_atom_keeper=perc_keper)
             self.ProteinView.monitor_live_file(pert_velocity_file, response_threshold=response_threshold)
             self.live_PyMol_already_started = True
 
         if statu == "Finished on PyMOL":
             self.ProteinView.stop_monitoring()
             self.live_PyMol_already_started = False
-
 
     def load_pdb_to_3DNetwork(self, pdb_file):
 

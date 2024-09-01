@@ -1,9 +1,11 @@
 import argparse
+from datetime import datetime
 from importlib import resources
 import os
 import sys
 import platform
-
+import glob
+import time
 this_directory = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(this_directory)
 
@@ -17,7 +19,7 @@ import _version as current_version
 from no_gui import run_mdpertool_from_cli, add_arguments_tu_subparsers
 
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
+                            QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal, QThread)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
                            QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QIntValidator,
                            QRegExpValidator)
@@ -49,6 +51,56 @@ class PlotSignal(QObject):
     plot_network = Signal()
 
 
+# class ElapsedTimeWorker(QThread):
+#     # Signal to send the elapsed time back to the main thread
+#     elapsed_time_calculated = Signal(float)
+#
+#     def __init__(self, start_time):
+#         super().__init__()
+#         self.start_time = start_time
+#         self._stop_elapsed_time_thread_flag = False
+#         self.datetimeFormat = '%Y/%m/%d %H:%M:%S.%f'
+#
+#     def run(self):
+#         while not self._stop_elapsed_time_thread_flag:
+#             # Calculate elapsed time
+#             elapsed_time = datetime.strptime(datetime.now(), self.datetimeFormat) - datetime.strptime(self.start_time, self.datetimeFormat)
+#
+#
+#             # Emit the elapsed time signal
+#             self.elapsed_time_calculated.emit(elapsed_time)
+#             # Sleep for a short period to update periodically
+#             time.sleep(1)  # Update every second
+#
+#     def stop(self):
+#         self._stop_elapsed_time_thread_flag = True
+#         self.wait()
+
+class ElapsedTimeWorker(QThread):
+    # Gün, saat, dakika ve saniye sinyali
+    elapsed_time_calculated = Signal(int, int, int, int)
+
+    def __init__(self, start_time):
+        super().__init__()
+        self.start_time = start_time
+        self._stop_elapsed_time_thread_flag = False
+
+    def run(self):
+        while not self._stop_elapsed_time_thread_flag:
+            elapsed_time = datetime.now() - self.start_time
+
+            days = elapsed_time.days
+            hours, remainder = divmod(elapsed_time.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            self.elapsed_time_calculated.emit(days, hours, minutes, seconds)
+            self.sleep(1)
+
+    def stop(self):
+        self._stop_elapsed_time_thread_flag = True
+        self.wait()
+
+
 class MainWindow(QtWidgets.QMainWindow):
     global active_workers, network_holder, log_holder
 
@@ -56,7 +108,10 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(parent=parent)
         self.dragPos = None
         self.live_PyMol_already_started = False
-
+        self.current_output_folder_path = None
+        self.pert_velocity_file = None
+        self.ref_velocity_file = None
+        self.effected_atom_percentage_keper = None
         # Current directory
         current_dir = os.path.dirname(os.path.realpath(__file__))
         # UI file path
@@ -170,7 +225,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.export_workspace_pushButton.clicked.connect(lambda: UIF.Functions.export_workspace(self))
         self.import_workspace_pushButton.clicked.connect(lambda: UIF.Functions.import_workspace(self))
 
-
         # --> RUN TIME SETTINGS
         self.run_duration_doubleSpinBox.valueChanged.connect(
             lambda: UIF.Functions.number_of_steps_changed_from_quick(self))
@@ -185,7 +239,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run = OpenMMScriptRunner
 
         self.run.Signals.decomp_process.connect(lambda decomp_data: self.progressBar_decomp.setValue(decomp_data[-1]))
-        self.run.Signals.real_time_pertub_info.connect(lambda pymol_statu: self.update_live_perturbation_onPyMOL(pymol_statu))
+        self.run.Signals.real_time_pertub_info.connect(
+            lambda pymol_statu: self.update_live_perturbation_onPyMOL(pymol_statu))
         self.run.Signals.classic_md_remain_time.connect(
             lambda classic_md_remain_data: self.update_classic_md_remaining_time(classic_md_remain_data[-1]))
         self.run.Signals.reference_md_remain_time.connect(
@@ -268,10 +323,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.r_factor_count = 0
         self.Run.setEnabled(False)
         self.start_monitoring = False
+
+        self.get_most_recent_directory()
+
         self.start_monitoring = Advanced.send_arg_to_Engine(self)
         self.run.plotdata = {}
 
         if self.start_monitoring:
+
+            self.pert_velocity_file = os.path.join(self.current_output_folder_path, "dis_protein_velocities.xml")
+            self.ref_velocity_file = os.path.join(self.current_output_folder_path, "ref_protein_velocities.xml")
+            self.effected_atom_percentage_keper = os.path.join(self.current_output_folder_path, "effected_atom_count.txt")
             self.show_simulation_monitoring()
 
             self.Real_Time_Graphs.temperature_graph_plot.clear()
@@ -286,8 +348,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.progressBar_decomp.setValue(0)
 
+            self.start_time = datetime.now()
+            self.elapsed_time_worker = ElapsedTimeWorker(self.start_time)
+            self.elapsed_time_worker.elapsed_time_calculated.connect(self.update_elapsed_time)
+            self.elapsed_time_worker.start()
+
         if not self.start_monitoring:
             self.Run.setEnabled(True)
+            self.elapsed_time_worker.stop()
+
+    def update_elapsed_time(self, days, hours, minutes, seconds):
+        # Slot: Sinyalden gelen veriyi kullanarak label'ı güncelle
+        self.label_9.setText(f"Elapsed Time: {days}d {hours}h {minutes}m {seconds}s")
+
+    def closeEvent(self, event):
+        # Ensure the worker thread stops when the window is closed
+        # Pencere kapatıldığında thread'i durdur
+        self.elapsed_time_worker.stop()
+        event.accept()
 
     def platform_specific_precision_applying(self):
         eq_md_precission_indexes = {'single': self.eq_precision_comboBox.findText('single'),
@@ -297,7 +375,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # per_md_precission_indexes = {'single': self.per_precision_comboBox.findText('single'),
         #                              'mixed': self.per_precision_comboBox.findText('mixed'),
         #                              'double': self.per_precision_comboBox.findText('double')}
-        per_md_precission_indexes=None
+        per_md_precission_indexes = None
         self.equ_platform_comboBox.currentTextChanged.connect(
             lambda: UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
                                                               per_md_indexes=None))
@@ -323,13 +401,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Real_Time_Graphs.total_energy_graph.clear()
             self.Real_Time_Graphs.energy_graph.clear()
             self.Real_Time_Graphs.setup_energy_graph(reset=True)
+            self.elapsed_time_worker.stop()
 
             # self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
         except Exception as ins:
             pass
             # Message_Boxes.Information_message(self, "Info", str(ins), Style.MessageBox_stylesheet)
-
-
 
     def show_simulation_monitoring(self):
         # self.stackedWidget.setCurrentIndex(1)
@@ -414,7 +491,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.res1_comboBox.addItem(str(i))
                     self.res1_comboBox.clear()  # delete all items from comboBox
                     self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-
+                self.selected_residues_listWidget.clear()
                 UIF.UIFunctions.load_pdb_to_pymol(self, modified_pdb)
 
         except Exception as Error:
@@ -525,9 +602,9 @@ class MainWindow(QtWidgets.QMainWindow):
             UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
 
-            self.net_output_directory_lineedit.setText(self.Output_Folder_textEdit.toPlainText())
+            self.net_output_directory_lineedit.setText(self.current_output_folder_path)
             self.boundForm_pdb_lineedit.setText(self.upload_pdb_lineEdit.text())
-            self.response_time_lineEdit.setText(os.path.join(self.Output_Folder_textEdit.toPlainText(),
+            self.response_time_lineEdit.setText(os.path.join(self.current_output_folder_path,
                                                              'responseTimes_%s.csv' % int(
                                                                  self.R_factor_ComboBox.currentText())))
 
@@ -615,11 +692,32 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_59.setFont(font)
         self.label_59.setAlignment(Qt.AlignVCenter)
 
-    def update_live_perturbation_onPyMOL(self, statu):
-        UIF.UIFunctions.realtime_perturbation_monitoring_inPymol(self, statu,
-                                                                 pert_velocity_file=os.path.join(self.Output_Folder_textEdit.toPlainText(), "dis_protein_velocities.xml"),
-                                                                 ref_velocity_file=os.path.join(self.Output_Folder_textEdit.toPlainText(), "ref_protein_velocities.xml"))
+    def get_most_recent_directory(self):
+        # Generate a timestamp with both date and time
+        current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+        # Extract the protein name from the PDB file path
+        pdb_filename = os.path.basename(self.upload_pdb_lineEdit.text())
+        protein_name = os.path.splitext(pdb_filename)[0]
+
+        # Create a specific and descriptive folder name
+        run_folder_name = f"{protein_name}_{current_datetime}"
+        self.current_output_folder_path = os.path.join(self.Output_Folder_textEdit.toPlainText(), run_folder_name).replace('\\', '/')
+
+        # Create the subfolder if it doesn't exist
+        os.makedirs(self.current_output_folder_path, exist_ok=True)
+
+    def update_live_perturbation_onPyMOL(self, statu):
+        try:
+            # output_folder = self.Output_Folder_textEdit.toPlainText()
+            # Get the most recent perturbation file
+
+            UIF.UIFunctions.realtime_perturbation_monitoring_inPymol(self, statu,
+                                                                     pert_velocity_file=self.pert_velocity_file,
+                                                                     ref_velocity_file=self.ref_velocity_file,
+                                                                     perc_keper=self.effected_atom_percentage_keper)
+        except Exception as Error:
+            print("Function: update_live_perturbation_onPyMOL \n", Error)
 
     ####################################################################################################################
     #                                     ==> START OF DYNAMIC MENUS FUNCTIONS < ==                                    #

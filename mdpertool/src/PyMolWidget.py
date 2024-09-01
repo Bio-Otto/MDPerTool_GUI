@@ -34,12 +34,17 @@ class MonitorWorker(QThread):
                 mod_time = os.path.getmtime(self.pert_file_path)
                 if mod_time > self.last_mod_time:
                     self.last_mod_time = mod_time
-                    # print(f"[DEBUG] File updated: {self.pert_file_path}")
                     self.file_updated.emit(self.pert_file_path)
                 time.sleep(2)
             except Exception as e:
                 print(f"[ERROR] Exception in MonitorWorker: {e}")
                 break
+
+    def stop(self):
+        """Stops the thread and waits for it to finish."""
+        self._stop_thread_flag = True
+        self.wait()  # Wait for the thread to finish
+
 
     def stop(self):
         """Stops the thread and waits for it to finish."""
@@ -113,6 +118,7 @@ class PymolQtWidget(QGLWidget):
         self._enableUi = False
         self.cumulative_affected_atoms = set()
         self.ref_file_path = None
+        self.total_atom_count = None
         self.last_mod_time = 0
         self.total_steps = 0
         self.colored_atoms = {}
@@ -120,6 +126,7 @@ class PymolQtWidget(QGLWidget):
         self.mol_name = None
         self.monitor_thread = None
         self.processor_thread = None
+        self.effected_atom_count = None
 
     def initializeGL(self):
         """Initialize OpenGL context and PyMOL settings."""
@@ -246,7 +253,6 @@ class PymolQtWidget(QGLWidget):
     def selection_color(self, selection):
         try:
             # self._pymol.cmd.color('red', 'resi %s' %s[3])
-            print('resi %s' % selection[3:-1])
             self.resicolor('resi %s' % selection[3:-1])
         except Exception as ErrorExp:
             print("ERROR on PyMOL (selection_color): ", ErrorExp)
@@ -542,7 +548,6 @@ class PymolQtWidget(QGLWidget):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             lineno = exc_tb.tb_lineno
-            print(f"Error: {e} in file {fname} at line {lineno}")
 
     def show_ligand_polar_interactions(self):
         self._pymol.preset.ligands(selection='all', _self=self._pymol.cmd)
@@ -677,6 +682,7 @@ class PymolQtWidget(QGLWidget):
         self.monitor_thread.start()
 
     def on_file_updated(self, pert_file_path):
+
         if self.processor_thread is None or not self.processor_thread.isRunning():
             self.processor_thread = FileProcessorWorker(self, pert_file_path, self.monitor_thread.response_threshold)
             self.processor_thread.update_complete.connect(self._pymolProcess)
@@ -688,10 +694,13 @@ class PymolQtWidget(QGLWidget):
 
             self.cumulative_affected_atoms.clear()
             self.ref_file_path = None
+            self.effected_atom_keeper = None
             self.last_mod_time = 0
             self.total_steps = 0
             self.colored_atoms.clear()
             self.colors_set.clear()
+            self.total_atom_count = None
+            self.effected_atom_count =None
 
     def process_file(self, pert_file_path, threshold=0.05):
         """
@@ -703,9 +712,13 @@ class PymolQtWidget(QGLWidget):
         affected_atoms = self.find_affected_atoms(differences, threshold=threshold)
         self.update_colors(affected_atoms, max_step=len(ref_velocities))
 
+        if self.total_atom_count is None:
+            self.total_atom_count = len(ref_velocities)
+
     def parse_velocities(self, filename):
 
         velocities = {}
+
         try:
             for event, element in etree.iterparse(filename, events=('end',), tag='Velocity'):
                 step = int(element.get('step'))
@@ -713,8 +726,13 @@ class PymolQtWidget(QGLWidget):
                          element.findall('Atom')]
                 velocities[step] = atoms
                 element.clear()  # Free memory
+
         except etree.XMLSyntaxError:
             pass  # Handle syntax errors if needed
+
+        if self.total_atom_count is None:
+            self.total_atom_count = len(atoms)
+
         return velocities
 
     def compare_velocities(self, ref_velocities, pert_velocities):
@@ -786,11 +804,17 @@ class PymolQtWidget(QGLWidget):
                             self._pymolProcess()
                             time.sleep(0.01)
 
+            self.effected_atom_count = round(len(set(self.colored_atoms.keys())) / self.total_atom_count * 100, 1)
+
+            with open(self.effected_atom_keeper, 'w') as file:
+                file.write(f"{self.effected_atom_count}\n")
+
         except Exception as Err:
             print("ERROR:", Err)
 
-    def set_reference_file(self, ref_file_path):
+    def set_reference_file(self, ref_file_path, effected_atom_keeper):
         self.ref_file_path = ref_file_path
+        self.effected_atom_keeper = effected_atom_keeper
 
     """
 if __name__ == "__main__":

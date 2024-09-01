@@ -17,6 +17,7 @@ import itertools
 import tokenize
 from PySide2.QtCore import Signal
 from ui_main import *
+import logging
 
 
 class Advanced(QtCore.QThread):
@@ -111,8 +112,6 @@ class Advanced(QtCore.QThread):
             Message_Boxes.Warning_message(self, 'Selection Failed!', "There is no residue selected for perturbation.",
                                           Style.MessageBox_stylesheet)
             return False
-
-
 
         if not self.rigid_water_checkBox.isChecked():
             rigid_water = False
@@ -216,7 +215,7 @@ class Advanced(QtCore.QThread):
         print("Parameters have been sent to OMM-Runner...")
         script_structure = dict(pdb=pdb_pfile,
                                 parent_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), '..')),
-                                output_folder=self.Output_Folder_textEdit.toPlainText(),
+                                output_folder=self.current_output_folder_path,
                                 long_simulation_time=self.Number_of_steps_spinBox.value(),
                                 long_simulation_time_unit=self.long_simulation_time_unit.currentText(),
 
@@ -326,28 +325,44 @@ class Advanced_Helper_Functions(QtCore.QThread):
     def update_display(self, script_structure):
         renderer = pystache.Renderer()
 
-        # Current directory
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        # template file path
-        template_file_path = os.path.join(curr_dir, 'template_script.txt')
-
-        template = pystache.parse(open(template_file_path).read())
-        self.contents = renderer.render(template, script_structure)
-
-        if script_structure.get('save_script'):
-            save_filename = script_structure.get('script_save_directory')
-
-            # Check if the file already exists in the specified directory
+        def _generate_unique_filename(output_directory, save_filename):
             file_counter = 1
             original_save_filename = save_filename
-            while os.path.exists(os.path.join(script_structure.get('output_directory'), save_filename)):
+
+            while os.path.exists(os.path.join(output_directory, save_filename)):
                 # If the file already exists, generate a new filename with a suffix
                 save_filename, extension = os.path.splitext(original_save_filename)
                 save_filename = f"{save_filename}_{file_counter}{extension}"
                 file_counter += 1
 
-            # Create or open a Python script file and write the content
-            with open(os.path.join(script_structure.get('output_directory'), save_filename), 'w') as py_file:
-                py_file.write(self.contents)
+            return save_filename
 
-        return self.contents
+        try:
+            # Current directory and template file path
+            curr_dir = os.path.dirname(os.path.realpath(__file__))
+            template_file_path = os.path.join(curr_dir, 'template_script.txt')
+
+            # Read and parse the template file with UTF-8 encoding
+            with open(template_file_path, 'r', encoding='utf-8') as template_file:
+                template = pystache.parse(template_file.read())
+
+            # Render the template with the provided script structure
+            self.contents = renderer.render(template, script_structure)
+
+            if script_structure.get('save_script'):
+                save_filename = script_structure.get('script_save_directory')
+                output_directory = script_structure.get('output_folder')
+
+                # Generate a unique filename if the file already exists
+                save_filename = _generate_unique_filename(output_directory, save_filename)
+                # Write the rendered contents to the specified file
+                with open(os.path.join(output_directory, save_filename), 'w', encoding='utf-8') as py_file:
+                    py_file.write(self.contents)
+
+            return self.contents
+
+        except Exception as e:
+            logging.error(f"Error in update_display: {e}")
+            raise
+
+
