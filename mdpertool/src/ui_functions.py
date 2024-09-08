@@ -296,6 +296,9 @@ class UIFunctions(MainWindow):
             self.ProteinView.stop_monitoring()
             self.live_PyMol_already_started = False
 
+        if statu == "Auto-Extending":
+            self.ProteinView.reset_and_update_colors(ref_file_path=ref_velocity_file, pert_file_path=pert_velocity_file)
+
     def load_pdb_to_3DNetwork(self, pdb_file):
 
         self.Protein3DNetworkView.reinitialize()

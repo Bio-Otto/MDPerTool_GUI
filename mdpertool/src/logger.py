@@ -37,7 +37,7 @@ def Logger(file_name):
     logging.addLevelName(36, "PREPARATION")
     logging.addLevelName(37, "REFERENCE_MD")
     logging.addLevelName(38, "PERTURBATION_MD")
-
+    logging.addLevelName(39, "AUTO_EXTEND")
     # Log a message indicating that the logger object was created successfully
     logger.info("Logger object created successfully.")
 

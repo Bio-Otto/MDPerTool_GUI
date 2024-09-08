@@ -716,61 +716,116 @@ class PymolQtWidget(QGLWidget):
             self.total_atom_count = len(ref_velocities)
 
     def parse_velocities(self, filename):
+        """
+        Parse velocities from an XML file and store them in a dictionary.
+
+        Parameters:
+        - filename (str): The path to the XML file containing velocity data.
+
+        Returns:
+        - dict: A dictionary where keys are step numbers and values are lists of tuples representing atom velocities (x, y, z).
+        """
 
         velocities = {}
 
         try:
+            # Iterate through the XML file and parse 'Velocity' elements
             for event, element in etree.iterparse(filename, events=('end',), tag='Velocity'):
+                # Extract the step number from the element attributes
                 step = int(element.get('step'))
-                atoms = [(float(atom.get('x')), float(atom.get('y')), float(atom.get('z'))) for atom in
-                         element.findall('Atom')]
+
+                # Extract atom velocities from the 'Atom' sub-elements
+                atoms = [
+                    (float(atom.get('x')), float(atom.get('y')), float(atom.get('z')))
+                    for atom in element.findall('Atom')
+                ]
+
+                # Store the velocities in the dictionary with step as the key
                 velocities[step] = atoms
-                element.clear()  # Free memory
+
+                # Clear the element to free memory
+                element.clear()
 
         except etree.XMLSyntaxError:
-            pass  # Handle syntax errors if needed
+            pass
+            #print(f"XML Syntax Error: {e}")
+            # Handle XML syntax errors if needed
 
+        except Exception as e:
+            print(f"Unexpected Error: {e}")
+
+        # Initialize the total_atom_count if it is not already set
         if self.total_atom_count is None:
+            # Use the number of atoms from the first step
             self.total_atom_count = len(atoms)
 
         return velocities
 
     def compare_velocities(self, ref_velocities, pert_velocities):
         """
-        Compare the reference and perturbed velocities.
+        Compare the reference velocities with the perturbed velocities for each step.
+
+        Parameters:
+        - ref_velocities (dict): Dictionary where keys are step numbers and values are lists of reference atom velocities (x, y, z).
+        - pert_velocities (dict): Dictionary where keys are step numbers and values are lists of perturbed atom velocities (x, y, z).
+
+        Returns:
+        - list: A list of tuples containing the step number, atom index, and differences in velocities (dx, dy, dz).
         """
         differences = []
+
+        # Iterate through each step in the perturbed velocities
         for step, pert_atoms in pert_velocities.items():
+            # Retrieve reference atoms for the current step; default to empty list if not present
             ref_atoms = ref_velocities.get(step, [])
+
+            # Iterate through each perturbed atom
             for i, (px, py, pz) in enumerate(pert_atoms):
+                # Get the reference atom's velocities; default to (0, 0, 0) if not present
                 if i < len(ref_atoms):
                     rx, ry, rz = ref_atoms[i]
                 else:
-                    rx, ry, rz = 0, 0, 0  # Referans atomu yoksa (0, 0, 0) olarak kabul edilir
+                    rx, ry, rz = 0, 0, 0
 
+                # Calculate the differences in velocities
                 dx = px - rx
                 dy = py - ry
                 dz = pz - rz
 
-                # Step, atom index, ve koordinat farklılıklarını kaydet
+                # Record the step, atom index, and velocity differences
                 differences.append((step, i, dx, dy, dz))
 
         return differences
 
     def get_color_for_step(self, step, max_step):
+        """
+        Generate a color for a given step based on its position relative to the maximum step.
 
-        # print("STEP: ", step)
+        Parameters:
+        - step (int): The current step number for which the color needs to be generated.
+        - max_step (int): The maximum step number, which is used to normalize the step into a color gradient.
+
+        Returns:
+        - list: A list representing the RGB color values [red, green, blue].
+                Returns None if the step is outside the valid range.
+        """
+        # Define the minimum step number
         min_step = 1
 
+        # Check if the step is within the valid range
         if step < min_step or step > max_step:
             return None
 
-        # Adım numarasını renk değerine dönüştür
+        # Normalize the step to a range between 0 and 1
         normalized_step = (step - min_step) / (max_step - min_step)
-        red = 1.0  # Kırmızıdan beyaza geçiş
-        green = normalized_step
-        blue = normalized_step
 
+        # Generate color based on the normalized step value
+        # Starting with red, transitioning to white as the step number increases
+        red = 1.0  # Red stays constant
+        green = normalized_step  # Green increases with the step number
+        blue = normalized_step  # Blue increases with the step number
+
+        # Return the RGB color as a list
         return [red, green, blue]
 
     def update_colors(self, affected_atoms, max_step):
@@ -778,58 +833,116 @@ class PymolQtWidget(QGLWidget):
         Update the colors of affected atoms in PyMOL based on their step number.
 
         Parameters:
-        - affected_atoms: Dictionary with step numbers as keys and lists of atom indices as values.
-        - max_step: The maximum step number used to determine the color gradient.
+        - affected_atoms (dict): Dictionary where keys are step numbers and values are lists of atom indices
+                                 that were affected in those steps.
+        - max_step (int): The maximum step number, used to calculate color gradients for each step.
         """
         try:
+            # Iterate over the affected atoms for each step
             for step, atom_indices in affected_atoms.items():
-                # print(step, atom_indices)
+                # Determine the color based on the step number and the maximum step
                 color = self.get_color_for_step(step, max_step)
 
                 if color:
+                    # Create a unique color name for each step
                     color_name = f"step_{step}_color"
 
+                    # If this color has not been defined in PyMOL yet, define it
                     if color_name not in self.colors_set:
-                        # Define color in PyMOL
-                        self._pymol.cmd.set_color(color_name, color)
-                        self.colors_set[color_name] = color
+                        self._pymol.cmd.set_color(color_name, color)  # Define color in PyMOL
+                        self.colors_set[color_name] = color  # Mark this color as defined
 
+                    # Apply the color to each affected atom
                     for i in atom_indices:
-                        # Apply color to the atom based on its index
-                        if i not in self.colored_atoms:
-                            selection = f"index {i}"
-                            # print(f"Applying color {color_name} to {selection}")
-                            self._pymol.cmd.color(color_name, selection)
-                            self.colored_atoms[i] = step
+                        if i not in self.colored_atoms:  # Avoid re-coloring the same atom
+                            selection = f"index {i}"  # Select the atom by its index
+                            self._pymol.cmd.color(color_name, selection)  # Apply the color in PyMOL
+                            self.colored_atoms[i] = step  # Track which step colored this atom
+
+                            # Update the PyMOL visualization
                             self._pymolProcess()
+
+                            # Pause briefly to ensure smooth rendering in PyMOL
                             time.sleep(0.01)
 
+            # Calculate and save the percentage of affected atoms
             self.effected_atom_count = round(len(set(self.colored_atoms.keys())) / self.total_atom_count * 100, 1)
 
+            # Save the affected atom percentage to the keeper file
             with open(self.effected_atom_keeper, 'w') as file:
                 file.write(f"{self.effected_atom_count}\n")
 
         except Exception as Err:
+            # Catch and print any error that occurs during the process
             print("ERROR:", Err)
 
     def set_reference_file(self, ref_file_path, effected_atom_keeper):
+        """
+        Sets the reference file and affected atom data that will be used for comparison
+        in future calculations.
+
+        Parameters:
+        - ref_file_path (str): Path to the reference data file.
+        - effected_atom_keeper (object): Object or data structure that stores information
+                                         about affected atoms.
+        """
         self.ref_file_path = ref_file_path
         self.effected_atom_keeper = effected_atom_keeper
 
-    """
+    def reset_and_update_colors(self, ref_file_path, pert_file_path, threshold=0.05):
+        """
+        Resets the current color assignments for atoms and recalculates new color mappings
+        based on newly provided simulation data. It compares velocities from the reference file
+        with perturbed velocities and assigns new colors to affected atoms based on the differences.
+
+        Parameters:
+        - ref_file_path (str): Path to the reference velocities or data file.
+        - pert_file_path (str): Path to the perturbed velocities or data file.
+        - threshold (float): Threshold value for determining affected atoms based on velocity differences.
+                             Default is 0.05.
+        """
+        # Clear the previous data
+        self.cumulative_affected_atoms.clear()  # Clear the accumulated affected atoms
+        self.colored_atoms.clear()  # Clear previously assigned colors
+        self.colors_set.clear()  # Clear defined colors in PyMOL
+        self.total_steps = 0  # Reset the step counter
+
+        # Re-assign the reference file and process new velocities
+        self.ref_file_path = ref_file_path
+        ref_velocities = self.parse_velocities(ref_file_path)
+        pert_velocities = self.parse_velocities(pert_file_path)
+
+        # Compare reference and perturbed velocities
+        differences = self.compare_velocities(ref_velocities, pert_velocities)
+
+        # Analyze differences using the threshold to determine affected atoms
+        affected_atoms = self.find_affected_atoms(differences, threshold=threshold)
+
+        # Start the color update process based on affected atoms
+        self.update_colors(affected_atoms, max_step=len(ref_velocities))
+
+        # Set the total atom count if it hasn't been initialized yet
+        if self.total_atom_count is None:
+            self.total_atom_count = len(ref_velocities)
+
+        # Redraw the visualization in PyMOL
+        self._pymolProcess()
+
+"""
 if __name__ == "__main__":
-    ref_file_path = 'C:\\Users\\law5_\\Desktop\\MDPerTool_GUI\\mdpertool\\output\\ref_protein_velocities1.xml'
-    pert_file_path = 'C:\\Users\\law5_\\Desktop\\MDPerTool_GUI\\mdpertool\\output\\dis_protein_velocities1.xml'
+    ref_file_path = 'C:\\Users\\law5_\\Desktop\\MDPerTool_GUI\\mdpertool\\output\\1aki_fixed_ph7.4_2024-09-07_20-25-54\\ref_protein_velocities.xml'
+    pert_file_path = 'C:\\Users\\law5_\\Desktop\\MDPerTool_GUI\\mdpertool\\output\\1aki_fixed_ph7.4_2024-09-07_20-25-54\\dis_protein_velocities.xml'
 
     app = QtWidgets.QApplication()
     window = PymolQtWidget()
-    window.set_reference_file(ref_file_path=ref_file_path)
+    window.set_reference_file(ref_file_path=ref_file_path, effected_atom_keeper="out_keep.txt")
 
-    window.loadMolFile("C:\\Users\\law5_\\Desktop\\MDPerTool_GUI\\mdpertool\\Download\\4d7x_fixed_ph7.4.pdb")
+    window.loadMolFile("C:\\Users\\law5_\\Desktop\\MDPerTool_GUI\\mdpertool\\output\\1aki_fixed_ph7.4.pdb")
     window.show_protein_in_cartoon_and_atoms()
     window.show()
     window.monitor_live_file(pert_file_path, response_threshold=0.01)
-    # window.update_atom_colors(affected_atoms)
+    window.reset_and_update_colors(ref_file_path, pert_file_path)
+    #window.update_atom_colors(affected_atoms)
     # Call this function when you want to stop monitoring
     # time.sleep(15)
     # window.stop_monitoring()
@@ -837,4 +950,4 @@ if __name__ == "__main__":
     app.exec_()
     window = PymolQtWidget()
     window.show()
-    """
+"""

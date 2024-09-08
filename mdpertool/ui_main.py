@@ -112,6 +112,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pert_velocity_file = None
         self.ref_velocity_file = None
         self.effected_atom_percentage_keper = None
+        self.elapsed_time_worker =None
         # Current directory
         current_dir = os.path.dirname(os.path.realpath(__file__))
         # UI file path
@@ -364,8 +365,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         # Ensure the worker thread stops when the window is closed
         # Pencere kapatıldığında thread'i durdur
-        self.elapsed_time_worker.stop()
-        event.accept()
+        try:
+            if self.elapsed_time_worker is not None:
+                self.elapsed_time_worker.stop()
+                event.accept()
+        except:
+            print("ERROR DURING STOP THE THREAD")
 
     def platform_specific_precision_applying(self):
         eq_md_precission_indexes = {'single': self.eq_precision_comboBox.findText('single'),
@@ -484,7 +489,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                  ph=self.pH_doubleSpinBox.value(),
                                                                  chains_to_remove=None)
 
-                    self.upload_pdb_textEdit.setText(modified_pdb)
+                    self.upload_pdb_lineEdit.setText(modified_pdb)
 
                     self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
                     for i in self.combobox:
@@ -616,6 +621,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.show_analysis_window()
 
+            self.elapsed_time_worker.stop()
+
     def inform_about_progress(self, message):
         message_regular = '<font color="yellow">%s</font>' % message
         self.label_top_info_1.setText(message_regular)
@@ -711,7 +718,6 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             # output_folder = self.Output_Folder_textEdit.toPlainText()
             # Get the most recent perturbation file
-
             UIF.UIFunctions.realtime_perturbation_monitoring_inPymol(self, statu,
                                                                      pert_velocity_file=self.pert_velocity_file,
                                                                      ref_velocity_file=self.ref_velocity_file,

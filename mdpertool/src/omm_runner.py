@@ -218,6 +218,10 @@ class OpenMMScriptRunner(QtCore.QObject):
                     self.pymol_statu = "Finished on PyMOL"
                     self.Signals.real_time_pertub_info.emit(self.pymol_statu)
 
+                if 'AUTO_EXTEND |' in msg:
+                    self.pymol_statu = "Auto-Extending"
+                    self.Signals.real_time_pertub_info.emit(self.pymol_statu)
+
             except queue.Empty:
                 time.sleep(0.1)
 

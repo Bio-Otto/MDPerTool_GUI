@@ -271,7 +271,8 @@ class Advanced(QtCore.QThread):
                                 StateData_freq=StateData_freq,
                                 output_directory=self.out_dir,
                                 save_script=self.Save_Script_checkBox.isChecked(),
-                                script_save_directory=self.script_name_lineEdit.text()
+                                script_save_directory=self.script_name_lineEdit.text(),
+                                auto_extend_runtime=self.autoextend_checkBox.isChecked()
                                 )
 
         self.created_script = Advanced_Helper_Functions.update_display(self, script_structure)
