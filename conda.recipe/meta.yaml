@@ -33,7 +33,9 @@ requirements:
 
   run:
     - python >=3.11,<3.12
+    - lxml
     - pyside2 >=5.15
+    - qt-main =5.15
     - matplotlib
     - pandas
     - pyqtgraph
@@ -41,7 +43,7 @@ requirements:
     - networkx
     - pdbfixer
     - pyopengl
-    - pymol-open-source
+    - pymol-open-source >=2.5
     - biopython
     - prody
     - pyqtwebengine

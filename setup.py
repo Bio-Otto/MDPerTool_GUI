@@ -16,7 +16,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mdpertool',
     exec(version_file.read())
 
 install_requires = [
-    'python==3.11',
+    'python>=3.11,<3.12',  # Update Python requirement
     'numpy',
     'pyvis',
     'matplotlib',
@@ -27,15 +27,16 @@ install_requires = [
     'prody',
     'pyqtwebengine',
     'pyyaml',
-    'pystache',  
+    'pystache', 
+    'lxml', 
 ]
 
 # Conda-forge ile yüklenen paketler
 conda_packages = [
     "mdtraj",
-    "openmm",
-    "pymol-open-source",
-    "pyside2",
+    "openmm>=8.0",
+    "pymol-open-source>=2.5",
+    "pyside2>=5.15",
     "mdanalysis",
     "pyqtgraph",
     "parmed",
@@ -65,6 +66,20 @@ setup(
     ],
     packages=['mdpertool'],
     include_package_data=True,
+
+
+    package_data={
+        'mdpertool': [
+            'Download/*',
+            'analysis/*',
+            'fonts/*',
+            'gui/*',
+            'no_gui/*',
+            'src/*'
+        ]
+    },
+
+
     entry_points={
         'console_scripts': [
             'mdpertool=mdpertool.ui_main:run_mdpertool',

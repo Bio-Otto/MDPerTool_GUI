@@ -1,7 +1,13 @@
+include LICENSE.md
+include README.md
 include tests/*
-include mdpertool/gui/*
-include mdpertool/fonts/*
-include mdpertool/src/*
-include mdpertool/Download/*
-include mdpertool/no_gui/*
-include mdpertool/analysis/*
+include mdpertool/gui/*.*
+include mdpertool/fonts/*.*
+include mdpertool/src/*.*
+include mdpertool/Download/*.*
+include mdpertool/no_gui/*.*
+include mdpertool/analysis/*.*
+recursive-include mdpertool *.py
+recursive-include mdpertool *.ui
+recursive-include mdpertool *.qrc
+recursive-include mdpertool *.txt
