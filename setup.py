@@ -15,7 +15,9 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
     exec(version_file.read())
 
+
 install_requires = [
+
     'python>=3.11,<3.12',  # Update Python requirement
     'numpy',
     'pyvis',
@@ -29,14 +31,18 @@ install_requires = [
     'pyyaml',
     'pystache', 
     'lxml', 
+
 ]
 
+
 # Conda-forge ile yüklenen paketler
+
 conda_packages = [
-    "mdtraj",
-    "openmm>=8.0",
+
+    "mdtraj<=1.9.9",
+    "openmm>=8.0,<8.2",
     "pymol-open-source>=2.5",
-    "pyside2>=5.15",
+    "pyside2>=5.15,<6",
     "mdanalysis",
     "pyqtgraph",
     "parmed",
@@ -44,6 +50,7 @@ conda_packages = [
 
 
 setup(
+
     name='mdpertool',
     version=__version__,
     description=__description__,
@@ -53,6 +60,7 @@ setup(
     author_email=__author_email__,
     license='MIT',
     classifiers=[
+
         "License :: OSI Approved :: MIT License",
         "License :: OSI Approved :: Academic Free License (AFL)",
         "Operating System :: OS Independent",
@@ -64,11 +72,19 @@ setup(
         "Topic :: Software Development :: User Interfaces",
         "Topic :: Scientific/Engineering :: Chemistry",
     ],
+
     packages=['mdpertool'],
+
+
+    install_requires=[
+        'prody',  # This will ensure pip installs prody when your package is installed via pip
+    ],
+
+
     include_package_data=True,
 
-
     package_data={
+
         'mdpertool': [
             'Download/*',
             'analysis/*',
@@ -76,17 +92,26 @@ setup(
             'gui/*',
             'no_gui/*',
             'src/*'
+
         ]
+
     },
 
 
     entry_points={
+
         'console_scripts': [
+
             'mdpertool=mdpertool.ui_main:run_mdpertool',
+
         ],
+
     },
+
 
     extras_require={
         'conda': conda_packages
+
     }
+
 )

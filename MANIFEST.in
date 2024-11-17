@@ -11,3 +11,8 @@ recursive-include mdpertool *.py
 recursive-include mdpertool *.ui
 recursive-include mdpertool *.qrc
 recursive-include mdpertool *.txt
+include LICENSE*
+include README*
+recursive-include mdpertool *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

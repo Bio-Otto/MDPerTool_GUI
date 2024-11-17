@@ -9,7 +9,7 @@ GLOBAL_TITLE_BAR = True
 count = 1
 from .app_functions import *
 from .PyMolWidget import PymolQtWidget
-from analysis import VisJS_Widget
+#from analysis import VisJS_Widget
 from .message import Message_Boxes
 
 

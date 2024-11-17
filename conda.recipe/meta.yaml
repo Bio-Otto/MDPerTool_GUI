@@ -1,6 +1,8 @@
+
 {% set data = load_setup_py_data() %}
 {% set name = "mdpertool" %}
 {% set version = "0.0.1" %}
+
 
 package:
   name: "{{ name|lower }}"
@@ -34,12 +36,12 @@ requirements:
   run:
     - python >=3.11,<3.12
     - lxml
-    - pyside2 >=5.15
+    - pyside2 >=5.15,<6
     - qt-main =5.15
     - matplotlib
     - pandas
     - pyqtgraph
-    - openmm >=8.0
+    - openmm >=8.0,<8.2
     - networkx
     - pdbfixer
     - pyopengl
@@ -50,9 +52,10 @@ requirements:
     - pyyaml
     - pystache
     - parmed
-    - mdtraj
+    - mdtraj <=1.9.9
     - mdanalysis
     #- pyvis
+
 
 #test:
 #  imports:
@@ -60,14 +63,20 @@ requirements:
 
 #  commands:
 #    - mdpertool -gui
+
 test:
   requires:
     - pytest
+    - pip
+
   commands:
+    - pip install prody
     - mdpertool cli --help  # To check the CLI help message
     - mdpertool gui --help  # To check the GUI help message (this won't actually run the GUI, just test the CLI argument parsing)
   imports:
     - mdpertool
+
+
 
 about:
   home: "https://github.com/Bio-Otto/MDPerTool_GUI"

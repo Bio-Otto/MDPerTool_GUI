@@ -5,29 +5,55 @@ import openmm as mm
 import xml.etree.ElementTree as ET
 import os
 
-# path = 'last.pdb'
-
 
 def convert_res_to_atoms(pdb_path, selected_res, atom_to_extract=None):
-    selected_res_atoms = []
-    topology = md.load(pdb_path).topology
+    """
+    Convert residue selections to atom indices.
 
-    for inx, residue in enumerate(topology.residues):
-        if str(residue) in selected_res:
-            for i in range(len([atom for atom in topology.atoms])):
-                if str(topology.atom(i).residue) == selected_res[selected_res.index(str(residue))]:
-                    # print(topology.atom(i).residue)
-                    selected_res_atoms.append(i)
+    Parameters:
+    -----------
+    pdb_path : str
+        Path to the PDB file
+    selected_res : list
+        List of residues in format ['RES46'] where RES is residue name
+    atom_to_extract : str or None
+        Specific atom name to extract (e.g., 'CA' for alpha carbon)
 
-    if atom_to_extract is not None:
-        for i in selected_res_atoms:
-            if topology.atom(i - 1).name == atom_to_extract:
-                print(i)
+    Returns:
+    --------
+    list
+        List of atom indices corresponding to the selected residues
+    """
+    # Ensure selected_res is a list
+    if isinstance(selected_res, str):
+        selected_res = [selected_res]
 
-    # for i in selected_res_atoms:
-    #     print(topology.atom(i).residue)
+    # Load the topology
+    print("PDB-PATH: ", pdb_path)
+    try:
+        traj = md.load(pdb_path)
+        topology = traj.topology
 
-    return selected_res_atoms
+        selected_res_atoms = []
+
+        # Create a lookup of residue strings for comparison
+        residue_lookup = {str(res): res for res in topology.residues}
+
+        # Find matching residues
+        for res_str in selected_res:
+            if res_str in residue_lookup:
+                residue = residue_lookup[res_str]
+                # Get all atoms for this residue
+                for atom in residue.atoms:
+                    # If atom_to_extract is specified, only add matching atoms
+                    if atom_to_extract is None or atom.name == atom_to_extract:
+                        selected_res_atoms.append(atom.index)
+
+        return selected_res_atoms
+
+    except Exception as e:
+        print(f"Error processing PDB file: {str(e)}")
+        raise
 
 
 def change_velocity(xml_file, r_factor, modify_atoms):
