@@ -14,6 +14,8 @@ from gui.ui_styles import Style
 from src.builder import *
 from src.app_functions import *
 from src.checkBox_menu import *
+from src.logger import Logger
+import traceback
 
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect,
                             QSize, QTime, QUrl, Qt, QEvent, QRegExp, QThreadPool, Signal)
@@ -856,7 +858,22 @@ class SplashScreen(QMainWindow):
 
     # ------------------------------------------- > END OF APP FUNCTIONS < ------------------------------------------- #
 
+global logger
+logger = None
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    if logger is not None:
+        logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    else:
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+
 def run_mdpertool():
+    global logger
+    logger = Logger(os.path.join(this_directory, "ui_error.log"))
+    sys.excepthook = handle_exception
 
     parser = argparse.ArgumentParser(description="WELCOME TO MDPERTOOL ENTRY WINDOW")
     parser.add_argument("-gui", "--show_gui", action='store_true')

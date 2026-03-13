@@ -1719,7 +1719,7 @@ class Functions(MainWindow):
             template['Simulation']['equilibrium use device id'] = self.Device_ID_checkBox.isChecked()
             template['Simulation']['perturbation platform'] = self.per_platform_comboBox.currentText()
             template['Simulation']['perturbation precision'] = self.per_precision_comboBox.currentText()
-            template['Simulation']['perturbation device id'] = self.per_Device_Number_lineEdit.text().strip()
+            template['Simulation']['perturbation device id'] = self.per_Device_Number_comboBox.currentText().strip()
             template['Simulation']['perturbation use device id'] = self.per_Device_ID_checkBox.isChecked()
             template['Simulation']['protein forcefield'] = self.protein_forcefield_comboBox.currentText()
             template['Simulation']['water forcefield'] = self.water_forcefield_comboBox.currentText()
@@ -1960,19 +1960,23 @@ class Functions(MainWindow):
             if self.equ_platform_comboBox.currentText() in ["CPU", "Reference"]:
                 self.Device_Number_comboBox.setEnabled(False)
                 self.Device_ID_checkBox.setEnabled(False)
+                self.precision_comboBox.setEnabled(False)
 
             else:
                 self.Device_Number_comboBox.setEnabled(True)
                 self.Device_ID_checkBox.setEnabled(True)
+                self.precision_comboBox.setEnabled(True)
 
         if per_md:
             if self.per_platform_comboBox.currentText() in ["CPU", "Reference"]:
-                self.per_Device_Number_lineEdit.setEnabled(False)
+                self.per_Device_Number_comboBox.setEnabled(False)
                 self.per_Device_ID_checkBox.setEnabled(False)
+                self.per_precision_comboBox.setEnabled(False)
 
             else:
-                self.per_Device_Number_lineEdit.setEnabled(True)
+                self.per_Device_Number_comboBox.setEnabled(True)
                 self.per_Device_ID_checkBox.setEnabled(True)
+                self.per_precision_comboBox.setEnabled(True)
 
     def add_residue_toList(self):
         if str(self.res1_comboBox.currentText()) != "":

@@ -19,7 +19,7 @@ def Logger(file_name):
     formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
 
     # Configure the file handler
-    file_handler = logging.FileHandler(filename=file_name, mode='a')
+    file_handler = logging.FileHandler(filename=file_name, mode='a', encoding='utf-8')
     file_handler.setFormatter(formatter)
 
     # Configure the console handler

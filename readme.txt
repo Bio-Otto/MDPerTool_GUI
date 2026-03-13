@@ -4,7 +4,7 @@
 
 import sys
 import os
-sys.path.append(r"C:\Users\law5_\anaconda3\envs\perto\Lib\site-packages\mdpertool")
+sys.path.append(r"C:\Users\ibrahim.ozdemir\OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş\Masaüstü\MDPerTool_GUI\mdpertool")
 
 from no_gui.get_positions_from_trajectory_file import *
 from no_gui.energy_decomposition_from_trajectory import *
@@ -64,7 +64,7 @@ class Minimization_Reporter(openmm.MinimizationReporter):
 # ---------------- LOGGER ---------------- #
 current_date = datetime.now().strftime("%Y-%m-%d")
 file_name = f"out_{current_date}.log"
-log_path = os.path.join('C:/Users/law5_/Desktop/MDPerTool_GUI/Download', file_name)
+log_path = os.path.join('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output', file_name)
 
 log_obj = Logger(log_path)
 """
@@ -83,7 +83,7 @@ log_obj.handlers.clear()
 
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
-fixed_pdb_name = fix_pdb('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/5dk3_fixed_ph7.4.pdb', fixed_pdb_out_path='C:/Users/law5_/Desktop/MDPerTool_GUI/Download', logger_object=log_obj)
+fixed_pdb_name = fix_pdb('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/Download/2j0w_example_fixed_ph7.4.pdb', fixed_pdb_out_path='C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output', logger_object=log_obj)
 
 log_obj.info("Loading pdb to simulation engine ...".format())
 pdb = app.PDBFile(fixed_pdb_name)
@@ -119,12 +119,12 @@ nonbonded.setUseDispersionCorrection(True)
 log_obj.info('Creating a %sIntegrator with %s %s . time step' %('Langevin', 2.0, 'femtosecond'))
 integrator = mm.LangevinIntegrator(310.0*kelvin, 91.0/picosecond, 2.0*femtosecond)
 
-if True == True:
-    platform = mm.Platform.getPlatformByName('CUDA')
-    properties = {'CudaPrecision': 'single'}
+if False == True:
+    platform = mm.Platform.getPlatformByName('OpenCL')
+    properties = {'NonePrecision': 'single'}
 else:
-    platform = mm.Platform.getPlatformByName('CUDA')
-    properties = {'CUDAPrecision': 'single'}
+    platform = mm.Platform.getPlatformByName('OpenCL')
+    properties = {'OpenCLPrecision': 'single'}
 
 
 
@@ -138,7 +138,7 @@ simulation.minimizeEnergy(maxIterations=int(500), reporter=min_reporter)
 log_obj.info("Minimization done, the energy is %s" % simulation.context.getState(getEnergy=True).getPotentialEnergy())
 positions = simulation.context.getState(getPositions=True).getPositions()
 log_obj.info("Minimized geometry is written to 'minimized.pdb'")
-app.PDBFile.writeModel(modeller.topology, positions, open('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/minimized.pdb', 'w'), keepIds=True)
+app.PDBFile.writeModel(modeller.topology, positions, open('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output/minimized.pdb', 'w'), keepIds=True)
 
 simulation.context.setVelocitiesToTemperature(310.0*kelvin)
 
@@ -149,7 +149,7 @@ simulation.currentStep = 0
 simulation.context.setTime(0)
 
 log_obj.info('The trajectories will be saved in DCD file format.')
-simulation.reporters.append(DCDReporter('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/output.dcd', 100))
+simulation.reporters.append(DCDReporter('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output/output.dcd', 100))
 log_obj.info("Saving DCD File for every 100 period")
 
 log_obj.info("Saving XTC File for every 100 period")
@@ -158,29 +158,29 @@ log_obj.info("State Report will tell you.")
 simulation.reporters.append(Perturb_StateDataReporter(stdout, 100, step=True, time=True,
                                                       potentialEnergy=True, kineticEnergy=True, totalEnergy=True,
                                                       temperature=True, progress=True, remainingTime=True, speed=True,
-                                                      volume=True, density=True, totalSteps=1000,
+                                                      volume=True, density=True, totalSteps=500,
                                                       report_type='Progress (%)'))
 
 log_obj.info("Running Production...")
-simulation.step(1000)
+simulation.step(500)
 log_obj.info("Done!".format())
 
 lastpositions = simulation.context.getState(getPositions=True).getPositions()
 
-last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/last.pdb', 'w'), keepIds=True)
+last_pdb = app.PDBFile.writeFile(modeller.topology, lastpositions, open('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output/last.pdb', 'w'), keepIds=True)
 
 
 state = simulation.context.getState(getPositions=True, getVelocities=True)
 
-with open('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/system.xml', 'w') as f:
+with open('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output/system.xml', 'w') as f:
     system_xml = mm.XmlSerializer.serialize(system)
     f.write(system_xml)
 
-with open('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/integrator.xml', 'w') as f:
+with open('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output/integrator.xml', 'w') as f:
     integrator_xml = mm.XmlSerializer.serialize(integrator)
     f.write(integrator_xml)
 
-with open('C:/Users/law5_/Desktop/MDPerTool_GUI/Download/state.xml', 'w') as f:
+with open('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output/state.xml', 'w') as f:
     f.write(mm.XmlSerializer.serialize(state))
 
 try:
@@ -206,15 +206,15 @@ created_file_for_work = str
 OUTPUT_FOLDER_NAME = str
 
 
-OUTPUT_DIRECTORY = Path('C:/Users/law5_/Desktop/MDPerTool_GUI/Download')
+OUTPUT_DIRECTORY = Path('C:/Users/ibrahim.ozdemir/OneDrive - ABDİ İBRAHİM İLAÇ SAN. VE TİC. A.Ş/Masaüstü/MDPerTool_GUI/mdpertool/output')
 
 last_pdb_file_path = os.path.join(OUTPUT_DIRECTORY, last_pdb)
-modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['GLN6'], 'CA')
+modify_atoms = convert_res_to_atoms(last_pdb_file_path, ['SER345'], 'CA')
 state_file_path = os.path.join(OUTPUT_DIRECTORY, state_file_name)
 
-for i in range(len([2])):
-    name_of_changed_state_xml = change_velocity(state_file_path, [2][i], modify_atoms)
-    new_dissipated_trajectory_name = dissipated_trajectory_name + str([2][i])
+for i in range(len([4])):
+    name_of_changed_state_xml = change_velocity(state_file_path, [4][i], modify_atoms)
+    new_dissipated_trajectory_name = dissipated_trajectory_name + str([4][i])
 
     if True == False and False == False:
         write_dcd_cond = True
@@ -224,29 +224,29 @@ for i in range(len([2])):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        if 'CUDA' == 'OpenCL' and False == True:
+        if 'OpenCL' == 'OpenCL' and False == True:
             properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
             precision = 'double'
 
-        if 'CUDA' == 'OpenCL' and False == False:
+        if 'OpenCL' == 'OpenCL' and False == False:
             properties = {'OpenCLPrecision': 'double'}
             precision = 'double'
 
-        if 'CUDA' == 'CUDA' and False == True:
+        if 'OpenCL' == 'CUDA' and False == True:
             properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
             precision = 'double'
 
-        if 'CUDA' == 'CUDA' and False == False:
+        if 'OpenCL' == 'CUDA' and False == False:
             properties = {'CudaPrecision': 'double'}
             precision = 'double'
 
-        if 'CUDA' == 'CPU' and False == True:
+        if 'OpenCL' == 'CPU' and False == True:
             log_obj.info("The CPU platform always uses 'mixed' precision.".format())
             log_obj.info("Simulation process will use %s Thread(s)" % 2)
             properties = {'CpuThreads': '2'}
             precision = 'mixed'
 
-        if 'CUDA' == 'Reference':
+        if 'OpenCL' == 'Reference':
             log_obj.info("The Reference platform always uses 'double' precision.".format())
             properties = None
             precision= 'double'
@@ -272,7 +272,7 @@ for i in range(len([2])):
         integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('CUDA')
+        platform = mm.Platform.getPlatformByName('OpenCL')
 
         # ok now let's do some simulation using this restraint
         if properties is None:
@@ -320,10 +320,10 @@ for i in range(len([2])):
         log_obj.info("State Report will tell you ...".format())
         ref_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                                   kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                  density=True, remainingTime=True, speed=True, totalSteps=1000,
+                                  density=True, remainingTime=True, speed=True, totalSteps=3,
                                   report_type='Reference MD Progress (%)'))
 
-        ref_simulation.step(1000)
+        ref_simulation.step(3)
 
         simulation_last_step = 0
 
@@ -338,34 +338,34 @@ for i in range(len([2])):
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
     ################################################################################################################
 
-    if 'CUDA' == 'OpenCL' and False == True:
+    if 'OpenCL' == 'OpenCL' and False == True:
         properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
         precision = 'double'
 
-    if 'CUDA' == 'OpenCL' and False == False:
+    if 'OpenCL' == 'OpenCL' and False == False:
         properties = {'OpenCLPrecision': 'double'}
         precision = 'double'
 
-    if 'CUDA' == 'CUDA' and False == True:
+    if 'OpenCL' == 'CUDA' and False == True:
         properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
         precision = 'double'
 
-    if 'CUDA' == 'CUDA' and False == False:
+    if 'OpenCL' == 'CUDA' and False == False:
         properties = {'CudaPrecision': 'double'}
         precision = 'double'
 
-    if 'CUDA' == 'CPU' and False == True:
+    if 'OpenCL' == 'CPU' and False == True:
         log_obj.info("The CPU platform always uses 'mixed' precision.".format())
         log_obj.info("Simulation process will use %s Thread(s)" % 2)
         properties = {'CpuThreads': '2'}
         precision = 'mixed'
 
-    if 'CUDA' == 'Reference':
+    if 'OpenCL' == 'Reference':
         log_obj.info("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
 
-    log_obj.info("System will use %s Platform with %s Precision" % ('CUDA', precision))
+    log_obj.info("System will use %s Platform with %s Precision" % ('OpenCL', precision))
 
     # we'll just take the topology from here...
     pdb = app.PDBFile(last_pdb_file_path)
@@ -388,7 +388,7 @@ for i in range(len([2])):
     integrator.setConstraintTolerance(1e-8)
 
     # let's specify our simulation platform again
-    platform = mm.Platform.getPlatformByName('CUDA')
+    platform = mm.Platform.getPlatformByName('OpenCL')
 
     # ok now let's do some simulation using this restraint
     if properties is None:
@@ -438,10 +438,10 @@ for i in range(len([2])):
     log_obj.info("State Report will tell you ...")
     dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                               kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                              density=True, remainingTime=True, speed=True, totalSteps=1000,
+                              density=True, remainingTime=True, speed=True, totalSteps=3,
                               report_type='Dissipation MD Progress (%)'))
 
-    dis_simulation.step(1000)
+    dis_simulation.step(3)
 
     simulation_last_step = 0
 
@@ -504,17 +504,17 @@ for i in range(len([2])):
         if i == 0:
 
             #residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-            #                            output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+            #                            output_directory=OUTPUT_DIRECTORY, que=None, platform_name='OpenCL',
             #                            ref_energy_name='reference_energy_file.csv', device_id_active=False,
             #                            num_of_threads=2,
-            #                            modif_energy_name='modified_energy_file_%s.csv' % int([2][i]),
+            #                            modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
             #                            origin_last_pdb=last_pdb_file_path, ff='amber03.xml', logger_object=log_obj)
 
             process_energy_data(topology_file=last_pdb_file_path, protein_ff='amber03.xml', water_ff='tip3p.xml',
                                 modif_trajectory=dissipation_traj_file_for_pos, device_id_active=False,
-                                ref_trajectory=reference_traj_file_for_pos, platform_type='CUDA',
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='OpenCL',
                                 nonbonded_cutoff=1.2*nanometer, ref_energy_name = 'reference_energy_file.csv',
-                                modif_energy_name='modified_energy_file_%s.csv' % int([2][i]), 
+                                modif_energy_name='modified_energy_file_%s.csv' % int([4][i]), 
                                 output_directory=OUTPUT_DIRECTORY, num_of_threads=2, que=None, 
                                 logger_object=log_obj)
 	
@@ -525,9 +525,9 @@ for i in range(len([2])):
             # --> RESIDUE BASED DECOMPOSITION
             """
             residue_based_decomposition(topol=unwrap_pdb, trj_pos_list=position_list, start_res=0, stop_res=250,
-                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='CUDA',
+                                        output_directory=OUTPUT_DIRECTORY, que=None, platform_name='OpenCL',
                                         ref_energy_name=None, device_id_active=False, num_of_threads=2,
-                                        modif_energy_name='modified_energy_file_%s.csv' % int([2][i]),
+                                        modif_energy_name='modified_energy_file_%s.csv' % int([4][i]),
                                         origin_last_pdb=last_pdb_file_path,
                                         ff='amber03.xml', logger_object=log_obj)
 
@@ -535,9 +535,9 @@ for i in range(len([2])):
 
             process_energy_data(topology_file=last_pdb_file_path, protein_ff='amber03.xml', water_ff='tip3p.xml',
                                 modif_trajectory=dissipation_traj_file_for_pos, device_id_active=False,
-                                ref_trajectory=reference_traj_file_for_pos, platform_type='CUDA',
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='OpenCL',
                                 nonbonded_cutoff=1.2*nanometer, ref_energy_name = 'reference_energy_file.csv',
-                                modif_energy_name='modified_energy_file_%s.csv' % int([2][i]), 
+                                modif_energy_name='modified_energy_file_%s.csv' % int([4][i]), 
                                 output_directory=OUTPUT_DIRECTORY, num_of_threads=2, que=None, 
                                 logger_object=log_obj)
 
@@ -546,8 +546,8 @@ for i in range(len([2])):
 
         # --> RESPONSE TIME CSV EXPORTER
         getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
-                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([2][i])),
-                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([2][i])))
+                                os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int([4][i])),
+                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int([4][i])))
 
     except Exception as e:
         print("ERROR: ", e)

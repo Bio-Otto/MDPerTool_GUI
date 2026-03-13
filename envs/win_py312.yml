@@ -1,0 +1,22 @@
+name: mdpertool_312
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - openmm=8.1.1
+  - pyside2=5.15.15
+  - mdtraj
+  - mdanalysis
+  - pdbfixer
+  - matplotlib
+  - scipy
+  - pandas
+  - networkx
+  - pyopengl
+  - pystache
+  - pyyaml
+  - pip
+  - pip:
+      - pyqtgraph
+      - prody

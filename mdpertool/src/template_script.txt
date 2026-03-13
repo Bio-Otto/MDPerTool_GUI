@@ -237,29 +237,29 @@ for i in range(len({{speed_factor}})):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+        if '{{per_platform}}' == 'OpenCL' and {{per_Device_ID_active}} == True:
+            properties = {'OpenCLPrecision': '{{per_precision}}', 'OpenCLDeviceIndex': '{{per_Device_Number}}'}
+            precision = '{{per_precision}}'
 
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-            properties = {'OpenCLPrecision': 'double'}
-            precision = 'double'
+        if '{{per_platform}}' == 'OpenCL' and {{per_Device_ID_active}} == False:
+            properties = {'OpenCLPrecision': '{{per_precision}}'}
+            precision = '{{per_precision}}'
 
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+        if '{{per_platform}}' == 'CUDA' and {{per_Device_ID_active}} == True:
+            properties = {'CudaPrecision': '{{per_precision}}', 'CudaDeviceIndex': '{{per_Device_Number}}'}
+            precision = '{{per_precision}}'
 
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-            properties = {'CudaPrecision': 'double'}
-            precision = 'double'
+        if '{{per_platform}}' == 'CUDA' and {{per_Device_ID_active}} == False:
+            properties = {'CudaPrecision': '{{per_precision}}'}
+            precision = '{{per_precision}}'
 
-        if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
+        if '{{per_platform}}' == 'CPU' and {{per_CPU_properties_active}} == True:
             log_obj.info("The CPU platform always uses 'mixed' precision.".format())
             log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
             properties = {'CpuThreads': '{{Number_of_CPU}}'}
             precision = 'mixed'
 
-        if '{{platform}}' == 'Reference':
+        if '{{per_platform}}' == 'Reference':
             log_obj.info("The Reference platform always uses 'double' precision.".format())
             properties = None
             precision= 'double'
@@ -285,7 +285,7 @@ for i in range(len({{speed_factor}})):
         integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('{{platform}}')
+        platform = mm.Platform.getPlatformByName('{{per_platform}}')
 
         # ok now let's do some simulation using this restraint
         if properties is None:
@@ -353,34 +353,34 @@ for i in range(len({{speed_factor}})):
     ############################### DISSIPATION MD PROCESS USING MDPerTool v0.1 ####################################
     ################################################################################################################
 
-    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-        precision = 'double'
+    if '{{per_platform}}' == 'OpenCL' and {{per_Device_ID_active}} == True:
+        properties = {'OpenCLPrecision': '{{per_precision}}', 'OpenCLDeviceIndex': '{{per_Device_Number}}'}
+        precision = '{{per_precision}}'
 
-    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-        properties = {'OpenCLPrecision': 'double'}
-        precision = 'double'
+    if '{{per_platform}}' == 'OpenCL' and {{per_Device_ID_active}} == False:
+        properties = {'OpenCLPrecision': '{{per_precision}}'}
+        precision = '{{per_precision}}'
 
-    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-        precision = 'double'
+    if '{{per_platform}}' == 'CUDA' and {{per_Device_ID_active}} == True:
+        properties = {'CudaPrecision': '{{per_precision}}', 'CudaDeviceIndex': '{{per_Device_Number}}'}
+        precision = '{{per_precision}}'
 
-    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-        properties = {'CudaPrecision': 'double'}
-        precision = 'double'
+    if '{{per_platform}}' == 'CUDA' and {{per_Device_ID_active}} == False:
+        properties = {'CudaPrecision': '{{per_precision}}'}
+        precision = '{{per_precision}}'
 
-    if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
+    if '{{per_platform}}' == 'CPU' and {{per_CPU_properties_active}} == True:
         log_obj.info("The CPU platform always uses 'mixed' precision.".format())
         log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
         properties = {'CpuThreads': '{{Number_of_CPU}}'}
         precision = 'mixed'
 
-    if '{{platform}}' == 'Reference':
+    if '{{per_platform}}' == 'Reference':
         log_obj.info("The Reference platform always uses 'double' precision.")
         properties = None
         precision= 'double'
 
-    log_obj.info("System will use %s Platform with %s Precision" % ('{{platform}}', precision))
+    log_obj.info("System will use %s Platform with %s Precision" % ('{{per_platform}}', precision))
 
     # we'll just take the topology from here...
     pdb = app.PDBFile(last_pdb_file_path)
@@ -403,7 +403,7 @@ for i in range(len({{speed_factor}})):
     integrator.setConstraintTolerance(1e-8)
 
     # let's specify our simulation platform again
-    platform = mm.Platform.getPlatformByName('{{platform}}')
+    platform = mm.Platform.getPlatformByName('{{per_platform}}')
 
     # ok now let's do some simulation using this restraint
     if properties is None:
@@ -528,8 +528,8 @@ for i in range(len({{speed_factor}})):
             #                            origin_last_pdb=last_pdb_file_path, ff='{{protein_ff}}', logger_object=log_obj)
 
             process_energy_data(topology_file=last_pdb_file_path, protein_ff='{{protein_ff}}', water_ff='{{water_ff}}',
-                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active={{Device_ID_active}},
-                                ref_trajectory=reference_traj_file_for_pos, platform_type='{{platform}}',
+                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active={{per_Device_ID_active}},
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='{{per_platform}}',
                                 nonbonded_cutoff={{NonBounded_cutoff}}, ref_energy_name = 'reference_energy_file.csv',
                                 modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]), 
                                 output_directory=OUTPUT_DIRECTORY, num_of_threads={{Number_of_CPU}}, que=None, 
@@ -551,8 +551,8 @@ for i in range(len({{speed_factor}})):
             """
 
             process_energy_data(topology_file=last_pdb_file_path, protein_ff='{{protein_ff}}', water_ff='{{water_ff}}',
-                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active={{Device_ID_active}},
-                                ref_trajectory=reference_traj_file_for_pos, platform_type='{{platform}}',
+                                modif_trajectory=dissipation_traj_file_for_pos, device_id_active={{per_Device_ID_active}},
+                                ref_trajectory=reference_traj_file_for_pos, platform_type='{{per_platform}}',
                                 nonbonded_cutoff={{NonBounded_cutoff}}, ref_energy_name = 'reference_energy_file.csv',
                                 modif_energy_name='modified_energy_file_%s.csv' % int({{speed_factor}}[i]), 
                                 output_directory=OUTPUT_DIRECTORY, num_of_threads={{Number_of_CPU}}, que=None, 

@@ -17,6 +17,20 @@ import itertools
 import tokenize
 from PySide2.QtCore import Signal
 from ui_main import *
+import ctypes
+
+def get_short_path_name(long_name):
+    if os.name != 'nt':
+        return long_name
+    output_buf_size = 0
+    while True:
+        output_buf = ctypes.create_unicode_buffer(output_buf_size)
+        needed = ctypes.windll.kernel32.GetShortPathNameW(long_name, output_buf, output_buf_size)
+        if needed == 0:
+            return long_name
+        if needed <= output_buf_size:
+            return output_buf.value
+        output_buf_size = needed
 
 
 class Advanced(QtCore.QThread):
@@ -29,7 +43,11 @@ class Advanced(QtCore.QThread):
     def send_arg_to_Engine(self):
         # self.stackedWidget.setCurrentIndex(1)
         global platform_name
-        pdb_pfile = os.path.abspath(self.upload_pdb_lineEdit.text().strip()).replace('\\', '/')
+        pdb_pfile = os.path.abspath(self.upload_pdb_lineEdit.text().strip())
+        if os.path.exists(pdb_pfile):
+            pdb_pfile = get_short_path_name(pdb_pfile).replace('\\', '/')
+        else:
+            pdb_pfile = pdb_pfile.replace('\\', '/')
 
         rigid_water = True
         minimize = True
@@ -99,10 +117,12 @@ class Advanced(QtCore.QThread):
                     path_out = os.getcwd() + "/output"
                     Path(path_out).mkdir(parents=True, exist_ok=True)
 
-                    self.out_dir = os.path.abspath(path_out.strip()).replace('\\', '/')
+                    self.out_dir = get_short_path_name(os.path.abspath(path_out.strip())).replace('\\', '/')
                     self.Output_Folder_textEdit.setText(self.out_dir)
             else:
-                self.out_dir = os.path.abspath(self.out_dir.strip()).replace('\\', '/')
+                from pathlib import Path
+                Path(self.out_dir.strip()).mkdir(parents=True, exist_ok=True)
+                self.out_dir = get_short_path_name(os.path.abspath(self.out_dir.strip())).replace('\\', '/')
                 self.Output_Folder_textEdit.setText(self.out_dir)
         except:
             QMessageBox.critical(self, "Error", "An error occured while getting output directory")
@@ -200,6 +220,23 @@ class Advanced(QtCore.QThread):
                 cuda_precision_prefix = 'Cuda'
                 cuda_active = True
 
+            ## PERTURBATION PLATFORM PROPERTIES
+            per_properties_active = False
+            per_CPU_properties_active = False
+            per_Device_ID_active = False
+            per_precision = self.per_precision_comboBox.currentText().strip()
+
+            if self.per_platform_comboBox.currentText() in ["CUDA", "OpenCL"]:
+                per_properties_active = True
+
+            if self.per_platform_comboBox.currentText() == "CPU":
+                per_CPU_properties_active = True
+
+            if self.per_Device_ID_checkBox.isChecked():
+                per_Device_ID_active = True
+
+            per_platform_name = self.per_platform_comboBox.currentText()
+
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -220,6 +257,10 @@ class Advanced(QtCore.QThread):
                                 properties_active=properties_active, CPU_properties_active=CPU_properties_active,
                                 Device_ID_active=Device_ID_active,
                                 Device_Number=self.Device_Number_comboBox.currentText(),
+
+                                per_platform=per_platform_name, per_precision=per_precision,
+                                per_properties_active=per_properties_active, per_CPU_properties_active=per_CPU_properties_active,
+                                per_Device_ID_active=per_Device_ID_active, per_Device_Number=self.per_Device_Number_comboBox.currentText(),
 
                                 protein_ff=self.protein_ff,  # FORCEFIELD
                                 water_ff=self.water_ff,  # FORCEFIELD
@@ -323,10 +364,10 @@ class Advanced_Helper_Functions(QtCore.QThread):
         # template file path
         template_file_path = os.path.join(curr_dir, 'template_script.txt')
 
-        template = pystache.parse(open(template_file_path).read())
+        template = pystache.parse(open(template_file_path, encoding='utf-8').read())
         self.contents = renderer.render(template, script_structure)
 
-        with open('readme.txt', 'w') as f:
+        with open('readme.txt', 'w', encoding='utf-8') as f:
             f.write(self.contents)
 
         if script_structure.get('save_script'):
@@ -340,7 +381,7 @@ class Advanced_Helper_Functions(QtCore.QThread):
                 file_counter += 1
 
             # Create or open a Python script file and write the content
-            with open(os.path.join('temp', save_filename), 'w') as py_file:
+            with open(os.path.join('temp', save_filename), 'w', encoding='utf-8') as py_file:
                 py_file.write(self.contents)
 
         return self.contents

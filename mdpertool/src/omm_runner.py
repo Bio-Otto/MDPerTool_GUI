@@ -80,29 +80,22 @@ class OpenMMScriptRunner(QtCore.QObject):
         except tokenize.TokenError:
             raise ValueError('The script has a syntax error!')
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp_script:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as temp_script:
             temp_script.write(code)
             temp_script_path = temp_script.name
 
         try:
+            env = os.environ.copy()
+            env["PYTHONIOENCODING"] = "utf-8"
             self.process = subprocess.Popen(['python', temp_script_path], stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE)
+                                            stderr=subprocess.STDOUT, env=env)
 
             while True:
                 output = self.process.stdout.readline()
                 if output == b'' and self.process.poll() is not None:
                     break
                 if output:
-                    queue.put(output.decode().strip())
-
-            while True:
-                error_output = self.process.stderr.readline()
-                if error_output == b'' and self.process.poll() is not None:
-                    break
-                if error_output:
-
-                    print("Standard Error:", error_output.decode().strip())
-                    queue.put(error_output.decode().strip())
+                    queue.put(output.decode('utf-8', errors='replace').strip())
 
             self.process.wait()
 
