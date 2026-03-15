@@ -48,7 +48,8 @@ class Advanced(QtCore.QThread):
         precision = 'single'
         water_active = False
         # equilubrate_steps = self.Max_equilubrate_steps_textEdit.toPlainText()
-        StateData_freq = int(self.StateData_frequency_lineEdit.text())
+        state_data_freq_text = self.StateData_frequency_lineEdit.text().strip()
+        StateData_freq = int(state_data_freq_text) if state_data_freq_text else 100
         global selected_platform
 
         print("Simulation parameters preparing for the start ...")
@@ -167,19 +168,11 @@ class Advanced(QtCore.QThread):
                 State_Data_Reporter = False
 
             ## STATE DATA FREQUENCY
-            if StateData_freq == "" and State_Data_Reporter:
-                StateData_freq = 100
-                if StateData_freq > self.Number_of_steps_spinBox.value():
-                    StateData_freq = int(self.Number_of_steps_spinBox.value() / 2)
-                    print("You did not enter the stateData frequency. Therefore it will be automatically set to %s."
-                          % StateData_freq)
-
-            elif StateData_freq != "" and State_Data_Reporter:
-                if StateData_freq > self.Number_of_steps_spinBox.value():
-                    StateData_freq = int(int(self.Number_of_steps_spinBox.value()) / 2)
-                    print("You entered the stateData frequency bigger than total steps. Therefore it will be "
-                          "automatically set to half of the total steps which is equal to %s. "
-                          % StateData_freq)
+            if State_Data_Reporter and StateData_freq > self.Number_of_steps_spinBox.value():
+                StateData_freq = max(1, int(self.Number_of_steps_spinBox.value() / 2))
+                print("StateData frequency is bigger than total steps. Therefore it will be "
+                      "automatically set to half of the total steps which is equal to %s. "
+                      % StateData_freq)
 
             ## NONBOUNDED CUTOFF ACTIVE OR NOT
             if self.nonBounded_Method_comboBox.currentText == 'NoCutoff':
@@ -272,7 +265,8 @@ class Advanced(QtCore.QThread):
                                 output_directory=self.out_dir,
                                 save_script=self.Save_Script_checkBox.isChecked(),
                                 script_save_directory=self.script_name_lineEdit.text(),
-                                auto_extend_runtime=self.autoextend_checkBox.isChecked()
+                                auto_extend_runtime=self.autoextend_checkBox.isChecked(),
+                                real_time_active=self.realTime_active_checkBox.isChecked()
                                 )
 
         self.created_script = Advanced_Helper_Functions.update_display(self, script_structure)

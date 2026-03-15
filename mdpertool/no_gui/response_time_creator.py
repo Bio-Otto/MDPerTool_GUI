@@ -2,41 +2,42 @@ import numpy as np
 import pandas as pd
 
 
-def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTimes.csv'):
-    """
-    calculate residue response times and write them into a file
-    """
+RESPONSE_THRESHOLD = 0.01
 
-    refEnergies = pd.read_csv(referenceName)
-    perEnergies = pd.read_csv(perturbedName)
 
-    numEnergies = len(refEnergies.columns)
-    numFrames = len(refEnergies.values)
+def get_residue_response_times(reference_name, perturbed_name, output_name='responseTimes.csv'):
+    """Calculate the first responsive frame for each residue and write it to disk."""
 
-    energyDiff = []
+    reference_energies = pd.read_csv(reference_name)
+    perturbed_energies = pd.read_csv(perturbed_name)
 
-    for i in range(0, numEnergies):
-        columnName = refEnergies.columns[i]
-        diff = refEnergies[columnName] - perEnergies[columnName]
-        for k in range(0, numFrames):
-            if abs(diff[k]) < 0.01:
-                # print(diff[k])
-                diff[k] = 0
-        energyDiff.append(diff)
+    energy_diff = reference_energies.sub(perturbed_energies)
+    energy_diff = energy_diff.mask(energy_diff.abs() < RESPONSE_THRESHOLD, 0.0)
 
-    residueResponseTimes = []
+    num_frames = len(energy_diff.index)
+    residue_response_times = []
 
-    for residueDiff in energyDiff:
-        # For residues with no response, assign a value of length of trajectory.
-        # For residues with response, assign the first frame with a non-zero element.
-        if np.sum(residueDiff) != 0:
-            responseTime = np.array(residueDiff).nonzero()[0][0]
-            residueResponseTimes.append(responseTime)
+    for column_name in energy_diff.columns:
+        residue_diff = energy_diff[column_name].to_numpy()
+        non_zero_indices = np.flatnonzero(residue_diff)
+
+        if non_zero_indices.size:
+            residue_response_times.append(int(non_zero_indices[0]))
         else:
-            residueResponseTimes.append(0)
+            residue_response_times.append(num_frames)
 
-    residueResponseTimes = np.asarray(residueResponseTimes)
-    np.savetxt(outputName, residueResponseTimes, delimiter=',')
+    response_time_array = np.asarray(residue_response_times)
+    np.savetxt(output_name, response_time_array, delimiter=',')
+    return response_time_array
+
+
+def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTimes.csv'):
+    """Backward-compatible wrapper for legacy callers."""
+
+    return get_residue_response_times(referenceName, perturbedName, outputName)
+
+
+__all__ = ["RESPONSE_THRESHOLD", "get_residue_response_times", "getResidueResponseTimes"]
 
 
 # getResidueResponseTimes('reference_energy_file.csv', 'modified_energy_file.csv')

@@ -287,7 +287,19 @@ class UIFunctions(MainWindow):
                                                  perc_keper=None,
                                                  response_threshold=0.005):
 
-        if statu == "Started on PyMOL" and not self.live_PyMol_already_started:
+        if not self.realTime_active_checkBox.isChecked():
+            if self.live_PyMol_already_started:
+                self.ProteinView.stop_monitoring()
+                self.live_PyMol_already_started = False
+            return
+
+        if statu == "Started on PyMOL":
+            monitor_thread = getattr(self.ProteinView, 'monitor_thread', None)
+            monitor_running = monitor_thread is not None and monitor_thread.isRunning()
+
+            if self.live_PyMol_already_started and monitor_running:
+                return
+
             self.ProteinView.set_reference_file(ref_file_path=ref_velocity_file, effected_atom_keeper=perc_keper)
             self.ProteinView.monitor_live_file(pert_velocity_file, response_threshold=response_threshold)
             self.live_PyMol_already_started = True
@@ -298,6 +310,14 @@ class UIFunctions(MainWindow):
 
         if statu == "Auto-Extending":
             self.ProteinView.reset_and_update_colors(ref_file_path=ref_velocity_file, pert_file_path=pert_velocity_file)
+
+    def realtime_monitoring_toggle(self):
+        if self.realTime_active_checkBox.isChecked():
+            return
+
+        if self.live_PyMol_already_started:
+            self.ProteinView.stop_monitoring()
+            self.live_PyMol_already_started = False
 
     def load_pdb_to_3DNetwork(self, pdb_file):
 

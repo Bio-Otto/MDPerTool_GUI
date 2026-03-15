@@ -6,6 +6,12 @@ import sys
 import os
 sys.path.append(r"{{parent_dir}}")
 
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
 from no_gui.get_positions_from_trajectory_file import *
 from no_gui.energy_decomposition_from_trajectory import *
 from no_gui.response_time_creator import *
@@ -25,6 +31,7 @@ from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, at
 from sys import stdout
 import platform as pl
 import time
+import math
 import argparse
 import multiprocessing as mp
 from pathlib import Path, PureWindowsPath
@@ -212,6 +219,7 @@ log_obj.info("StateData_freq: {{StateData_freq}}")
 log_obj.info("output_directory: {{output_directory}}")
 log_obj.info("save_script: {{save_script}}")
 log_obj.info("script_save_directory: {{script_save_directory}}")
+log_obj.info("real_time_active: {{real_time_active}}")
 log_obj.info("#" * 50 + " END / PARAMETERS USED " + "#" * 50 + "\n")
 # ---------------- PARAMETERS USED ---------------- #
 
@@ -369,6 +377,59 @@ def check_value_in_file(effected_atom_file):
     except ValueError:
         print("The file does not contain a valid number.")
 
+    return None
+
+
+def calculate_effected_atom_percentage_from_contexts(ref_simulation_obj, dis_simulation_obj, topology_obj,
+                                                     threshold=0.005):
+    try:
+        ref_state = ref_simulation_obj.context.getState(getVelocities=True)
+        dis_state = dis_simulation_obj.context.getState(getVelocities=True)
+
+        ref_velocities = ref_state.getVelocities()
+        dis_velocities = dis_state.getVelocities()
+
+        protein_indices = [atom.index for atom in topology_obj.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]
+        if len(protein_indices) == 0:
+            return None
+
+        affected_count = 0
+        for atom_index in protein_indices:
+            ref_v = ref_velocities[atom_index].value_in_unit(unit.nanometer / unit.picosecond)
+            dis_v = dis_velocities[atom_index].value_in_unit(unit.nanometer / unit.picosecond)
+
+            dx = dis_v[0] - ref_v[0]
+            dy = dis_v[1] - ref_v[1]
+            dz = dis_v[2] - ref_v[2]
+
+            if math.sqrt(dx * dx + dy * dy + dz * dz) > threshold:
+                affected_count += 1
+
+        return round(affected_count / len(protein_indices) * 100, 1)
+    except Exception as context_percentage_error:
+        log_obj.warning("Could not calculate effected atom percentage from simulation contexts: %s",
+                        context_percentage_error)
+        return None
+
+
+def calculate_extra_run_time_from_effected_percentage(effeted_atom_percentage, base_perturb_steps):
+    if effeted_atom_percentage is None:
+        return 0
+
+    if effeted_atom_percentage >= 100:
+        return 0
+
+    bounded_effected_percentage = max(0.0, min(100.0, float(effeted_atom_percentage)))
+    remaining_ratio = (100.0 - bounded_effected_percentage) / 100.0
+
+    dynamic_multiplier = 0.5 + (remaining_ratio * 4.5)
+    extra_run_time = int(base_perturb_steps * remaining_ratio * dynamic_multiplier)
+
+    if remaining_ratio > 0 and extra_run_time == 0:
+        extra_run_time = max(1, int(base_perturb_steps * 0.1))
+
+    return extra_run_time
+
 
 # ## --> VARIABLES
 simulation_last_step = 0
@@ -401,20 +462,20 @@ for i in range(len({{speed_factor}})):
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
         if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+            properties = {'OpenCLPrecision': '{{precision}}', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-            properties = {'OpenCLPrecision': 'double'}
-            precision = 'double'
+            properties = {'OpenCLPrecision': '{{precision}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+            properties = {'CudaPrecision': '{{precision}}', 'CudaDeviceIndex': '{{Device_Number}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-            properties = {'CudaPrecision': 'double'}
-            precision = 'double'
+            properties = {'CudaPrecision': '{{precision}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
             log_obj.info("The CPU platform always uses 'mixed' precision.".format())
@@ -499,7 +560,14 @@ for i in range(len({{speed_factor}})):
         ref_simulation.reporters.append(app.CheckpointReporter(os.path.join(OUTPUT_DIRECTORY, 'reference.chk'), {{perturb_simulation_time}})) ## saving checkpoint file for this simulation
 
         ref_simulation_velocities = os.path.join(OUTPUT_DIRECTORY, 'ref_protein_velocities.xml')
-        ref_simulation.reporters.append(VelocityReporter(ref_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+        {{#real_time_active}}
+        try:
+            ref_simulation.reporters.append(VelocityReporter(ref_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+        except Exception as velocity_reporter_error:
+            log_obj.warning("Reference velocity reporter is unavailable: %s", velocity_reporter_error)
+            with open(ref_simulation_velocities, 'w') as _velocity_placeholder:
+                _velocity_placeholder.write("<Velocities>\n</Velocities>\n")
+        {{/real_time_active}}
 
         ref_simulation.step({{perturb_simulation_time}})
 
@@ -509,20 +577,20 @@ for i in range(len({{speed_factor}})):
     ####################################################################################################################
 
     if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-        precision = 'double'
+        properties = {'OpenCLPrecision': '{{precision}}', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-        properties = {'OpenCLPrecision': 'double'}
-        precision = 'double'
+        properties = {'OpenCLPrecision': '{{precision}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-        precision = 'double'
+        properties = {'CudaPrecision': '{{precision}}', 'CudaDeviceIndex': '{{Device_Number}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-        properties = {'CudaPrecision': 'double'}
-        precision = 'double'
+        properties = {'CudaPrecision': '{{precision}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
         log_obj.info("The CPU platform always uses 'mixed' precision.".format())
@@ -612,52 +680,112 @@ for i in range(len({{speed_factor}})):
 
 
     dis_simulation_velocities = os.path.join(OUTPUT_DIRECTORY, 'dis_protein_velocities.xml')
-    dis_simulation.reporters.append(VelocityReporter(dis_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+    {{#real_time_active}}
+    try:
+        dis_simulation.reporters.append(VelocityReporter(dis_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+    except Exception as velocity_reporter_error:
+        log_obj.warning("Dissipation velocity reporter is unavailable: %s", velocity_reporter_error)
+        with open(dis_simulation_velocities, 'w') as _velocity_placeholder:
+            _velocity_placeholder.write("<Velocities>\n</Velocities>\n")
+    {{/real_time_active}}
 
     dis_simulation.step({{perturb_simulation_time}})
 
-    effeted_atom_percentage = check_value_in_file(os.path.join(OUTPUT_DIRECTORY, 'effected_atom_count.txt'))
+    effeted_atom_percentage = calculate_effected_atom_percentage_from_contexts(
+        ref_simulation_obj=ref_simulation,
+        dis_simulation_obj=dis_simulation,
+        topology_obj=topology,
+        threshold=0.005
+    )
 
-    if effeted_atom_percentage <= 100:
-        extra_time = int({{perturb_simulation_time}}*((100-effeted_atom_percentage)/effeted_atom_percentage))
-        extra_run_time = int(extra_time*1.5)
+    if effeted_atom_percentage is None:
+        effeted_atom_percentage = check_value_in_file(os.path.join(OUTPUT_DIRECTORY, 'effected_atom_count.txt'))
+
+    log_obj.info("Effected atom percentage used for auto-extend: %s", effeted_atom_percentage)
+    extra_run_time = 0
+    base_perturb_steps = int({{perturb_simulation_time}})
+
+    if effeted_atom_percentage is None:
+        log_obj.info("Auto-extend runtime calculation is skipped because effected atom percentage is unavailable.")
+    elif effeted_atom_percentage >= 100:
+        log_obj.info("Auto-extend is not required because all tracked atoms already responded (%.1f%%).",
+                     effeted_atom_percentage)
+    else:
+        extra_run_time = calculate_extra_run_time_from_effected_percentage(effeted_atom_percentage,
+                                                                            base_perturb_steps)
+
         print(extra_run_time)
-        log_obj.info("To ensure complete dissipation across all atoms, an additional %d time steps will be necessary.", extra_run_time)
+        log_obj.info("To ensure complete dissipation across all atoms, an additional %d time steps will be necessary.",
+                     extra_run_time)
 
     #################################### START / AUTO EXTEND PERTURBATION TIME STEP ####################################
     {{#auto_extend_runtime}}
+        auto_extend_iteration = 0
+        max_auto_extend_iterations = 25
 
-        for reporter in ref_simulation.reporters[:]:
-            if not isinstance(reporter, VelocityReporter):
-                ref_simulation.reporters.remove(reporter)
+        while extra_run_time > 0 and (effeted_atom_percentage is None or effeted_atom_percentage < 100) and auto_extend_iteration < max_auto_extend_iterations:
+            auto_extend_iteration += 1
+            log_obj.log(39, "Auto-Extending iteration %d is started: %d time steps.", auto_extend_iteration, extra_run_time)
 
+            for reporter in ref_simulation.reporters[:]:
+                if not isinstance(reporter, VelocityReporter):
+                    ref_simulation.reporters.remove(reporter)
 
-        ref_simulation.loadCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'reference.chk'))
-        # if its a restart, will append new trj to the old one
-        ref_simulation.reporters.append(app.DCDReporter(os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name), 1, append=True))
-        ref_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
-                                                                  kineticEnergy=True, totalEnergy=True, temperature=True,
-                                                                  progress=True, volume=True,
-                                                                  density=True, remainingTime=True, speed=True,
-                                                                  totalSteps={{perturb_simulation_time}}+extra_run_time,
-                                                                  report_type='Reference MD Progress (%)'))
+            ref_simulation.loadCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'reference.chk'))
+            # if its a restart, will append new trj to the old one
+            ref_simulation.reporters.append(app.DCDReporter(os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % undissipated_trajectory_name), 1, append=True))
+            ref_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
+                                                                      kineticEnergy=True, totalEnergy=True, temperature=True,
+                                                                      progress=True, volume=True,
+                                                                      density=True, remainingTime=True, speed=True,
+                                                                      totalSteps=ref_simulation.currentStep+extra_run_time,
+                                                                      report_type='Reference MD Progress (%)'))
 
-        ref_simulation.step(extra_run_time)
+            ref_simulation.step(extra_run_time)
+            ref_simulation.saveCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'reference.chk'))
 
-        log_obj.log(39, "Auto-Extending is started: %d time steps.", extra_run_time)
-        for reporter in dis_simulation.reporters[:]:
-            if not isinstance(reporter, VelocityReporter):
-                dis_simulation.reporters.remove(reporter)
+            for reporter in dis_simulation.reporters[:]:
+                if not isinstance(reporter, VelocityReporter):
+                    dis_simulation.reporters.remove(reporter)
 
-        dis_simulation.loadCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'dissipation.chk'))
-        # if its a restart, will append new trj to the old one
-        dis_simulation.reporters.append(app.DCDReporter(os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name), 1, append=True))
-        dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
-                                  kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                  density=True, remainingTime=True, speed=True, totalSteps={{perturb_simulation_time}}+extra_run_time,
-                                  report_type='Dissipation MD Progress (%)'))
+            dis_simulation.loadCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'dissipation.chk'))
+            # if its a restart, will append new trj to the old one
+            dis_simulation.reporters.append(app.DCDReporter(os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name), 1, append=True))
+            dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
+                                      kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
+                                      density=True, remainingTime=True, speed=True, totalSteps=dis_simulation.currentStep+extra_run_time,
+                                      report_type='Dissipation MD Progress (%)'))
 
-        dis_simulation.step(extra_run_time)
+            dis_simulation.step(extra_run_time)
+            dis_simulation.saveCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'dissipation.chk'))
+
+            effeted_atom_percentage = calculate_effected_atom_percentage_from_contexts(
+                ref_simulation_obj=ref_simulation,
+                dis_simulation_obj=dis_simulation,
+                topology_obj=topology,
+                threshold=0.005
+            )
+
+            if effeted_atom_percentage is None:
+                effeted_atom_percentage = check_value_in_file(os.path.join(OUTPUT_DIRECTORY, 'effected_atom_count.txt'))
+
+            log_obj.info("Effected atom percentage after auto-extend iteration %d: %s",
+                         auto_extend_iteration, effeted_atom_percentage)
+
+            if effeted_atom_percentage is not None and effeted_atom_percentage >= 100:
+                log_obj.info("All tracked atoms responded after auto-extend iteration %d.", auto_extend_iteration)
+                extra_run_time = 0
+                break
+
+            extra_run_time = calculate_extra_run_time_from_effected_percentage(effeted_atom_percentage,
+                                                                                base_perturb_steps)
+
+            if extra_run_time > 0:
+                log_obj.info("Auto-extend will continue with %d additional time steps.", extra_run_time)
+
+        if auto_extend_iteration >= max_auto_extend_iterations and (effeted_atom_percentage is None or effeted_atom_percentage < 100):
+            log_obj.warning("Auto-extend stopped after reaching iteration limit (%d). Current effected atom percentage: %s",
+                            max_auto_extend_iterations, effeted_atom_percentage)
     {{/auto_extend_runtime}}
     ##################################### END / AUTO EXTEND PERTURBATION TIME STEP #####################################
 

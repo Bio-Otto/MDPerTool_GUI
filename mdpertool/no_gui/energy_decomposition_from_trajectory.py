@@ -26,7 +26,10 @@ RESIDUE_NAME = str
 CpuThreads = 4
 
 
-def get_snapshot_positions(pdb_files, pdb_positions=[]):
+def get_snapshot_positions(pdb_files, pdb_positions=None):
+    if pdb_positions is None:
+        pdb_positions = []
+
     for pdb in pdb_files:
         pdb_positions.append(app.PDBFile(pdb).positions)
     return pdb_positions

@@ -6,13 +6,13 @@ import sys
 import platform
 import glob
 import time
+import traceback
 this_directory = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(this_directory)
 
 from src.builder import *
 from src.pyside_dynamic import loadUi
 from gui.ui_styles import Style
-from src.builder import *
 from src.app_functions import *
 from src.checkBox_menu import *
 import _version as current_version
@@ -113,6 +113,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ref_velocity_file = None
         self.effected_atom_percentage_keper = None
         self.elapsed_time_worker =None
+        self.run_active = False
+        self.current_run_stage = "Idle"
+        self.last_log_update_at = None
+        self.elapsed_time_text = "Elapsed Time: 0d 0h 0m 0s"
+        self.run_status_timer = QtCore.QTimer(self)
+        self.run_status_timer.setInterval(1000)
+        self.run_status_timer.timeout.connect(self.update_run_status_line)
         # Current directory
         current_dir = os.path.dirname(os.path.realpath(__file__))
         # UI file path
@@ -218,6 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.minimize_checkBox.stateChanged.connect(lambda: UIF.Functions.minimize_Step_isVisible(self))
         self.State_Data_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.State_Data_Reporter_Changed(self))
         self.DCD_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.DCD_Reporter_Changed(self))
+        self.realTime_active_checkBox.stateChanged.connect(lambda: UIF.UIFunctions.realtime_monitoring_toggle(self))
         # self.equilubrate_checkBox.stateChanged.connect(lambda: UIF.Functions.Equilibration_On_Off_Changed(self))
         self.Device_ID_checkBox.stateChanged.connect(lambda: UIF.Functions.UseDeviceID_On_Off_Changed(self))
         self.XTC_Reporter_checkBox.stateChanged.connect(lambda: UIF.Functions.XTC_Reporter_Changed(self))
@@ -324,13 +332,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.r_factor_count = 0
         self.Run.setEnabled(False)
         self.start_monitoring = False
+        self.run_active = False
+        self.current_run_stage = "Preparing"
+        self.last_log_update_at = datetime.now()
+        self.update_run_status_line()
 
         self.get_most_recent_directory()
 
-        self.start_monitoring = Advanced.send_arg_to_Engine(self)
+        try:
+            self.start_monitoring = Advanced.send_arg_to_Engine(self)
+        except Exception as run_error:
+            traceback.print_exc()
+            self.inform_about_progress(f"Run preparation failed: {run_error}")
+            UIF.Message_Boxes.Critical_message(self, "Run Preparation Error", str(run_error),
+                                               Style.MessageBox_stylesheet)
+            self.Run.setEnabled(True)
+            return
+
         self.run.plotdata = {}
 
         if self.start_monitoring:
+            self.run_active = True
+            self.current_run_stage = "Classical MD"
+            self.last_log_update_at = datetime.now()
+            self.run_status_timer.start()
 
             self.pert_velocity_file = os.path.join(self.current_output_folder_path, "dis_protein_velocities.xml")
             self.ref_velocity_file = os.path.join(self.current_output_folder_path, "ref_protein_velocities.xml")
@@ -356,21 +381,67 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if not self.start_monitoring:
             self.Run.setEnabled(True)
-            self.elapsed_time_worker.stop()
+            self.run_active = False
+            self.current_run_stage = "Idle"
+            self.run_status_timer.stop()
+            worker = getattr(self, 'elapsed_time_worker', None)
+            if worker is not None:
+                worker.stop()
+            self.update_run_status_line()
 
     def update_elapsed_time(self, days, hours, minutes, seconds):
-        # Slot: Sinyalden gelen veriyi kullanarak label'ı güncelle
-        self.label_9.setText(f"Elapsed Time: {days}d {hours}h {minutes}m {seconds}s")
+        self.elapsed_time_text = f"Elapsed Time: {days}d {hours}h {minutes}m {seconds}s"
+        self.update_run_status_line()
+
+    def infer_run_stage_from_message(self, message):
+        text = str(message).lower()
+
+        if 'pdb file fixing and preparing' in text or 'creating pdbfixer' in text:
+            return 'PDB Preparation'
+        if 'minimizing for' in text or 'iteration:' in text:
+            return 'Minimization'
+        if 'equilibrating for' in text:
+            return 'Equilibration'
+        if 'running production' in text or 'progress (%)' in text:
+            return 'Classical MD'
+        if 'reference md progress' in text or 'constructing nve system' in text:
+            return 'Reference MD'
+        if 'dissipation md progress' in text or 'will the perturbed system use periodic boundary conditions' in text:
+            return 'Dissipation MD'
+        if 'decompose started' in text or 'decomposition progress' in text:
+            return 'Decomposition'
+        if 'auto-extending' in text:
+            return 'Auto Extend'
+        if 'progress finished succesfully' in text:
+            return 'Completed'
+        if 'error' in text or 'traceback' in text or 'exception' in text:
+            return 'Error'
+
+        return self.current_run_stage
+
+    def update_run_status_line(self):
+        if self.last_log_update_at is None:
+            self.label_9.setText(f"{self.elapsed_time_text} | Stage: {self.current_run_stage}")
+            return
+
+        seconds_since_update = int((datetime.now() - self.last_log_update_at).total_seconds())
+        if self.run_active:
+            heartbeat = f"Last update: {seconds_since_update}s ago"
+        else:
+            heartbeat = "Run inactive"
+
+        self.label_9.setText(f"{self.elapsed_time_text} | Stage: {self.current_run_stage} | {heartbeat}")
 
     def closeEvent(self, event):
         # Ensure the worker thread stops when the window is closed
         # Pencere kapatıldığında thread'i durdur
-        try:
-            if self.elapsed_time_worker is not None:
-                self.elapsed_time_worker.stop()
-                event.accept()
-        except:
-            print("ERROR DURING STOP THE THREAD")
+        worker = getattr(self, 'elapsed_time_worker', None)
+        if worker is not None:
+            try:
+                worker.stop()
+            except RuntimeError:
+                print("ERROR DURING STOP THE THREAD")
+        event.accept()
 
     def platform_specific_precision_applying(self):
         eq_md_precission_indexes = {'single': self.eq_precision_comboBox.findText('single'),
@@ -392,6 +463,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def stop_button_clicked(self):
         self.__stop = True
+        self.run_active = False
+        self.current_run_stage = "Stopped"
+        self.run_status_timer.stop()
+        self.update_run_status_line()
 
         try:
             self.Real_Time_Graphs.stop_th()
@@ -602,8 +677,24 @@ class MainWindow(QtWidgets.QMainWindow):
         UIF.Functions.Stochastic_changed(self)
 
     def finish_message(self, alert_message):
+        if alert_message != "Progress Finished Succesfully :)":
+            self.run_active = False
+            self.current_run_stage = "Error"
+            self.run_status_timer.stop()
+            self.inform_about_progress(alert_message)
+            UIF.Message_Boxes.Critical_message(self, "Run Error", alert_message, Style.MessageBox_stylesheet)
+            self.Run.setEnabled(True)
+            worker = getattr(self, 'elapsed_time_worker', None)
+            if worker is not None:
+                worker.stop()
+            self.update_run_status_line()
+            return
+
         self.r_factor_count += 1
         if self.r_factor_count == len(str(self.R_factor_ComboBox.currentText())):
+            self.run_active = False
+            self.current_run_stage = "Completed"
+            self.run_status_timer.stop()
             UIF.Message_Boxes.Succesfully_message(self, "Thumbs Up :)", alert_message, Style.MessageBox_stylesheet)
             self.Run.setEnabled(True)
 
@@ -621,11 +712,32 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.show_analysis_window()
 
-            self.elapsed_time_worker.stop()
+            worker = getattr(self, 'elapsed_time_worker', None)
+            if worker is not None:
+                worker.stop()
+            self.update_run_status_line()
 
     def inform_about_progress(self, message):
-        message_regular = '<font color="yellow">%s</font>' % message
+        lower_message = str(message).lower()
+        if 'error' in lower_message or 'traceback' in lower_message or 'exception' in lower_message:
+            message_regular = '<font color="red">%s</font>' % message
+        elif 'warning' in lower_message:
+            message_regular = '<font color="orange">%s</font>' % message
+        else:
+            message_regular = '<font color="yellow">%s</font>' % message
+
+        self.log_holder.append(str(message))
+        if len(self.log_holder) > 200:
+            self.log_holder = self.log_holder[-200:]
+
+        self.last_log_update_at = datetime.now()
+        self.current_run_stage = self.infer_run_stage_from_message(message)
+        if self.current_run_stage in ["Error", "Completed"]:
+            self.run_active = False
+            self.run_status_timer.stop()
+
         self.label_top_info_1.setText(message_regular)
+        self.update_run_status_line()
 
     def update_classic_md_remaining_time(self, time):
         font = QFont("Segoe UI", 10, QFont.Bold)  # Segoe UI, 10 boyut, bold font
