@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+conda-dist/
 
 # Local editor settings
 .idea/

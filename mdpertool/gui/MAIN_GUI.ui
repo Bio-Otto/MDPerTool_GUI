@@ -14312,7 +14312,7 @@ QCommandLinkButton:pressed {
                       <string notr="true">color: rgb(98, 103, 111);</string>
                      </property>
                      <property name="text">
-                      <string>Version 0.0.1</string>
+                      <string>Version 0.0.2.dev1</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
