@@ -4,14 +4,18 @@ import queue
 import threading
 import time
 import tokenize
+import traceback
+import logging
+import sys
 from io import StringIO
 import numpy as np
 import pyqtgraph as pg
 from PySide2 import QtCore
-from PySide2.QtWidgets import *
+from PySide2.QtWidgets import QMessageBox, QWidget
 from openmm.app import StateDataReporter
 import subprocess
 import tempfile
+from datetime import datetime
 from .message import Message_Boxes
 from gui.ui_styles import Style
 
@@ -54,21 +58,77 @@ class OpenMMScriptRunner(QtCore.QObject):
         super(OpenMMScriptRunner, self).__init__()
         self.plots_created = False
         self.process = None
+        self.stop_requested = False
+        self.shutdown_requested = threading.Event()
 
         self.openmm_script_code = script
-        q = queue.Queue()
+        self._queue = queue.Queue()
 
-        self.t1 = threading.Thread(target=self.run_openmm_script, args=(self.openmm_script_code, q), daemon=True)
-        self.t2 = threading.Thread(target=self.queue_consumer, args=(q,), daemon=True)
+        self.t1 = threading.Thread(target=self.run_openmm_script, args=(self.openmm_script_code, self._queue),
+                                   daemon=True)
+        self.t2 = threading.Thread(target=self.queue_consumer, args=(self._queue,), daemon=True)
 
         self.t1.start()
         self.t2.start()
 
+    def _safe_emit(self, signal_obj, payload):
+        if self.shutdown_requested.is_set():
+            return False
+        try:
+            signal_obj.emit(payload)
+            return True
+        except RuntimeError:
+            self.shutdown_requested.set()
+            return False
+
     def stop_threads(self):
-        self.stop_process()
-        self.plots_created = False
+        self.shutdown_requested.set()
+        was_stopped = self.stop_process()
+        if hasattr(self, '_queue'):
+            try:
+                self._queue.put(None)
+            except Exception:
+                pass
+        if hasattr(self, 't2') and self.t2.is_alive():
+            self.t2.join(timeout=2)
+        if was_stopped:
+            self.plots_created = False
+        return was_stopped
+
+    def shutdown(self):
+        self.shutdown_requested.set()
+        try:
+            if self.process is not None and self.process.poll() is None:
+                self.stop_requested = True
+                self.process.terminate()
+                self.process.wait(timeout=3)
+        except Exception:
+            try:
+                if self.process is not None and self.process.poll() is None:
+                    self.process.kill()
+            except Exception:
+                pass
+
+        if hasattr(self, '_queue'):
+            try:
+                self._queue.put(None)
+            except Exception:
+                pass
+
+        if hasattr(self, 't2') and self.t2.is_alive():
+            self.t2.join(timeout=2)
 
     def run_openmm_script(self, code, queue):
+        def _safe_decode(raw_line):
+            if isinstance(raw_line, str):
+                return raw_line
+            for encoding in ('utf-8', 'cp1254', 'latin-1'):
+                try:
+                    return raw_line.decode(encoding)
+                except UnicodeDecodeError:
+                    continue
+            return raw_line.decode('utf-8', errors='replace')
+
         def fix_code():
             itoks = tokenize.generate_tokens(StringIO(code).readline)
 
@@ -87,41 +147,62 @@ class OpenMMScriptRunner(QtCore.QObject):
             temp_script.write(code)
             temp_script_path = temp_script.name
 
+        debug_script_path = None
         try:
-            self.process = subprocess.Popen(['python', temp_script_path], stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE)
+            debug_dir = os.path.join(os.getcwd(), 'output', 'debug_scripts')
+            os.makedirs(debug_dir, exist_ok=True)
+            stamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            debug_script_path = os.path.join(debug_dir, f'generated_openmm_script_{stamp}.py')
+            with open(debug_script_path, 'w', encoding='utf-8') as debug_script_file:
+                debug_script_file.write(code)
+            queue.put(f"INFO | Debug script saved: {debug_script_path}")
+        except Exception as debug_file_error:
+            queue.put(f"WARNING | Unable to save debug script file: {debug_file_error}")
 
-            while True:
-                output = self.process.stdout.readline()
-                if output == b'' and self.process.poll() is not None:
-                    break
+        try:
+            child_env = os.environ.copy()
+            child_env['PYTHONIOENCODING'] = 'utf-8'
+            child_env['PYTHONUTF8'] = '1'
+
+            self.process = subprocess.Popen(
+                [sys.executable, '-u', temp_script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=0,
+                env=child_env
+            )
+
+            for output in iter(self.process.stdout.readline, b''):
                 if output:
-                    queue.put(output.decode().strip())
-
-            while True:
-                error_output = self.process.stderr.readline()
-                if error_output == b'' and self.process.poll() is not None:
-                    break
-                if error_output:
-                    queue.put(error_output.decode().strip())
+                    queue.put(_safe_decode(output).rstrip('\r\n'))
 
             self.process.wait()
 
             if self.process.returncode != 0:
-                queue.put(str(self.process.returncode) + '\nScript execution has been stoped by the User!')
+                if self.stop_requested:
+                    queue.put("INFO | Run stopped by user.")
+                else:
+                    queue.put(f"ERROR | Script process exited with code {self.process.returncode}.")
+                    queue.put("Script execution failed. Please review the traceback/messages above.")
+                    if debug_script_path:
+                        queue.put(f"ERROR | Re-run this file directly for debugging: {debug_script_path}")
                 # raise subprocess.CalledProcessError(self.process.returncode, 'Script execution has been stoped by the '
                 #                                                             'User!')
 
-        except (subprocess.CalledProcessError, OSError) as e:
-            print("Exception:", str(e))
-            raise
+        except (subprocess.CalledProcessError, OSError, Exception) as e:
+            logging.exception("Exception while running generated OpenMM script")
+            queue.put(f"CRITICAL | Runner exception: {e}")
+            queue.put(traceback.format_exc())
 
         finally:
-            os.remove(temp_script_path)
+            self.stop_requested = False
+            if os.path.exists(temp_script_path):
+                os.remove(temp_script_path)
+            queue.put(None)
 
     def stop_process(self):
 
-        if self.process.poll() is None:
+        if self.process is not None and self.process.poll() is None:
             try:
                 """Close Application Question Message Box."""
                 close_answer = Message_Boxes.Question_message(self, "Are you sure!", "Do you really want to stop the "
@@ -130,72 +211,71 @@ class OpenMMScriptRunner(QtCore.QObject):
 
                 if close_answer == QMessageBox.Yes:
                     try:
+                        self.stop_requested = True
                         self.process.terminate()
                         self.process.wait()
+                        return True
                     except (subprocess.CalledProcessError, OSError) as err:
                         print("ERROR IN STOP PROCESS: %s" % err)
+                        return False
 
                 if close_answer == QMessageBox.No:
-                    pass
+                    return False
 
             except Exception as inst:
                 Message_Boxes.Critical_message(self, 'An unexpected error has occurred!', str(inst),
                                                Style.MessageBox_stylesheet)
+                return False
         else:
             Message_Boxes.Information_message(self, "Info", "There is no an active run", Style.MessageBox_stylesheet)
+            return False
 
     def queue_consumer(self, q):
         self.status = 'Running...'
         _headers = []
         decompose_started = None
 
-        while True:
+        while not self.shutdown_requested.is_set():
             try:
 
                 msg = q.get_nowait()
                 if msg is None:
                     break
 
-                else:
-                    pass
+                msg_handled = False
 
-                if 'INFO |' in msg:
-                    info_log = re.search(r'INFO \| (.+)', msg)
-                    self.update_plot(info_log.group(1))
+                if type(msg) == str and 'INFO |' in msg:
+                    info_log = re.search(r'INFO \|\s*(.*)', msg)
+                    parsed_info = info_log.group(1) if info_log else msg
+                    self.update_plot(parsed_info)
+                    msg_handled = True
 
-                elif 'CRITICAL |' in msg:
-                    critic_log = re.search(r'CRITICAL \| (.+)', msg)
-                    self.update_plot(critic_log.group(1))
+                elif type(msg) == str and 'CRITICAL |' in msg:
+                    critic_log = re.search(r'CRITICAL \|\s*(.*)', msg)
+                    parsed_critical = critic_log.group(1) if critic_log else msg
+                    self.update_plot(parsed_critical)
+                    msg_handled = True
 
-                elif 'WARNING |' in msg:
-                    warning_log = re.search(r'WARNING \| (.+)', msg)
-                    self.update_plot(warning_log.group(1))
+                elif type(msg) == str and 'WARNING |' in msg:
+                    warning_log = re.search(r'WARNING \|\s*(.*)', msg)
+                    parsed_warning = warning_log.group(1) if warning_log else msg
+                    self.update_plot(parsed_warning)
+                    msg_handled = True
 
-                elif 'ERROR |' in msg:
-                    error_log = re.search(r'ERROR \| (.+)', msg)
-                    print(error_log.group(1))
-                    self.update_plot(error_log.group(1))
+                elif type(msg) == str and 'ERROR |' in msg:
+                    error_log = re.search(r'ERROR \|\s*(.*)', msg)
+                    parsed_error = error_log.group(1) if error_log else msg
+                    print(parsed_error)
+                    self.update_plot(parsed_error)
+                    msg_handled = True
 
-                elif '#"Progress (%)"' in msg:
-                    # the first report has two lines on it -- we want to look at the first, as it contains the headers
-                    # print(self._out.getvalue())
+                elif type(msg) == str and 'Progress (%)' in msg and '|' not in msg:
                     headers = msg.strip().split(',')
-                    # filter out some extra quotation marks and comment characters
                     _headers = [e.strip('#"\'') for e in headers]
-
-                elif '#"Reference MD Progress (%)"' in msg:
-                    # the first report has two lines on it -- we want to look at the first, as it contains the headers
-                    # print(self._out.getvalue())
-                    headers = msg.strip().split(',')
-                    # filter out some extra quotation marks and comment characters
-                    _headers = [e.strip('#"\'') for e in headers]
-
-                elif '#"Dissipation MD Progress (%)"' in msg:
-                    # the first report has two lines on it -- we want to look at the first, as it contains the headers
-                    headers = msg.strip().split(',')
-                    # filter out some extra quotation marks and comment characters
-                    _headers = [e.strip('#"\'') for e in headers]
-                    self.pymol_statu = "Started on PyMOL"
+                    if 'Dissipation MD Progress (%)' in msg:
+                        self.pymol_statu = "Started on PyMOL"
+                        self._safe_emit(self.Signals.real_time_pertub_info, self.pymol_statu)
+                    msg_handled = True
 
                 elif type(msg) is not dict:
                     t = [e.strip('%"\'') for e in msg.strip().split(',')]
@@ -204,8 +284,9 @@ class OpenMMScriptRunner(QtCore.QObject):
                         msg = dict(zip(_headers, t))
                         q.put(msg)
                         self.update_plot(msg)
+                        msg_handled = True
 
-                if 'DECOMPOSE |' in msg:
+                if type(msg) == str and 'DECOMPOSE |' in msg:
                     decomp_info_log = re.search(r"Decomposition Progress: ([\d.]+)", msg)
 
                     if decomp_info_log:
@@ -216,13 +297,27 @@ class OpenMMScriptRunner(QtCore.QObject):
                         self.update_plot(self.decomp_data)
 
                     self.pymol_statu = "Finished on PyMOL"
-                    self.Signals.real_time_pertub_info.emit(self.pymol_statu)
+                    self._safe_emit(self.Signals.real_time_pertub_info, self.pymol_statu)
+                    msg_handled = True
 
-                if 'AUTO_EXTEND |' in msg:
+                if type(msg) == str and 'AUTO_EXTEND |' in msg:
                     self.pymol_statu = "Auto-Extending"
-                    self.Signals.real_time_pertub_info.emit(self.pymol_statu)
+                    self._safe_emit(self.Signals.real_time_pertub_info, self.pymol_statu)
+                    msg_handled = True
+
+                if type(msg) == str and not msg_handled:
+                    stripped_msg = msg.strip()
+                    if stripped_msg:
+                        self.update_plot(stripped_msg)
 
             except queue.Empty:
+                time.sleep(0.1)
+            except RuntimeError:
+                self.shutdown_requested.set()
+                break
+            except Exception as queue_consumer_error:
+                if self.shutdown_requested.is_set():
+                    break
                 time.sleep(0.1)
 
         self.status = 'Done'
@@ -264,24 +359,27 @@ class OpenMMScriptRunner(QtCore.QObject):
                 current = self.plotdata.get(k)
                 self.plotdata.update({k: np.concatenate((current, v), axis=None)})
 
-            self.Signals.dataSignal.emit(self.plotdata)
-            self.Signals.real_time_pertub_info.emit(self.pymol_statu)
+            self._safe_emit(self.Signals.dataSignal, self.plotdata)
+            self._safe_emit(self.Signals.real_time_pertub_info, self.pymol_statu)
 
         if not self.plots_created and type(msg) == dict:
             self.create_plots(msg.keys())
             self.plots_created = True
 
         if type(msg) == list:
-            self.Signals.decomp_process.emit(msg)
+            self._safe_emit(self.Signals.decomp_process, msg)
 
         if type(msg) == str:
             if msg != "Progress Finished Succesfully :)":
-                self.Signals.inform_about_situation.emit(msg)
+                if not self._safe_emit(self.Signals.inform_about_situation, msg):
+                    return
+                if "error" in msg.lower() or "traceback" in msg.lower() or "exception" in msg.lower():
+                    self._safe_emit(self.Signals.finish_alert, msg)
             else:
                 self.decomp_data.append(int(100))
                 # self.Signals.decomp_process.emit(self.decomp_data)
                 self.update_plot(self.decomp_data)
-                self.Signals.finish_alert.emit(msg)
+                self._safe_emit(self.Signals.finish_alert, msg)
                 self.plots_created = False
 
 
@@ -505,19 +603,22 @@ class Graphs(QWidget):
 
     def stop_th(self):
         try:
-            self.runner.stop_threads()
+            was_stopped = self.runner.stop_threads()
+            if not was_stopped:
+                return False
+
             self.runner.plotdata.clear()
 
             self.real_time_as_minute = []
             self.real_speed = []
             self.current_step_keeper = None
             self.elapsed_time = 0.0
+            return True
 
         except Exception as Run_Stop_Error:
             Message_Boxes.Information_message(self, "There is no an active run!", str(Run_Stop_Error),
                                               Style.MessageBox_stylesheet)
-
-            pass
+            return False
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication(sys.argv)
 #     main = Graphs(contents)

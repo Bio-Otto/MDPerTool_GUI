@@ -7,6 +7,7 @@ import platform
 import glob
 import time
 import traceback
+from pathlib import Path
 this_directory = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(this_directory)
 
@@ -23,7 +24,7 @@ from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTi
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence,
                            QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient, QIntValidator,
                            QRegExpValidator)
-from PySide2 import QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets, QtGui
 
 # =================== > IMPORTS < =================== #
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
@@ -117,6 +118,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.current_run_stage = "Idle"
         self.last_log_update_at = None
         self.elapsed_time_text = "Elapsed Time: 0d 0h 0m 0s"
+        self.log_holder = []
+        self.network_holder = []
+        self.active_workers = 0
+        self.node_threshold = None
         self.run_status_timer = QtCore.QTimer(self)
         self.run_status_timer.setInterval(1000)
         self.run_status_timer.timeout.connect(self.update_run_status_line)
@@ -316,7 +321,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # ################################################# TRAIL #################################################### #
         # self.add_tabb.clicked.connect(self.add_tab)
-        self.analysis_TabWidget.tabBar().setTabButton(0, QTabBar.RightSide, None)
+        self.analysis_TabWidget.tabBar().setTabButton(0, QtWidgets.QTabBar.RightSide, None)
         self.analysis_TabWidget.tabBarClicked.connect(self.handle_tabbar_clicked)
         self.tab_count_on_analysis = str(self.analysis_TabWidget.count())
 
@@ -441,6 +446,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 worker.stop()
             except RuntimeError:
                 print("ERROR DURING STOP THE THREAD")
+
+        runner = getattr(self.Real_Time_Graphs, 'runner', None)
+        if runner is not None:
+            try:
+                runner.shutdown()
+            except Exception:
+                pass
+
+        thread_main = getattr(self, 'thread_main', None)
+        if thread_main is not None and thread_main.isRunning():
+            thread_main.quit()
+            thread_main.wait()
         event.accept()
 
     def platform_specific_precision_applying(self):
@@ -463,13 +480,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def stop_button_clicked(self):
         self.__stop = True
-        self.run_active = False
-        self.current_run_stage = "Stopped"
-        self.run_status_timer.stop()
-        self.update_run_status_line()
+        was_stopped = False
 
         try:
-            self.Real_Time_Graphs.stop_th()
+            was_stopped = self.Real_Time_Graphs.stop_th()
+            if not was_stopped:
+                return
+
+            self.run_active = False
+            self.current_run_stage = "Stopped"
+            self.run_status_timer.stop()
+            self.update_run_status_line()
             self.Run.setEnabled(True)
 
             self.Real_Time_Graphs.temperature_graph_plot.clear()
@@ -481,7 +502,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Real_Time_Graphs.total_energy_graph.clear()
             self.Real_Time_Graphs.energy_graph.clear()
             self.Real_Time_Graphs.setup_energy_graph(reset=True)
-            self.elapsed_time_worker.stop()
+            worker = getattr(self, 'elapsed_time_worker', None)
+            if worker is not None:
+                worker.stop()
 
             # self.Real_Time_Graphs.simulation_speed_graph_plot.clear()
         except Exception as ins:
@@ -493,7 +516,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.Simulation_Graphs)
         UIF.UIFunctions.resetStyle(self, "btn_monitoring")
         UIF.UIFunctions.labelPage(self, "MONITORING THE PROCESS")
-        widget = self.findChild(QPushButton, "btn_monitoring")
+        widget = self.findChild(QtWidgets.QPushButton, "btn_monitoring")
         widget.setStyleSheet(UIF.UIFunctions.selectMenu(widget.styleSheet()))
 
         self.Real_Time_Graphs.run_script(self.created_script)
@@ -502,7 +525,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.Analysis)
         UIF.UIFunctions.resetStyle(self, "btn_analysis")
         UIF.UIFunctions.labelPage(self, "ENERGY DISSIPATION ANALYSIS")
-        widget = self.findChild(QPushButton, "btn_analysis")
+        widget = self.findChild(QtWidgets.QPushButton, "btn_analysis")
         widget.setStyleSheet(UIF.UIFunctions.selectMenu(widget.styleSheet()))
 
     def fetch_and_load_pdbfile(self):
@@ -533,7 +556,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 fixer.removeHeterogens(keepWater=False)
 
                 modeller = Modeller(fixer.topology, fixer.positions)
-                chains = [r.id for r in modeller.topology.chains()]
+                chain_ids = [str(chain.id).strip() for chain in modeller.topology.chains()]
+                chains = [chain_id for chain_id in dict.fromkeys(chain_ids) if chain_id]
 
                 checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
                                                    checked=True)
@@ -591,7 +615,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 fixer.removeHeterogens(keepWater=False)
 
                 modeller = Modeller(fixer.topology, fixer.positions)
-                chains = [r.id for r in modeller.topology.chains()]
+                chain_ids = [str(chain.id).strip() for chain in modeller.topology.chains()]
+                chains = [chain_id for chain_id in dict.fromkeys(chain_ids) if chain_id]
 
                 if manuel:
                     checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
@@ -718,6 +743,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.update_run_status_line()
 
     def inform_about_progress(self, message):
+        if not hasattr(self, 'log_holder') or self.log_holder is None:
+            self.log_holder = []
+
         lower_message = str(message).lower()
         if 'error' in lower_message or 'traceback' in lower_message or 'exception' in lower_message:
             message_regular = '<font color="red">%s</font>' % message
@@ -1138,10 +1166,10 @@ class MainWindow(QtWidgets.QMainWindow):
     ####################################################################################################################
 
 
-class SplashScreen(QMainWindow):
+class SplashScreen(QtWidgets.QMainWindow):
 
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
 
         # Current directory
         current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1159,7 +1187,7 @@ class SplashScreen(QMainWindow):
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
         # ----- > Drop Shadow Effect
-        self.shadow = QGraphicsDropShadowEffect(self)
+        self.shadow = QtWidgets.QGraphicsDropShadowEffect(self)
         self.shadow.setBlurRadius(20)
         self.shadow.setXOffset(0)
         self.shadow.setYOffset(0)

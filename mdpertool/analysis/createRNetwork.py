@@ -24,7 +24,7 @@ from analysis.multiproc_net_calc import CalcNetWorker
 
 try:
     from .pdbsum_conservation_puller import *
-except:
+except ImportError:
     from analysis.pdbsum_conservation_puller import *
 
 import networkx as nx
@@ -236,6 +236,13 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_t
     try:
         structure_res_list, res_list = get_residues(pdb)
         reTimeList = load_response_times(reTimeFile)
+
+        if len(structure_res_list) != len(reTimeList):
+            raise ValueError(
+                f"Residue count and response-time count mismatch: residues={len(structure_res_list)}, "
+                f"response_times={len(reTimeList)}"
+            )
+
         distance_cutoff = float(cutoff)
         network = nx.Graph()
 
@@ -297,6 +304,9 @@ def filter_pair_network(network, source, target, node_threshold=None):
     Returns:
         networkx.DiGraph: The filtered pair network.
     """
+    if network is None or source not in network.nodes or target not in network.nodes:
+        return None
+
     # Filter out residues with a residue response time greater than the target residue response time
     target_retime = network.nodes[target]['retime']
     clean_network = nx.DiGraph()
@@ -363,7 +373,7 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
         if write_out:
             nx.write_gml(clean_network, os.path.join(out_directory, pairNetworkName))
     else:
-        log = f'Source: {source}  Target: {target}\nPair network not created due to node threshold.'
+        log = f'Source: {source}  Target: {target}\nPair network not created (missing node(s) or node threshold condition).'
 
     progress_callback.emit([clean_network, log])
     return clean_network, log

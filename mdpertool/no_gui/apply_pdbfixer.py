@@ -1,13 +1,44 @@
 from pdbfixer import PDBFixer
 from openmm.app.pdbfile import PDBFile
 from openmm import app
-import openmm.app.data
-import openmm.app.data.charmm36
-from sys import stdout
-import parmed as pmd
-import numpy as np
-import time
 import os
+
+
+def _build_fixed_pdb_filename(source_path_or_id, pH):
+    source_name = os.path.basename(str(source_path_or_id))
+    stem, _ = os.path.splitext(source_name)
+    return f"{stem}_fixed_pH_{pH}.pdb"
+
+
+def _log(log_obj, message):
+    if log_obj is not None:
+        log_obj.info(message)
+
+
+def _prepare_fixed_structure(source_pdb, pH, log_obj=None):
+    _log(log_obj, "Creating PDBFixer...")
+    fixer = PDBFixer(source_pdb)
+    _log(log_obj, "Finding missing residues...")
+    fixer.findMissingResidues()
+    _log(log_obj, "Finding nonstandard residues...")
+    fixer.findNonstandardResidues()
+    _log(log_obj, "Replacing nonstandard residues...")
+    fixer.replaceNonstandardResidues()
+    _log(log_obj, "Removing heterogens...")
+    fixer.removeHeterogens(keepWater=False)
+    _log(log_obj, "Finding missing atoms...")
+    fixer.findMissingAtoms()
+    _log(log_obj, "Adding missing atoms...")
+    fixer.addMissingAtoms()
+    _log(log_obj, "Adding missing hydrogens...")
+    fixer.addMissingHydrogens(pH)
+    _log(log_obj, "Writing PDB file...")
+    return fixer
+
+
+def _write_fixed_structure(fixer, target_path):
+    with open(target_path, "w") as output_handle:
+        PDBFile.writeFile(fixer.topology, fixer.positions, output_handle, keepIds=True)
 
 
 def apply_mutation(pdb_path, output=None, mut_region=None, chain_id=None):
@@ -36,9 +67,10 @@ def apply_mutation(pdb_path, output=None, mut_region=None, chain_id=None):
 
     try:
         pdb_name = os.path.basename(pdb_path).split('.')[0]
+        output_directory = output or os.path.dirname(pdb_path) or os.getcwd()
 
         mut_file_name = pdb_name + '_chain' + chain_id + '_' + str(mut_region[0]) + '.pdb'
-        mut_file_path = os.path.join(output, mut_file_name)
+        mut_file_path = os.path.join(output_directory, mut_file_name)
 
         fixer = PDBFixer(pdb_path)
         fixer.applyMutations(mut_region, chain_id)
@@ -63,114 +95,21 @@ def fix_pdb(pdb_id, pH=7.4, output=None, log_obj=None, mutate=None, mut_region=N
     else:
         path = os.getcwd()
 
-    if len(pdb_id) != 4 and log_obj is not None:
+    if len(pdb_id) == 4:
+        return None
 
-        if mutate:
-            log_obj.info("Mutating {} in Chain {} ...".format(mut_region, chain_id))
-            mut_file_path = apply_mutation(pdb_path=pdb_id, output=output, mut_region=mut_region, chain_id=chain_id)
-            log_obj.info("Creating PDBFixer...".format())
-            fixer = PDBFixer(mut_file_path)
-            log_obj.info("Finding missing residues...".format())
-            fixer.findMissingResidues()
-            log_obj.info("Finding nonstandard residues...".format())
-            fixer.findNonstandardResidues()
-            log_obj.info("Replacing nonstandard residues...".format())
-            fixer.replaceNonstandardResidues()
-            log_obj.info("Removing heterogens...".format())
-            fixer.removeHeterogens(keepWater=False)
-            log_obj.info("Finding missing atoms...".format())
-            fixer.findMissingAtoms()
-            log_obj.info("Adding missing atoms...".format())
-            fixer.addMissingAtoms()
-            log_obj.info("Adding missing hydrogens...".format())
-            fixer.addMissingHydrogens(pH)
-            log_obj.info("Writing PDB file...".format())
+    source_pdb = pdb_id
+    if mutate:
+        _log(log_obj, "Mutating {} in Chain {} ...".format(mut_region, chain_id))
+        source_pdb = apply_mutation(
+            pdb_path=pdb_id,
+            output=output,
+            mut_region=mut_region,
+            chain_id=chain_id,
+        )
 
-            PDBFile.writeFile(
-                fixer.topology,
-                fixer.positions,
-                open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (mut_file_path.split('.')[0], pH)), "w"), keepIds=True)
-
-            return "%s_fixed_pH_%s.pdb" % (mut_file_path.split('.')[0], pH)
-
-        if not mutate:
-            log_obj.info("Creating PDBFixer...".format())
-            fixer = PDBFixer(pdb_id)
-            log_obj.info("Finding missing residues...".format())
-            fixer.findMissingResidues()
-            log_obj.info("Finding nonstandard residues...".format())
-            fixer.findNonstandardResidues()
-            log_obj.info("Replacing nonstandard residues...".format())
-            fixer.replaceNonstandardResidues()
-            log_obj.info("Removing heterogens...".format())
-            fixer.removeHeterogens(keepWater=False)
-            log_obj.info("Finding missing atoms...".format())
-            fixer.findMissingAtoms()
-            log_obj.info("Adding missing atoms...".format())
-            fixer.addMissingAtoms()
-            log_obj.info("Adding missing hydrogens...".format())
-            fixer.addMissingHydrogens(pH)
-            log_obj.info("Writing PDB file...".format())
-
-            PDBFile.writeFile(
-                fixer.topology,
-                fixer.positions,
-                open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)), "w"), keepIds=True)
-
-            return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)
-
-    if len(pdb_id) != 4 and log_obj is None:
-
-        if mutate:
-            log_obj.info("Mutating {} in Chain {} ...".format(mut_region, chain_id))
-            mut_file_path = apply_mutation(pdb_path=pdb_id, mut_region=mut_region, chain_id=chain_id)
-            log_obj.info("Creating PDBFixer...".format())
-            fixer = PDBFixer(mut_file_path)
-            log_obj.info("Finding missing residues...".format())
-            fixer.findMissingResidues()
-            log_obj.info("Finding nonstandard residues...".format())
-            fixer.findNonstandardResidues()
-            log_obj.info("Replacing nonstandard residues...".format())
-            fixer.replaceNonstandardResidues()
-            log_obj.info("Removing heterogens...".format())
-            fixer.removeHeterogens(keepWater=False)
-            log_obj.info("Finding missing atoms...".format())
-            fixer.findMissingAtoms()
-            log_obj.info("Adding missing atoms...".format())
-            fixer.addMissingAtoms()
-            log_obj.info("Adding missing hydrogens...".format())
-            fixer.addMissingHydrogens(pH)
-            log_obj.info("Writing PDB file...".format())
-
-            PDBFile.writeFile(
-                fixer.topology,
-                fixer.positions,
-                open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (mut_file_path.split('.')[0], pH)), "w"), keepIds=True)
-
-            return "%s_fixed_pH_%s.pdb" % (mut_file_path.split('.')[0], pH)
-
-        if not mutate:
-            log_obj.info("Creating PDBFixer...".format())
-            fixer = PDBFixer(pdb_id)
-            log_obj.info("Finding missing residues...".format())
-            fixer.findMissingResidues()
-            log_obj.info("Finding nonstandard residues...".format())
-            fixer.findNonstandardResidues()
-            log_obj.info("Replacing nonstandard residues...".format())
-            fixer.replaceNonstandardResidues()
-            log_obj.info("Removing heterogens...".format())
-            fixer.removeHeterogens(keepWater=False)
-            log_obj.info("Finding missing atoms...".format())
-            fixer.findMissingAtoms()
-            log_obj.info("Adding missing atoms...".format())
-            fixer.addMissingAtoms()
-            log_obj.info("Adding missing hydrogens...".format())
-            fixer.addMissingHydrogens(pH)
-            log_obj.info("Writing PDB file...".format())
-
-            PDBFile.writeFile(
-                fixer.topology,
-                fixer.positions,
-                open(os.path.join(path, "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)), "w"), keepIds=True)
-
-            return "%s_fixed_pH_%s.pdb" % (pdb_id.split('.')[0], pH)
+    fixer = _prepare_fixed_structure(source_pdb=source_pdb, pH=pH, log_obj=log_obj)
+    fixed_pdb_filename = _build_fixed_pdb_filename(source_pdb, pH)
+    fixed_pdb_path = os.path.join(path, fixed_pdb_filename)
+    _write_fixed_structure(fixer=fixer, target_path=fixed_pdb_path)
+    return fixed_pdb_path

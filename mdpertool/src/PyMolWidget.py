@@ -5,6 +5,7 @@ import time
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt, QThread, Signal, QTimer, QCoreApplication
 from OpenGL.GL import *
+import OpenGL.GL as gl
 import pymol2
 from PySide2.QtOpenGL import QGLFormat, QGLWidget
 from pymol.cgo import *
@@ -36,20 +37,27 @@ class MonitorWorker(QThread):
                     self.last_mod_time = mod_time
                     self.file_updated.emit(self.pert_file_path)
                 time.sleep(2)
+            except FileNotFoundError:
+                time.sleep(1)
+                continue
+            except PermissionError:
+                time.sleep(0.5)
+                continue
             except Exception as e:
                 print(f"[ERROR] Exception in MonitorWorker: {e}")
-                break
+                time.sleep(1)
+                continue
 
     def stop(self):
         """Stops the thread and waits for it to finish."""
         self._stop_thread_flag = True
-        self.wait()  # Wait for the thread to finish
+        self.wait(250)
 
 
     def stop(self):
         """Stops the thread and waits for it to finish."""
         self._stop_thread_flag = True
-        self.wait()  # Wait for the thread to finish
+        self.wait(250)
 
 
 class FileProcessorWorker(QThread):
@@ -127,6 +135,8 @@ class PymolQtWidget(QGLWidget):
         self.monitor_thread = None
         self.processor_thread = None
         self.effected_atom_count = None
+        self._velocity_to_pymol_index_cache = {}
+        self._velocity_atom_index_map = []
 
     def initializeGL(self):
         """Initialize OpenGL context and PyMOL settings."""
@@ -151,7 +161,7 @@ class PymolQtWidget(QGLWidget):
 
     def _update_viewport(self):
         """Update the OpenGL viewport."""
-        glViewport(0, 0, self.width(), self.height())
+        gl.glViewport(0, 0, self.width(), self.height())
 
     def resizeGL(self, w, h):
         """Handle widget resizing."""
@@ -230,15 +240,15 @@ class PymolQtWidget(QGLWidget):
             print("An error occurred while loading the structure file :(\n", loadingError)
 
     def initial_pymol_visual(self):
-        cgo = []
+        cgo_data = []
         axes = [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
         pos = [1.0, 1.0, -10.0]
-        cyl_text(cgo, plain, pos, 'MDPerTool', 0.20, [1.0, 0.1, 0.1], axes=axes)
+        cgo.cyl_text(cgo_data, plain, pos, 'MDPerTool', 0.20, [1.0, 0.1, 0.1], axes=axes)
         pos = [0.0, -2.0, -15.0]
-        wire_text(cgo, plain, pos, 'Version v0.1', axes)
+        cgo.wire_text(cgo_data, plain, pos, 'Version v0.1', axes)
         self._pymol.cmd.bg_color('0x2C313C')
         self._pymol.cmd.set("cgo_line_radius", 0.05)
-        self._pymol.cmd.load_cgo(cgo, 'txt')
+        self._pymol.cmd.load_cgo(cgo_data, 'txt')
         self._pymol.cmd.zoom()
 
         try:
@@ -622,6 +632,10 @@ class PymolQtWidget(QGLWidget):
 
             # Filter atoms based on threshold
             affected_indices = np.where(magnitudes > threshold)[0].tolist()
+            if not affected_indices and len(magnitudes) > 0:
+                max_magnitude_index = int(np.argmax(magnitudes))
+                if magnitudes[max_magnitude_index] > 0:
+                    affected_indices = [max_magnitude_index]
             affected_atoms[step] = [diffs[i][0] for i in affected_indices]
 
         return affected_atoms
@@ -639,6 +653,36 @@ class PymolQtWidget(QGLWidget):
             residue_atoms[residue_name].append(atom.index)
 
         return residue_atoms
+
+    def _build_velocity_atom_index_map(self):
+        try:
+            model = self._pymol.cmd.get_model("all")
+            self._velocity_atom_index_map = [
+                atom.index for atom in model.atom
+                if str(atom.resn).upper() not in ('HOH', 'NA', 'CL')
+            ]
+        except Exception:
+            self._velocity_atom_index_map = []
+
+    def _map_velocity_atom_index_to_pymol(self, velocity_atom_index):
+        if velocity_atom_index in self._velocity_to_pymol_index_cache:
+            return self._velocity_to_pymol_index_cache[velocity_atom_index]
+
+        mapped_index = None
+        if self._velocity_atom_index_map and 0 <= velocity_atom_index < len(self._velocity_atom_index_map):
+            mapped_index = self._velocity_atom_index_map[velocity_atom_index]
+
+        if mapped_index is None:
+            candidates = [velocity_atom_index, velocity_atom_index + 1]
+            for candidate in candidates:
+                if candidate <= 0:
+                    continue
+                if self._pymol.cmd.count_atoms(f"index {candidate}") > 0:
+                    mapped_index = candidate
+                    break
+
+        self._velocity_to_pymol_index_cache[velocity_atom_index] = mapped_index
+        return mapped_index
 
     def update_atom_colors(self, affected_atoms):
 
@@ -676,6 +720,11 @@ class PymolQtWidget(QGLWidget):
         return len(unique_steps)
 
     def monitor_live_file(self, pert_file_path, response_threshold=0.05):
+        if self.monitor_thread is not None and self.monitor_thread.isRunning():
+            self.monitor_thread.stop()
+
+        self._build_velocity_atom_index_map()
+        self.last_mod_time = 0
         self.monitor_thread = MonitorWorker(pert_file_path, response_threshold, self.last_mod_time)
         self.monitor_thread.file_updated.connect(self.on_file_updated)
         self.show_protein_in_cartoon_and_atoms()
@@ -701,6 +750,8 @@ class PymolQtWidget(QGLWidget):
             self.colors_set.clear()
             self.total_atom_count = None
             self.effected_atom_count =None
+            self._velocity_to_pymol_index_cache.clear()
+            self._velocity_atom_index_map = []
 
     def process_file(self, pert_file_path, threshold=0.05):
         """
@@ -727,6 +778,7 @@ class PymolQtWidget(QGLWidget):
         """
 
         velocities = {}
+        parsed_atom_count = None
 
         try:
             # Iterate through the XML file and parse 'Velocity' elements
@@ -739,6 +791,9 @@ class PymolQtWidget(QGLWidget):
                     (float(atom.get('x')), float(atom.get('y')), float(atom.get('z')))
                     for atom in element.findall('Atom')
                 ]
+
+                if parsed_atom_count is None:
+                    parsed_atom_count = len(atoms)
 
                 # Store the velocities in the dictionary with step as the key
                 velocities[step] = atoms
@@ -755,9 +810,8 @@ class PymolQtWidget(QGLWidget):
             print(f"Unexpected Error: {e}")
 
         # Initialize the total_atom_count if it is not already set
-        if self.total_atom_count is None:
-            # Use the number of atoms from the first step
-            self.total_atom_count = len(atoms)
+        if self.total_atom_count is None and parsed_atom_count is not None:
+            self.total_atom_count = parsed_atom_count
 
         return velocities
 
@@ -854,19 +908,20 @@ class PymolQtWidget(QGLWidget):
 
                     # Apply the color to each affected atom
                     for i in atom_indices:
-                        if i not in self.colored_atoms:  # Avoid re-coloring the same atom
-                            selection = f"index {i}"  # Select the atom by its index
+                        mapped_index = self._map_velocity_atom_index_to_pymol(i)
+                        if mapped_index is None:
+                            continue
+
+                        if mapped_index not in self.colored_atoms:  # Avoid re-coloring the same atom
+                            selection = f"index {mapped_index}"  # Select the atom by its index
                             self._pymol.cmd.color(color_name, selection)  # Apply the color in PyMOL
-                            self.colored_atoms[i] = step  # Track which step colored this atom
-
-                            # Update the PyMOL visualization
-                            self._pymolProcess()
-
-                            # Pause briefly to ensure smooth rendering in PyMOL
-                            time.sleep(0.01)
+                            self.colored_atoms[mapped_index] = step  # Track which step colored this atom
 
             # Calculate and save the percentage of affected atoms
-            self.effected_atom_count = round(len(set(self.colored_atoms.keys())) / self.total_atom_count * 100, 1)
+            if self.total_atom_count:
+                self.effected_atom_count = round(len(set(self.colored_atoms.keys())) / self.total_atom_count * 100, 1)
+            else:
+                self.effected_atom_count = 0.0
 
             # Save the affected atom percentage to the keeper file
             with open(self.effected_atom_keeper, 'w') as file:
@@ -906,6 +961,8 @@ class PymolQtWidget(QGLWidget):
         self.colored_atoms.clear()  # Clear previously assigned colors
         self.colors_set.clear()  # Clear defined colors in PyMOL
         self.total_steps = 0  # Reset the step counter
+        self._velocity_to_pymol_index_cache.clear()
+        self._build_velocity_atom_index_map()
 
         # Re-assign the reference file and process new velocities
         self.ref_file_path = ref_file_path

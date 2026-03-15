@@ -1,5 +1,9 @@
 ## ==> GUI FILE
 from gui.ui_styles import Style
+from PySide2 import QtCore, QtGui
+from PySide2.QtCore import QSize, Qt, QPropertyAnimation
+from PySide2.QtGui import QFont
+from PySide2.QtWidgets import QFileDialog, QMessageBox, QPushButton, QSizeGrip, QVBoxLayout
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0
@@ -9,7 +13,10 @@ GLOBAL_TITLE_BAR = True
 count = 1
 from .app_functions import *
 from .PyMolWidget import PymolQtWidget
-#from analysis import VisJS_Widget
+try:
+    from analysis import VisJS_Widget
+except Exception:
+    VisJS_Widget = None
 from .message import Message_Boxes
 
 
@@ -328,6 +335,15 @@ class UIFunctions(MainWindow):
         self.Protein3DNetworkView.show()
 
     def start_VisJS_2D_Network(self):
+        if VisJS_Widget is None:
+            Message_Boxes.Information_message(
+                self,
+                "2D Network Viewer Unavailable",
+                "VisJS widget could not be imported. Please check analysis dependencies.",
+                Style.MessageBox_stylesheet,
+            )
+            return
+
         self.VisJSEngineView = VisJS_Widget.VisJS_QtWidget()
         self.Network_2D_verticalLayout.addWidget(self.VisJSEngineView.m_output)
 

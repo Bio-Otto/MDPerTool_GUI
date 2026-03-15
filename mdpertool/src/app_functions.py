@@ -1,7 +1,15 @@
 import os.path
 from functools import partial
 import networkx as nx
-from PySide2.QtWidgets import QFileDialog, QDialog, QTableWidgetItem
+from PySide2.QtWidgets import (
+    QFileDialog,
+    QDialog,
+    QProgressDialog,
+    QTableWidgetItem,
+    QTabBar,
+    QVBoxLayout,
+    QListWidgetItem,
+)
 from PySide2.QtCore import Qt, Slot, QMutexLocker, QMutex
 import csv
 from pathlib import Path
@@ -9,6 +17,7 @@ from pdbfixer import PDBFixer
 from os import path
 from urllib.request import urlretrieve
 from openmm.app import *
+from openmm.app import PDBFile
 from .checkBox_menu import *
 from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
@@ -341,7 +350,44 @@ class Functions(MainWindow):
 
             self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
 
+            if self.initial_network is None or resId_List is None:
+                Message_Boxes.Warning_message(
+                    self,
+                    "Network Preparation Failed",
+                    "General network could not be created. Please verify that the topology and response-time files belong to the same system.",
+                    Style.MessageBox_stylesheet,
+                )
+                return
+
             if len(resId_List) == len_of_reTimes:
+                available_residues = set(resId_List)
+
+                if self.source not in available_residues:
+                    Message_Boxes.Warning_message(
+                        self,
+                        "Source Residue Not Found",
+                        f"Selected source residue '{self.source}' is not present in the loaded topology/response-time dataset.",
+                        Style.MessageBox_stylesheet,
+                    )
+                    return
+
+                valid_targets = [target for target in target_residues if target in available_residues and target != self.source]
+                skipped_targets = [target for target in target_residues if target not in available_residues]
+
+                if not valid_targets:
+                    Message_Boxes.Warning_message(
+                        self,
+                        "No Valid Target Residues",
+                        "None of the selected target residues were found in the loaded topology/response-time dataset.",
+                        Style.MessageBox_stylesheet,
+                    )
+                    return
+
+                if skipped_targets:
+                    self.inform_about_progress(
+                        f"Warning: {len(skipped_targets)} target residue(s) were skipped because they are not in the current network."
+                    )
+
                 if conservation_settings['use_conservation']:
                     res_IDs, con_scores = get_conservation_scores(
                         pdb_id=conservation_settings['pdb_id'],
@@ -353,10 +399,10 @@ class Functions(MainWindow):
                         Helper_Functions._save_conservation_scores(self, res_IDs, con_scores,
                                                                    conservation_settings['pdb_id'])
 
-                    intersection_resIDs = set(res_IDs).intersection(target_residues)
+                    intersection_resIDs = set(res_IDs).intersection(valid_targets)
                     Helper_Functions._run_network_calculation(self, engine, intersection_resIDs)
                 else:
-                    Helper_Functions._run_network_calculation(self, engine, target_residues)
+                    Helper_Functions._run_network_calculation(self, engine, valid_targets)
             else:
                 Helper_Functions._handle_mismatch_error(self)
 
@@ -1678,7 +1724,14 @@ class Functions(MainWindow):
         try:
             from pathlib import Path
             current_path = os.path.dirname(os.path.realpath(__file__))
-            path = os.path.join(Path(current_path).parent, 'Download', '2j0w_example.pdb')
+            example_sim_path = os.path.join(
+                Path(current_path).parent,
+                'example',
+                'simulation_demo',
+                '2j0w_example.pdb',
+            )
+            download_sim_path = os.path.join(Path(current_path).parent, 'Download', '2j0w_example.pdb')
+            path = example_sim_path if os.path.exists(example_sim_path) else download_sim_path
             output_directory = os.path.join(Path(current_path).parent, 'output')
 
             if os.path.exists(path):
@@ -1739,8 +1792,57 @@ class Functions(MainWindow):
     def load_sample_for_analysis(self):
         from pathlib import Path
         current_path = os.path.dirname(os.path.realpath(__file__))
-        topology_path = os.path.join(Path(current_path).parent, 'Download', '2j0x_example.pdb')
-        reTime_File = os.path.join(Path(current_path).parent, 'Download', 'example_responseTimes_file.csv')
+        project_root = Path(current_path).parent.parent
+        example_analysis_dir = os.path.join(Path(current_path).parent, 'example', 'analysis_demo')
+        preferred_output_dir = os.path.join(
+            Path(current_path).parent,
+            'output',
+            '2j0w_example_fixed_ph7.4_2026-03-15_00-08-18',
+        )
+        sample_pairs = [
+            (
+                os.path.join(example_analysis_dir, 'last.pdb'),
+                os.path.join(example_analysis_dir, 'responseTimes_4.csv'),
+            ),
+            (
+                os.path.join(example_analysis_dir, 'minimized.pdb'),
+                os.path.join(example_analysis_dir, 'responseTimes_4.csv'),
+            ),
+            (
+                os.path.join(preferred_output_dir, 'last.pdb'),
+                os.path.join(preferred_output_dir, 'responseTimes_4.csv'),
+            ),
+            (
+                os.path.join(preferred_output_dir, 'minimized.pdb'),
+                os.path.join(preferred_output_dir, 'responseTimes_4.csv'),
+            ),
+            (
+                os.path.join(Path(current_path).parent, 'Download', '2j0w_example_fixed_ph7.4.pdb'),
+                os.path.join(preferred_output_dir, 'responseTimes_4.csv'),
+            ),
+            (
+                os.path.join(project_root, 'tests', '2DH3', '2DH3.pdb'),
+                os.path.join(project_root, 'tests', '2DH3', 'responseTimes_4.csv'),
+            ),
+        ]
+
+        topology_path = None
+        reTime_File = None
+        for candidate_topology, candidate_response in sample_pairs:
+            if os.path.exists(candidate_topology) and os.path.exists(candidate_response):
+                topology_path = candidate_topology
+                reTime_File = candidate_response
+                break
+
+        if topology_path is None or reTime_File is None:
+            Message_Boxes.Warning_message(
+                self,
+                "Analysis sample files are missing",
+                "No valid analysis sample topology/response-time files were found in example, output, Download or tests folders.",
+                Style.MessageBox_stylesheet,
+            )
+            return
+
         output_directory = os.path.join(Path(current_path).parent, 'output')
 
         if os.path.exists(topology_path):
@@ -1762,12 +1864,12 @@ class Functions(MainWindow):
 
             if self.selected_target_residues_listWidget.count() == 0:
                 self.selected_target_residues_listWidget.addItems(
-                    ['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
+                    ['THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
                 self.target_res_comboBox.setCurrentIndex(255)
             else:
                 self.selected_target_residues_listWidget.clear()
                 self.selected_target_residues_listWidget.addItems(
-                    ['THR221A', 'THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
+                    ['THR221A', 'PRO231A', 'LYS257A', 'VAL258A'])
                 self.target_res_comboBox.setCurrentIndex(255)
 
             self.source_res_comboBox.setCurrentIndex(342)
@@ -1777,6 +1879,7 @@ class Functions(MainWindow):
             self.conservation_PDB_ID_lineEdit.setText("")
             self.conservation_pdb_chain_id_lineedit.setText("")
             self.conserv_score_doubleSpinBox.setValue(float(1.0))
+            self.show_analysis_window()
 
             # self.run_duration_spinBox.blockSignals(True)
             # self.run_duration_doubleSpinBox.blockSignals(True)
