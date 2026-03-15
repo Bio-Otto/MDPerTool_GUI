@@ -1,0 +1,23 @@
+# Python cache artifacts
+__pycache__/
+*.py[cod]
+
+# Build and packaging artifacts
+*.egg-info/
+build/
+dist/
+
+# Local editor settings
+.idea/
+.vscode/
+
+# Runtime outputs and debug logs
+*.out
+last_quickcheck_out.txt
+mdpertool/output/
+
+# Downloaded/generated PDB files produced during runs
+mdpertool/Download/*.pdb
+!mdpertool/Download/1aki.pdb
+!mdpertool/Download/2j0w_example.pdb
+*_fixed_ph7.4.pdb
