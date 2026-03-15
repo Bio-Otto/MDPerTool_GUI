@@ -1,38 +1,12 @@
-from setuptools import setup
-import os
-from os import path
-import sys
+from pathlib import Path
+
+from setuptools import find_namespace_packages, setup
 
 
-this_directory = path.abspath(path.dirname(__file__))
-sys.path.append(this_directory)
-
-import mdpertool
-
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
-
-with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mdpertool', '_version.py')) as version_file:
-    exec(version_file.read())
-
-
-install_requires = [
-
-    'python>=3.11,<3.12',  # Update Python requirement
-    'numpy',
-    'pyvis',
-    'matplotlib',
-    'pandas',
-    'networkx',
-    'pyopengl',
-    'biopython',
-    'prody',
-    'pyqtwebengine',
-    'pyyaml',
-    'pystache', 
-    'lxml', 
-
-]
+this_directory = Path(__file__).resolve().parent
+version_ns = {}
+exec((this_directory / 'mdpertool' / '_version.py').read_text(encoding='utf-8'), version_ns)
+long_description = (this_directory / 'README.md').read_text(encoding='utf-8')
 
 
 # Conda-forge ile yüklenen paketler
@@ -52,13 +26,15 @@ conda_packages = [
 setup(
 
     name='mdpertool',
-    version=__version__,
-    description=__description__,
-    long_description=__long_description__,
-    url=__url__,
-    author=__author__,
-    author_email=__author_email__,
+    version=version_ns['__version__'],
+    description=version_ns['__description__'],
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url=version_ns['__url__'],
+    author=version_ns['__author__'],
+    author_email=version_ns['__author_email__'],
     license='MIT',
+    python_requires='>=3.11,<3.12',
     classifiers=[
 
         "License :: OSI Approved :: MIT License",
@@ -73,11 +49,11 @@ setup(
         "Topic :: Scientific/Engineering :: Chemistry",
     ],
 
-    packages=['mdpertool'],
+    packages=find_namespace_packages(include=['mdpertool', 'mdpertool.*']),
 
 
     install_requires=[
-        'prody',  # This will ensure pip installs prody when your package is installed via pip
+        'prody',
     ],
 
 

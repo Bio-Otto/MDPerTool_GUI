@@ -1,4 +1,6 @@
 import os
+import shutil
+import tempfile
 import openmm.unit as unit
 from openmm.app import CutoffNonPeriodic, Simulation, Modeller, ForceField
 from openmm import NonbondedForce, LangevinMiddleIntegrator, Platform
@@ -9,6 +11,22 @@ import parmed as pmd
 from pdbfixer import PDBFixer
 import csv
 import pandas as pd
+
+
+def _is_ascii_path(path):
+    if path is None:
+        return True
+    try:
+        str(path).encode('ascii')
+        return True
+    except UnicodeEncodeError:
+        return False
+
+
+def _copy_to_ascii_temp_path(source_path, temp_dir, target_name):
+    target_path = os.path.join(temp_dir, target_name)
+    shutil.copy2(source_path, target_path)
+    return target_path
 
 
 def fix_pdb_file(pdb_id):
@@ -197,14 +215,29 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
 
     ###########################################################################
 
+    temp_ascii_dir = None
+    topology_path = topology_file
+    ref_trajectory_path = ref_trajectory
+    modif_trajectory_path = modif_trajectory
+
+    if not (_is_ascii_path(topology_file) and _is_ascii_path(ref_trajectory) and _is_ascii_path(modif_trajectory)):
+        temp_ascii_dir = tempfile.mkdtemp(prefix='mdpertool_ascii_')
+        topology_path = _copy_to_ascii_temp_path(topology_file, temp_ascii_dir, 'topology.pdb')
+        if ref_trajectory is not None:
+            ref_trajectory_path = _copy_to_ascii_temp_path(ref_trajectory, temp_ascii_dir, 'reference.dcd')
+        modif_trajectory_path = _copy_to_ascii_temp_path(modif_trajectory, temp_ascii_dir, 'modified.dcd')
+
+        if logger_object is not None:
+            logger_object.info("Using temporary ASCII-safe file paths for decomposition.")
+
     # Fix PDB file
-    pdb_top = fix_pdb_file(topology_file)
+    pdb_top = fix_pdb_file(topology_path)
 
     # Create a Modeller
     modeller = Modeller(pdb_top.topology, pdb_top.positions)
 
     # Load structure and force field
-    structure = pmd.load_file(topology_file)
+    structure = pmd.load_file(topology_path)
     forcefield = ForceField(protein_ff, water_ff)
 
     # Set periodic box vectors
@@ -221,8 +254,8 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
 
 
     # Get positions from trajectory using custom function (get_openmm_pos_from_traj_with_mdtraj)
-    positions, _, len_of_traj = get_residue_pos_from_traj_with_mdtraj(top=topology_file, ref_traj=ref_trajectory,
-                                                                     modif_traj=modif_trajectory,
+    positions, _, len_of_traj = get_residue_pos_from_traj_with_mdtraj(top=topology_path, ref_traj=ref_trajectory_path,
+                                                                     modif_traj=modif_trajectory_path,
                                                                      selected_atoms=modeller.topology.getNumResidues(),
                                                                      write_pdb_for_selection=True,
                                                                      start=None,
@@ -244,13 +277,41 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
     ########################
 
 
+    current_platform = platform
+    current_properties = properties
+    current_platform_type = platform_type
+
     # Calculate energy decomposition for each residue
     for j in range(modeller.topology.getNumResidues()):
         res_name = res_name_list[j]
         print("Name of Residue: ", res_name)
-        enesel = EnergyDecomposition(modeller.topology, system, platform=platform, properties=properties,
-                                     selection_md="resid %s" % j, swithing_distance=1.0 * unit.nanometers,
-                                     use_switchin_dist=True)
+        try:
+            enesel = EnergyDecomposition(modeller.topology, system, platform=current_platform, properties=current_properties,
+                                         selection_md="resid %s" % j, swithing_distance=1.0 * unit.nanometers,
+                                         use_switchin_dist=True)
+        except Exception as decomposition_platform_error:
+            fallback_needed = current_platform_type in ('OpenCL', 'CUDA') and (
+                    'No compatible OpenCL platform is available' in str(decomposition_platform_error)
+                    or 'No compatible CUDA platform is available' in str(decomposition_platform_error)
+            )
+
+            if not fallback_needed:
+                raise
+
+            if logger_object is not None:
+                logger_object.warning("Decomposition platform '%s' is unavailable (%s). Falling back to CPU.",
+                                      current_platform_type, decomposition_platform_error)
+
+            current_platform = Platform.getPlatformByName('CPU')
+            current_properties = {'CpuThreads': '%s' % num_of_threads}
+            current_platform_type = 'CPU'
+
+            if logger_object is not None:
+                logger_object.info("Decomposition fallback platform: CPU with %s thread(s).", num_of_threads)
+
+            enesel = EnergyDecomposition(modeller.topology, system, platform=current_platform, properties=current_properties,
+                                         selection_md="resid %s" % j, swithing_distance=1.0 * unit.nanometers,
+                                         use_switchin_dist=True)
         res_data = enesel.calc_energy(positions[j], len_of_traj)
 
 
@@ -314,6 +375,9 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
 
     if logger_object is not None:
         logger_object.info("Progress Finished Succesfully :)")
+
+    if temp_ascii_dir is not None:
+        shutil.rmtree(temp_ascii_dir, ignore_errors=True)
 #
 # process_energy_data(topology_file="last.pdb", protein_ff='amber03.xml', water_ff='tip3p.xml',
 #                     modif_trajectory='without_energy_perturbation_trajectory.dcd', device_id_active={{Device_ID_active}},

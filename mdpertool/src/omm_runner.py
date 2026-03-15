@@ -63,6 +63,9 @@ class OpenMMScriptRunner(QtCore.QObject):
 
         self.openmm_script_code = script
         self._queue = queue.Queue()
+        self.max_plot_points = 3000
+        self.last_plot_emit_time = 0.0
+        self.plot_emit_interval_sec = 0.15
 
         self.t1 = threading.Thread(target=self.run_openmm_script, args=(self.openmm_script_code, self._queue),
                                    daemon=True)
@@ -323,7 +326,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.status = 'Done'
 
     def create_plots(self, keys):
-        self.plotdata = dict(zip(keys, [[]] * len(keys)))
+        self.plotdata = {key: np.array([], dtype=object) for key in keys}
         # figure out which key will be the x-axis
         if 'Step' not in keys:
             raise ValueError('The reporter has not step information, so there is no x-axis to plot graphs!')
@@ -335,31 +338,37 @@ class OpenMMScriptRunner(QtCore.QObject):
 
         if self.plots_created and type(msg) == dict:
             for k, v in msg.items():
+                current = self.plotdata.get(k)
+                if current is None:
+                    current = np.array([], dtype=object)
+
+                updated = np.concatenate((current, np.array([v], dtype=object)), axis=None)
+                if len(updated) > self.max_plot_points:
+                    updated = updated[-self.max_plot_points:]
 
                 if k == 'Progress (%)':
-                    current = self.plotdata.get(k)
-                    self.plotdata.update({k: np.concatenate((current, v), axis=None)})
+                    self.plotdata.update({k: updated})
 
                 elif k == 'Reference MD Progress (%)':
                     try:
                         self.plotdata.pop('Progress (%)')
                     except:
                         pass
-                    current = self.plotdata.get(k)
-                    self.plotdata = {**{k: np.concatenate((current, v), axis=None)}, **self.plotdata}
+                    self.plotdata = {**{k: updated}, **self.plotdata}
 
                 elif k == 'Dissipation MD Progress (%)':
                     try:
                         self.plotdata.pop('Reference MD Progress (%)')
                     except:
                         pass
-                    current = self.plotdata.get(k)
-                    self.plotdata = {**{k: np.concatenate((current, v), axis=None)}, **self.plotdata}
+                    self.plotdata = {**{k: updated}, **self.plotdata}
+                else:
+                    self.plotdata.update({k: updated})
 
-                current = self.plotdata.get(k)
-                self.plotdata.update({k: np.concatenate((current, v), axis=None)})
-
-            self._safe_emit(self.Signals.dataSignal, self.plotdata)
+            current_time = time.time()
+            if current_time - self.last_plot_emit_time >= self.plot_emit_interval_sec:
+                self._safe_emit(self.Signals.dataSignal, self.plotdata)
+                self.last_plot_emit_time = current_time
             self._safe_emit(self.Signals.real_time_pertub_info, self.pymol_statu)
 
         if not self.plots_created and type(msg) == dict:

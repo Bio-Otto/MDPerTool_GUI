@@ -316,7 +316,11 @@ class UIFunctions(MainWindow):
             self.live_PyMol_already_started = False
 
         if statu == "Auto-Extending":
-            self.ProteinView.reset_and_update_colors(ref_file_path=ref_velocity_file, pert_file_path=pert_velocity_file)
+            monitor_thread = getattr(self.ProteinView, 'monitor_thread', None)
+            if monitor_thread is None or not monitor_thread.isRunning():
+                self.ProteinView.set_reference_file(ref_file_path=ref_velocity_file, effected_atom_keeper=perc_keper)
+                self.ProteinView.monitor_live_file(pert_velocity_file, response_threshold=response_threshold)
+                self.live_PyMol_already_started = True
 
     def realtime_monitoring_toggle(self):
         if self.realTime_active_checkBox.isChecked():

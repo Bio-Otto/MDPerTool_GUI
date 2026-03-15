@@ -6,6 +6,12 @@ import sys
 import os
 sys.path.append(r"{{parent_dir}}")
 
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
 from no_gui.get_positions_from_trajectory_file import *
 from no_gui.energy_decomposition_from_trajectory import *
 from no_gui.response_time_creator import *
@@ -308,20 +314,20 @@ for i in range(len({{speed_factor}})):
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
         if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-            properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+            properties = {'OpenCLPrecision': '{{precision}}', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-            properties = {'OpenCLPrecision': 'double'}
-            precision = 'double'
+            properties = {'OpenCLPrecision': '{{precision}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-            properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-            precision = 'double'
+            properties = {'CudaPrecision': '{{precision}}', 'CudaDeviceIndex': '{{Device_Number}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-            properties = {'CudaPrecision': 'double'}
-            precision = 'double'
+            properties = {'CudaPrecision': '{{precision}}'}
+            precision = '{{precision}}'
 
         if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
             log_obj.info("The CPU platform always uses 'mixed' precision.".format())
@@ -413,7 +419,12 @@ for i in range(len({{speed_factor}})):
         # ref_simulation_forces = os.path.join(OUTPUT_DIRECTORY, 'ref_protein_forces.xml')
         ref_simulation_velocities = os.path.join(OUTPUT_DIRECTORY, 'ref_protein_velocities.xml')
         # ref_simulation.reporters.append(ForceReporter(ref_simulation_forces, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
-        ref_simulation.reporters.append(VelocityReporter(ref_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+        try:
+            ref_simulation.reporters.append(VelocityReporter(ref_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+        except Exception as velocity_reporter_error:
+            log_obj.warning("Reference velocity reporter is unavailable: %s", velocity_reporter_error)
+            with open(ref_simulation_velocities, 'w') as _velocity_placeholder:
+                _velocity_placeholder.write("<Velocities>\n</Velocities>\n")
 
 
         ref_simulation.step({{perturb_simulation_time}})
@@ -432,20 +443,20 @@ for i in range(len({{speed_factor}})):
     ################################################################################################################
 
     if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-        precision = 'double'
+        properties = {'OpenCLPrecision': '{{precision}}', 'OpenCLDeviceIndex': '{{Device_Number}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-        properties = {'OpenCLPrecision': 'double'}
-        precision = 'double'
+        properties = {'OpenCLPrecision': '{{precision}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '{{Device_Number}}'}
-        precision = 'double'
+        properties = {'CudaPrecision': '{{precision}}', 'CudaDeviceIndex': '{{Device_Number}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-        properties = {'CudaPrecision': 'double'}
-        precision = 'double'
+        properties = {'CudaPrecision': '{{precision}}'}
+        precision = '{{precision}}'
 
     if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
         log_obj.info("The CPU platform always uses 'mixed' precision.".format())
@@ -541,7 +552,12 @@ for i in range(len({{speed_factor}})):
     # dis_simulation_forces = os.path.join(OUTPUT_DIRECTORY, 'dis_protein_forces.xml')
     dis_simulation_velocities = os.path.join(OUTPUT_DIRECTORY, 'dis_protein_velocities.xml')
     # dis_simulation.reporters.append(ForceReporter(dis_simulation_forces, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
-    dis_simulation.reporters.append(VelocityReporter(dis_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+    try:
+        dis_simulation.reporters.append(VelocityReporter(dis_simulation_velocities, reportInterval=1, protein_selection=[atom.index for atom in topology.atoms() if atom.residue.name not in ['HOH', 'NA', 'CL']]))
+    except Exception as velocity_reporter_error:
+        log_obj.warning("Dissipation velocity reporter is unavailable: %s", velocity_reporter_error)
+        with open(dis_simulation_velocities, 'w') as _velocity_placeholder:
+            _velocity_placeholder.write("<Velocities>\n</Velocities>\n")
 
 
     dis_simulation.step({{perturb_simulation_time}})

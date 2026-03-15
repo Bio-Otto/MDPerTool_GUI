@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>0</number>
+                   <number>2</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -4774,6 +4774,55 @@ QCheckBox::indicator:checked {
                                  </property>
                                 </spacer>
                                </item>
+                               <item row="0" column="0">
+                                <widget class="QCheckBox" name="realTime_active_checkBox">
+                                 <property name="font">
+                                  <font>
+                                   <family>Segoe UI</family>
+                                   <pointsize>10</pointsize>
+                                  </font>
+                                 </property>
+                                 <property name="styleSheet">
+                                  <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+	border-radius: 5px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+
+QCheckBox:disabled {
+    color: #f5f5f5;
+	border: 2px solid rgb(27, 29, 35);
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+	margin-left: 0px;
+	padding-left: 13px;
+}
+
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+</string>
+                                 </property>
+                                 <property name="text">
+                                  <string>Real Time Monitoring</string>
+                                 </property>
+                                 <property name="checked">
+                                  <bool>true</bool>
+                                 </property>
+                                </widget>
+                               </item>
                               </layout>
                              </widget>
                             </item>
@@ -5195,7 +5244,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                              <enum>QTabWidget::Rounded</enum>
                             </property>
                             <property name="currentIndex">
-                             <number>1</number>
+                             <number>0</number>
                             </property>
                             <property name="movable">
                              <bool>true</bool>
@@ -12405,7 +12454,11 @@ QPushButton:pressed
 </string>
                                      </property>
                                      <property name="text">
-                                      <string>Load Test</string>
+                                      <string>Load Test Case</string>
+                                     </property>
+                                     <property name="icon">
+                                      <iconset resource="icons_path.qrc">
+                                       <normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</iconset>
                                      </property>
                                     </widget>
                                    </item>
@@ -14192,7 +14245,7 @@ QCommandLinkButton:pressed {
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>400</width>
+                       <width>500</width>
                        <height>16777215</height>
                       </size>
                      </property>

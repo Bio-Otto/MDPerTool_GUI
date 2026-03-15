@@ -137,6 +137,8 @@ class PymolQtWidget(QGLWidget):
         self.effected_atom_count = None
         self._velocity_to_pymol_index_cache = {}
         self._velocity_atom_index_map = []
+        self.color_order_counter = 0
+        self.last_processed_step = None
 
     def initializeGL(self):
         """Initialize OpenGL context and PyMOL settings."""
@@ -752,19 +754,100 @@ class PymolQtWidget(QGLWidget):
             self.effected_atom_count =None
             self._velocity_to_pymol_index_cache.clear()
             self._velocity_atom_index_map = []
+            self.color_order_counter = 0
+            self.last_processed_step = None
+
+    def parse_velocity_frame_at_step(self, filename, target_step):
+        frame_atoms = None
+
+        try:
+            for event, element in etree.iterparse(filename, events=('end',), tag='Velocity'):
+                step = int(element.get('step'))
+                if step == target_step:
+                    frame_atoms = np.array([
+                        (float(atom.get('x')), float(atom.get('y')), float(atom.get('z')))
+                        for atom in element.findall('Atom')
+                    ], dtype=np.float64)
+
+                element.clear()
+
+        except etree.XMLSyntaxError:
+            return frame_atoms
+        except Exception as parse_error:
+            print(f"Unexpected Error while parsing step frame: {parse_error}")
+            return None
+
+        return frame_atoms
+
+    def parse_last_velocity_frame(self, filename):
+        last_step = None
+        last_atoms = None
+
+        try:
+            for event, element in etree.iterparse(filename, events=('end',), tag='Velocity'):
+                step = int(element.get('step'))
+                atoms = np.array([
+                    (float(atom.get('x')), float(atom.get('y')), float(atom.get('z')))
+                    for atom in element.findall('Atom')
+                ], dtype=np.float64)
+
+                last_step = step
+                last_atoms = atoms
+                element.clear()
+
+        except etree.XMLSyntaxError:
+            # File can be partially written while simulation is running.
+            # Return the last successfully parsed frame instead of failing hard.
+            return last_step, last_atoms
+        except Exception as parse_error:
+            print(f"Unexpected Error while parsing last frame: {parse_error}")
+            return None, None
+
+        return last_step, last_atoms
 
     def process_file(self, pert_file_path, threshold=0.05):
         """
         Process the perturbed XML file and update PyMOL.
         """
-        ref_velocities = self.parse_velocities(self.ref_file_path)
-        pert_velocities = self.parse_velocities(pert_file_path)
-        differences = self.compare_velocities(ref_velocities, pert_velocities)
-        affected_atoms = self.find_affected_atoms(differences, threshold=threshold)
-        self.update_colors(affected_atoms, max_step=len(ref_velocities))
+        if not self.ref_file_path:
+            return
+
+        ref_step, ref_atoms = self.parse_last_velocity_frame(self.ref_file_path)
+        pert_step, pert_atoms = self.parse_last_velocity_frame(pert_file_path)
+
+        if ref_step is None or pert_step is None:
+            return
+
+        target_step = min(ref_step, pert_step)
+        if self.last_processed_step is not None and target_step <= self.last_processed_step:
+            return
+
+        if ref_step != target_step:
+            ref_atoms = self.parse_velocity_frame_at_step(self.ref_file_path, target_step)
+        if pert_step != target_step:
+            pert_atoms = self.parse_velocity_frame_at_step(pert_file_path, target_step)
+
+        if ref_atoms is None or pert_atoms is None:
+            return
+
+        common_len = min(len(ref_atoms), len(pert_atoms))
+        if common_len == 0:
+            return
+
+        ref_atoms = ref_atoms[:common_len]
+        pert_atoms = pert_atoms[:common_len]
 
         if self.total_atom_count is None:
-            self.total_atom_count = len(ref_velocities)
+            self.total_atom_count = common_len
+
+        magnitudes = np.linalg.norm(pert_atoms - ref_atoms, axis=1)
+        affected_indices = np.where(magnitudes > threshold)[0].tolist()
+
+        if affected_indices:
+            affected_atoms = {target_step: affected_indices}
+            self.update_colors(affected_atoms, max_step=max(target_step, 1))
+
+        self.last_processed_step = target_step
 
     def parse_velocities(self, filename):
         """
@@ -894,28 +977,33 @@ class PymolQtWidget(QGLWidget):
         try:
             # Iterate over the affected atoms for each step
             for step, atom_indices in affected_atoms.items():
-                # Determine the color based on the step number and the maximum step
-                color = self.get_color_for_step(step, max_step)
+                # Track first affected time-step per atom
+                for i in atom_indices:
+                    mapped_index = self._map_velocity_atom_index_to_pymol(i)
+                    if mapped_index is None:
+                        continue
 
-                if color:
-                    # Create a unique color name for each step
-                    color_name = f"step_{step}_color"
+                    if mapped_index in self.colored_atoms:
+                        continue
 
-                    # If this color has not been defined in PyMOL yet, define it
-                    if color_name not in self.colors_set:
-                        self._pymol.cmd.set_color(color_name, color)  # Define color in PyMOL
-                        self.colors_set[color_name] = color  # Mark this color as defined
+                    self.colored_atoms[mapped_index] = step
 
-                    # Apply the color to each affected atom
-                    for i in atom_indices:
-                        mapped_index = self._map_velocity_atom_index_to_pymol(i)
-                        if mapped_index is None:
-                            continue
+            # Recompute gradient dynamically from observed affected time-step window.
+            if self.colored_atoms:
+                min_observed_step = min(self.colored_atoms.values())
+                max_observed_step = max(self.colored_atoms.values())
+                denom = max(max_observed_step - min_observed_step, 1)
 
-                        if mapped_index not in self.colored_atoms:  # Avoid re-coloring the same atom
-                            selection = f"index {mapped_index}"  # Select the atom by its index
-                            self._pymol.cmd.color(color_name, selection)  # Apply the color in PyMOL
-                            self.colored_atoms[mapped_index] = step  # Track which step colored this atom
+                for mapped_index, affected_step in self.colored_atoms.items():
+                    ratio = min((affected_step - min_observed_step) / denom, 1.0)
+
+                    # Red -> White
+                    color = [1.0, ratio, ratio]
+
+                    color_name = f"step_{affected_step}"
+                    self._pymol.cmd.set_color(color_name, color)
+                    self.colors_set[color_name] = color
+                    self._pymol.cmd.color(color_name, f"index {mapped_index}")
 
             # Calculate and save the percentage of affected atoms
             if self.total_atom_count:
@@ -961,6 +1049,8 @@ class PymolQtWidget(QGLWidget):
         self.colored_atoms.clear()  # Clear previously assigned colors
         self.colors_set.clear()  # Clear defined colors in PyMOL
         self.total_steps = 0  # Reset the step counter
+        self.color_order_counter = 0
+        self.last_processed_step = None
         self._velocity_to_pymol_index_cache.clear()
         self._build_velocity_atom_index_map()
 

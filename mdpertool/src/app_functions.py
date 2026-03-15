@@ -2425,7 +2425,7 @@ class pdb_Tools:
         fixer = PDBFixer(temp_file_path)
         print("Finding missing residues...")
 
-        if chains_to_remove is not None:
+        if chains_to_remove:
             print("toDelete: %s" % chains_to_remove)
             fixer.removeChains(chainIds=chains_to_remove)
 
@@ -2455,6 +2455,10 @@ class pdb_Tools:
 
         # Read the cleaned PDB content with HETATOM removed
         fixer = PDBFixer(cleaned_pdb_path)
+
+        if chains_to_remove:
+            print("toDelete (cleaned): %s" % chains_to_remove)
+            fixer.removeChains(chainIds=chains_to_remove)
 
         print("Adding missing atoms...")
         fixer.findMissingResidues()

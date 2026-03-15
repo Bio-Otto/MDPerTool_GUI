@@ -420,13 +420,14 @@ def calculate_extra_run_time_from_effected_percentage(effeted_atom_percentage, b
         return 0
 
     bounded_effected_percentage = max(0.0, min(100.0, float(effeted_atom_percentage)))
-    remaining_ratio = (100.0 - bounded_effected_percentage) / 100.0
+    if bounded_effected_percentage <= 0:
+        return base_perturb_steps
 
-    dynamic_multiplier = 0.5 + (remaining_ratio * 4.5)
-    extra_run_time = int(base_perturb_steps * remaining_ratio * dynamic_multiplier)
-
-    if remaining_ratio > 0 and extra_run_time == 0:
-        extra_run_time = max(1, int(base_perturb_steps * 0.1))
+    # extra = ((initial_steps * total_atoms) / first_affected_atoms) - initial_steps
+    # Since percentage = (first_affected_atoms / total_atoms) * 100,
+    # this becomes: extra = (initial_steps * 100 / percentage) - initial_steps
+    total_required_steps = int(math.ceil((base_perturb_steps * 100.0) / bounded_effected_percentage))
+    extra_run_time = max(0, total_required_steps - int(base_perturb_steps))
 
     return extra_run_time
 
@@ -703,7 +704,7 @@ for i in range(len({{speed_factor}})):
 
     log_obj.info("Effected atom percentage used for auto-extend: %s", effeted_atom_percentage)
     extra_run_time = 0
-    base_perturb_steps = int({{perturb_simulation_time}})
+    cumulative_perturb_steps = int({{perturb_simulation_time}})
 
     if effeted_atom_percentage is None:
         log_obj.info("Auto-extend runtime calculation is skipped because effected atom percentage is unavailable.")
@@ -712,7 +713,7 @@ for i in range(len({{speed_factor}})):
                      effeted_atom_percentage)
     else:
         extra_run_time = calculate_extra_run_time_from_effected_percentage(effeted_atom_percentage,
-                                                                            base_perturb_steps)
+                                                                            cumulative_perturb_steps)
 
         print(extra_run_time)
         log_obj.info("To ensure complete dissipation across all atoms, an additional %d time steps will be necessary.",
@@ -725,6 +726,7 @@ for i in range(len({{speed_factor}})):
 
         while extra_run_time > 0 and (effeted_atom_percentage is None or effeted_atom_percentage < 100) and auto_extend_iteration < max_auto_extend_iterations:
             auto_extend_iteration += 1
+            iteration_steps = int(extra_run_time)
             log_obj.log(39, "Auto-Extending iteration %d is started: %d time steps.", auto_extend_iteration, extra_run_time)
 
             for reporter in ref_simulation.reporters[:]:
@@ -738,10 +740,10 @@ for i in range(len({{speed_factor}})):
                                                                       kineticEnergy=True, totalEnergy=True, temperature=True,
                                                                       progress=True, volume=True,
                                                                       density=True, remainingTime=True, speed=True,
-                                                                      totalSteps=ref_simulation.currentStep+extra_run_time,
+                                                                      totalSteps=ref_simulation.currentStep+iteration_steps,
                                                                       report_type='Reference MD Progress (%)'))
 
-            ref_simulation.step(extra_run_time)
+            ref_simulation.step(iteration_steps)
             ref_simulation.saveCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'reference.chk'))
 
             for reporter in dis_simulation.reporters[:]:
@@ -753,11 +755,13 @@ for i in range(len({{speed_factor}})):
             dis_simulation.reporters.append(app.DCDReporter(os.path.join(OUTPUT_DIRECTORY, '%s.dcd' % new_dissipated_trajectory_name), 1, append=True))
             dis_simulation.reporters.append(Perturb_StateDataReporter(stdout, 1, step=True, time=True, potentialEnergy=True,
                                       kineticEnergy=True, totalEnergy=True, temperature=True, progress=True, volume=True,
-                                      density=True, remainingTime=True, speed=True, totalSteps=dis_simulation.currentStep+extra_run_time,
+                                      density=True, remainingTime=True, speed=True, totalSteps=dis_simulation.currentStep+iteration_steps,
                                       report_type='Dissipation MD Progress (%)'))
 
-            dis_simulation.step(extra_run_time)
+            dis_simulation.step(iteration_steps)
             dis_simulation.saveCheckpoint(os.path.join(OUTPUT_DIRECTORY, 'dissipation.chk'))
+
+            cumulative_perturb_steps += iteration_steps
 
             effeted_atom_percentage = calculate_effected_atom_percentage_from_contexts(
                 ref_simulation_obj=ref_simulation,
@@ -778,7 +782,7 @@ for i in range(len({{speed_factor}})):
                 break
 
             extra_run_time = calculate_extra_run_time_from_effected_percentage(effeted_atom_percentage,
-                                                                                base_perturb_steps)
+                                                                                cumulative_perturb_steps)
 
             if extra_run_time > 0:
                 log_obj.info("Auto-extend will continue with %d additional time steps.", extra_run_time)

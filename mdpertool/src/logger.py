@@ -3,6 +3,16 @@ import logging
 import logging.config
 
 
+def _make_stream_encoding_safe(stream):
+    if stream is None:
+        return stream
+    try:
+        stream.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+    return stream
+
+
 def Logger(file_name):
     """
     Creates and configures a logger with both file and console handlers.
@@ -19,11 +29,12 @@ def Logger(file_name):
     formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
 
     # Configure the file handler
-    file_handler = logging.FileHandler(filename=file_name, mode='a')
+    file_handler = logging.FileHandler(filename=file_name, mode='a', encoding='utf-8')
     file_handler.setFormatter(formatter)
 
     # Configure the console handler
-    console_handler = logging.StreamHandler(stream=sys.stdout)
+    safe_stdout = _make_stream_encoding_safe(sys.stdout)
+    console_handler = logging.StreamHandler(stream=safe_stdout)
     console_handler.setFormatter(formatter)
 
     # Create and configure the logger

@@ -1,15 +1,15 @@
-from distutils.util import strtobool
-from no_gui.MD_1 import *
-from no_gui.MD_2 import *
-from no_gui.Classic_MD import *
-from no_gui.Velocity_Changer import *
-from no_gui.get_positions_from_trajectory_file import *
-from no_gui.energy_decomposition_from_trajectory import *
-from no_gui.response_time_creator import *
+from mdpertool._compat import strtobool
+from .MD_1 import *
+from .MD_2 import *
+from .Classic_MD import *
+from .Velocity_Changer import *
+from .get_positions_from_trajectory_file import *
+from .energy_decomposition_from_trajectory import *
+from .response_time_creator import *
 from openmm import unit
 from openmm import *
 import time
-from no_gui.write_outputs import *
+from .write_outputs import *
 from logging.config import dictConfig
 
 if __name__ == '__main__':
