@@ -1,0 +1,8 @@
+name: mdpertool-gui
+channels:
+  - bio-otto
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - mdpertool=0.0.2.dev1=py_1

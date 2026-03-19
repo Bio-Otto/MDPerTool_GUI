@@ -34,7 +34,7 @@ setup(
     author=version_ns['__author__'],
     author_email=version_ns['__author_email__'],
     license='MIT',
-    python_requires='>=3.11,<3.12',
+    python_requires='>=3.9,<3.10',
     classifiers=[
 
         "License :: OSI Approved :: MIT License",
@@ -78,7 +78,7 @@ setup(
 
         'console_scripts': [
 
-            'mdpertool=mdpertool.ui_main:run_mdpertool',
+            'mdpertool=mdpertool.launcher:run_mdpertool',
 
         ],
 

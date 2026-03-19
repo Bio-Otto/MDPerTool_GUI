@@ -20,11 +20,11 @@ source:
 build:
   noarch: python
   #preserve_egg_dir: True
-  #number: 0 # Build number and string do not work together.
+  number: 4
   #skip: True  # [win or py2k]
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
-    - mdpertool = mdpertool.ui_main:run_mdpertool
+    - mdpertool = mdpertool.launcher:run_mdpertool
 
 
 requirements:
@@ -34,10 +34,9 @@ requirements:
     - setuptools
 
   run:
-    - python >=3.11,<3.12
+    - python >=3.9,<3.10
     - lxml
     - pyside2 >=5.15,<6
-    - qt-main =5.15
     - matplotlib
     - pandas
     - pyqtgraph
