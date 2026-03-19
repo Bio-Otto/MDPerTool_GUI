@@ -69,26 +69,6 @@ class Helper_Functions():
         self._residue_manager = ResidueManager()
         self._network_manager = NetworkParametersManager()
 
-    def _get_ui_manager(self):
-        """Get UI manager with fallback to class-level instance."""
-        return getattr(self, '_ui_manager', self.__class__._ui_manager_class)
-
-    def _get_pymol_viz(self, main_window=None):
-        """Get PyMOL visualizer with fallback to class-level instance."""
-        if hasattr(self, '_pymol_viz') and self._pymol_viz:
-            return self._pymol_viz
-        if not self.__class__._pymol_viz_class:
-            self.__class__._pymol_viz_class = PyMOLVisualizer(main_window)
-        return self.__class__._pymol_viz_class
-
-    def _get_residue_manager(self):
-        """Get residue manager with fallback to class-level instance."""
-        return getattr(self, '_residue_manager', self.__class__._residue_manager_class)
-
-    def _get_network_manager(self):
-        """Get network manager with fallback to class-level instance."""
-        return getattr(self, '_network_manager', self.__class__._network_manager_class)
-
     def fill_residue_combobox(self, pdb_path):
         from prody.proteins.pdbfile import parsePDB
         combobox = []
@@ -103,19 +83,19 @@ class Helper_Functions():
 
     def available_platforms(self):
         """Delegate to NetworkParametersManager for platform detection."""
-        return self._get_network_manager().available_platforms()
+        return self.__class__._network_manager_class.available_platforms()
 
     def show_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                 hide_navigation_button):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().show_visualization_settings_on_analysis(analysis_settings_groupBox, show_navigation_button,
-                                                                      hide_navigation_button)
+        self.__class__._ui_manager_class.show_visualization_settings_on_analysis(analysis_settings_groupBox, show_navigation_button,
+                                                                                 hide_navigation_button)
 
     def hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                 hide_navigation_button):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().hide_visualization_settings_on_analysis(analysis_settings_groupBox, show_navigation_button,
-                                                                      hide_navigation_button)
+        self.__class__._ui_manager_class.hide_visualization_settings_on_analysis(analysis_settings_groupBox, show_navigation_button,
+                                                                                 hide_navigation_button)
 
     def visualization_Handle_buttons_changing_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                           hide_navigation_button):
@@ -125,43 +105,52 @@ class Helper_Functions():
 
     def Handle_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button, hide_navigation_button):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().Handle_Buttons_on_analysis(analysis_settings_groupBox, show_navigation_button,
-                                                          hide_navigation_button)
+        self.__class__._ui_manager_class.Handle_Buttons_on_analysis(analysis_settings_groupBox, show_navigation_button,
+                                                                    hide_navigation_button)
 
     def activate_navigation_on_Pymol(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
-        self._get_pymol_viz().activate_navigation_on_Pymol(created_pymol_widget)
+        if not self.__class__._pymol_viz_class:
+            self.__class__._pymol_viz_class = PyMOLVisualizer(self)
+        self.__class__._pymol_viz_class.activate_navigation_on_Pymol(created_pymol_widget)
 
     def deactivate_navigation_on_Pymol(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
-        self._get_pymol_viz().deactivate_navigation_on_Pymol(created_pymol_widget)
+        if not self.__class__._pymol_viz_class:
+            self.__class__._pymol_viz_class = PyMOLVisualizer(self)
+        self.__class__._pymol_viz_class.deactivate_navigation_on_Pymol(created_pymol_widget)
 
     def clear_residue_labels(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
-        self._get_pymol_viz().clear_residue_labels(created_pymol_widget)
+        if not self.__class__._pymol_viz_class:
+            self.__class__._pymol_viz_class = PyMOLVisualizer(self)
+        self.__class__._pymol_viz_class.clear_residue_labels(created_pymol_widget)
 
     def show_beautiful_in_Pymol(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
-        self._get_pymol_viz().show_beautiful_in_Pymol(created_pymol_widget)
+        if not self.__class__._pymol_viz_class:
+            self.__class__._pymol_viz_class = PyMOLVisualizer(self)
+        self.__class__._pymol_viz_class.show_beautiful_in_Pymol(created_pymol_widget)
 
     def save_as_png_Pymol(self, created_pymol_widget, width_horizontalSlider, height_horizontalSlider,
                           dpi_horizontalSlider, ray_horizontalSlider):
         """Delegate to PyMOLVisualizer (with main_window context for dialogs)."""
-        main_window = getattr(self, '_main_window', self)
-        self._get_pymol_viz(main_window).save_as_png_Pymol(main_window, created_pymol_widget, width_horizontalSlider,
-                                                           height_horizontalSlider, dpi_horizontalSlider, ray_horizontalSlider)
+        if not self.__class__._pymol_viz_class:
+            self.__class__._pymol_viz_class = PyMOLVisualizer(self)
+        self.__class__._pymol_viz_class.save_as_png_Pymol(self, created_pymol_widget, width_horizontalSlider,
+                                                          height_horizontalSlider, dpi_horizontalSlider, ray_horizontalSlider)
 
     # ----------------------------------------- > FIGURE OPTIONS IN PYMOL < ------------------------------------------ #
     def Handle_Save_Figure_Options_on_analysis_Changed(self, figure_settings_groupBox_on_analysis):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().hide_figure_options_on_analysis(figure_settings_groupBox_on_analysis)
+        self.__class__._ui_manager_class.hide_figure_options_on_analysis(figure_settings_groupBox_on_analysis)
 
     def Handle_Save_Figure_Options_on_analysis(self, save_as_png_pushButton, hide_figure_settings_pushButton,
                                                width_horizontalSlider, height_horizontalSlider, dpi_horizontalSlider,
                                                ray_horizontalSlider, figure_settings_groupBox_on_analysis,
                                                pymol_width_label, pymol_height_label, pymol_dpi_label, pymol_ray_label):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().Handle_Save_Figure_Options_on_analysis(
+        self.__class__._ui_manager_class.Handle_Save_Figure_Options_on_analysis(
             save_as_png_pushButton, hide_figure_settings_pushButton,
             width_horizontalSlider, height_horizontalSlider, dpi_horizontalSlider,
             ray_horizontalSlider, figure_settings_groupBox_on_analysis,
@@ -169,27 +158,27 @@ class Helper_Functions():
 
     def show_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().show_figure_options_on_analysis(figure_settings_groupBox_on_analysis)
+        self.__class__._ui_manager_class.show_figure_options_on_analysis(figure_settings_groupBox_on_analysis)
 
     def hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().hide_figure_options_on_analysis(figure_settings_groupBox_on_analysis)
+        self.__class__._ui_manager_class.hide_figure_options_on_analysis(figure_settings_groupBox_on_analysis)
 
     def figure_width_label_on_analysis(self, width_horizontalSlider, with_label):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().figure_width_label_on_analysis(width_horizontalSlider, with_label)
+        self.__class__._ui_manager_class.figure_width_label_on_analysis(width_horizontalSlider, with_label)
 
     def figure_height_label_on_analysis(self, height_horizontalSlider, height_label):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().figure_height_label_on_analysis(height_horizontalSlider, height_label)
+        self.__class__._ui_manager_class.figure_height_label_on_analysis(height_horizontalSlider, height_label)
 
     def figure_dpi_label_on_analysis(self, dpi_horizontalSlider, dpi_label):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().figure_dpi_label_on_analysis(dpi_horizontalSlider, dpi_label)
+        self.__class__._ui_manager_class.figure_dpi_label_on_analysis(dpi_horizontalSlider, dpi_label)
 
     def figure_ray_label_on_analysis(self, ray_horizontalSlider, ray_label):
         """Delegate to UILayoutManager."""
-        self._get_ui_manager().figure_ray_label_on_analysis(ray_horizontalSlider, ray_label)
+        self.__class__._ui_manager_class.figure_ray_label_on_analysis(ray_horizontalSlider, ray_label)
 
     def _initialize_parameters(self):
         self.number_of_threads = self.Number_of_thread_for_network_spinBox.value()
