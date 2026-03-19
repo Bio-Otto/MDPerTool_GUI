@@ -29,6 +29,14 @@ from .config import write_output_configuration_file, read_output_configuration_f
 from ui_main import *
 from src.file_dialog import Dialog as file_dialog
 
+# Import modularized helpers
+from .helpers import (
+    UILayoutManager,
+    PyMOLVisualizer,
+    ResidueManager,
+    NetworkParametersManager,
+)
+
 # List of three-letter amino acid residue codes
 amino_acid_residues = [
     "ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE",
