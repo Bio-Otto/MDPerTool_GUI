@@ -1,16 +1,20 @@
 """Residue Manager - Handle residue selection and conservation data."""
 
+from __future__ import annotations
+
 import csv
 import os
+from typing import Any, Dict, List, Sequence
+
 from prody.proteins.pdbfile import parsePDB
 
 
 class ResidueManager:
     """Manage residue selection, conservation scores, and related operations."""
 
-    def fill_residue_combobox(self, pdb_path):
+    def fill_residue_combobox(self, pdb_path: str) -> List[str]:
         """Extract chain identifiers from PDB file and populate combobox."""
-        combobox = []
+        combobox: List[str] = []
         pdb = parsePDB(pdb_path)
         protein = pdb.select('protein')
         
@@ -20,7 +24,12 @@ class ResidueManager:
         
         return combobox
 
-    def _get_target_residues(self, all_residue_as_target, target_res_comboBox, selected_target_residues_listWidget):
+    def _get_target_residues(
+        self,
+        all_residue_as_target: bool,
+        target_res_comboBox: Any,
+        selected_target_residues_listWidget: Any,
+    ) -> List[str]:
         """Get list of target residues for analysis.
         
         Args:
@@ -38,8 +47,13 @@ class ResidueManager:
             return [selected_target_residues_listWidget.item(x).text()[:-1]
                    for x in range(selected_target_residues_listWidget.count())]
 
-    def _get_conservation_settings(self, use_conservation_checkBox, conservation_PDB_ID_lineEdit,
-                                   conservation_pdb_chain_id_lineedit, conserv_score_doubleSpinBox):
+    def _get_conservation_settings(
+        self,
+        use_conservation_checkBox: Any,
+        conservation_PDB_ID_lineEdit: Any,
+        conservation_pdb_chain_id_lineedit: Any,
+        conserv_score_doubleSpinBox: Any,
+    ) -> Dict[str, Any]:
         """Extract conservation calculation settings from UI controls.
         
         Returns:
@@ -53,7 +67,13 @@ class ResidueManager:
             'save_conservation_scores': False
         }
 
-    def _save_conservation_scores(self, res_IDs, con_scores, pdb_id, output_folder_directory):
+    def _save_conservation_scores(
+        self,
+        res_IDs: Sequence[Any],
+        con_scores: Sequence[Any],
+        pdb_id: str,
+        output_folder_directory: str,
+    ) -> None:
         """Save conservation scores to CSV file.
         
         Args:
@@ -68,7 +88,7 @@ class ResidueManager:
             for row in rows:
                 writer.writerow(row)
 
-    def create_shortest_path_string(self, sp):
+    def create_shortest_path_string(self, sp: Sequence[Any]) -> str:
         """Format shortest path data for display.
         
         Args:

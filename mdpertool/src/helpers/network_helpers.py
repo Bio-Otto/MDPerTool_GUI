@@ -1,12 +1,15 @@
 """Network Analysis Parameters Manager - Handle OpenMM platform and parameter configuration."""
 
+from __future__ import annotations
+
 import openmm
+from typing import Any, Dict, Iterable, List, Tuple
 
 
 class NetworkParametersManager:
     """Manage network analysis parameters and platform detection."""
 
-    def available_platforms(self):
+    def available_platforms(self) -> Tuple[Iterable[str], Dict[str, float]]:
         """Detect and return available OpenMM platforms on system.
         
         Returns:
@@ -21,10 +24,19 @@ class NetworkParametersManager:
 
         return avail_plt_and_speed.keys(), avail_plt_and_speed
 
-    def initialize_parameters(self, Number_of_thread_for_network_spinBox, boundForm_pdb_lineedit,
-                             network_cutoff_spinBox, response_time_lineEdit, PPI_Network_name_lineedit,
-                             net_output_directory_lineedit, source_res_comboBox, node_threshold_spinBox,
-                             node_threshold_checkBox, all_targets_checkBox):
+    def initialize_parameters(
+        self,
+        Number_of_thread_for_network_spinBox: Any,
+        boundForm_pdb_lineedit: Any,
+        network_cutoff_spinBox: Any,
+        response_time_lineEdit: Any,
+        PPI_Network_name_lineedit: Any,
+        net_output_directory_lineedit: Any,
+        source_res_comboBox: Any,
+        node_threshold_spinBox: Any,
+        node_threshold_checkBox: Any,
+        all_targets_checkBox: Any,
+    ) -> List[Tuple[str, Any]]:
         """Initialize network analysis parameters from UI controls.
         
         Args:

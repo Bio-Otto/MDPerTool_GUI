@@ -1,38 +1,49 @@
 """PyMOL Visualization Manager - Handle 3D structure visualization."""
 
+from __future__ import annotations
+
+from typing import Any
+
 from PySide2.QtWidgets import QFileDialog
 
 
 class PyMOLVisualizer:
     """Manage PyMOL 3D visualization and figure export operations."""
 
-    def activate_navigation_on_Pymol(self, created_pymol_widget):
+    def activate_navigation_on_Pymol(self, created_pymol_widget: Any) -> None:
         """Activate navigation tool in PyMOL widget."""
         created_pymol_widget.activate_navigation_tool()
         created_pymol_widget.paintGL()
         created_pymol_widget.update()
         created_pymol_widget.show()
 
-    def deactivate_navigation_on_Pymol(self, created_pymol_widget):
+    def deactivate_navigation_on_Pymol(self, created_pymol_widget: Any) -> None:
         """Deactivate navigation tool in PyMOL widget."""
         created_pymol_widget.deactivate_navigation_tool()
         created_pymol_widget.paintGL()
         created_pymol_widget.update()
         created_pymol_widget.show()
 
-    def clear_residue_labels(self, created_pymol_widget):
+    def clear_residue_labels(self, created_pymol_widget: Any) -> None:
         """Clear all residue labels from PyMOL display."""
         created_pymol_widget.clear_all_labels()
         created_pymol_widget.update()
 
-    def show_beautiful_in_Pymol(self, created_pymol_widget):
+    def show_beautiful_in_Pymol(self, created_pymol_widget: Any) -> None:
         """Display secondary structure in PyMOL."""
         created_pymol_widget.set_ss_figure()
         created_pymol_widget.update()
         created_pymol_widget.show()
 
-    def save_as_png_Pymol(self, main_window, created_pymol_widget, width_horizontalSlider, height_horizontalSlider,
-                          dpi_horizontalSlider, ray_horizontalSlider):
+    def save_as_png_Pymol(
+        self,
+        main_window: Any,
+        created_pymol_widget: Any,
+        width_horizontalSlider: Any,
+        height_horizontalSlider: Any,
+        dpi_horizontalSlider: Any,
+        ray_horizontalSlider: Any,
+    ) -> None:
         """Export PyMOL visualization as PNG file."""
         # Lazy import to avoid circular dependencies
         from ..message import Message_Boxes
