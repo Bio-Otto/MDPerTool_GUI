@@ -1,0 +1,31 @@
+{
+  "created_at_utc": "2026-03-19T12:44:41.994703+00:00",
+  "mdpertool_version": "0.0.2.dev1",
+  "runtime_seconds": 1.2000000476837158,
+  "output_directory": "tests/2DH3",
+  "cli_arguments": {
+    "topology": "tests/2DH3/2DH3.pdb",
+    "write_group_summary": true,
+    "write_run_manifest": true,
+    "velocity_speed_factor": [
+      3,
+      4,
+      5
+    ]
+  },
+  "generated_files": {
+    "response_time_files": [
+      "tests/2DH3/responseTimes_3.csv",
+      "tests/2DH3/responseTimes_4.csv"
+    ],
+    "metrics_files": [
+      "tests/2DH3/responseTimes_3_metrics.csv",
+      "tests/2DH3/responseTimes_4_metrics.csv"
+    ],
+    "fit_curve_files": [
+      "tests/2DH3/responseTimes_3_fit_curve.csv",
+      "tests/2DH3/responseTimes_4_fit_curve.csv"
+    ],
+    "group_summary_file": "tests/2DH3/group_summary.csv"
+  }
+}

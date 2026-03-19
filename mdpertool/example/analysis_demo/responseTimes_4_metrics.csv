@@ -1,0 +1,2 @@
+total_residues,responded_residues,non_responded_residues,max_frame,t_half_empirical_frame,t_half_fit_frame,k_d,fit_rmse
+447,447,0,761,613.0,603.682026239788,0.00889759730152903,29.339516292750393

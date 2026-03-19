@@ -1,4 +1,5 @@
 import os.path
+import json
 from functools import partial
 import networkx as nx
 from PySide2.QtWidgets import (
@@ -80,7 +81,7 @@ class Helper_Functions():
         show_navigation_button.show()
         hide_navigation_button.hide()
 
-    def visualization_Handel_buttons_changing_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+    def visualization_Handle_buttons_changing_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                           hide_navigation_button):
         Helper_Functions.hide_visualization_settings_on_analysis(self, analysis_settings_groupBox,
                                                                  show_navigation_button,
@@ -92,7 +93,7 @@ class Helper_Functions():
         show_navigation_button.show()
         hide_navigation_button.hide()
 
-    def Handel_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button, hide_navigation_button):
+    def Handle_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button, hide_navigation_button):
         show_navigation_button.clicked.connect(lambda:
                                                Helper_Functions.show_visualization_settings_on_analysis(self,
                                                                                                         analysis_settings_groupBox,
@@ -120,7 +121,7 @@ class Helper_Functions():
         created_pymol_widget.clear_all_labels()
         created_pymol_widget.update()
 
-    def show_beatiful_in_Pymol(self, created_pymol_widget):
+    def show_beautiful_in_Pymol(self, created_pymol_widget):
         created_pymol_widget.set_ss_figure()
         created_pymol_widget.update()
         created_pymol_widget.show()
@@ -153,10 +154,10 @@ class Helper_Functions():
             Message_Boxes.Critical_message(self, 'png save failed!', str(save_err), Style.MessageBox_stylesheet)
 
     # ----------------------------------------- > FIGURE OPTIONS IN PYMOL < ------------------------------------------ #
-    def Handel_Save_Figure_Options_on_analysis_Changed(self, figure_settings_groupBox_on_analysis):
+    def Handle_Save_Figure_Options_on_analysis_Changed(self, figure_settings_groupBox_on_analysis):
         Helper_Functions.hide_figure_options_on_analysis(self, figure_settings_groupBox_on_analysis)
 
-    def Handel_Save_Figure_Options_on_analysis(self, save_as_png_pushButton, hide_figure_settings_pushButton,
+    def Handle_Save_Figure_Options_on_analysis(self, save_as_png_pushButton, hide_figure_settings_pushButton,
                                                width_horizontalSlider, height_horizontalSlider, dpi_horizontalSlider,
                                                ray_horizontalSlider, figure_settings_groupBox_on_analysis,
                                                pymol_width_label, pymol_height_label, pymol_dpi_label, pymol_ray_label):
@@ -472,27 +473,70 @@ class Functions(MainWindow):
             label_2.setObjectName("label_29")
             gridLayout.addWidget(label_2, 0, 0, 1, 1)
 
-            label_3 = QtWidgets.QLabel(tab)
-            label_3.setText("Energy Dissipation Curve")
-            label_3.setMinimumSize(QtCore.QSize(0, 22))
-            label_3.setMaximumSize(QtCore.QSize(450, 22))
-            label_3.setStyleSheet("QLabel {\n"
-                                  "    background-color: rgb(27, 29, 35);\n"
-                                  "    border-radius: 5px;\n"
-                                  "    border: 2px solid rgb(27, 29, 35);\n"
-                                  "    padding: 1px 1px 1px 1px;\n"
-                                  "    \n"
-                                  "    border-bottom-color: rgb(157, 90, 198);\n"
-                                  "}\n"
-                                  "\n"
-                                  "\n"
-                                  "QLabel:hover{\n"
-                                  "    border: 2px solid rgb(64, 71, 88);\n"
-                                  "    selection-color: rgb(127, 5, 64);\n"
-                                  "\n"
-                                  "}")
-            label_3.setObjectName("label_27")
-            gridLayout.addWidget(label_3, 4, 0, 1, 1)
+            analysis_data_tabwidget = QtWidgets.QTabWidget(tab)
+            analysis_data_tabwidget.setObjectName("analysis_data_tabwidget")
+            analysis_data_tabwidget.setMinimumSize(QtCore.QSize(450, 520))
+            analysis_data_tabwidget.setMaximumSize(QtCore.QSize(450, 16777215))
+
+            plot_tab = QtWidgets.QWidget()
+            plot_tab.setObjectName("analysis_plot_tab")
+            plot_tab_layout = QtWidgets.QVBoxLayout(plot_tab)
+            plot_tab_layout.setContentsMargins(0, 0, 0, 0)
+            plot_tab_layout.setObjectName("analysis_plot_tab_layout")
+
+            metrics_tab = QtWidgets.QWidget()
+            metrics_tab.setObjectName("analysis_metrics_tab")
+            metrics_tab_layout = QtWidgets.QVBoxLayout(metrics_tab)
+            metrics_tab_layout.setContentsMargins(0, 0, 0, 0)
+            metrics_tab_layout.setObjectName("analysis_metrics_tab_layout")
+
+            qc_tab = QtWidgets.QWidget()
+            qc_tab.setObjectName("analysis_qc_tab")
+            qc_tab_layout = QtWidgets.QVBoxLayout(qc_tab)
+            qc_tab_layout.setContentsMargins(0, 0, 0, 0)
+            qc_tab_layout.setObjectName("analysis_qc_tab_layout")
+
+            provenance_tab = QtWidgets.QWidget()
+            provenance_tab.setObjectName("analysis_provenance_tab")
+            provenance_tab_layout = QtWidgets.QVBoxLayout(provenance_tab)
+            provenance_tab_layout.setContentsMargins(0, 0, 0, 0)
+            provenance_tab_layout.setObjectName("analysis_provenance_tab_layout")
+
+            metrics_table = QtWidgets.QTableWidget(metrics_tab)
+            metrics_table.setObjectName("response_metrics_table")
+            metrics_table.setColumnCount(2)
+            metrics_table.setRowCount(11)
+            metrics_table.setHorizontalHeaderLabels(["Metric", "Value"])
+            metrics_table.horizontalHeader().setStretchLastSection(True)
+            metrics_table.verticalHeader().setVisible(False)
+            metrics_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            metrics_table.setMinimumSize(QtCore.QSize(0, 0))
+            metrics_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            metrics_tab_layout.addWidget(metrics_table)
+
+            qc_table = QtWidgets.QTableWidget(qc_tab)
+            qc_table.setObjectName("response_qc_table")
+            qc_table.setColumnCount(2)
+            qc_table.setRowCount(4)
+            qc_table.setHorizontalHeaderLabels(["QC Metric", "Value"])
+            qc_table.horizontalHeader().setStretchLastSection(True)
+            qc_table.verticalHeader().setVisible(False)
+            qc_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            qc_table.setMinimumSize(QtCore.QSize(0, 0))
+            qc_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            qc_tab_layout.addWidget(qc_table)
+
+            provenance_table = QtWidgets.QTableWidget(provenance_tab)
+            provenance_table.setObjectName("analysis_provenance_table")
+            provenance_table.setColumnCount(2)
+            provenance_table.setRowCount(4)
+            provenance_table.setHorizontalHeaderLabels(["Field", "Value"])
+            provenance_table.horizontalHeader().setStretchLastSection(True)
+            provenance_table.verticalHeader().setVisible(False)
+            provenance_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            provenance_table.setMinimumSize(QtCore.QSize(0, 0))
+            provenance_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            provenance_tab_layout.addWidget(provenance_table)
 
             # --> Dissipation Widget
             dissipation_curve_widget = WidgetPlot(self)
@@ -510,7 +554,23 @@ class Functions(MainWindow):
             dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 400))
             dissipation_curve_widget.setMaximumSize(QtCore.QSize(450, 450))
             dissipation_curve_widget.setObjectName("dissipation_curve_widget")
-            gridLayout.addWidget(dissipation_curve_widget, 5, 0, 1, 2)
+
+            plot_tab_layout.addWidget(dissipation_curve_widget)
+
+            analysis_data_tabwidget.addTab(plot_tab, "Plot")
+            analysis_data_tabwidget.addTab(metrics_tab, "Metrics")
+            analysis_data_tabwidget.addTab(qc_tab, "QC")
+            analysis_data_tabwidget.addTab(provenance_tab, "Provenance")
+
+            last_inner_tab = int(getattr(self, '_analysis_data_tab_last_index', 0))
+            if 0 <= last_inner_tab < analysis_data_tabwidget.count():
+                analysis_data_tabwidget.setCurrentIndex(last_inner_tab)
+
+            analysis_data_tabwidget.currentChanged.connect(
+                lambda idx: setattr(self, '_analysis_data_tab_last_index', idx)
+            )
+
+            gridLayout.addWidget(analysis_data_tabwidget, 2, 0, 1, 1)
 
             ############################################################################################################
             show_navigation_button = QtWidgets.QPushButton(tab)
@@ -550,7 +610,7 @@ class Functions(MainWindow):
                              QtGui.QIcon.Off)
             show_navigation_button.setIcon(icon11)
             show_navigation_button.setObjectName("show_navigation_button")
-            gridLayout.addWidget(show_navigation_button, 0, 1, 6, 1)
+            gridLayout.addWidget(show_navigation_button, 0, 1, 3, 1)
             # 0  2  6  1
             hide_navigation_button = QtWidgets.QPushButton(tab)
             hide_navigation_button.setMaximumSize(QtCore.QSize(20, 61))
@@ -580,7 +640,7 @@ class Functions(MainWindow):
             hide_navigation_button.setText("")
             hide_navigation_button.setIcon(icon11)
             hide_navigation_button.setObjectName("hide_navigation")
-            gridLayout.addWidget(hide_navigation_button, 0, 3, 6, 1)
+            gridLayout.addWidget(hide_navigation_button, 0, 3, 3, 1)
 
             analysis_settings_groupBox = QtWidgets.QGroupBox(tab)
             analysis_settings_groupBox.setTitle('Visualization Settings')
@@ -737,7 +797,7 @@ class Functions(MainWindow):
             verticalLayout_analysis.addWidget(refresh_pushButton_on_analysis)
 
             ss_beatiful_snapshoot_on_analysis = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
-            ss_beatiful_snapshoot_on_analysis.setText('Beatiful Snap')
+            ss_beatiful_snapshoot_on_analysis.setText('Beautiful Snap')
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHorizontalStretch(0)
             sizePolicy.setVerticalStretch(0)
@@ -1242,13 +1302,170 @@ class Functions(MainWindow):
             possible_path = str(self.response_time_lineEdit.text())
             if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
                 source_residue = self.source_res_comboBox.currentText()
-                row, col, Response_Count, plot_name = getResponseTimeGraph(possible_path)
+                row, col, Response_Count, plot_name, fit_curve, metrics = getResponseTimeGraph(possible_path)
+
+                metrics_order = [
+                    ('total_residues', 'Total Residues'),
+                    ('responded_residues', 'Responded Residues'),
+                    ('non_responded_residues', 'Non-Responded Residues'),
+                    ('max_frame', 'Max Frame'),
+                    ('t_half_empirical_frame', 't_half Empirical'),
+                    ('t_half_fit_frame', 't_half Fit'),
+                    ('k_d', 'k_d'),
+                    ('fit_rmse', 'Fit RMSE'),
+                    ('selected_model', 'Selected Model'),
+                    ('aic_logistic', 'AIC Logistic'),
+                    ('aic_gompertz', 'AIC Gompertz'),
+                ]
+
+                for row_idx, (metric_key, metric_label) in enumerate(metrics_order):
+                    value = metrics.get(metric_key)
+                    if isinstance(value, float):
+                        value_text = f"{value:.4f}"
+                    elif value is None:
+                        value_text = "N/A"
+                    else:
+                        value_text = str(value)
+
+                    metric_item = QTableWidgetItem(metric_label)
+                    value_item = QTableWidgetItem(value_text)
+                    metric_item.setFlags(QtCore.Qt.ItemIsEnabled)
+                    value_item.setFlags(QtCore.Qt.ItemIsEnabled)
+                    metrics_table.setItem(row_idx, 0, metric_item)
+                    metrics_table.setItem(row_idx, 1, value_item)
+
+                responded_fraction = metrics.get('responded_fraction')
+                fit_status = str(metrics.get('fit_status') or 'unavailable')
+                na_reason_code = str(metrics.get('na_reason_code') or 'none')
+                fit_rmse = metrics.get('fit_rmse')
+
+                if isinstance(fit_rmse, float):
+                    if fit_rmse < 10.0:
+                        rmse_level = 'low'
+                    elif fit_rmse < 30.0:
+                        rmse_level = 'medium'
+                    else:
+                        rmse_level = 'high'
+                else:
+                    rmse_level = 'N/A'
+
+                if isinstance(responded_fraction, float):
+                    responded_fraction_text = f"{responded_fraction * 100.0:.1f}%"
+                else:
+                    responded_fraction_text = 'N/A'
+
+                fit_ok = 'yes' if fit_status == 'ok' else 'no'
+                qc_rows = [
+                    ('fit_ok', fit_ok),
+                    ('rmse_level', rmse_level),
+                    ('responded_fraction', responded_fraction_text),
+                    ('na_reason_code', na_reason_code),
+                ]
+
+                manifest_path = f"{os.path.splitext(possible_path)[0]}_analysis_manifest.json"
+                provenance_data = {
+                    'manifest_exists': 'no',
+                    'created_at_utc': 'N/A',
+                    'selected_model': str(metrics.get('selected_model') or 'N/A'),
+                    'fit_status': fit_status,
+                }
+                if os.path.exists(manifest_path):
+                    try:
+                        with open(manifest_path, 'r', encoding='utf-8') as manifest_file:
+                            manifest_json = json.load(manifest_file)
+                        provenance_data['manifest_exists'] = 'yes'
+                        provenance_data['created_at_utc'] = str(manifest_json.get('created_at_utc') or 'N/A')
+                        provenance_data['selected_model'] = str(
+                            manifest_json.get('selected_model') or provenance_data['selected_model']
+                        )
+                        provenance_data['fit_status'] = str(
+                            manifest_json.get('fit_status') or provenance_data['fit_status']
+                        )
+                    except Exception:
+                        provenance_data['manifest_exists'] = 'error'
+
+                provenance_rows = [
+                    ('manifest_exists', provenance_data['manifest_exists']),
+                    ('created_at_utc', provenance_data['created_at_utc']),
+                    ('selected_model', provenance_data['selected_model']),
+                    ('manifest_path', manifest_path),
+                ]
+
+                for row_idx, (qc_key, qc_value) in enumerate(qc_rows):
+                    qc_key_item = QTableWidgetItem(qc_key)
+                    qc_value_item = QTableWidgetItem(str(qc_value))
+                    qc_key_item.setFlags(QtCore.Qt.ItemIsEnabled)
+                    qc_value_item.setFlags(QtCore.Qt.ItemIsEnabled)
+
+                    if qc_key == 'fit_ok':
+                        if str(qc_value).lower() == 'yes':
+                            qc_value_item.setBackground(QColor('#77dd77'))
+                            qc_value_item.setToolTip('Fit quality check passed.')
+                        else:
+                            qc_value_item.setBackground(QColor('#ff686b'))
+                            qc_value_item.setToolTip('Fit quality check failed or unavailable.')
+
+                    if qc_key == 'rmse_level':
+                        rmse_level_value = str(qc_value).lower()
+                        if rmse_level_value == 'low':
+                            qc_value_item.setBackground(QColor('#77dd77'))
+                            qc_value_item.setToolTip('Low fit error.')
+                        elif rmse_level_value == 'medium':
+                            qc_value_item.setBackground(QColor('#f6bc66'))
+                            qc_value_item.setToolTip('Moderate fit error.')
+                        elif rmse_level_value == 'high':
+                            qc_value_item.setBackground(QColor('#ff686b'))
+                            qc_value_item.setToolTip('High fit error; inspect curve carefully.')
+                        else:
+                            qc_value_item.setToolTip('RMSE not available.')
+
+                    if qc_key == 'responded_fraction':
+                        qc_value_item.setToolTip('Fraction of residues that responded before max frame.')
+
+                    if qc_key == 'na_reason_code':
+                        reason_text_map = {
+                            'none': 'No NA condition detected.',
+                            'missing_sidecar': 'Metrics sidecar was missing or could not be loaded.',
+                            'insufficient_fit_points': 'Insufficient sigmoid-transition points for fit.',
+                            'all_nonresponsive': 'No residue crossed response threshold.',
+                        }
+                        reason_key = str(qc_value)
+                        qc_value_item.setToolTip(reason_text_map.get(reason_key, 'Unknown NA reason code.'))
+
+                    qc_table.setItem(row_idx, 0, qc_key_item)
+                    qc_table.setItem(row_idx, 1, qc_value_item)
+
+                for row_idx, (prov_key, prov_value) in enumerate(provenance_rows):
+                    prov_key_item = QTableWidgetItem(str(prov_key))
+                    prov_value_item = QTableWidgetItem(str(prov_value))
+                    prov_key_item.setFlags(QtCore.Qt.ItemIsEnabled)
+                    prov_value_item.setFlags(QtCore.Qt.ItemIsEnabled)
+                    if prov_key == 'manifest_exists':
+                        if str(prov_value).lower() == 'yes':
+                            prov_value_item.setBackground(QColor('#77dd77'))
+                        elif str(prov_value).lower() == 'error':
+                            prov_value_item.setBackground(QColor('#ff686b'))
+                        else:
+                            prov_value_item.setBackground(QColor('#f6bc66'))
+                    if prov_key == 'manifest_path':
+                        prov_value_item.setToolTip('Analysis manifest location on disk.')
+                    provenance_table.setItem(row_idx, 0, prov_key_item)
+                    provenance_table.setItem(row_idx, 1, prov_value_item)
 
                 if source_residue == '':
-                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=None, plot_name=plot_name)
+                    dissipation_curve_widget.canvas.plot(
+                        Response_Count,
+                        source_residue=None,
+                        plot_name=plot_name,
+                        fitted_data=fit_curve,
+                    )
                 if source_residue != '':
-                    dissipation_curve_widget.canvas.plot(Response_Count, source_residue=source_residue,
-                                                         plot_name=plot_name)
+                    dissipation_curve_widget.canvas.plot(
+                        Response_Count,
+                        source_residue=source_residue,
+                        plot_name=plot_name,
+                        fitted_data=fit_curve,
+                    )
 
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
@@ -1270,7 +1487,7 @@ class Functions(MainWindow):
             pyMOL_3D_analysis_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             pyMOL_3D_analysis_frame.setFrameShadow(QtWidgets.QFrame.Raised)
             pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
-            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 2, 6, 1)
+            gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 2, 3, 1)
             horizontalLayout.addLayout(gridLayout)
             self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
             horizontalLayout.addWidget(analysis_settings_groupBox)
@@ -1289,10 +1506,10 @@ class Functions(MainWindow):
             # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
             # verticalLayout.addWidget(self.matplotlib_widget.canvas)
             ##########################################################################################################
-            Helper_Functions.visualization_Handel_buttons_changing_on_analysis(self, analysis_settings_groupBox,
+            Helper_Functions.visualization_Handle_buttons_changing_on_analysis(self, analysis_settings_groupBox,
                                                                                show_navigation_button,
                                                                                hide_navigation_button)
-            Helper_Functions.Handel_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
+            Helper_Functions.Handle_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                         hide_navigation_button)
 
             activate_pymol_navigation_on_analysis.clicked.connect(
@@ -1302,7 +1519,7 @@ class Functions(MainWindow):
             refresh_pushButton_on_analysis.clicked.connect(
                 lambda: Helper_Functions.clear_residue_labels(self, Protein3DNetworkView))
             ss_beatiful_snapshoot_on_analysis.clicked.connect(
-                lambda: Helper_Functions.show_beatiful_in_Pymol(self, Protein3DNetworkView))
+                lambda: Helper_Functions.show_beautiful_in_Pymol(self, Protein3DNetworkView))
             get_figure_pushButton_on_analysis.clicked.connect(
                 lambda: Helper_Functions.save_as_png_Pymol(self, Protein3DNetworkView,
                                                            width_horizontalSlider_on_analysis,
@@ -1310,7 +1527,7 @@ class Functions(MainWindow):
                                                            dpi_horizontalSlider_on_analysis,
                                                            ray_horizontalSlider_on_analysis))
 
-            Helper_Functions.Handel_Save_Figure_Options_on_analysis(self, save_as_png_on_analysis_pushButton,
+            Helper_Functions.Handle_Save_Figure_Options_on_analysis(self, save_as_png_on_analysis_pushButton,
                                                                     hide_figure_settings_on_analysis_pushButton,
                                                                     width_horizontalSlider_on_analysis,
                                                                     height_horizontalSlider_on_analysis,
@@ -1322,7 +1539,7 @@ class Functions(MainWindow):
                                                                     pymol_dpi_label_on_analysis,
                                                                     pymol_ray_label_on_analysis)
 
-            Helper_Functions.Handel_Save_Figure_Options_on_analysis_Changed(self, figure_settings_on_analysis_groupBox)
+            Helper_Functions.Handle_Save_Figure_Options_on_analysis_Changed(self, figure_settings_on_analysis_groupBox)
             ##########################################################################################################
 
             source_res = self.source_res_comboBox.currentText()[:-1]

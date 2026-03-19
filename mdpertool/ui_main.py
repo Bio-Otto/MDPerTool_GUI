@@ -301,12 +301,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.refresh_pushButton.clicked.connect(lambda: UIF.UIFunctions.clear_residue_labels(self))
         self.activate_pymol_navigation.clicked.connect(lambda: UIF.UIFunctions.activate_navigation_on_Pymol(self))
         self.deactivate_pymol_navigation.clicked.connect(lambda: UIF.UIFunctions.deactivate_navigation_on_Pymol(self))
-        self.visualization_Handel_buttons_changing()
-        self.Handel_Buttons()
-        self.ss_beatiful_snapshoot.clicked.connect(lambda: UIF.UIFunctions.show_beatiful_in_Pymol(self))
+        self.visualization_Handle_buttons_changing()
+        self.Handle_Buttons()
+        self.ss_beatiful_snapshoot.clicked.connect(lambda: UIF.UIFunctions.show_beautiful_in_Pymol(self))
         self.get_figure_pushButton.clicked.connect(lambda: UIF.UIFunctions.save_as_png_Pymol(self))
-        self.Handel_Save_Figure_Options_Changed()
-        self.Handel_Save_Figure_Options()
+        self.Handle_Save_Figure_Options_Changed()
+        self.Handle_Save_Figure_Options()
 
         # ----> Analysis Menu Parameters
         self.threadpool = QThreadPool()
@@ -1010,10 +1010,10 @@ class MainWindow(QtWidgets.QMainWindow):
     ##################################################################################################################
     #                                   == > START OF PYMOL NAVIGATION TOOLBAR < ==                                  #
     ##################################################################################################################
-    def visualization_Handel_buttons_changing(self):
+    def visualization_Handle_buttons_changing(self):
         self.hide_visualization_settings()
 
-    def Handel_Buttons(self):
+    def Handle_Buttons(self):
         self.show_navigation.clicked.connect(self.show_visualization_settings)
         self.hide_navigation.clicked.connect(self.hide_visualization_settings)
 
@@ -1028,10 +1028,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hide_navigation.hide()
 
     # ----------------------------------------- > FIGURE OPTIONS IN PYMOL < ------------------------------------------ #
-    def Handel_Save_Figure_Options_Changed(self):
+    def Handle_Save_Figure_Options_Changed(self):
         self.hide_figure_options()
 
-    def Handel_Save_Figure_Options(self):
+    def Handle_Save_Figure_Options(self):
         self.save_as_png_pushButton.clicked.connect(self.show_figure_options)
         self.hide_figure_settings_pushButton.clicked.connect(self.hide_figure_options)
         self.width_horizontalSlider.valueChanged.connect(self.figure_width_label)
@@ -1069,7 +1069,7 @@ class MainWindow(QtWidgets.QMainWindow):
         possible_path = str(self.response_time_lineEdit.text())
         if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
             source_residue = self.source_res_comboBox.currentText()
-            row, col, Response_Count, plot_name = getResponseTimeGraph(possible_path)
+            row, col, Response_Count, plot_name, fit_curve, metrics = getResponseTimeGraph(possible_path)
             """
             if source_residue == '':
                 self.matplotlib_widget.canvas.plot(Response_Count, source_residue=None)

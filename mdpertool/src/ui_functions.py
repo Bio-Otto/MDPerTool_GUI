@@ -388,7 +388,7 @@ class UIFunctions(MainWindow):
         self.ProteinView.update()
         self.ProteinView.show()
 
-    def show_beatiful_in_Pymol(self):
+    def show_beautiful_in_Pymol(self):
         self.ProteinView.set_ss_figure()
         self.ProteinView.update()
         self.ProteinView.show()

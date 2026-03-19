@@ -1,0 +1,10 @@
+{
+  "created_at_utc": "2026-03-19T18:29:56.103203+00:00",
+  "mdpertool_version": "0.0.2.dev1",
+  "response_time_file": "tests/2DH3/responseTimes_4.csv",
+  "metrics_file": "tests/2DH3/responseTimes_4_metrics.csv",
+  "fit_curve_file": "tests/2DH3/responseTimes_4_fit_curve.csv",
+  "selected_model": "logistic",
+  "fit_status": "ok",
+  "na_reason_code": "none"
+}

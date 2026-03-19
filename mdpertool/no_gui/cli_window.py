@@ -9,10 +9,42 @@ from .response_time_creator import *
 from openmm import unit
 from openmm import *
 import time
+import json
+from datetime import datetime, timezone
 from .write_outputs import *
 from logging.config import dictConfig
 import argparse
 import multiprocessing as mp
+
+try:
+    from mdpertool._version import __version__ as mdpertool_version
+except Exception:
+    mdpertool_version = "unknown"
+
+
+def _write_run_manifest(output_directory, args, generated_response_files, group_summary_path, start_time, end_time):
+    metrics_files = [os.path.splitext(file_path)[0] + '_metrics.csv' for file_path in generated_response_files]
+    fit_curve_files = [os.path.splitext(file_path)[0] + '_fit_curve.csv' for file_path in generated_response_files]
+
+    manifest = {
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "mdpertool_version": mdpertool_version,
+        "runtime_seconds": float(end_time - start_time),
+        "output_directory": output_directory,
+        "cli_arguments": vars(args),
+        "generated_files": {
+            "response_time_files": generated_response_files,
+            "metrics_files": metrics_files,
+            "fit_curve_files": fit_curve_files,
+            "group_summary_file": group_summary_path,
+        },
+    }
+
+    manifest_path = os.path.join(output_directory, 'run_manifest.json')
+    with open(manifest_path, 'w', encoding='utf-8') as manifest_file:
+        json.dump(manifest, manifest_file, indent=2, ensure_ascii=False)
+
+    return manifest_path
 
 
 def add_arguments_tu_subparsers(parser):
@@ -142,6 +174,14 @@ def add_arguments_tu_subparsers(parser):
     parser.add_argument('-per_ri', '--perturbation_report_interval', default=1, nargs='?', type=int, required=False,
                         help='The program defaultly will report perturbation simulation reports every 10 steps.')
 
+    parser.add_argument('-wgs', '--write_group_summary', type=lambda x: bool(strtobool(x)), choices=[True, False],
+                        default=True, nargs='?', required=False,
+                        help='Write group_summary.csv using all generated responseTimes files in this run.')
+
+    parser.add_argument('-wrm', '--write_run_manifest', type=lambda x: bool(strtobool(x)), choices=[True, False],
+                        default=True, nargs='?', required=False,
+                        help='Write run_manifest.json with run metadata and generated file paths.')
+
 
 def run_mdpertool_from_cli(args):
 
@@ -244,6 +284,8 @@ def run_mdpertool_from_cli(args):
     if not args.write_dcd and not args.write_xtc:
         args.write_dcd = True
 
+    generated_response_files = []
+
     for i in range(len(args.velocity_speed_factor)):
 
         name_of_changed_state_xml = change_velocity(state_file_path, int(args.velocity_speed_factor[i]),
@@ -323,6 +365,37 @@ def run_mdpertool_from_cli(args):
                                              % int(args.velocity_speed_factor[i])),
                                 outputName=os.path.join(created_file_for_work, 'responseTimes_%s.csv'
                                                         % int(args.velocity_speed_factor[i])))
+
+        generated_response_files.append(
+            os.path.join(created_file_for_work, 'responseTimes_%s.csv' % int(args.velocity_speed_factor[i]))
+        )
+
+    group_summary_path = None
+
+    if getattr(args, 'write_group_summary', True) and generated_response_files:
+        try:
+            group_summary_path = summarize_response_time_group(generated_response_files)
+            api_logger.info("Group summary written to: %s" % group_summary_path)
+            print("Group summary written to:", group_summary_path)
+        except Exception as err:
+            api_logger.warning("Failed to write group summary: %s" % err)
+            print("Warning: failed to write group summary:", err)
+
+    if getattr(args, 'write_run_manifest', True):
+        try:
+            manifest_path = _write_run_manifest(
+                output_directory=created_file_for_work,
+                args=args,
+                generated_response_files=generated_response_files,
+                group_summary_path=group_summary_path,
+                start_time=start_time,
+                end_time=time.time(),
+            )
+            api_logger.info("Run manifest written to: %s" % manifest_path)
+            print("Run manifest written to:", manifest_path)
+        except Exception as err:
+            api_logger.warning("Failed to write run manifest: %s" % err)
+            print("Warning: failed to write run manifest:", err)
 
     print("\n--- %s seconds ---" % (time.time() - start_time))
 
