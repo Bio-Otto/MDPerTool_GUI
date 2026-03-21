@@ -17,16 +17,15 @@ from pathlib import Path
 from pdbfixer import PDBFixer
 from os import path
 from urllib.request import urlretrieve
-from openmm.app import *
-from openmm.app import PDBFile
-from .checkBox_menu import *
+from openmm.app import PDBFile, Modeller
+from .checkBox_menu import ChecklistDialog
 from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (MultiTaskEngine, Pymol_Visualize_Path, Shortest_Path_Visualize)
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
-from ui_main import *
+from ui_main import MainWindow
 from src.file_dialog import Dialog as file_dialog
 
 # Import modularized helpers

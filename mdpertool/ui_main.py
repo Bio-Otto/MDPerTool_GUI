@@ -11,11 +11,11 @@ from pathlib import Path
 this_directory = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(this_directory)
 
-from src.builder import *
+from src.builder import Advanced, Advanced_Helper_Functions
 from src.pyside_dynamic import loadUi
 from gui.ui_styles import Style
-from src.app_functions import *
-from src.checkBox_menu import *
+from src.app_functions import Helper_Functions, Functions
+from src.checkBox_menu import ChecklistDialog
 import _version as current_version
 from no_gui import run_mdpertool_from_cli, add_arguments_tu_subparsers
 

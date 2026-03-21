@@ -1,12 +1,12 @@
-from MD_1 import *
-from MD_2 import *
-from Classic_MD import *
-from Velocity_Changer import *
-from get_positions_from_trajectory_file import *
-from energy_decomposition_from_trajectory import *
-from response_time_creator import *
+from .Classic_MD import Classic_MD_Engine
+from .MD_1 import Dissipation_MD_Engine
+from .MD_2 import Reference_MD_Engine
+from .Velocity_Changer import convert_res_to_atoms, change_velocity
+from .get_positions_from_trajectory_file import get_openmm_pos_from_traj
+from .energy_decomposition_from_trajectory import main
+from .response_time_creator import getResidueResponseTimes
 from simtk import unit
-from simtk.openmm import *
+from simtk.openmm import Platform, Context, System, Integrator, LangevinMiddleIntegrator
 import time
 
 start_time = time.time()

@@ -1,6 +1,6 @@
 from gui.ui_styles import Style
-from src.mplwidget import *
-from src.omm_runner import *
+from src.mplwidget import WidgetPlot, PlotCanvas
+from src.omm_runner import Communicate, OpenMMScriptRunner, Graphs
 from src.pyside_dynamic import loadUi
 import src.ui_functions as UIF
 
@@ -16,7 +16,7 @@ import threading
 import itertools
 import tokenize
 from PySide2.QtCore import Signal
-from ui_main import *
+from ui_main import MainWindow
 import logging
 
 
