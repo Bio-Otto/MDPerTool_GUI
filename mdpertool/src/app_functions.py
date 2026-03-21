@@ -13,6 +13,7 @@ from PySide2.QtWidgets import (
     QListWidgetItem,
 )
 from PySide2.QtCore import Qt, Slot, QMutexLocker, QMutex
+from PySide2 import QtCore, QtGui, QtWidgets
 import csv
 from pathlib import Path
 from pdbfixer import PDBFixer
