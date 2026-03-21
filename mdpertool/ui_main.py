@@ -17,6 +17,7 @@ from gui.ui_styles import Style
 from src.app_functions import Helper_Functions, Functions
 import src.ui_functions as UIF
 from src.omm_runner import OpenMMScriptRunner, Graphs
+from src.mplwidget import WidgetPlot, getResponseTimeGraph
 from src.checkBox_menu import ChecklistDialog
 import _version as current_version
 from no_gui import run_mdpertool_from_cli, add_arguments_tu_subparsers

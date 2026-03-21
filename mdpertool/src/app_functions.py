@@ -26,6 +26,7 @@ import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (MultiTaskEngine, Pymol_Visualize_Path, Shortest_Path_Visualize)
 from .config import write_output_configuration_file, read_output_configuration_file, config_template
+from .mplwidget import getResponseTimeGraph
 from src.file_dialog import Dialog as file_dialog
 
 # Import modularized helpers
