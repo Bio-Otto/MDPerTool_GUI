@@ -3,7 +3,7 @@ from gui.ui_styles import Style
 from PySide2 import QtCore, QtGui
 from PySide2.QtCore import QSize, Qt, QPropertyAnimation
 from PySide2.QtGui import QFont
-from PySide2.QtWidgets import QFileDialog, QMessageBox, QPushButton, QSizeGrip, QVBoxLayout
+from PySide2.QtWidgets import QFileDialog, QMessageBox, QPushButton, QSizeGrip, QVBoxLayout, QSizePolicy
 
 ## ==> GLOBALS
 GLOBAL_STATE = 0
