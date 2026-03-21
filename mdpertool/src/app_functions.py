@@ -1,5 +1,6 @@
 import os.path
 import json
+import tempfile
 from functools import partial
 import networkx as nx
 from PySide2.QtWidgets import (
