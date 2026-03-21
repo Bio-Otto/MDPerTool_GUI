@@ -3,7 +3,7 @@ from .MD_1 import Dissipation_MD_Engine
 from .MD_2 import Reference_MD_Engine
 from .Velocity_Changer import convert_res_to_atoms, change_velocity
 from .get_positions_from_trajectory_file import get_openmm_pos_from_traj
-from .energy_decomposition_from_trajectory import main
+from .energy_decomposition_from_trajectory import residue_based_decomposition
 from .response_time_creator import getResidueResponseTimes
 from simtk import unit
 from simtk.openmm import Platform, Context, System, Integrator, LangevinMiddleIntegrator
@@ -96,7 +96,7 @@ if write_to_xtc_trajectory:
 position_list, unwrap_pdb = get_openmm_pos_from_traj(last_pdb, reference_traj_file_for_pos,
                                                      dissipation_traj_file_for_pos, write_dcd=False)
 
-main(unwrap_pdb, position_list, 0, 250)
+residue_based_decomposition(unwrap_pdb, position_list, 0, 250)
 
 getResidueResponseTimes('reference_energy_file.csv', 'modified_energy_file.csv')
 

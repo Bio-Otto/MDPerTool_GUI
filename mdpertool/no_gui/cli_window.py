@@ -4,13 +4,14 @@ from .Velocity_Changer import convert_res_to_atoms, change_velocity
 from .MD_2 import Reference_MD_Engine
 from .MD_1 import Dissipation_MD_Engine
 from .get_positions_from_trajectory_file import get_openmm_pos_from_traj_with_mdtraj
-from .energy_decomposition_from_trajectory import main
-from .response_time_creator import getResidueResponseTimes
+from .energy_decomposition_from_trajectory import residue_based_decomposition
+from .response_time_creator import getResidueResponseTimes, summarize_response_time_group
 from openmm import unit, Platform, Context, System, Integrator, LangevinMiddleIntegrator
 import time
 import json
+import os
 from datetime import datetime, timezone
-from .write_outputs import write_output
+from .write_outputs import write_folder, lof_file_settings
 from logging.config import dictConfig
 import argparse
 import multiprocessing as mp
