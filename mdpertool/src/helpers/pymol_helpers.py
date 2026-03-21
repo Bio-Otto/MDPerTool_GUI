@@ -47,7 +47,7 @@ class PyMOLVisualizer:
         """Export PyMOL visualization as PNG file."""
         # Lazy import to avoid circular dependencies
         from ..message import Message_Boxes
-        from ..gui.ui_styles import Style
+        from gui.ui_styles import Style
         
         filedialog = QFileDialog(main_window)
         filedialog.setDefaultSuffix("png")

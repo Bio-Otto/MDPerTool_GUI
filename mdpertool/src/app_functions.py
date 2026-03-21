@@ -68,7 +68,7 @@ class Helper_Functions():
         """Initialize helper instances for different concerns."""
         self._main_window = main_window
         self._ui_manager = UILayoutManager()
-        self._pymol_viz = PyMOLVisualizer(main_window) if main_window else None
+        self._pymol_viz = PyMOLVisualizer() if main_window else None
         self._residue_manager = ResidueManager()
         self._network_manager = NetworkParametersManager()
 
@@ -114,32 +114,32 @@ class Helper_Functions():
     def activate_navigation_on_Pymol(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
         if not Helper_Functions._pymol_viz_class:
-            Helper_Functions._pymol_viz_class = PyMOLVisualizer(self)
+            Helper_Functions._pymol_viz_class = PyMOLVisualizer()
         Helper_Functions._pymol_viz_class.activate_navigation_on_Pymol(created_pymol_widget)
 
     def deactivate_navigation_on_Pymol(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
         if not Helper_Functions._pymol_viz_class:
-            Helper_Functions._pymol_viz_class = PyMOLVisualizer(self)
+            Helper_Functions._pymol_viz_class = PyMOLVisualizer()
         Helper_Functions._pymol_viz_class.deactivate_navigation_on_Pymol(created_pymol_widget)
 
     def clear_residue_labels(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
         if not Helper_Functions._pymol_viz_class:
-            Helper_Functions._pymol_viz_class = PyMOLVisualizer(self)
+            Helper_Functions._pymol_viz_class = PyMOLVisualizer()
         Helper_Functions._pymol_viz_class.clear_residue_labels(created_pymol_widget)
 
     def show_beautiful_in_Pymol(self, created_pymol_widget):
         """Delegate to PyMOLVisualizer."""
         if not Helper_Functions._pymol_viz_class:
-            Helper_Functions._pymol_viz_class = PyMOLVisualizer(self)
+            Helper_Functions._pymol_viz_class = PyMOLVisualizer()
         Helper_Functions._pymol_viz_class.show_beautiful_in_Pymol(created_pymol_widget)
 
     def save_as_png_Pymol(self, created_pymol_widget, width_horizontalSlider, height_horizontalSlider,
                           dpi_horizontalSlider, ray_horizontalSlider):
         """Delegate to PyMOLVisualizer (with main_window context for dialogs)."""
         if not Helper_Functions._pymol_viz_class:
-            Helper_Functions._pymol_viz_class = PyMOLVisualizer(self)
+            Helper_Functions._pymol_viz_class = PyMOLVisualizer()
         Helper_Functions._pymol_viz_class.save_as_png_Pymol(self, created_pymol_widget, width_horizontalSlider,
                                                             height_horizontalSlider, dpi_horizontalSlider, ray_horizontalSlider)
 
