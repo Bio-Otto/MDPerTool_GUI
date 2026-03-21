@@ -16,7 +16,6 @@ import threading
 import itertools
 import tokenize
 from PySide2.QtCore import Signal
-from ui_main import MainWindow
 import logging
 
 

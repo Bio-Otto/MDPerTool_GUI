@@ -20,7 +20,7 @@ except Exception:
 from .message import Message_Boxes
 
 
-class UIFunctions(MainWindow):
+class UIFunctions:
     # ----- > GLOBALS
     GLOBAL_STATE = 0
     GLOBAL_TITLE_BAR = True
