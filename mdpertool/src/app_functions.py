@@ -19,6 +19,7 @@ from pdbfixer import PDBFixer
 from os import path
 from urllib.request import urlretrieve
 from openmm.app import PDBFile, Modeller
+from gui.ui_styles import Style
 from .checkBox_menu import ChecklistDialog
 from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
