@@ -37,9 +37,11 @@ class UILayoutManager:
         hide_navigation_button: Any,
     ) -> None:
         """Trigger visualization settings panel toggle."""
-        self.hide_visualization_settings_on_analysis(analysis_settings_groupBox,
-                                                     show_navigation_button,
-                                                     hide_navigation_button)
+        self.hide_visualization_settings_on_analysis(
+            show_navigation_button,
+            hide_navigation_button,
+            analysis_settings_groupBox,
+        )
 
     def Handle_Buttons_on_analysis(
         self,

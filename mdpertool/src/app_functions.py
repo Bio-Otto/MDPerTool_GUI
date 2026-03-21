@@ -94,14 +94,14 @@ class Helper_Functions():
     def hide_visualization_settings_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                 hide_navigation_button):
         """Delegate to UILayoutManager."""
-        Helper_Functions._ui_manager_class.hide_visualization_settings_on_analysis(analysis_settings_groupBox, show_navigation_button,
-                                                                                   hide_navigation_button)
+        Helper_Functions._ui_manager_class.hide_visualization_settings_on_analysis(show_navigation_button, hide_navigation_button,
+                                                                                   analysis_settings_groupBox)
 
     def visualization_Handle_buttons_changing_on_analysis(self, analysis_settings_groupBox, show_navigation_button,
                                                           hide_navigation_button):
         """Delegate to UILayoutManager."""
-        self.hide_visualization_settings_on_analysis(analysis_settings_groupBox, show_navigation_button,
-                                                     hide_navigation_button)
+        Helper_Functions._ui_manager_class.hide_visualization_settings_on_analysis(show_navigation_button, hide_navigation_button,
+                                                                                   analysis_settings_groupBox)
 
     def Handle_Buttons_on_analysis(self, analysis_settings_groupBox, show_navigation_button, hide_navigation_button):
         """Delegate to UILayoutManager."""
