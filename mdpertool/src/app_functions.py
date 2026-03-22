@@ -1,12 +1,12 @@
 import os.path
 import json
 import tempfile
+import numpy as np
 from functools import partial
 import networkx as nx
 from PySide2.QtWidgets import (
     QFileDialog,
     QDialog,
-    QProgressDialog,
     QTableWidgetItem,
     QTabBar,
     QVBoxLayout,
@@ -38,6 +38,7 @@ from .helpers import (
     PyMOLVisualizer,
     ResidueManager,
     NetworkParametersManager,
+    ProgressDialogManager,
 )
 
 # List of three-letter amino acid residue codes
@@ -52,6 +53,23 @@ colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8
           '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
 
+class GeneralNetworkWorker(QtCore.QObject):
+    finished = QtCore.Signal(object, object, int, object)
+    failed = QtCore.Signal(str)
+
+    def __init__(self, engine):
+        super().__init__()
+        self.engine = engine
+
+    @QtCore.Slot()
+    def run(self):
+        try:
+            initial_network, res_id_list, len_of_retimes = self.engine.calculate_general_network()
+            self.finished.emit(initial_network, res_id_list, len_of_retimes, self.engine)
+        except Exception as error:
+            self.failed.emit(str(error))
+
+
 class Helper_Functions():
     """
     Facade class that delegates to modularized helper classes.
@@ -63,6 +81,7 @@ class Helper_Functions():
     _pymol_viz_class = None  # Initialized on first use
     _residue_manager_class = ResidueManager()
     _network_manager_class = NetworkParametersManager()
+    _progress_dialog_manager_class = None  # Initialized on first use with stylesheet
 
     def __init__(self, main_window=None):
         """Initialize helper instances for different concerns."""
@@ -71,6 +90,16 @@ class Helper_Functions():
         self._pymol_viz = PyMOLVisualizer() if main_window else None
         self._residue_manager = ResidueManager()
         self._network_manager = NetworkParametersManager()
+        self._progress_dialog_manager = None
+
+    @staticmethod
+    def _get_progress_dialog_manager(parent=None):
+        """Get or create the class-level progress dialog manager."""
+        if Helper_Functions._progress_dialog_manager_class is None:
+            Helper_Functions._progress_dialog_manager_class = ProgressDialogManager(
+                parent, Style.QProgressDialog_stylesheet
+            )
+        return Helper_Functions._progress_dialog_manager_class
 
     def fill_residue_combobox(self, pdb_path):
         from prody.proteins.pdbfile import parsePDB
@@ -249,6 +278,10 @@ class Helper_Functions():
     def _run_network_calculation(self, engine, target_residues):
         engine.run_pair_network_calculation(target_residues)
 
+        self._expected_workers = len(engine.work)
+        self._completed_workers = 0
+        self._network_finalize_done = False
+
         for i, work in enumerate(engine.work):
             work.signals.progress_on_net_calc.connect(partial(Functions.progress_fn, self))
             work.signals.work_started.connect(partial(Functions.on_started, self))
@@ -269,17 +302,8 @@ class Functions:
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
     @Slot()
     def on_started(self):
-        if self.active_workers == 0:
-            self.progress = QProgressDialog('Work in progress...', None, 0, 0)
-            self.progress.setWindowTitle("Network Calculation")
-            self.progress.setWindowModality(Qt.WindowModal)
-            self.progress.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
-            self.progress.setStyleSheet(Style.QProgressDialog_stylesheet)
-            self.progress.setFixedSize(400, 100)
-            self.progress.show()
-            self.progress.setValue(0)
-
-        self.active_workers += 1
+        """Called when each worker thread starts."""
+        return
 
     @Slot()
     def progress_fn(self, progress_on_net_calc):
@@ -288,28 +312,56 @@ class Functions:
             pass
 
     def thread_complete(self):
-        self.active_workers -= 1
-        if self.active_workers == 0 and len(self.network_holder) != 0:
-            self.plot_signal.plot_network.emit()
-            self.progress.cancel()
+        self._completed_workers = getattr(self, '_completed_workers', 0) + 1
+        expected_workers = max(0, getattr(self, '_expected_workers', 0))
+
+        if expected_workers > 0 and self._completed_workers >= expected_workers:
+            if getattr(self, '_network_finalize_done', False):
+                return
+            self._network_finalize_done = True
+            # Close progress dialog when all threads complete
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            # Re-enable main window after calculation is done
+            self.setEnabled(True)
+            if hasattr(self, '_active_network_engine'):
+                self._active_network_engine = None
+            if len(self.network_holder) != 0:
+                self.plot_signal.plot_network.emit()
 
     def print_output(self, s):
         self.network_holder.append(s[0])
         self.log_holder.append(s[1])
 
     def calculate_intersection_network(self):
-
+        """Start network calculation with Qt-safe background worker."""
         global output_folder_directory, network_holder
+
+        # Disable main window buttons to prevent user interaction during calculation
+        self.setEnabled(False)
+        
+        # Open progress dialog at the start (non-modal to allow background thread execution)
+        progress_manager = Helper_Functions._get_progress_dialog_manager(self)
+        self.progress = progress_manager.show_indeterminate(
+            label='Calculating network...',
+            title='Network Calculation',
+            window_modal=False,
+            frameless=True,
+            size=(400, 100),
+            cancel_button_text=None,
+        )
 
         try:
             self.active_workers = 0
+            self._expected_workers = 0
+            self._completed_workers = 0
+            self._network_finalize_done = False
             self.network_holder = []
             self.log_holder = []
             self.initial_network = None
 
             self.network_params = dict(Helper_Functions._initialize_parameters(self))
-            target_residues = Helper_Functions._get_target_residues(self)
-            conservation_settings = Helper_Functions._get_conservation_settings(self)
+            self._target_residues_for_calc = Helper_Functions._get_target_residues(self)
+            self._conservation_settings_for_calc = Helper_Functions._get_conservation_settings(self)
 
             general_output_folder = os.path.join(self.output_directory, 'network_outputs')
             Path(general_output_folder).mkdir(parents=True, exist_ok=True)
@@ -319,10 +371,13 @@ class Functions:
             Path(output_folder_directory).mkdir(parents=True, exist_ok=True)
 
             method = ''
-            for checkbox, m in [(self.atomPair_checkBox, 'any'), (self.Calpha_checkBox, 'selected_atom'),
-                                (self.center_of_mass_checkBox, 'center_of_mass')]:
+            for checkbox, method_name in [
+                (self.atomPair_checkBox, 'any'),
+                (self.Calpha_checkBox, 'selected_atom'),
+                (self.center_of_mass_checkBox, 'center_of_mass'),
+            ]:
                 if checkbox.isChecked():
-                    method = m
+                    method = method_name
                     break
 
             engine = MultiTaskEngine(
@@ -336,71 +391,118 @@ class Functions:
                 output_directory=output_folder_directory,
                 method=method,
                 atom_type='CA'
-
             )
 
-            self.initial_network, resId_List, len_of_reTimes = engine.calculate_general_network()
+            self._general_network_thread = QtCore.QThread(self)
+            self._general_network_worker = GeneralNetworkWorker(engine)
+            self._general_network_worker.moveToThread(self._general_network_thread)
 
-            if self.initial_network is None or resId_List is None:
-                Message_Boxes.Warning_message(
-                    self,
-                    "Network Preparation Failed",
-                    "General network could not be created. Please verify that the topology and response-time files belong to the same system.",
-                    Style.MessageBox_stylesheet,
-                )
-                return
+            self._general_network_thread.started.connect(self._general_network_worker.run)
+            self._general_network_worker.finished.connect(partial(Functions._on_general_network_ready, self))
+            self._general_network_worker.failed.connect(partial(Functions._on_general_network_failed, self))
+            self._general_network_worker.finished.connect(self._general_network_thread.quit)
+            self._general_network_worker.failed.connect(self._general_network_thread.quit)
+            self._general_network_worker.finished.connect(self._general_network_worker.deleteLater)
+            self._general_network_worker.failed.connect(self._general_network_worker.deleteLater)
+            self._general_network_thread.finished.connect(self._general_network_thread.deleteLater)
 
-            if len(resId_List) == len_of_reTimes:
-                available_residues = set(resId_List)
+            self._general_network_thread.start()
 
-                if self.source not in available_residues:
-                    Message_Boxes.Warning_message(
-                        self,
-                        "Source Residue Not Found",
-                        f"Selected source residue '{self.source}' is not present in the loaded topology/response-time dataset.",
-                        Style.MessageBox_stylesheet,
-                    )
-                    return
+        except Exception as error:
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            self.setEnabled(True)
+            Message_Boxes.Warning_message(
+                self,
+                "Network Calculation Error",
+                f"An error occurred before network calculation started: {str(error)}",
+                Style.MessageBox_stylesheet,
+            )
 
-                valid_targets = [target for target in target_residues if target in available_residues and target != self.source]
-                skipped_targets = [target for target in target_residues if target not in available_residues]
+    def _on_general_network_ready(self, initial_network, resId_List, len_of_reTimes, engine):
+        self.initial_network = initial_network
 
-                if not valid_targets:
-                    Message_Boxes.Warning_message(
-                        self,
-                        "No Valid Target Residues",
-                        "None of the selected target residues were found in the loaded topology/response-time dataset.",
-                        Style.MessageBox_stylesheet,
-                    )
-                    return
+        if self.initial_network is None or resId_List is None:
+            Message_Boxes.Warning_message(
+                self,
+                "Network Preparation Failed",
+                "General network could not be created. Please verify that the topology and response-time files belong to the same system.",
+                Style.MessageBox_stylesheet,
+            )
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            self.setEnabled(True)
+            return
 
-                if skipped_targets:
-                    self.inform_about_progress(
-                        f"Warning: {len(skipped_targets)} target residue(s) were skipped because they are not in the current network."
-                    )
+        if len(resId_List) != len_of_reTimes:
+            Helper_Functions._handle_mismatch_error(self)
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            self.setEnabled(True)
+            return
 
-                if conservation_settings['use_conservation']:
-                    res_IDs, con_scores = get_conservation_scores(
-                        pdb_id=conservation_settings['pdb_id'],
-                        chain_id=conservation_settings['chain'],
-                        cutoff=conservation_settings['conservation_threshold'],
-                        bound_pdb=self.pdb
-                    )
-                    if conservation_settings['save_conservation_scores']:
-                        Helper_Functions._save_conservation_scores(self, res_IDs, con_scores,
-                                                                   conservation_settings['pdb_id'])
+        available_residues = set(resId_List)
 
-                    intersection_resIDs = set(res_IDs).intersection(valid_targets)
-                    Helper_Functions._run_network_calculation(self, engine, intersection_resIDs)
-                else:
-                    Helper_Functions._run_network_calculation(self, engine, valid_targets)
-            else:
-                Helper_Functions._handle_mismatch_error(self)
+        if self.source not in available_residues:
+            Message_Boxes.Warning_message(
+                self,
+                "Source Residue Not Found",
+                f"Selected source residue '{self.source}' is not present in the loaded topology/response-time dataset.",
+                Style.MessageBox_stylesheet,
+            )
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            self.setEnabled(True)
+            return
 
-            del engine
+        target_residues = self._target_residues_for_calc
+        valid_targets = [target for target in target_residues if target in available_residues and target != self.source]
+        skipped_targets = [target for target in target_residues if target not in available_residues]
 
-        except Exception as E:
-            print(E)
+        if not valid_targets:
+            Message_Boxes.Warning_message(
+                self,
+                "No Valid Target Residues",
+                "None of the selected target residues were found in the loaded topology/response-time dataset.",
+                Style.MessageBox_stylesheet,
+            )
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            self.setEnabled(True)
+            return
+
+        if skipped_targets:
+            self.inform_about_progress(
+                f"Warning: {len(skipped_targets)} target residue(s) were skipped because they are not in the current network."
+            )
+
+        conservation_settings = self._conservation_settings_for_calc
+        if conservation_settings['use_conservation']:
+            res_IDs, con_scores = get_conservation_scores(
+                pdb_id=conservation_settings['pdb_id'],
+                chain_id=conservation_settings['chain'],
+                cutoff=conservation_settings['conservation_threshold'],
+                bound_pdb=self.pdb
+            )
+            if conservation_settings['save_conservation_scores']:
+                Helper_Functions._save_conservation_scores(self, res_IDs, con_scores,
+                                                           conservation_settings['pdb_id'])
+
+            intersection_resIDs = set(res_IDs).intersection(valid_targets)
+            self._active_network_engine = engine
+            Helper_Functions._run_network_calculation(self, engine, intersection_resIDs)
+        else:
+            self._active_network_engine = engine
+            Helper_Functions._run_network_calculation(self, engine, valid_targets)
+
+        if not getattr(engine, 'work', []):
+            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+            self.setEnabled(True)
+
+    def _on_general_network_failed(self, error_text):
+        Helper_Functions._get_progress_dialog_manager().close(process_events=True)
+        self.setEnabled(True)
+        Message_Boxes.Warning_message(
+            self,
+            "Network Calculation Error",
+            f"An error occurred during network calculation: {error_text}",
+            Style.MessageBox_stylesheet,
+        )
 
     def plot_networks(self):
 
@@ -528,6 +630,43 @@ class Functions:
             provenance_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
             provenance_tab_layout.addWidget(provenance_table)
 
+            # --> Response Dynamics Tab
+            response_dynamics_tab = QtWidgets.QWidget()
+            response_dynamics_tab.setObjectName("analysis_response_dynamics_tab")
+            response_dynamics_tab_layout = QtWidgets.QVBoxLayout(response_dynamics_tab)
+            response_dynamics_tab_layout.setContentsMargins(0, 0, 0, 0)
+            response_dynamics_tab_layout.setObjectName("analysis_response_dynamics_tab_layout")
+
+            # Create a splitter for per-residue and domain summary tables
+            response_splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+            
+            # Per-residue response time table
+            residue_response_table = QtWidgets.QTableWidget(response_dynamics_tab)
+            residue_response_table.setObjectName("residue_response_table")
+            residue_response_table.setColumnCount(4)
+            residue_response_table.setHorizontalHeaderLabels(["Residue ID", "Name", "Response Frame", "Response Time (ps)"])
+            residue_response_table.horizontalHeader().setStretchLastSection(True)
+            residue_response_table.verticalHeader().setVisible(False)
+            residue_response_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            residue_response_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            residue_response_table.setMinimumSize(QtCore.QSize(0, 200))
+            response_splitter.addWidget(residue_response_table)
+
+            # Domain summary table
+            domain_summary_table = QtWidgets.QTableWidget(response_dynamics_tab)
+            domain_summary_table.setObjectName("domain_summary_table")
+            domain_summary_table.setColumnCount(5)
+            domain_summary_table.setHorizontalHeaderLabels(["Domain", "# Residues", "Mean (ps)", "Min (ps)", "Max (ps)"])
+            domain_summary_table.horizontalHeader().setStretchLastSection(True)
+            domain_summary_table.verticalHeader().setVisible(False)
+            domain_summary_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            domain_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            domain_summary_table.setMinimumSize(QtCore.QSize(0, 150))
+            response_splitter.addWidget(domain_summary_table)
+
+            response_dynamics_tab_layout.addWidget(response_splitter)
+            response_dynamics_tab.setLayout(response_dynamics_tab_layout)
+
             # --> Dissipation Widget
             dissipation_curve_widget = WidgetPlot(self)
 
@@ -551,6 +690,7 @@ class Functions:
             analysis_data_tabwidget.addTab(metrics_tab, "Metrics")
             analysis_data_tabwidget.addTab(qc_tab, "QC")
             analysis_data_tabwidget.addTab(provenance_tab, "Provenance")
+            analysis_data_tabwidget.addTab(response_dynamics_tab, "Response Dynamics")
 
             last_inner_tab = int(getattr(self, '_analysis_data_tab_last_index', 0))
             if 0 <= last_inner_tab < analysis_data_tabwidget.count():
@@ -785,6 +925,49 @@ class Functions:
             refresh_pushButton_on_analysis.setIcon(icon14)
             refresh_pushButton_on_analysis.setObjectName("refresh_pushButton_on_analysis")
             verticalLayout_analysis.addWidget(refresh_pushButton_on_analysis)
+
+            color_response_panel_pushButton = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
+            color_response_panel_pushButton.setText('Color by Response')
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(color_response_panel_pushButton.sizePolicy().hasHeightForWidth())
+            color_response_panel_pushButton.setSizePolicy(sizePolicy)
+            color_response_panel_pushButton.setMinimumSize(QtCore.QSize(149, 33))
+            color_response_panel_pushButton.setMaximumSize(QtCore.QSize(110, 33))
+            font = QtGui.QFont()
+            font.setFamily("Segoe UI")
+            font.setPointSize(9)
+            color_response_panel_pushButton.setFont(font)
+            color_response_panel_pushButton.setStyleSheet("            QPushButton \n"
+                                                          "            {\n"
+                                                          "                color: white; \n"
+                                                          "                border: 2px solid rgb(52, 59, 72); \n"
+                                                          "                border-radius: 5px; \n"
+                                                          "                background-color:  rgb(22, 200, 244); \n"
+                                                          "                margin-top:1px; \n"
+                                                          "                margin-bottom: 1px; \n"
+                                                          "                border-width: 1px; \n"
+                                                          "                padding: 5px; \n"
+                                                          "                outline: none;\n"
+                                                          "            }\n"
+                                                          "\n"
+                                                          "            QPushButton:hover \n"
+                                                          "            { \n"
+                                                          "                background-color: rgb(255, 17, 100); \n"
+                                                          "                border: 2px solid rgb(61, 70, 86);\n"
+                                                          "            }\n"
+                                                          "\n"
+                                                          "            QPushButton:pressed \n"
+                                                          "            { \n"
+                                                          "                background-color:  rgb(15, 133, 163); \n"
+                                                          "                border: 2px solid rgb(43, 50, 61);\n"
+                                                          "            }")
+            icon_response = QtGui.QIcon()
+            icon_response.addPixmap(QtGui.QPixmap(":/16x16/icons/16x16/cil-brush-alt.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            color_response_panel_pushButton.setIcon(icon_response)
+            color_response_panel_pushButton.setObjectName("color_response_panel_pushButton")
+            verticalLayout_analysis.addWidget(color_response_panel_pushButton)
 
             ss_beatiful_snapshoot_on_analysis = QtWidgets.QPushButton(gridLayoutWidget_on_analysis)
             ss_beatiful_snapshoot_on_analysis.setText('Beautiful Snap')
@@ -1294,6 +1477,58 @@ class Functions:
                 source_residue = self.source_res_comboBox.currentText()
                 row, col, Response_Count, plot_name, fit_curve, metrics = getResponseTimeGraph(possible_path)
 
+                # --> Load Response Dynamics analyzer for per-residue and domain analysis
+                try:
+                    from analysis.residue_response_analyzer import ResidueResponseAnalyzer
+                    
+                    response_metrics_file = possible_path.replace('responseTimes.csv', 'responseTimes_metrics.csv')
+                    response_fit_file = possible_path.replace('responseTimes.csv', 'responseTimes_fit_curve.csv')
+                    
+                    if os.path.isfile(response_metrics_file) and os.path.isfile(response_fit_file):
+                        response_analyzer = ResidueResponseAnalyzer(
+                            possible_path,
+                            response_metrics_file,
+                            response_fit_file,
+                            frame_time_delta=1.0
+                        )
+                        
+                        # Populate per-residue response table
+                        gen_residue_names = [f"RES_{i+1}" for i in range(response_analyzer.num_residues)]
+                        residue_summary_df = response_analyzer.get_per_residue_summary(gen_residue_names)
+                        
+                        residue_response_table.setRowCount(len(residue_summary_df))
+                        for row_idx, (_, row_data) in enumerate(residue_summary_df.iterrows()):
+                            residue_response_table.setItem(row_idx, 0, QTableWidgetItem(str(row_data['residue_id'])))
+                            residue_response_table.setItem(row_idx, 1, QTableWidgetItem(row_data['residue_name']))
+                            residue_response_table.setItem(row_idx, 2, QTableWidgetItem(str(row_data['response_time_frame'])))
+                            residue_response_table.setItem(row_idx, 3, QTableWidgetItem(f"{row_data['response_time_ps']:.2f}"))
+
+                        # Populate domain summary (for now, show fast/medium/slow categories)
+                        groups = response_analyzer.get_residue_groups_by_threshold()
+                        domain_data = [
+                            ('Fast Responders', len(groups['fast']), np.mean(response_analyzer.response_times_ps[groups['fast']]) if groups['fast'] else 0.0,
+                             np.min(response_analyzer.response_times_ps[groups['fast']]) if groups['fast'] else 0.0,
+                             np.max(response_analyzer.response_times_ps[groups['fast']]) if groups['fast'] else 0.0),
+                            ('Medium Responders', len(groups['medium']), np.mean(response_analyzer.response_times_ps[groups['medium']]) if groups['medium'] else 0.0,
+                             np.min(response_analyzer.response_times_ps[groups['medium']]) if groups['medium'] else 0.0,
+                             np.max(response_analyzer.response_times_ps[groups['medium']]) if groups['medium'] else 0.0),
+                            ('Slow Responders', len(groups['slow']), np.mean(response_analyzer.response_times_ps[groups['slow']]) if groups['slow'] else 0.0,
+                             np.min(response_analyzer.response_times_ps[groups['slow']]) if groups['slow'] else 0.0,
+                             np.max(response_analyzer.response_times_ps[groups['slow']]) if groups['slow'] else 0.0),
+                        ]
+                        
+                        domain_summary_table.setRowCount(len(domain_data))
+                        for row_idx, (domain_name, count, mean_time, min_time, max_time) in enumerate(domain_data):
+                            domain_summary_table.setItem(row_idx, 0, QTableWidgetItem(domain_name))
+                            domain_summary_table.setItem(row_idx, 1, QTableWidgetItem(str(count)))
+                            domain_summary_table.setItem(row_idx, 2, QTableWidgetItem(f"{mean_time:.2f}"))
+                            domain_summary_table.setItem(row_idx, 3, QTableWidgetItem(f"{min_time:.2f}"))
+                            domain_summary_table.setItem(row_idx, 4, QTableWidgetItem(f"{max_time:.2f}"))
+                    
+                except Exception as analyzer_error:
+                    import sys
+                    print(f"Warning: Could not load response analyzer: {analyzer_error}", file=sys.stderr)
+
                 metrics_order = [
                     ('total_residues', 'Total Residues'),
                     ('responded_residues', 'Responded Residues'),
@@ -1491,6 +1726,21 @@ class Functions:
             Protein3DNetworkView.update()
             Protein3DNetworkView.show()
             verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
+
+            def _apply_response_coloring():
+                selected_response_path = str(self.response_time_lineEdit.text()).strip()
+                if os.path.exists(selected_response_path) and selected_response_path.lower().endswith('.csv'):
+                    Protein3DNetworkView.show_energy_dissipation(response_time_file_path=selected_response_path)
+                    return
+
+                Message_Boxes.Warning_message(
+                    self,
+                    "Response Time File Missing",
+                    "Please select a valid response time CSV file before applying 3D coloring.",
+                    Style.MessageBox_stylesheet,
+                )
+
+            color_response_panel_pushButton.clicked.connect(_apply_response_coloring)
             # ################################# ==> END - 3D WIDGETS LOCATING <== ################################## #
             # matplotlib_widget = WidgetPlot(self)
             # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
@@ -1536,6 +1786,7 @@ class Functions:
             all_residue_as_target_clean_graph_list = []
             selected_residue_as_target_clean_graph_list = []
             target_res_list = []
+            done_message_shown = False
 
             all_paths = []
             clean_all_graps = []
@@ -1583,6 +1834,7 @@ class Functions:
                     if j != '':
                         all_path_string = all_path_string + '\n' + j
                 Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
+                done_message_shown = True
 
                 shortest_path_listWidget.itemDoubleClicked.connect(
                     lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
@@ -1625,6 +1877,7 @@ class Functions:
                     if j != '':
                         all_path_string = all_path_string + '\n' + j
                 Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
+                done_message_shown = True
 
                 shortest_path_listWidget.itemDoubleClicked.connect(
                     lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
@@ -1673,7 +1926,8 @@ class Functions:
                     for j in clean_log_list:
                         # if j != '':
                         all = all + '\n' + j
-                    Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
+                    if not done_message_shown:
+                        Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
                     del self.log_holder, self.network_holder
 
                 else:

@@ -204,27 +204,28 @@ QMessageBox QPushButton
         QProgressDialog {
             background-color: #323232;
             color: white;
-            border: 2px solid rgb(255, 170, 0);one;
+            border: 2px solid rgb(255, 170, 0);
             border-radius: 6px;
             padding: 10px;
         }
 
-        QLabel {
+        QProgressDialog QLabel {
             font: bold 12px;
             color: white;
+            background-color: transparent;
             border: none;
         }
 
-        QProgressBar {
-            border: 1px solid rgb(255, 170, 0); /* Transparent border */
+        QProgressDialog QProgressBar {
+            border: 1px solid rgb(255, 170, 0);
             border-radius: 2px;
             text-align: center;
             background: #cfcfcf;
             color: white;
-            height: 10px;  /* Set the height of the progress bar */
+            height: 10px;
         }
 
-        QProgressBar::chunk {
+        QProgressDialog QProgressBar::chunk {
             background: #05b8cc;
             width: 10px;
         }

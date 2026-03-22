@@ -8,10 +8,12 @@ from .ui_helpers import UILayoutManager
 from .pymol_helpers import PyMOLVisualizer
 from .residue_helpers import ResidueManager
 from .network_helpers import NetworkParametersManager
+from .progress_helpers import ProgressDialogManager
 
 __all__ = [
     "UILayoutManager",
     "PyMOLVisualizer", 
     "ResidueManager",
     "NetworkParametersManager",
+    "ProgressDialogManager",
 ]

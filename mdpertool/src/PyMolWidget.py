@@ -391,6 +391,7 @@ class PymolQtWidget(QGLWidget):
 
         self._pymol.cmd.spectrum('b', spectrum, minimum=0, maximum=max(stored))
         self._pymol.cmd.recolor()
+        self.update()
 
         # if display_color_ramp:
         #     self._pymol.cmd.ramp_new("count", self.mol_name, [0, len(stored)], color=['red', 'white'])
