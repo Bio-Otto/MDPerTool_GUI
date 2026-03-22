@@ -10723,7 +10723,7 @@ QTabBar::tab:disabled {
                             </property>
                             <widget class="QWidget" name="GENERAL">
                              <attribute name="title">
-                              <string>GENERAL</string>
+                              <string>General</string>
                              </attribute>
                              <layout class="QVBoxLayout" name="verticalLayout_42">
                               <item>
@@ -12471,7 +12471,7 @@ QPushButton:pressed
                             </widget>
                             <widget class="QWidget" name="ADVANCED">
                              <attribute name="title">
-                              <string>ADVANCED</string>
+                              <string>Advanced</string>
                              </attribute>
                              <layout class="QVBoxLayout" name="verticalLayout_49">
                               <item>
