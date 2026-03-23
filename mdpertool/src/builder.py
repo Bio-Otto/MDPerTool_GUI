@@ -15,6 +15,7 @@ import queue
 import threading
 import itertools
 import tokenize
+import multiprocessing
 from PySide2.QtCore import Signal
 import logging
 
@@ -303,8 +304,14 @@ class Advanced_Helper_Functions(QtCore.QThread):
 
         if platform_name == 'CPU':
             print("The CPU platform always uses 'mixed' precision.")
-            print("Simulation process will use %s Thread(s)" % self.Number_CPU_spinBox_2.value())
-            properties = {'CpuThreads': '%s' % self.Number_CPU_spinBox_2.value()}
+            if self.All_CPU_checkBox.isChecked():
+                cpu_count = multiprocessing.cpu_count()
+                print("Simulation process will use %s Thread(s) (ALL available CPU cores)" % cpu_count)
+                properties = {'CpuThreads': '%s' % cpu_count}
+            else:
+                thread_count = self.Number_CPU_spinBox_2.value()
+                print("Simulation process will use %s Thread(s)" % thread_count)
+                properties = {'CpuThreads': '%s' % thread_count}
             precision = 'mixed'
             return platform_name, properties, precision
 
