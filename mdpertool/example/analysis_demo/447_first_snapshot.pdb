@@ -1,5 +1,6 @@
-REMARK   1 CREATED WITH OPENMM 8.1.1, 2026-03-23
+REMARK   1 CREATED WITH MDTraj 1.9.9, 2026-03-19
 CRYST1   93.537   93.537   93.537  90.00  90.00  90.00 P 1           1 
+MODEL        0
 ATOM      1  N   GLU A   3     -36.664  37.913 156.684  1.00  0.00           N  
 ATOM      2  H   GLU A   3     -36.661  37.316 155.812  1.00  0.00           H  
 ATOM      3  H2  GLU A   3     -36.769  37.196 157.438  1.00  0.00           H  
@@ -6858,4 +6859,5 @@ ATOM   6855  OE1 GLU A 449     -69.341  18.341 135.105  1.00  0.00           O
 ATOM   6856  OE2 GLU A 449     -67.258  17.823 135.695  1.00  0.00           O  
 ATOM   6857  OXT GLU A 449     -70.274  18.721 141.220  1.00  0.00           O  
 TER    6858      GLU A 449
+ENDMDL
 END

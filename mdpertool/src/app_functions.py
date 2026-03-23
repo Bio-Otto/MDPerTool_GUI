@@ -1472,17 +1472,24 @@ class Functions:
                     modified_candidates.append(os.path.join(response_dir, f'modified_energy_file_{suffix}.csv'))
                 modified_candidates.append(os.path.join(response_dir, 'modified_energy_file.csv'))
 
-                discovered_reference = sorted(
-                    os.path.join(response_dir, file_name)
-                    for file_name in os.listdir(response_dir)
-                    if file_name.lower().startswith('reference_energy_file') and file_name.lower().endswith('.csv')
-                ) if os.path.isdir(response_dir) else []
-
-                discovered_modified = sorted(
-                    os.path.join(response_dir, file_name)
-                    for file_name in os.listdir(response_dir)
-                    if file_name.lower().startswith('modified_energy_file') and file_name.lower().endswith('.csv')
-                ) if os.path.isdir(response_dir) else []
+                discovered_reference = []
+                discovered_modified = []
+                try:
+                    if os.path.isdir(response_dir):
+                        all_files = os.listdir(response_dir)
+                        discovered_reference = sorted(
+                            os.path.join(response_dir, file_name)
+                            for file_name in all_files
+                            if file_name.lower().startswith('reference_energy_file') and file_name.lower().endswith('.csv')
+                        )
+                        discovered_modified = sorted(
+                            os.path.join(response_dir, file_name)
+                            for file_name in all_files
+                            if file_name.lower().startswith('modified_energy_file') and file_name.lower().endswith('.csv')
+                        )
+                except Exception as list_error:
+                    import sys
+                    print(f"Debug: Error listing directory {response_dir}: {list_error}", file=sys.stderr)
 
                 reference_energy_file = next((path for path in reference_candidates if os.path.exists(path)), None)
                 if reference_energy_file is None and discovered_reference:
@@ -1533,7 +1540,12 @@ class Functions:
                     )
 
             def _recalculate_response_time_on_analysis():
+                import sys
                 selected_response_path = str(self.response_time_lineEdit.text()).strip()
+                print(f"Debug: Selected response path: {selected_response_path}", file=sys.stderr)
+                print(f"Debug: Path exists: {os.path.exists(selected_response_path)}", file=sys.stderr)
+                print(f"Debug: Path is CSV: {selected_response_path.lower().endswith('.csv')}", file=sys.stderr)
+                
                 if not (os.path.exists(selected_response_path) and selected_response_path.lower().endswith('.csv')):
                     Message_Boxes.Warning_message(
                         self,
@@ -1544,6 +1556,11 @@ class Functions:
                     return
 
                 reference_energy_file, modified_energy_file, discovered_reference, discovered_modified = _resolve_response_energy_files(selected_response_path)
+                print(f"Debug: reference_energy_file = {reference_energy_file}", file=sys.stderr)
+                print(f"Debug: modified_energy_file = {modified_energy_file}", file=sys.stderr)
+                print(f"Debug: discovered_reference = {discovered_reference}", file=sys.stderr)
+                print(f"Debug: discovered_modified = {discovered_modified}", file=sys.stderr)
+                
                 if reference_energy_file is None or modified_energy_file is None:
                     discovered_reference_text = ', '.join(os.path.basename(path) for path in discovered_reference) or 'none'
                     discovered_modified_text = ', '.join(os.path.basename(path) for path in discovered_modified) or 'none'
