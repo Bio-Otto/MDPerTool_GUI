@@ -501,6 +501,53 @@ class Functions:
             response_dynamics_tab_layout.setContentsMargins(0, 0, 0, 0)
             response_dynamics_tab_layout.setObjectName("analysis_response_dynamics_tab_layout")
 
+            response_recalc_controls_layout = QtWidgets.QHBoxLayout()
+            response_recalc_controls_layout.setObjectName("analysis_response_recalc_controls_layout")
+
+            response_threshold_label = QtWidgets.QLabel(response_dynamics_tab)
+            response_threshold_label.setObjectName("analysis_response_threshold_label")
+            response_threshold_label.setText("Response Threshold:")
+
+            response_threshold_spinbox = QtWidgets.QDoubleSpinBox(response_dynamics_tab)
+            response_threshold_spinbox.setObjectName("analysis_response_threshold_spinbox")
+            response_threshold_spinbox.setDecimals(6)
+            response_threshold_spinbox.setRange(0.0, 1000.0)
+            response_threshold_spinbox.setSingleStep(0.001)
+            response_threshold_spinbox.setValue(float(getattr(self, '_analysis_response_threshold', 0.01)))
+
+            recalculate_response_button = QtWidgets.QPushButton(response_dynamics_tab)
+            recalculate_response_button.setObjectName("analysis_recalculate_response_button")
+            recalculate_response_button.setText("Recalculate Response Time")
+            recalculate_response_button.setMinimumSize(QtCore.QSize(190, 33))
+            recalculate_response_button.setMaximumSize(QtCore.QSize(230, 33))
+            recalculate_response_button.setStyleSheet("""QPushButton
+            {
+                color: white;
+                border: 2px solid rgb(52, 59, 72);
+                border-radius: 5px;
+                background-color: rgb(253, 1, 136);
+                border-width: 1px;
+                padding: 5px;
+                outline: none;
+            }
+            QPushButton:hover
+            {
+                background-color: rgb(22, 200, 244);
+                border: 2px solid rgb(61, 70, 86);
+            }
+            QPushButton:pressed
+            {
+                background-color: rgb(15, 133, 163);
+                border: 2px solid rgb(43, 50, 61);
+            }""")
+            recalculate_response_button.setToolTip("Recompute responseTimes from energy CSV files using selected threshold")
+
+            response_recalc_controls_layout.addWidget(response_threshold_label)
+            response_recalc_controls_layout.addWidget(response_threshold_spinbox)
+            response_recalc_controls_layout.addWidget(recalculate_response_button)
+            response_recalc_controls_layout.addStretch(1)
+            response_dynamics_tab_layout.addLayout(response_recalc_controls_layout)
+
             response_dynamics_tabwidget = QtWidgets.QTabWidget(response_dynamics_tab)
             response_dynamics_tabwidget.setObjectName("analysis_response_dynamics_tabwidget")
             response_dynamics_tab_layout.addWidget(response_dynamics_tabwidget)
@@ -1407,13 +1454,60 @@ class Functions:
             hide_figure_settings_on_analysis_pushButton.setFlat(False)
             hide_figure_settings_on_analysis_pushButton.setObjectName("hide_figure_settings_pushButton")
 
-            possible_path = str(self.response_time_lineEdit.text())
-            if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
-                source_residue = self.source_res_comboBox.currentText()
-                row, col, Response_Count, plot_name, fit_curve, metrics = getResponseTimeGraph(possible_path)
+            def _resolve_response_energy_files(response_file_path):
+                response_dir = os.path.dirname(response_file_path)
+                response_name = os.path.basename(response_file_path)
+
+                suffix = ""
+                if response_name.startswith('responseTimes_') and response_name.lower().endswith('.csv'):
+                    suffix = response_name[len('responseTimes_'):-4]
+
+                reference_candidates = []
+                if suffix:
+                    reference_candidates.append(os.path.join(response_dir, f'reference_energy_file_{suffix}.csv'))
+                reference_candidates.append(os.path.join(response_dir, 'reference_energy_file.csv'))
+
+                modified_candidates = []
+                if suffix:
+                    modified_candidates.append(os.path.join(response_dir, f'modified_energy_file_{suffix}.csv'))
+                modified_candidates.append(os.path.join(response_dir, 'modified_energy_file.csv'))
+
+                discovered_reference = sorted(
+                    os.path.join(response_dir, file_name)
+                    for file_name in os.listdir(response_dir)
+                    if file_name.lower().startswith('reference_energy_file') and file_name.lower().endswith('.csv')
+                ) if os.path.isdir(response_dir) else []
+
+                discovered_modified = sorted(
+                    os.path.join(response_dir, file_name)
+                    for file_name in os.listdir(response_dir)
+                    if file_name.lower().startswith('modified_energy_file') and file_name.lower().endswith('.csv')
+                ) if os.path.isdir(response_dir) else []
+
+                reference_energy_file = next((path for path in reference_candidates if os.path.exists(path)), None)
+                if reference_energy_file is None and discovered_reference:
+                    reference_energy_file = discovered_reference[0]
+
+                modified_energy_file = next((path for path in modified_candidates if os.path.exists(path)), None)
+                if modified_energy_file is None and discovered_modified:
+                    if suffix:
+                        suffix_matches = [
+                            path for path in discovered_modified
+                            if os.path.basename(path).lower() == f'modified_energy_file_{suffix}'.lower() + '.csv'
+                        ]
+                        if suffix_matches:
+                            modified_energy_file = suffix_matches[0]
+                    if modified_energy_file is None:
+                        modified_energy_file = discovered_modified[0]
+
+                return reference_energy_file, modified_energy_file, discovered_reference, discovered_modified
+
+            def _refresh_response_dynamics_views(response_file_path):
+                source_residue_text = self.source_res_comboBox.currentText()
+                row, col, response_count, plot_name, fit_curve, metrics = getResponseTimeGraph(response_file_path)
 
                 try:
-                    response_payload = build_response_dynamics_payload(possible_path, metrics, frame_time_delta=1.0)
+                    response_payload = build_response_dynamics_payload(response_file_path, metrics, frame_time_delta=1.0)
                     populate_residue_response_table(residue_response_table, response_payload['residue_rows'])
                     populate_domain_summary_table(domain_summary_table, response_payload['domain_rows'])
                     populate_metrics_table(metrics_table, response_payload['metrics_rows'])
@@ -1423,20 +1517,82 @@ class Functions:
                     import sys
                     print(f"Warning: Could not build response dynamics payload: {analyzer_error}", file=sys.stderr)
 
-                if source_residue == '':
+                if source_residue_text == '':
                     dissipation_curve_widget.canvas.plot(
-                        Response_Count,
+                        response_count,
                         source_residue=None,
                         plot_name=plot_name,
                         fitted_data=fit_curve,
                     )
-                if source_residue != '':
+                else:
                     dissipation_curve_widget.canvas.plot(
-                        Response_Count,
-                        source_residue=source_residue,
+                        response_count,
+                        source_residue=source_residue_text,
                         plot_name=plot_name,
                         fitted_data=fit_curve,
                     )
+
+            def _recalculate_response_time_on_analysis():
+                selected_response_path = str(self.response_time_lineEdit.text()).strip()
+                if not (os.path.exists(selected_response_path) and selected_response_path.lower().endswith('.csv')):
+                    Message_Boxes.Warning_message(
+                        self,
+                        "Response Time File Missing",
+                        "Please select a valid response time CSV file before recalculation.",
+                        Style.MessageBox_stylesheet,
+                    )
+                    return
+
+                reference_energy_file, modified_energy_file, discovered_reference, discovered_modified = _resolve_response_energy_files(selected_response_path)
+                if reference_energy_file is None or modified_energy_file is None:
+                    discovered_reference_text = ', '.join(os.path.basename(path) for path in discovered_reference) or 'none'
+                    discovered_modified_text = ', '.join(os.path.basename(path) for path in discovered_modified) or 'none'
+                    Message_Boxes.Warning_message(
+                        self,
+                        "Energy File Missing",
+                        "Reference or modified energy file was not found for recalculation.\n"
+                        f"Found reference files: {discovered_reference_text}\n"
+                        f"Found modified files: {discovered_modified_text}",
+                        Style.MessageBox_stylesheet,
+                    )
+                    return
+
+                response_threshold_value = float(response_threshold_spinbox.value())
+                self._analysis_response_threshold = response_threshold_value
+
+                try:
+                    try:
+                        from no_gui.response_time_creator import get_residue_response_times
+                    except ModuleNotFoundError:
+                        from mdpertool.no_gui.response_time_creator import get_residue_response_times
+
+                    get_residue_response_times(
+                        reference_energy_file,
+                        modified_energy_file,
+                        output_name=selected_response_path,
+                        response_threshold=response_threshold_value,
+                    )
+                    _refresh_response_dynamics_views(selected_response_path)
+
+                    Message_Boxes.Information_message(
+                        self,
+                        "Response Recalculated",
+                        f"Response time has been recalculated with threshold {response_threshold_value:.6f}.",
+                        Style.MessageBox_stylesheet,
+                    )
+                except Exception as recalc_error:
+                    Message_Boxes.Warning_message(
+                        self,
+                        "Recalculation Failed",
+                        str(recalc_error),
+                        Style.MessageBox_stylesheet,
+                    )
+
+            recalculate_response_button.clicked.connect(_recalculate_response_time_on_analysis)
+
+            possible_path = str(self.response_time_lineEdit.text())
+            if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
+                _refresh_response_dynamics_views(possible_path)
 
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)

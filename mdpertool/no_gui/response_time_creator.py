@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-RESPONSE_THRESHOLD = 0.01
+DEFAULT_RESPONSE_THRESHOLD = 0.01
 
 
 def _build_cumulative_response_curve(response_time_array, num_frames):
@@ -261,14 +261,17 @@ def _write_response_metrics(output_name, response_time_array, num_frames):
     return summary_path, fit_curve_path
 
 
-def get_residue_response_times(reference_name, perturbed_name, output_name='responseTimes.csv'):
+def get_residue_response_times(reference_name, perturbed_name, output_name='responseTimes.csv',
+                              response_threshold=DEFAULT_RESPONSE_THRESHOLD):
     """Calculate the first responsive frame for each residue and write it to disk."""
 
     reference_energies = pd.read_csv(reference_name)
     perturbed_energies = pd.read_csv(perturbed_name)
 
     energy_diff = reference_energies.sub(perturbed_energies)
-    energy_diff = energy_diff.mask(energy_diff.abs() < RESPONSE_THRESHOLD, 0.0)
+
+    if response_threshold is not None and float(response_threshold) > 0.0:
+        energy_diff = energy_diff.mask(energy_diff.abs() < float(response_threshold), 0.0)
 
     num_frames = len(energy_diff.index)
     residue_response_times = []
@@ -288,10 +291,16 @@ def get_residue_response_times(reference_name, perturbed_name, output_name='resp
     return response_time_array
 
 
-def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTimes.csv'):
+def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTimes.csv',
+                           responseThreshold=DEFAULT_RESPONSE_THRESHOLD):
     """Backward-compatible wrapper for legacy callers."""
 
-    return get_residue_response_times(referenceName, perturbedName, outputName)
+    return get_residue_response_times(
+        referenceName,
+        perturbedName,
+        outputName,
+        response_threshold=responseThreshold,
+    )
 
 
 def summarize_response_time_group(response_time_files, output_name=None):
@@ -380,7 +389,7 @@ def summarize_response_time_group(response_time_files, output_name=None):
 
 
 __all__ = [
-    "RESPONSE_THRESHOLD",
+    "DEFAULT_RESPONSE_THRESHOLD",
     "get_residue_response_times",
     "getResidueResponseTimes",
     "summarize_response_time_group",
