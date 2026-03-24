@@ -232,7 +232,7 @@ def load_response_times(reTimeFile):
 
 
 def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_type='CA', write_out=False,
-                   out_directory='', progress_callback=None):
+                   out_directory='', progress_callback=None, verbose=False):
     try:
         structure_res_list, res_list = get_residues(pdb)
         reTimeList = load_response_times(reTimeFile)
@@ -248,8 +248,10 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_t
 
         len_of_retimes_on_file = len(reTimeList)
 
-        total_steps = len(structure_res_list) * (len(structure_res_list) - 1)
+        residue_count = len(structure_res_list)
+        total_steps = (residue_count * (residue_count - 1)) // 2
         current_step = 0
+        last_progress_value = -1
 
         # Add nodes and properties to the graph
         for idx, res in enumerate(structure_res_list):
@@ -259,27 +261,34 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_t
             if network.has_node(node_name):
                 node_name += 'X'
                 res_list[idx] = node_name
-                print(f"Residue of the same name was found. Residue name changed to {node_name}.")
+                if verbose:
+                    print(f"Residue of the same name was found. Residue name changed to {node_name}.")
 
             network.add_node(node_name, posx=str(res_pos[0]), posy=str(res_pos[1]), posz=str(res_pos[2]),
                              retime=reTimeList[idx])
 
-        print(f"Nodes added: {len(network.nodes)}")
+        if verbose:
+            print(f"Nodes added: {len(network.nodes)}")
 
         # Add edges according to residue response time and cutoff distance
         for i, res1 in enumerate(structure_res_list):
-            for j, res2 in enumerate(structure_res_list):
-                if i != j:
-                    if within_cutoff(res1, res2, distance_cutoff, method, atom_type):
-                        network.add_edge(res_list[i], res_list[j])
-                        print(f"Edge added between {res_list[i]} and {res_list[j]}")
+            for j in range(i + 1, residue_count):
+                res2 = structure_res_list[j]
+                if within_cutoff(res1, res2, distance_cutoff, method, atom_type):
+                    network.add_edge(res_list[i], res_list[j])
 
                 current_step += 1
-                if progress_callback:
-                    progress_value = (current_step / total_steps) * 100
-                    print(int(progress_value))
+                if progress_callback and total_steps > 0:
+                    progress_value = int((current_step / total_steps) * 100)
+                    if progress_value != last_progress_value:
+                        progress_callback(progress_value)
+                        last_progress_value = progress_value
 
-        print(f"Total edges: {len(network.edges)}")
+        if progress_callback and last_progress_value < 100:
+            progress_callback(100)
+
+        if verbose:
+            print(f"Total edges: {len(network.edges)}")
 
         if write_out:
             nx.write_gml(network, os.path.join(out_directory, outputFileName))

@@ -510,10 +510,39 @@ class Functions:
 
             response_threshold_spinbox = QtWidgets.QDoubleSpinBox(response_dynamics_tab)
             response_threshold_spinbox.setObjectName("analysis_response_threshold_spinbox")
-            response_threshold_spinbox.setDecimals(6)
-            response_threshold_spinbox.setRange(0.0, 1000.0)
-            response_threshold_spinbox.setSingleStep(0.001)
+            response_threshold_spinbox.setDecimals(3)
+            response_threshold_spinbox.setRange(0.0, 10.0)
+            response_threshold_spinbox.setSingleStep(0.005)
             response_threshold_spinbox.setValue(float(getattr(self, '_analysis_response_threshold', 0.01)))
+            response_threshold_spinbox.setMinimumHeight(33)
+            response_threshold_spinbox.setStyleSheet("""QDoubleSpinBox
+            {
+                color: white;
+                border: 2px solid rgb(52, 59, 72);
+                border-radius: 5px;
+                background-color: rgb(27, 29, 35);
+                border-width: 1px;
+                padding: 4px 8px;
+                selection-background-color: rgb(110, 105, 225);
+            }
+            QDoubleSpinBox:hover
+            {
+                border: 2px solid rgb(61, 70, 86);
+            }
+            QDoubleSpinBox:focus
+            {
+                border: 2px solid rgb(22, 200, 244);
+            }
+            QDoubleSpinBox::up-button, QDoubleSpinBox::down-button
+            {
+                width: 16px;
+                border: none;
+                background-color: rgb(52, 59, 72);
+            }
+            QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover
+            {
+                background-color: rgb(110, 105, 225);
+            }""")
 
             recalculate_response_button = QtWidgets.QPushButton(response_dynamics_tab)
             recalculate_response_button.setObjectName("analysis_recalculate_response_button")
@@ -1489,7 +1518,7 @@ class Functions:
                         )
                 except Exception as list_error:
                     import sys
-                    print(f"Debug: Error listing directory {response_dir}: {list_error}", file=sys.stderr)
+                    print(f"Warning: Could not list directory {response_dir}: {list_error}", file=sys.stderr)
 
                 reference_energy_file = next((path for path in reference_candidates if os.path.exists(path)), None)
                 if reference_energy_file is None and discovered_reference:
@@ -1518,7 +1547,6 @@ class Functions:
                     populate_residue_response_table(residue_response_table, response_payload['residue_rows'])
                     populate_domain_summary_table(domain_summary_table, response_payload['domain_rows'])
                     populate_metrics_table(metrics_table, response_payload['metrics_rows'])
-                    populate_qc_table(qc_table, response_payload['qc_rows'])
                     populate_provenance_table(provenance_table, response_payload['provenance_rows'])
                 except Exception as analyzer_error:
                     import sys
@@ -1540,12 +1568,7 @@ class Functions:
                     )
 
             def _recalculate_response_time_on_analysis():
-                import sys
                 selected_response_path = str(self.response_time_lineEdit.text()).strip()
-                print(f"Debug: Selected response path: {selected_response_path}", file=sys.stderr)
-                print(f"Debug: Path exists: {os.path.exists(selected_response_path)}", file=sys.stderr)
-                print(f"Debug: Path is CSV: {selected_response_path.lower().endswith('.csv')}", file=sys.stderr)
-                
                 if not (os.path.exists(selected_response_path) and selected_response_path.lower().endswith('.csv')):
                     Message_Boxes.Warning_message(
                         self,
@@ -1556,11 +1579,6 @@ class Functions:
                     return
 
                 reference_energy_file, modified_energy_file, discovered_reference, discovered_modified = _resolve_response_energy_files(selected_response_path)
-                print(f"Debug: reference_energy_file = {reference_energy_file}", file=sys.stderr)
-                print(f"Debug: modified_energy_file = {modified_energy_file}", file=sys.stderr)
-                print(f"Debug: discovered_reference = {discovered_reference}", file=sys.stderr)
-                print(f"Debug: discovered_modified = {discovered_modified}", file=sys.stderr)
-                
                 if reference_energy_file is None or modified_energy_file is None:
                     discovered_reference_text = ', '.join(os.path.basename(path) for path in discovered_reference) or 'none'
                     discovered_modified_text = ', '.join(os.path.basename(path) for path in discovered_modified) or 'none'
@@ -1590,6 +1608,7 @@ class Functions:
                         response_threshold=response_threshold_value,
                     )
                     _refresh_response_dynamics_views(selected_response_path)
+                    _refresh_pathway_and_critical_views(show_done_message=False)
 
                     Message_Boxes.Information_message(
                         self,
@@ -1701,51 +1720,66 @@ class Functions:
             Helper_Functions.Handle_Save_Figure_Options_on_analysis_Changed(self, figure_settings_on_analysis_groupBox)
             ##########################################################################################################
 
-            source_res = self.source_res_comboBox.currentText()[:-1]
             done_message_shown = False
+            current_shortest_path_graphs = []
 
             if self.initial_network is not None and len(self.initial_network.nodes()) > 0:
                 global_betweenness = nx.betweenness_centrality(self.initial_network)
             else:
                 global_betweenness = {}
 
-            all_paths = []
-            clean_all_graps = []
             target_res_list, target_graph_list = extract_target_graph_pairs(
                 clean_log_list,
                 all_graph_list,
                 amino_acid_residues,
             )
 
-            pathway_rows, residue_path_hits, shortest_path_strings, all_paths_messages = summarize_target_pathways(
-                source_res,
-                target_res_list,
-                target_graph_list,
-            )
+            def _refresh_pathway_and_critical_views(show_done_message=False):
+                nonlocal done_message_shown
+                local_source_res = self.source_res_comboBox.currentText()[:-1]
+                pathway_rows_local, residue_path_hits_local, shortest_path_strings_local, all_paths_messages_local = summarize_target_pathways(
+                    local_source_res,
+                    target_res_list,
+                    target_graph_list,
+                )
 
-            for cnt, shortest_path_text in enumerate(shortest_path_strings):
-                item = QListWidgetItem(shortest_path_text)
-                item.setBackground(QColor(colors[cnt % len(colors)]))
-                shortest_path_listWidget.addItem(item)
+                shortest_path_listWidget.clear()
+                current_shortest_path_graphs.clear()
+                current_shortest_path_graphs.extend(target_graph_list[:len(shortest_path_strings_local)])
 
-            all_paths.extend(all_paths_messages)
+                for cnt, shortest_path_text in enumerate(shortest_path_strings_local):
+                    item = QListWidgetItem(shortest_path_text)
+                    item.setBackground(QColor(colors[cnt % len(colors)]))
+                    shortest_path_listWidget.addItem(item)
 
-            pathway_rows = sorted(pathway_rows, key=lambda row: (row[3] == 'No Path', str(row[2]), row[0]))
-            populate_pathway_summary_table(pathway_summary_table, pathway_rows)
-            reachable_count, unreachable_count = count_reachability(pathway_rows)
-            populate_reachability_qc(qc_table, reachable_count, unreachable_count)
+                pathway_rows_sorted = sorted(pathway_rows_local, key=lambda row: (row[3] == 'No Path', str(row[2]), row[0]))
+                populate_pathway_summary_table(pathway_summary_table, pathway_rows_sorted)
+                reachable_count, unreachable_count = count_reachability(pathway_rows_sorted)
+                populate_reachability_qc(qc_table, reachable_count, unreachable_count)
 
-            critical_rows = build_critical_residue_rows(residue_path_hits, global_betweenness, top_n=20)
-            populate_critical_residue_table(critical_residue_table, critical_rows)
+                critical_rows_local = build_critical_residue_rows(residue_path_hits_local, global_betweenness, top_n=20)
+                populate_critical_residue_table(critical_residue_table, critical_rows_local)
 
-            all_path_string = build_done_message(all_paths)
-            Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
-            done_message_shown = True
+                if show_done_message:
+                    all_path_string = build_done_message(list(all_paths_messages_local))
+                    Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
+                    done_message_shown = True
+
+            _refresh_pathway_and_critical_views(show_done_message=True)
+
+            def _show_selected_shortest_path(item):
+                selected_row = shortest_path_listWidget.currentRow()
+                if not (0 <= selected_row < len(current_shortest_path_graphs)):
+                    return
+                Functions.show_shortest_paths_on_3D_ProteinView(
+                    self,
+                    item,
+                    Protein3DNetworkView,
+                    current_shortest_path_graphs[selected_row],
+                )
 
             shortest_path_listWidget.itemDoubleClicked.connect(
-                lambda item: Functions.show_shortest_paths_on_3D_ProteinView(
-                    self, item, Protein3DNetworkView,
-                    target_graph_list[shortest_path_listWidget.currentRow()]))
+                _show_selected_shortest_path)
             # #########################################################################################################
 
             # #########################################################################################################
@@ -2031,6 +2065,7 @@ class Functions:
 
             if os.path.exists(path):
                 self.upload_pdb_lineEdit.setText(path)
+                self._pending_res1_index = 342
                 self.upload_pdb_from_local(manuel=False)
                 try:
                     os.mkdir(output_directory)
@@ -2143,6 +2178,8 @@ class Functions:
         if os.path.exists(topology_path):
             self.boundForm_pdb_lineedit.setText(topology_path)
             self.response_time_lineEdit.setText(reTime_File)
+            self._pending_target_index = 255
+            self._pending_source_index = 342
             self.upload_boundForm_pdb_from_local(manuel=False)
             try:
                 os.mkdir(output_directory)

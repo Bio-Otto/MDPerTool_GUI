@@ -1,6 +1,7 @@
 import argparse
 from datetime import datetime
 from importlib import resources
+from functools import partial
 import os
 import sys
 import platform
@@ -53,6 +54,23 @@ def center_window(widget):
 
 class PlotSignal(QObject):
     plot_network = Signal()
+
+
+class BackgroundTaskWorker(QtCore.QObject):
+    finished = QtCore.Signal(object)
+    failed = QtCore.Signal(str)
+
+    def __init__(self, task):
+        super().__init__()
+        self._task = task
+
+    @QtCore.Slot()
+    def run(self):
+        try:
+            result = self._task()
+            self.finished.emit(result)
+        except Exception as error:
+            self.failed.emit(str(error))
 
 
 # class ElapsedTimeWorker(QThread):
@@ -118,6 +136,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.effected_atom_percentage_keper = None
         self.elapsed_time_worker =None
         self.run_active = False
+        self._active_background_tasks = []
         self.current_run_stage = "Idle"
         self.last_log_update_at = None
         self.elapsed_time_text = "Elapsed Time: 0d 0h 0m 0s"
@@ -536,164 +555,217 @@ class MainWindow(QtWidgets.QMainWindow):
         Fetch action for getting crystal structure from pdb databank
         :return: path of downloaded pdb file or None conditions will return
         """
-        fetched_and_modified_pdb = UIF.Functions.Fetch_PDB_File(self)
+        fetch_pdb_id = self.PDB_ID_lineEdit.text().strip()
+        if len(fetch_pdb_id) != 4:
+            UIF.Message_Boxes.Warning_message(
+                self,
+                "Wrong PDB ID",
+                "Please enter a valid 4-character PDB ID.",
+                Style.MessageBox_stylesheet,
+            )
+            return
 
-        if fetched_and_modified_pdb:
-            UIF.UIFunctions.load_pdb_to_pymol(self, fetched_and_modified_pdb)
+        def _fetch_task():
+            download_folder = os.path.join(os.getcwd(), 'Download')
+            return UIF.download_pdb_file(fetch_pdb_id, compressed=False, dest_folder=download_folder)
 
-        if fetched_and_modified_pdb is None:
-            UIF.Message_Boxes.Information_message(self, 'Wrong pdb id "%s"' % self.PDB_ID_lineEdit.text(),
-                                                  'There is no protein crystal structure in this expression.',
-                                                  Style.MessageBox_stylesheet)
+        def _on_fetch_success(pdb_path):
+            if not pdb_path or not os.path.exists(pdb_path):
+                UIF.Message_Boxes.Information_message(
+                    self,
+                    'Wrong pdb id "%s"' % fetch_pdb_id,
+                    'There is no protein crystal structure in this expression.',
+                    Style.MessageBox_stylesheet,
+                )
+                return
 
-    def upload_pdb_from_local(self, manuel):
+            self.upload_pdb_lineEdit.setText(pdb_path)
+            self.upload_pdb_from_local(manuel=True, pdb_path_override=pdb_path)
+
+        self._run_background_task_with_progress(
+            label=f"Fetching PDB file ({fetch_pdb_id})...",
+            task=_fetch_task,
+            on_success=_on_fetch_success,
+            failure_title="PDB Fetch Error",
+        )
+
+    def _run_background_task_with_progress(self, label, task, on_success, failure_title="Operation Error"):
+        progress_manager = UIF.Helper_Functions._get_progress_dialog_manager(self)
+        progress_manager.show_indeterminate(
+            label=label,
+            title="Please Wait",
+            frameless=True,
+            size=(500, 80),
+            cancel_button_text=None,
+        )
+        self.setEnabled(False)
+
+        thread = QtCore.QThread(self)
+        worker = BackgroundTaskWorker(task)
+        worker.moveToThread(thread)
+
+        task_state = {'thread': thread, 'worker': worker}
+        self._active_background_tasks.append(task_state)
+
+        def _finalize():
+            progress_manager.close(process_events=True)
+            self.setEnabled(True)
+            thread.quit()
+            thread.wait()
+            if task_state in self._active_background_tasks:
+                self._active_background_tasks.remove(task_state)
+            worker.deleteLater()
+            thread.deleteLater()
+
+        def _on_finished(result):
+            _finalize()
+            on_success(result)
+
+        def _on_failed(error_text):
+            _finalize()
+            UIF.Message_Boxes.Critical_message(
+                self,
+                failure_title,
+                str(error_text),
+                Style.MessageBox_stylesheet,
+            )
+
+        thread.started.connect(worker.run)
+        worker.finished.connect(_on_finished)
+        worker.failed.connect(_on_failed)
+        thread.start()
+
+    @staticmethod
+    def _task_fix_and_extract_residues(pdb_path, output_dir, ph_value, chains_to_remove):
+        modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(
+            None,
+            pdb_path,
+            output_dir,
+            ph=ph_value,
+            chains_to_remove=chains_to_remove,
+        )
+        residues = UIF.Helper_Functions().fill_residue_combobox(modified_pdb)
+        return modified_pdb, residues
+
+    def _resolve_selected_chains(self, pdb_path):
+        fixer = PDBFixer(pdb_path)
+        fixer.removeHeterogens(keepWater=False)
+        modeller = Modeller(fixer.topology, fixer.positions)
+        chain_ids = [str(chain.id).strip() for chain in modeller.topology.chains()]
+        chains = [chain_id for chain_id in dict.fromkeys(chain_ids) if chain_id]
+
+        checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains, checked=True)
+        pdb_fix_dialog_answer = checked_list.exec_()
+        if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
+            selected_chains = [str(s) for s in checked_list.choices]
+            return list(set(chains) - set(selected_chains))
+        return None
+
+    def _apply_simulation_upload_result(self, modified_pdb, residues):
+        self.upload_pdb_lineEdit.setText(modified_pdb)
+        self.combobox = residues
+        self.res1_comboBox.clear()
+        self.res1_comboBox.addItems(self.combobox)
+        pending_res1_index = getattr(self, '_pending_res1_index', None)
+        if isinstance(pending_res1_index, int) and 0 <= pending_res1_index < self.res1_comboBox.count():
+            self.res1_comboBox.setCurrentIndex(pending_res1_index)
+            self._pending_res1_index = None
+        self.selected_residues_listWidget.clear()
+        UIF.UIFunctions.load_pdb_to_pymol(self, modified_pdb)
+
+    def _apply_analysis_upload_result(self, modified_pdb, residues):
+        self.boundForm_pdb_lineedit.setText(modified_pdb)
+        self.target_combobox = residues
+
+        self.target_res_comboBox.clear()
+        self.source_res_comboBox.clear()
+        self.target_res_comboBox.addItems(self.target_combobox)
+        self.source_res_comboBox.addItems(self.target_combobox)
+
+        pending_target_index = getattr(self, '_pending_target_index', None)
+        pending_source_index = getattr(self, '_pending_source_index', None)
+        if isinstance(pending_target_index, int) and 0 <= pending_target_index < self.target_res_comboBox.count():
+            self.target_res_comboBox.setCurrentIndex(pending_target_index)
+            self._pending_target_index = None
+        if isinstance(pending_source_index, int) and 0 <= pending_source_index < self.source_res_comboBox.count():
+            self.source_res_comboBox.setCurrentIndex(pending_source_index)
+            self._pending_source_index = None
+        pending_source_text = getattr(self, '_pending_source_text', None)
+        if pending_source_text:
+            text_index = self.source_res_comboBox.findText(pending_source_text, QtCore.Qt.MatchFixedString)
+            if text_index >= 0:
+                self.source_res_comboBox.setCurrentIndex(text_index)
+            self._pending_source_text = None
+
+        UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
+
+    def upload_pdb_from_local(self, manuel, pdb_path_override=None):
         global selected_chains
         try:
-            if manuel:
+            if pdb_path_override is not None:
+                pdb_path = pdb_path_override
+            elif manuel:
                 upload_condition, pdb_path = UIF.Functions.browse_pdbFile(self)
-            if not manuel:
+            else:
                 pdb_path = self.upload_pdb_lineEdit.text()
 
             if os.path.exists(pdb_path):
-                fixer = PDBFixer(pdb_path)
-                fixer.removeHeterogens(keepWater=False)
+                if manuel:
+                    delete_chains = self._resolve_selected_chains(pdb_path)
+                else:
+                    delete_chains = None
 
-                modeller = Modeller(fixer.topology, fixer.positions)
-                chain_ids = [str(chain.id).strip() for chain in modeller.topology.chains()]
-                chains = [chain_id for chain_id in dict.fromkeys(chain_ids) if chain_id]
+                output_dir = self.Output_Folder_textEdit.toPlainText()
+                ph_value = self.pH_doubleSpinBox.value()
 
-                checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                                   checked=True)
-                pdb_fix_dialog_answer = checked_list.exec_()
-                if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
-                    selected_chains = [str(s) for s in checked_list.choices]
-
-                    delete_chains = list(set(chains) - set(selected_chains))
-
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
-                                                                 self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=self.pH_doubleSpinBox.value(),
-                                                                 chains_to_remove=delete_chains)
-
-                    self.upload_pdb_lineEdit.setText(modified_pdb)
-
-                    self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
-                    # for i in self.combobox:
-                    #     self.res1_comboBox.addItem(str(i))
-                    self.res1_comboBox.clear()  # delete all items from comboBox
-                    # self.mut_res_comboBox.clear()  # delete all items from comboBox
-                    self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                    # self.mut_res_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-
-                elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
-                                                                 self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=self.pH_doubleSpinBox.value(),
-                                                                 chains_to_remove=None)
-
-                    self.upload_pdb_lineEdit.setText(modified_pdb)
-
-                    self.combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
-                    for i in self.combobox:
-                        self.res1_comboBox.addItem(str(i))
-                    self.res1_comboBox.clear()  # delete all items from comboBox
-                    self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-                self.selected_residues_listWidget.clear()
-                UIF.UIFunctions.load_pdb_to_pymol(self, modified_pdb)
+                self._run_background_task_with_progress(
+                    label="Preparing uploaded PDB file...",
+                    task=partial(
+                        MainWindow._task_fix_and_extract_residues,
+                        pdb_path,
+                        output_dir,
+                        ph_value,
+                        delete_chains,
+                    ),
+                    on_success=lambda result: self._apply_simulation_upload_result(result[0], result[1]),
+                    failure_title="PDB Upload Error",
+                )
 
         except Exception as Error:
             print("ERROR: ", Error)
             pass
 
-    def upload_boundForm_pdb_from_local(self, manuel=False):
+    def upload_boundForm_pdb_from_local(self, manuel=False, pdb_path_override=None):
         global selected_chains
         try:
-            if manuel:
+            if pdb_path_override is not None:
+                pdb_path = pdb_path_override
+            elif manuel:
                 upload_condition, pdb_path = UIF.Functions.browse_bound_form_pdbFile(self)
-            if not manuel:
+            else:
                 pdb_path = self.boundForm_pdb_lineedit.text()
 
             if os.path.exists(pdb_path):
-                fixer = PDBFixer(pdb_path)
-                fixer.removeHeterogens(keepWater=False)
+                if manuel and pdb_path_override is None:
+                    delete_chains = self._resolve_selected_chains(pdb_path)
+                else:
+                    delete_chains = None
 
-                modeller = Modeller(fixer.topology, fixer.positions)
-                chain_ids = [str(chain.id).strip() for chain in modeller.topology.chains()]
-                chains = [chain_id for chain_id in dict.fromkeys(chain_ids) if chain_id]
+                output_dir = self.Output_Folder_textEdit.toPlainText()
+                ph_value = self.pH_doubleSpinBox.value()
 
-                if manuel:
-                    checked_list = UIF.ChecklistDialog('Select the chain (s) to be used in the system', chains,
-                                                       checked=True)
-                    pdb_fix_dialog_answer = checked_list.exec_()
-                    if pdb_fix_dialog_answer == QtWidgets.QDialog.Accepted:
-                        selected_chains = [str(s) for s in checked_list.choices]
-
-                        delete_chains = list(set(chains) - set(selected_chains))
-
-                        modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
-                                                                     self.Output_Folder_textEdit.toPlainText(),
-                                                                     ph=self.pH_doubleSpinBox.value(),
-                                                                     chains_to_remove=delete_chains)
-
-                        self.boundForm_pdb_lineedit.setText(modified_pdb)
-
-                        self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
-
-                        for i in self.target_combobox:
-                            self.target_res_comboBox.addItem(str(i))
-                            self.source_res_comboBox.addItem(str(i))
-
-                        self.target_res_comboBox.clear()  # delete all items from comboBox
-                        self.target_res_comboBox.addItems(
-                            self.target_combobox)  # add the actual content of self.comboData
-                        self.source_res_comboBox.clear()  # delete all items from comboBox
-                        self.source_res_comboBox.addItems(
-                            self.target_combobox)  # add the actual content of self.comboData
-
-                    elif pdb_fix_dialog_answer == QtWidgets.QDialog.Rejected:
-                        modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
-                                                                     self.Output_Folder_textEdit.toPlainText(),
-                                                                     ph=self.pH_doubleSpinBox.value(),
-                                                                     chains_to_remove=None)
-
-                        self.boundForm_pdb_lineedit.setText(modified_pdb)
-
-                        self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
-                        for i in self.target_combobox:
-                            self.target_res_comboBox.addItem(str(i))
-                            self.source_res_comboBox.addItem(str(i))
-
-                        self.target_res_comboBox.clear()  # delete all items from comboBox
-                        self.target_res_comboBox.addItems(
-                            self.target_combobox)  # add the actual content of self.comboData
-                        self.source_res_comboBox.clear()  # delete all items from comboBox
-                        self.source_res_comboBox.addItems(
-                            self.target_combobox)  # add the actual content of self.comboData
-
-                    UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
-
-                if not manuel:
-                    modified_pdb = UIF.pdb_Tools.fetched_pdb_fix(self, pdb_path,
-                                                                 self.Output_Folder_textEdit.toPlainText(),
-                                                                 ph=self.pH_doubleSpinBox.value(),
-                                                                 chains_to_remove=None)
-
-                    self.boundForm_pdb_lineedit.setText(modified_pdb)
-
-                    self.target_combobox = UIF.Helper_Functions.fill_residue_combobox(self, modified_pdb)
-
-                    for i in self.target_combobox:
-                        self.target_res_comboBox.addItem(str(i))
-                        self.source_res_comboBox.addItem(str(i))
-
-                    self.target_res_comboBox.clear()  # delete all items from comboBox
-                    self.target_res_comboBox.addItems(
-                        self.target_combobox)  # add the actual content of self.comboData
-                    self.source_res_comboBox.clear()  # delete all items from comboBox
-                    self.source_res_comboBox.addItems(
-                        self.target_combobox)  # add the actual content of self.comboData
-
-                    UIF.UIFunctions.load_pdb_to_3DNetwork(self, modified_pdb)
+                self._run_background_task_with_progress(
+                    label="Preparing bound-form topology...",
+                    task=partial(
+                        MainWindow._task_fix_and_extract_residues,
+                        pdb_path,
+                        output_dir,
+                        ph_value,
+                        delete_chains,
+                    ),
+                    on_success=lambda result: self._apply_analysis_upload_result(result[0], result[1]),
+                    failure_title="Bound-Form Upload Error",
+                )
 
         except TypeError:
             pass
@@ -732,6 +804,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                              'responseTimes_%s.csv' % int(
                                                                  self.R_factor_ComboBox.currentText())))
 
+            self._pending_source_text = self.res1_comboBox.currentText()
             self.upload_boundForm_pdb_from_local(manuel=False)
 
             index = self.source_res_comboBox.findText(self.res1_comboBox.currentText(), QtCore.Qt.MatchFixedString)

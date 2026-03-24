@@ -56,7 +56,6 @@ class CalcNetWorker(QRunnable):
             self.signals.error.emit((exctype, value, traceback.format_exc()))
         else:
             self.signals.result.emit([net, log])
-            print(log)
         finally:
             self.signals.finished.emit()
 
