@@ -89,7 +89,14 @@ buttonMap = {
     Qt.MidButton: 1,
 }
 
-path = os.getcwd()
+def _get_safe_working_directory():
+    try:
+        return os.getcwd()
+    except FileNotFoundError:
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+
+path = _get_safe_working_directory()
 demo_pdb_path = os.path.join(path, 'Download', '1aki.pdb')
 
 
