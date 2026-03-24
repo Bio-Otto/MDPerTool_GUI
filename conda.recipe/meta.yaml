@@ -1,5 +1,4 @@
 
-{% set data = load_setup_py_data() %}
 {% set name = "mdpertool" %}
 {% set version = "0.0.3" %}
 
