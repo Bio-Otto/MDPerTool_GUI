@@ -7,6 +7,7 @@
 
 
 <div align="center">
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/mdpertool-gui)
 	<a href="https://anaconda.org/bio-otto/mdpertool"><img src="https://img.shields.io/conda/v/bio-otto/mdpertool.svg" alt="Conda Build"/></a>
     <img src="https://anaconda.org/bio-otto/mdpertool/badges/platforms.svg" alt="Platforms"/>
     <img src="https://anaconda.org/bio-otto/mdpertool/badges/downloads.svg" alt="Download Counter"/>
