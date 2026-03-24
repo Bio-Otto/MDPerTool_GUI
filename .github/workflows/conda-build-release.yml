@@ -1,0 +1,145 @@
+name: Conda Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  CONDA_BLD_PATH: /tmp/conda-bld
+  CONDA_CHANNELS: -c bio-otto -c conda-forge
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ['3.9']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge,defaults
+          channel-priority: strict
+          auto-activate-base: true
+          miniconda-version: latest
+
+      - name: Install conda-build
+        shell: bash -el {0}
+        run: |
+          conda install -y conda-build anaconda-client
+
+      - name: Build conda package
+        shell: bash -el {0}
+        run: |
+          mkdir -p ${{ env.CONDA_BLD_PATH }}
+          conda build conda.recipe \
+            ${{ env.CONDA_CHANNELS }} \
+            --output-folder ${{ env.CONDA_BLD_PATH }} \
+            --no-test
+        continue-on-error: false
+
+      - name: List build outputs
+        shell: bash -el {0}
+        run: |
+          find ${{ env.CONDA_BLD_PATH }} -name "*.conda" -o -name "*.tar.bz2" | head -20
+
+      - name: Test package installation
+        shell: bash -el {0}
+        run: |
+          PACKAGE=$(find ${{ env.CONDA_BLD_PATH }} -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" | head -1)
+          if [ -z "$PACKAGE" ]; then
+            echo "No package found!"
+            exit 1
+          fi
+          conda create -y -n test_env --file <(echo "$PACKAGE")
+          conda activate test_env
+          mdpertool --help
+          python -c "from mdpertool._version import __version__; print('Version:', __version__)"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-packages-${{ matrix.os }}
+          path: ${{ env.CONDA_BLD_PATH }}/**/*.{conda,tar.bz2}
+          retention-days: 30
+
+      - name: Store package path for upload
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash -el {0}
+        run: |
+          PACKAGE=$(find ${{ env.CONDA_BLD_PATH }} -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" | head -1)
+          echo "PACKAGE_PATH=$PACKAGE" >> $GITHUB_ENV
+          echo "Package: $PACKAGE"
+
+      - name: Upload to anaconda.org
+        if: startsWith(github.ref, 'refs/tags/v') && success()
+        shell: bash -el {0}
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          if [ -z "$ANACONDA_TOKEN" ]; then
+            echo "Warning: ANACONDA_TOKEN not set, skipping upload"
+            exit 0
+          fi
+          PACKAGE=$(find ${{ env.CONDA_BLD_PATH }} -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" | head -1)
+          if [ -n "$PACKAGE" ]; then
+            anaconda -t $ANACONDA_TOKEN upload -u bio-otto "$PACKAGE" --force
+          else
+            echo "No package found for upload"
+            exit 1
+          fi
+
+  create-release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && success()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create Release Notes
+        id: release_notes
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "## MDPerTool $TAG" > release.md
+          echo "" >> release.md
+          echo "### Release Artifacts" >> release.md
+          echo "Built and tested on:" >> release.md
+          echo "- Windows (win-64)" >> release.md
+          echo "- Linux (linux-64)" >> release.md
+          echo "- macOS (osx-64)" >> release.md
+          echo "" >> release.md
+          echo "### Installation" >> release.md
+          echo "\`\`\`bash" >> release.md
+          echo "conda create -n mdpertool" >> release.md
+          echo "conda activate mdpertool" >> release.md
+          echo "conda install -c bio-otto -c conda-forge mdpertool==$TAG" >> release.md
+          echo "\`\`\`" >> release.md
+          cat release.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release.md
+          files: release-artifacts/**/*.{conda,tar.bz2}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
