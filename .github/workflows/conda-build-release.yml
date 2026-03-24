@@ -97,11 +97,15 @@ jobs:
         shell: bash -el {0}
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          if [ -z "$ANACONDA_TOKEN" ]; then
-            echo "ANACONDA_TOKEN is not set"
+          TOKEN="${ANACONDA_TOKEN:-$ANACONDA_API_TOKEN}"
+          if [ -z "$TOKEN" ]; then
+            echo "No Anaconda token found. Set ANACONDA_TOKEN or ANACONDA_API_TOKEN in repository secrets."
             exit 1
           fi
+          export ANACONDA_API_TOKEN="$TOKEN"
+          echo "Anaconda token detected (length: ${#TOKEN})."
           conda install -y anaconda-client
           echo "Artifacts downloaded:"
           find artifacts -type f | head -100 || true
@@ -114,7 +118,7 @@ jobs:
             exit 1
           fi
           echo "Uploading $PACKAGE"
-          anaconda -t "$ANACONDA_TOKEN" upload -u bio-otto "$PACKAGE" --force
+          anaconda --token "$TOKEN" upload -u bio-otto "$PACKAGE" --force
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
