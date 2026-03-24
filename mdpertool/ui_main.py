@@ -40,6 +40,13 @@ import multiprocessing as mp
 counter = 0
 
 
+def safe_getcwd():
+    try:
+        return os.getcwd()
+    except FileNotFoundError:
+        return str(Path.home())
+
+
 def center_window(widget):
     window = widget.window()
     window.setGeometry(
@@ -182,7 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_version.setText('Version %s' % current_version.__version__)
         # self.setWindowIcon(QIcon('%s/icons/MDPerTool.ico' % os.getcwd()))
         UIF.UIFunctions.labelTitle(self, 'MDPerTool - %s %s' % (platform.system(), platform.release()))
-        UIF.UIFunctions.labelDescription(self, str(os.getcwd()))
+        UIF.UIFunctions.labelDescription(self, safe_getcwd())
 
         # # ----- > Move The Screen To Center
         # qtRectangle = self.frameGeometry()
@@ -566,7 +573,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         def _fetch_task():
-            download_folder = os.path.join(os.getcwd(), 'Download')
+            download_folder = os.path.join(safe_getcwd(), 'Download')
             return UIF.download_pdb_file(fetch_pdb_id, compressed=False, dest_folder=download_folder)
 
         def _on_fetch_success(pdb_path):
@@ -1184,7 +1191,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     return False
 
                 if user_response == QMessageBox.No:
-                    output_directory = os.path.join(os.getcwd(), "out_for_net_analysis")
+                    output_directory = os.path.join(safe_getcwd(), "out_for_net_analysis")
                     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
             output_directory = os.path.abspath(output_directory.strip()).replace('\\', '/')
@@ -1231,7 +1238,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.atomPair_checkBox.setChecked(False)
 
     def load_nx_to_VisJS_2D_Network(self, intersection_graph_html='2d_network.html', intersection_gml_file=None):
-        initial_2d_network_html_directory = os.path.join(os.getcwd(), 'analysis')
+        initial_2d_network_html_directory = os.path.join(safe_getcwd(), 'analysis')
         initial_2d_network_html_path = os.path.join(initial_2d_network_html_directory, intersection_graph_html)
         self.VisJSEngineView.load_network_component(network=intersection_gml_file,
                                                     html_file=initial_2d_network_html_path)
