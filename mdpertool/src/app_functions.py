@@ -76,6 +76,13 @@ colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8
           '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
 
+def _safe_getcwd():
+    try:
+        return os.getcwd()
+    except FileNotFoundError:
+        return str(Path.home())
+
+
 class GeneralNetworkWorker(QtCore.QObject):
     finished = QtCore.Signal(object, object, int, object)
     failed = QtCore.Signal(str)
@@ -1484,8 +1491,9 @@ class Functions:
             hide_figure_settings_on_analysis_pushButton.setObjectName("hide_figure_settings_pushButton")
 
             def _resolve_response_energy_files(response_file_path):
-                response_dir = os.path.dirname(response_file_path)
-                response_name = os.path.basename(response_file_path)
+                normalized_response_path = os.path.abspath(os.path.expanduser(response_file_path.strip()))
+                response_dir = os.path.dirname(normalized_response_path)
+                response_name = os.path.basename(normalized_response_path)
 
                 suffix = ""
                 if response_name.startswith('responseTimes_') and response_name.lower().endswith('.csv'):
@@ -1569,6 +1577,16 @@ class Functions:
 
             def _recalculate_response_time_on_analysis():
                 selected_response_path = str(self.response_time_lineEdit.text()).strip()
+                if not os.path.isabs(selected_response_path):
+                    selected_response_path = os.path.abspath(os.path.join(_safe_getcwd(), selected_response_path))
+                selected_response_path = os.path.abspath(os.path.expanduser(selected_response_path))
+
+                response_parent_dir = os.path.dirname(selected_response_path)
+                if response_parent_dir and not os.path.exists(response_parent_dir):
+                    os.makedirs(response_parent_dir, exist_ok=True)
+
+                self.response_time_lineEdit.setText(selected_response_path)
+
                 if not (os.path.exists(selected_response_path) and selected_response_path.lower().endswith('.csv')):
                     Message_Boxes.Warning_message(
                         self,
@@ -1614,6 +1632,16 @@ class Functions:
                         self,
                         "Response Recalculated",
                         f"Response time has been recalculated with threshold {response_threshold_value:.6f}.",
+                        Style.MessageBox_stylesheet,
+                    )
+                except FileNotFoundError as recalc_file_error:
+                    missing_path = str(recalc_file_error).split(':')[-1].strip().strip("'")
+                    Message_Boxes.Warning_message(
+                        self,
+                        "Recalculation Failed",
+                        "Response recalculation could not start because a required input file is missing.\n"
+                        f"Missing file: {missing_path}\n\n"
+                        "Please use analysis output that contains reference_energy_file*.csv and modified_energy_file*.csv.",
                         Style.MessageBox_stylesheet,
                     )
                 except Exception as recalc_error:
@@ -2127,6 +2155,24 @@ class Functions:
 
     def load_sample_for_analysis(self):
         from pathlib import Path
+
+        def _has_recalculation_inputs(response_csv_path):
+            response_dir = os.path.dirname(response_csv_path)
+            response_name = os.path.basename(response_csv_path)
+            suffix = ""
+            if response_name.startswith('responseTimes_') and response_name.lower().endswith('.csv'):
+                suffix = response_name[len('responseTimes_'):-4]
+
+            reference_candidates = [os.path.join(response_dir, 'reference_energy_file.csv')]
+            modified_candidates = [os.path.join(response_dir, 'modified_energy_file.csv')]
+            if suffix:
+                reference_candidates.insert(0, os.path.join(response_dir, f'reference_energy_file_{suffix}.csv'))
+                modified_candidates.insert(0, os.path.join(response_dir, f'modified_energy_file_{suffix}.csv'))
+
+            has_reference = any(os.path.isfile(candidate) for candidate in reference_candidates)
+            has_modified = any(os.path.isfile(candidate) for candidate in modified_candidates)
+            return has_reference and has_modified
+
         current_path = os.path.dirname(os.path.realpath(__file__))
         project_root = Path(current_path).parent.parent
         example_analysis_dir = os.path.join(Path(current_path).parent, 'example', 'analysis_demo')
@@ -2164,11 +2210,22 @@ class Functions:
 
         topology_path = None
         reTime_File = None
+        fallback_topology_path = None
+        fallback_response_file = None
         for candidate_topology, candidate_response in sample_pairs:
             if os.path.exists(candidate_topology) and os.path.exists(candidate_response):
-                topology_path = candidate_topology
-                reTime_File = candidate_response
-                break
+                if fallback_topology_path is None:
+                    fallback_topology_path = candidate_topology
+                    fallback_response_file = candidate_response
+
+                if _has_recalculation_inputs(candidate_response):
+                    topology_path = candidate_topology
+                    reTime_File = candidate_response
+                    break
+
+        if topology_path is None and fallback_topology_path is not None:
+            topology_path = fallback_topology_path
+            reTime_File = fallback_response_file
 
         if topology_path is None or reTime_File is None:
             Message_Boxes.Warning_message(
@@ -2218,6 +2275,16 @@ class Functions:
             self.conservation_pdb_chain_id_lineedit.setText("")
             self.conserv_score_doubleSpinBox.setValue(float(1.0))
             self.show_analysis_window()
+
+            if not _has_recalculation_inputs(reTime_File):
+                Message_Boxes.Information_message(
+                    self,
+                    "Sample loaded",
+                    "Analysis sample loaded successfully.\n"
+                    "Recalculate Response Time requires reference_energy_file*.csv and modified_energy_file*.csv, "
+                    "which are not available for this sample.",
+                    Style.MessageBox_stylesheet,
+                )
 
             # self.run_duration_spinBox.blockSignals(True)
             # self.run_duration_doubleSpinBox.blockSignals(True)
