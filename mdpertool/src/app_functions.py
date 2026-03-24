@@ -1836,7 +1836,13 @@ class Functions:
                 print(exc_type, fname, exc_tb.tb_lineno)
 
         else:
-            print("There is no suitable Graph for your search parameters")
+            Message_Boxes.Warning_message(
+                self,
+                "No Suitable Graph Found",
+                "No suitable graph was found for the selected search parameters.\n"
+                "Try lowering the response threshold, adjusting cutoff values, or selecting a different source residue.",
+                Style.MessageBox_stylesheet,
+            )
 
     def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget, selected_graph):
         processed_path = [x.strip() for x in item.text().split('-->')]
