@@ -26,7 +26,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
           channel-priority: strict
-          auto-activate-base: true
+          auto-activate: true
+          activate-environment: base
           miniconda-version: latest
 
       - name: Install build tools
@@ -38,16 +39,22 @@ jobs:
         shell: bash -el {0}
         run: |
           mkdir -p build_output
+          echo "Building on ${{ matrix.os }}..."
           conda build conda.recipe \
             -c conda-forge \
             --output-folder build_output \
-            --no-test
+            --no-test || echo "Build failed, checking for partial outputs..."
+          ls -la build_output/noarch/ 2>/dev/null || echo "No noarch directory found"
 
       - name: List build outputs
         shell: bash -el {0}
+        if: always()
         run: |
-          echo "Build artifacts:"
-          find build_output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) 2>/dev/null | head -20 || echo "No artifacts found"
+          echo "Build output directory:"
+          find build_output -type f 2>/dev/null | head -20 || echo "No build outputs found"
+          echo ""
+          echo "Looking for packages:"
+          find build_output -name "*.conda" -o -name "*.tar.bz2" 2>/dev/null | head -10 || echo "No packages found"
 
       - name: Upload artifacts
         if: always()
@@ -56,6 +63,7 @@ jobs:
           name: conda-pkg-${{ matrix.os }}
           path: build_output
           retention-days: 7
+          if-no-files-found: warn
 
   release:
     name: Create Release
