@@ -33,7 +33,7 @@ To install MDPERTOOL using Conda (GUI + CLI in one package), use:
 # Cross-platform recommended install
 conda create -n mdpertool python=3.9
 conda activate mdpertool
-conda install --override-channels -c bio-otto -c conda-forge mdpertool==0.0.2.dev1
+conda install --override-channels -c bio-otto -c conda-forge mdpertool==0.0.3
 ```
 
 This single `mdpertool` package provides both `mdpertool gui` and `mdpertool cli`.
@@ -79,7 +79,7 @@ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
 conda create -n mdpertool python=3.9
 conda activate mdpertool
-conda install --override-channels -c bio-otto -c conda-forge mdpertool==0.0.2.dev1
+conda install --override-channels -c bio-otto -c conda-forge mdpertool==0.0.3
 ```
 <p align="right">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="50" title="Available on macOS">
