@@ -20,10 +20,10 @@ jobs:
         python-version: ['3.9']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -61,7 +61,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: conda-pkg-${{ matrix.os }}
           path: build_output
@@ -75,15 +75,15 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') && success()
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
 
       - name: Setup Miniconda for upload
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           python-version: '3.9'
@@ -103,7 +103,12 @@ jobs:
             exit 1
           fi
           conda install -y anaconda-client
-          PACKAGE=$(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
+          echo "Artifacts downloaded:"
+          find artifacts -type f | head -100 || true
+          PACKAGE=$(find artifacts/conda-pkg-windows-latest -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
+          if [ -z "$PACKAGE" ]; then
+            PACKAGE=$(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
+          fi
           if [ -z "$PACKAGE" ]; then
             echo "No package file found to upload"
             exit 1
@@ -112,9 +117,15 @@ jobs:
           anaconda -t "$ANACONDA_TOKEN" upload -u bio-otto "$PACKAGE" --force
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*.{conda,tar.bz2}
+          tag_name: ${{ github.ref_name }}
+          files: |
+            artifacts/**/*.conda
+            artifacts/**/*.tar.bz2
+          overwrite_files: true
+          fail_on_unmatched_files: false
+          append_body: true
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
