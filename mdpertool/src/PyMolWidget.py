@@ -2,6 +2,7 @@ import os.path
 import sys
 import threading
 import time
+from pathlib import Path
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt, QThread, Signal, QTimer, QCoreApplication
 from OpenGL.GL import *
@@ -96,8 +97,24 @@ def _get_safe_working_directory():
         return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
-path = _get_safe_working_directory()
-demo_pdb_path = os.path.join(path, 'Download', '1aki.pdb')
+def _resolve_demo_pdb_path():
+    cwd_path = Path(_get_safe_working_directory())
+    package_root = Path(__file__).resolve().parent.parent
+
+    candidates = [
+        cwd_path / 'Download' / '1aki.pdb',
+        package_root / 'Download' / '1aki.pdb',
+        package_root / 'example' / 'simulation_demo' / '2j0w_example_fixed_ph7.4.pdb',
+        package_root / 'example' / 'simulation_demo' / '2j0w_example.pdb',
+    ]
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+demo_pdb_path = _resolve_demo_pdb_path()
 
 
 class PymolQtWidget(QGLWidget):
@@ -260,10 +277,10 @@ class PymolQtWidget(QGLWidget):
         self._pymol.cmd.load_cgo(cgo_data, 'txt')
         self._pymol.cmd.zoom()
 
-        try:
+        if demo_pdb_path and os.path.isfile(demo_pdb_path):
             self.loadMolFile(demo_pdb_path)
             self.mol_name = os.path.basename(demo_pdb_path).split('.')[0]
-        except:
+        else:
             self._pymol.cmd.fragment("phe")
 
         self._pymol.cmd.center()

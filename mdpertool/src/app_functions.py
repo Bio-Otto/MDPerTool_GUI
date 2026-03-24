@@ -1619,11 +1619,6 @@ class Functions:
                     except ModuleNotFoundError:
                         from mdpertool.no_gui.response_time_creator import get_residue_response_times
 
-                    import sys
-                    print(f"DEBUG: reference_energy_file = {reference_energy_file}", file=sys.stderr)
-                    print(f"DEBUG: modified_energy_file = {modified_energy_file}", file=sys.stderr)
-                    print(f"DEBUG: output_name = {selected_response_path}", file=sys.stderr)
-
                     get_residue_response_times(
                         reference_energy_file,
                         modified_energy_file,
@@ -1640,10 +1635,8 @@ class Functions:
                         Style.MessageBox_stylesheet,
                     )
                 except FileNotFoundError as recalc_file_error:
-                    import sys
                     error_str = str(recalc_file_error)
-                    print(f"DEBUG: FileNotFoundError full message: {error_str}", file=sys.stderr)
-                    
+
                     # Try to extract filename from exception
                     missing_path = error_str
                     if "No such file or directory:" in error_str:
