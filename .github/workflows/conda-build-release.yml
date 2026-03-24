@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
@@ -78,6 +81,35 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Setup Miniconda for upload
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: '3.9'
+          channels: conda-forge,defaults
+          channel-priority: strict
+          auto-activate: true
+          activate-environment: base
+          miniconda-version: latest
+
+      - name: Upload package to anaconda.org
+        shell: bash -el {0}
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          if [ -z "$ANACONDA_TOKEN" ]; then
+            echo "ANACONDA_TOKEN is not set"
+            exit 1
+          fi
+          conda install -y anaconda-client
+          PACKAGE=$(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
+          if [ -z "$PACKAGE" ]; then
+            echo "No package file found to upload"
+            exit 1
+          fi
+          echo "Uploading $PACKAGE"
+          anaconda -t "$ANACONDA_TOKEN" upload -u bio-otto "$PACKAGE" --force
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

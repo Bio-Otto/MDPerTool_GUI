@@ -14,8 +14,8 @@
     <a href="https://github.com/Bio-Otto/MDPerTool_GUI/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Bio-Otto/MDPerTool_GUI?color=2b9348"></a>
     <a href="http://compbio.bioe.eng.marmara.edu.tr/"><img src="https://img.shields.io/static/v1?label=&labelColor=505050&message=ozbek-lab&color=%230076D6&style=flat&logo=google-chrome&logoColor=%230076D6" alt="website"/></a>
     <a href="https://twitter.com/LabOzbek"><img src="https://img.shields.io/twitter/follow/pemoshh.svg?style=social" alt="Twitter Follow"/></a>
-    <a href="https://github.com/Bio-Otto/MDPerTool_GUI/stargazers"><img src="https://img.shields.io/github/stars/Bio-Otto/Bio-Otto" alt="Stars Badge"/></a>
-    <a href="https://github.com/Bio-Otto/MDPerTool_GUI/members"><img src="https://img.shields.io/github/forks/Bio-Otto/Bio-Otto" alt="Forks Badge"/></a>
+    <a href="https://github.com/Bio-Otto/MDPerTool_GUI/stargazers"><img src="https://img.shields.io/github/stars/Bio-Otto/MDPerTool_GUI" alt="Stars Badge"/></a>
+    <a href="https://github.com/Bio-Otto/MDPerTool_GUI/network/members"><img src="https://img.shields.io/github/forks/Bio-Otto/MDPerTool_GUI" alt="Forks Badge"/></a>
    
 </div>
 
@@ -33,7 +33,7 @@ To install MDPERTOOL using Conda (GUI + CLI in one package), use:
 # Cross-platform recommended install
 conda create -n mdpertool python=3.9
 conda activate mdpertool
-conda install --override-channels -c bio-otto -c conda-forge mdpertool==0.0.3
+conda install --override-channels -c bio-otto -c conda-forge mdpertool
 ```
 
 This single `mdpertool` package provides both `mdpertool gui` and `mdpertool cli`.
@@ -79,7 +79,7 @@ git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
 conda create -n mdpertool python=3.9
 conda activate mdpertool
-conda install --override-channels -c bio-otto -c conda-forge mdpertool==0.0.3
+conda install --override-channels -c bio-otto -c conda-forge mdpertool
 ```
 <p align="right">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="50" title="Available on macOS">

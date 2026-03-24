@@ -15,14 +15,14 @@
 
 <i>A Software Tool for Investigation of Allosteric Communication within Protein Structures via Energy Dissipation in Molecular Dynamics Simulations</i>
 
-<a href="https://github.com/Bio-Otto/MDPerTool_GUI/stargazers"><img src="https://img.shields.io/github/stars/Bio-Otto/Bio-Otto" alt="Stars Badge"/></a>
-<a href="https://github.com/Bio-Otto/MDPerTool_GUI/members"><img src="https://img.shields.io/github/forks/Bio-Otto/Bio-Otto" alt="Forks Badge"/></a>
-<a href="https://github.com/Bio-Otto/MDPerTool_GUI/pulls"><img src="https://img.shields.io/github/issues-pr/Bio-Otto/Bio-Otto" alt="Pull Requests Badge"/></a>
-<a href="https://github.com/Bio-Otto/MDPerTool_GUI/issues"><img src="https://img.shields.io/github/issues/Bio-Otto/Bio-Otto" alt="Issues Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/stargazers"><img src="https://img.shields.io/github/stars/Bio-Otto/MDPerTool_GUI" alt="Stars Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/network/members"><img src="https://img.shields.io/github/forks/Bio-Otto/MDPerTool_GUI" alt="Forks Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/pulls"><img src="https://img.shields.io/github/issues-pr/Bio-Otto/MDPerTool_GUI" alt="Pull Requests Badge"/></a>
+<a href="https://github.com/Bio-Otto/MDPerTool_GUI/issues"><img src="https://img.shields.io/github/issues/Bio-Otto/MDPerTool_GUI" alt="Issues Badge"/></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Bio-Otto/MDPerTool_GUI?color=2b9348"></a>
 <a href="https://github.com/Bio-Otto/MDPerTool_GUI/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License Badge"/></a>
 [![Version](https://badge.fury.io/gh/Bio-Otto%2FMDPerTool_GUI.svg)](https://badge.fury.io/gh/Bio-Otto%2FMDPerTool_GUI)
-[![GitHub Release](https://img.shields.io/github/release/Bio-Otto/MDPerTool_GUI.svg?style=flat)]()
+[![GitHub Release](https://img.shields.io/github/release/Bio-Otto/MDPerTool_GUI.svg?style=flat)](https://github.com/Bio-Otto/MDPerTool_GUI/releases)
 
 <img alt="Awesome GitHub Profile Readme" src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/icons/MDPerTool.gif"> </img>
 
