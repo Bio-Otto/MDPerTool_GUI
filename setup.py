@@ -64,6 +64,10 @@ setup(
         'mdpertool': [
             'Download/*',
             'analysis/*',
+            'example/*',
+            'example/analysis_demo/*',
+            'example/namd_example/*',
+            'example/simulation_demo/*',
             'fonts/*',
             'gui/*',
             'no_gui/*',
