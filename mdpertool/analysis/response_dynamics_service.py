@@ -28,7 +28,7 @@ def build_response_dynamics_payload(
     response_metrics_file = possible_path.replace("responseTimes.csv", "responseTimes_metrics.csv")
     response_fit_file = possible_path.replace("responseTimes.csv", "responseTimes_fit_curve.csv")
 
-    if os.path.isfile(response_metrics_file) and os.path.isfile(response_fit_file):
+    if os.path.isfile(possible_path) and os.path.isfile(response_metrics_file) and os.path.isfile(response_fit_file):
         response_analyzer = ResidueResponseAnalyzer(
             possible_path,
             response_metrics_file,
