@@ -1619,6 +1619,11 @@ class Functions:
                     except ModuleNotFoundError:
                         from mdpertool.no_gui.response_time_creator import get_residue_response_times
 
+                    import sys
+                    print(f"DEBUG: reference_energy_file = {reference_energy_file}", file=sys.stderr)
+                    print(f"DEBUG: modified_energy_file = {modified_energy_file}", file=sys.stderr)
+                    print(f"DEBUG: output_name = {selected_response_path}", file=sys.stderr)
+
                     get_residue_response_times(
                         reference_energy_file,
                         modified_energy_file,
@@ -1635,13 +1640,28 @@ class Functions:
                         Style.MessageBox_stylesheet,
                     )
                 except FileNotFoundError as recalc_file_error:
-                    missing_path = str(recalc_file_error).split(':')[-1].strip().strip("'")
+                    import sys
+                    error_str = str(recalc_file_error)
+                    print(f"DEBUG: FileNotFoundError full message: {error_str}", file=sys.stderr)
+                    
+                    # Try to extract filename from exception
+                    missing_path = error_str
+                    if "No such file or directory:" in error_str:
+                        missing_path = error_str.split("No such file or directory:")[1].strip().strip("'\"")
+                    elif "[Errno 2]" in error_str:
+                        parts = error_str.split("[Errno 2]")
+                        if len(parts) > 1:
+                            missing_path = parts[1].strip().strip("'\"")
+                    
+                    if hasattr(recalc_file_error, 'filename') and recalc_file_error.filename:
+                        missing_path = recalc_file_error.filename
+                    
                     Message_Boxes.Warning_message(
                         self,
                         "Recalculation Failed",
                         "Response recalculation could not start because a required input file is missing.\n"
                         f"Missing file: {missing_path}\n\n"
-                        "Please use analysis output that contains reference_energy_file*.csv and modified_energy_file*.csv.",
+                        "Please ensure that both reference_energy_file*.csv and modified_energy_file*.csv exist in the analysis directory.",
                         Style.MessageBox_stylesheet,
                     )
                 except Exception as recalc_error:
