@@ -201,9 +201,16 @@ class Advanced(QtCore.QThread):
                 cuda_active = True
 
         except Exception as e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+            error_text = str(e)
+            if any(keyword in error_text.lower() for keyword in ['platform', 'cuda', 'opencl', 'precision']):
+                error_text = (
+                    f"{error_text}\n\n"
+                    "Platform configuration could not be prepared. "
+                    "Please switch to CPU or Reference in platform settings and run again."
+                )
+
+            QMessageBox.critical(self, "Platform Configuration Error", error_text)
+            return False
 
         print("Parameters have been sent to OMM-Runner...")
         script_structure = dict(pdb=pdb_pfile,
@@ -320,7 +327,11 @@ class Advanced_Helper_Functions(QtCore.QThread):
             properties = None
             precision = 'double'
             return platform_name, properties, precision
-        print("System will use '%s' Platform with '%s' Precision" % (platform_name, precision))
+
+        raise ValueError(
+            "Unsupported platform selection '%s'. Please choose one of CUDA, OpenCL, CPU, or Reference."
+            % platform_name
+        )
 
     @Slot()
     def update_display(self, script_structure):

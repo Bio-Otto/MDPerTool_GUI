@@ -224,6 +224,64 @@ log_obj.info("#" * 50 + " END / PARAMETERS USED " + "#" * 50 + "\n")
 # ---------------- PARAMETERS USED ---------------- #
 
 
+def _resolve_openmm_platform(requested_platform_name, logger):
+    try:
+        available_platforms = [mm.Platform.getPlatform(i).getName() for i in range(mm.Platform.getNumPlatforms())]
+    except Exception:
+        available_platforms = []
+
+    logger.info("Available OpenMM platforms at runtime: %s", ', '.join(available_platforms) if available_platforms else 'none')
+
+    fallback_order = [requested_platform_name, 'CPU', 'Reference']
+    tried_names = []
+    for candidate_name in fallback_order:
+        if candidate_name in tried_names:
+            continue
+        tried_names.append(candidate_name)
+        try:
+            platform_obj = mm.Platform.getPlatformByName(candidate_name)
+            if candidate_name != requested_platform_name:
+                logger.warning(
+                    "Requested platform '%s' is unavailable or failed to initialize. Falling back to '%s'.",
+                    requested_platform_name,
+                    candidate_name,
+                )
+            return candidate_name, platform_obj
+        except Exception as platform_error:
+            logger.warning("Platform '%s' is not available: %s", candidate_name, platform_error)
+
+    raise RuntimeError(
+        "No usable OpenMM platform is available. Tried: %s. Available: %s. "
+        "Please switch platform in MDPerTool settings and retry (CPU or Reference recommended)."
+        % (
+            ', '.join(tried_names),
+            ', '.join(available_platforms) if available_platforms else 'none'
+        )
+    )
+
+
+def _resolve_platform_properties(platform_name, requested_precision):
+    resolved_precision = requested_precision
+    resolved_properties = None
+
+    if platform_name == 'CPU':
+        resolved_precision = 'mixed'
+        resolved_properties = {'CpuThreads': '{{Number_of_CPU}}'}
+    elif platform_name == 'Reference':
+        resolved_precision = 'double'
+        resolved_properties = None
+    elif platform_name == 'OpenCL':
+        resolved_properties = {'OpenCLPrecision': requested_precision}
+        if {{Device_ID_active}}:
+            resolved_properties['OpenCLDeviceIndex'] = '{{Device_Number}}'
+    elif platform_name == 'CUDA':
+        resolved_properties = {'CudaPrecision': requested_precision, 'DeterministicForces': 'True'}
+        if {{Device_ID_active}}:
+            resolved_properties['CudaDeviceIndex'] = '{{Device_Number}}'
+
+    return resolved_properties, resolved_precision
+
+
 simulation_last_time = 0
 log_obj.info("pdb file fixing and preparing for simulation ...".format())
 #fixed_pdb_name = fix_pdb('{{pdb}}', output='{{output_folder}}', log_obj=log_obj{{#mutation_isActive}}, mutate={{mutation_isActive}}, mut_region={{mutated_residue}}, chain_id={{mutated_chain}}{{/mutation_isActive}})
@@ -273,16 +331,36 @@ nonbonded.setUseDispersionCorrection(True)
 log_obj.info('Creating a %sIntegrator with %s %s time step' %('{{integrator_kind}}', {{integrator_time_step}}, '{{integrator_time_step_unit}}'))
 integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temperature}}, {{friction}}, {{/Additional_Integrator}}{{integrator_time_step}}*{{integrator_time_step_unit}})
 
-if {{cuda_active}} == True:
-    platform = mm.Platform.getPlatformByName('{{platform}}')
-    {{#properties_active}}properties = {'{{cuda_precision_prefix}}Precision': '{{precision}}'{{#Device_ID_active}},'{{cuda_precision_prefix}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
-else:
-    platform = mm.Platform.getPlatformByName('{{platform}}')
-    {{#properties_active}}properties = {'{{platform}}Precision': '{{precision}}'{{#Device_ID_active}},'{{platform}}DeviceIndex': '{{Device_Number}}'{{/Device_ID_active}}}{{/properties_active}}
+requested_platform_name = '{{platform}}'
+runtime_platform_name, platform = _resolve_openmm_platform(requested_platform_name, log_obj)
+properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
 
-{{#CPU_properties_active}}properties = {'CpuThreads': '{{Number_of_CPU}}'}{{/CPU_properties_active}}
+if runtime_platform_name == 'CPU':
+    log_obj.info("The CPU platform always uses 'mixed' precision.")
+    log_obj.info("Simulation process will use %s Thread(s)" % '{{Number_of_CPU}}')
+if runtime_platform_name == 'Reference':
+    log_obj.info("The Reference platform always uses 'double' precision.")
 
-simulation = app.Simulation(modeller.topology, system, integrator, platform{{#properties_active}}, properties{{/properties_active}})
+try:
+    if properties is None:
+        simulation = app.Simulation(modeller.topology, system, integrator, platform)
+    else:
+        simulation = app.Simulation(modeller.topology, system, integrator, platform, properties)
+except Exception as simulation_init_error:
+    log_obj.warning(
+        "Simulation initialization failed on platform '%s' with properties %s: %s",
+        runtime_platform_name,
+        properties,
+        simulation_init_error,
+    )
+    runtime_platform_name, platform = _resolve_openmm_platform('CPU', log_obj)
+    properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
+    if properties is None:
+        simulation = app.Simulation(modeller.topology, system, integrator, platform)
+    else:
+        simulation = app.Simulation(modeller.topology, system, integrator, platform, properties)
+    log_obj.warning("Fell back to platform '%s' after initialization failure.", runtime_platform_name)
+
 simulation.context.setPositions(modeller.positions)
 simulation.context.computeVirtualSites()
 
@@ -462,32 +540,7 @@ for i in range(len({{speed_factor}})):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-            properties = {'OpenCLPrecision': '{{precision}}', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-            precision = '{{precision}}'
-
-        if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-            properties = {'OpenCLPrecision': '{{precision}}'}
-            precision = '{{precision}}'
-
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-            properties = {'CudaPrecision': '{{precision}}', 'CudaDeviceIndex': '{{Device_Number}}'}
-            precision = '{{precision}}'
-
-        if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-            properties = {'CudaPrecision': '{{precision}}'}
-            precision = '{{precision}}'
-
-        if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
-            log_obj.info("The CPU platform always uses 'mixed' precision.".format())
-            log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
-            properties = {'CpuThreads': '{{Number_of_CPU}}'}
-            precision = 'mixed'
-
-        if '{{platform}}' == 'Reference':
-            log_obj.info("The Reference platform always uses 'double' precision.".format())
-            properties = None
-            precision= 'double'
+        properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
 
         # we'll just take the topology from here...
         pdb = app.PDBFile(last_pdb_file_path)
@@ -510,7 +563,7 @@ for i in range(len({{speed_factor}})):
         integrator.setConstraintTolerance(1e-8)
 
         # let's specify our simulation platform again
-        platform = mm.Platform.getPlatformByName('{{platform}}')
+        platform = mm.Platform.getPlatformByName(runtime_platform_name)
 
         # ok now let's do some simulation using this restraint
         if properties is None:
@@ -577,34 +630,8 @@ for i in range(len({{speed_factor}})):
     ################################# DISSIPATION MD PROCESS USING MDPerTool v0.1 ######################################
     ####################################################################################################################
 
-    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == True:
-        properties = {'OpenCLPrecision': '{{precision}}', 'OpenCLDeviceIndex': '{{Device_Number}}'}
-        precision = '{{precision}}'
-
-    if '{{platform}}' == 'OpenCL' and {{Device_ID_active}} == False:
-        properties = {'OpenCLPrecision': '{{precision}}'}
-        precision = '{{precision}}'
-
-    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == True:
-        properties = {'CudaPrecision': '{{precision}}', 'CudaDeviceIndex': '{{Device_Number}}'}
-        precision = '{{precision}}'
-
-    if '{{platform}}' == 'CUDA' and {{Device_ID_active}} == False:
-        properties = {'CudaPrecision': '{{precision}}'}
-        precision = '{{precision}}'
-
-    if '{{platform}}' == 'CPU' and {{CPU_properties_active}} == True:
-        log_obj.info("The CPU platform always uses 'mixed' precision.".format())
-        log_obj.info("Simulation process will use %s Thread(s)" % {{Number_of_CPU}})
-        properties = {'CpuThreads': '{{Number_of_CPU}}'}
-        precision = 'mixed'
-
-    if '{{platform}}' == 'Reference':
-        log_obj.info("The Reference platform always uses 'double' precision.")
-        properties = None
-        precision= 'double'
-
-    log_obj.info("System will use %s Platform with %s Precision" % ('{{platform}}', precision))
+    properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
+    log_obj.info("System will use %s Platform with %s Precision" % (runtime_platform_name, precision))
 
     # we'll just take the topology from here...
     pdb = app.PDBFile(last_pdb_file_path)
@@ -627,7 +654,7 @@ for i in range(len({{speed_factor}})):
     integrator.setConstraintTolerance(1e-8)
 
     # let's specify our simulation platform again
-    platform = mm.Platform.getPlatformByName('{{platform}}')
+    platform = mm.Platform.getPlatformByName(runtime_platform_name)
 
     # ok now let's do some simulation using this restraint
     if properties is None:

@@ -36,6 +36,13 @@ def fix_pdb_file(pdb_id):
     return fixer
 
 
+def _get_available_openmm_platform_names():
+    try:
+        return [Platform.getPlatform(i).getName() for i in range(Platform.getNumPlatforms())]
+    except Exception:
+        return []
+
+
 def get_residue_pos_from_traj_with_mdtraj(top, ref_traj, modif_traj, selected_atoms='protein',
                                          write_pdb_for_selection=True, start=None, stop=None, stride=1,
                                          logger_object=None):
@@ -177,32 +184,44 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
 
     ############################################################################3
 
-    platform = Platform.getPlatformByName(platform_type)
+    available_platforms = _get_available_openmm_platform_names()
+    if platform_type not in available_platforms:
+        raise RuntimeError(
+            "Requested OpenMM platform '%s' is not available for decomposition. "
+            "Available platforms: %s. Please switch platform in MDPerTool (CPU recommended) and re-run."
+            % (platform_type, ', '.join(available_platforms) if available_platforms else 'none')
+        )
 
-    if platform_type == 'OpenCL' and device_id_active == True:
-        properties = {'OpenCLPrecision': 'double', 'OpenCLDeviceIndex': '1'}
-        precision = 'mixed'
+    try:
+        platform = Platform.getPlatformByName(platform_type)
+    except Exception as platform_error:
+        raise RuntimeError(
+            "OpenMM failed to initialize platform '%s' for decomposition: %s. "
+            "This usually indicates driver/runtime incompatibility (e.g., CUDA/OpenCL). "
+            "Please switch platform in MDPerTool and try CPU or Reference."
+            % (platform_type, platform_error)
+        )
 
-    if platform_type == 'OpenCL' and device_id_active == False:
+    properties = None
+    precision = 'mixed'
+
+    if platform_type == 'OpenCL':
         properties = {'OpenCLPrecision': 'double'}
-        precision = 'mixed'
+        if device_id_active:
+            properties['OpenCLDeviceIndex'] = '1'
 
-    if platform_type == 'CUDA' and device_id_active == True:
-        properties = {'CudaPrecision': 'double', 'CudaDeviceIndex': '1'}
-        precision = 'mixed'
-
-    if platform_type == 'CUDA' and device_id_active == False:
+    elif platform_type == 'CUDA':
         properties = {'CudaPrecision': 'double'}
-        precision = 'mixed'
+        if device_id_active:
+            properties['CudaDeviceIndex'] = '1'
 
-    if platform_type == 'CPU' and device_id_active == True:
+    elif platform_type == 'CPU':
         if logger_object is not None:
-            logger_object.info("The CPU platform always uses 'mixed' precision.".format())
+            logger_object.info("The CPU platform always uses 'mixed' precision.")
             logger_object.info("Simulation process will use %s Thread(s)" % num_of_threads)
         properties = {'CpuThreads': '%s' % num_of_threads}
-        precision = 'mixed'
 
-    if platform_type == 'Reference':
+    elif platform_type == 'Reference':
         if logger_object is not None:
             logger_object.info("The Reference platform always uses 'double' precision.")
         properties = None
