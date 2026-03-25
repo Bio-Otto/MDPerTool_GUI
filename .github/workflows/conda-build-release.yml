@@ -131,6 +131,8 @@ jobs:
             echo "No Anaconda token found. Set ANACONDA_TOKEN or ANACONDA_API_TOKEN in repository secrets."
             exit 1
           fi
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade anaconda-client
           mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
           if [ "${#PACKAGES[@]}" -eq 0 ]; then
             echo "No package file found to upload"
@@ -138,7 +140,7 @@ jobs:
           fi
           for PACKAGE in "${PACKAGES[@]}"; do
             echo "Uploading $PACKAGE"
-            anaconda --token "$TOKEN" upload -u bio-otto "$PACKAGE" --skip-existing
+            python -m binstar_client.scripts.cli -t "$TOKEN" upload -u bio-otto "$PACKAGE" --skip-existing
           done
 
       - name: Create GitHub Release
