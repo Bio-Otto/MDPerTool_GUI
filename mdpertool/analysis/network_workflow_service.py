@@ -27,17 +27,49 @@ def collect_network_parameters(
     resolved_node_threshold = None if use_node_threshold_condition else node_threshold
     return {
         "number_of_threads": number_of_threads,
-        "pdb": pdb_file,
+        "pdb": str(pdb_file).strip(),
         "cutoff": cutoff,
-        "retime_file": response_time_file,
+        "retime_file": str(response_time_file).strip(),
         "outputFileName": output_file_name,
-        "output_directory": output_directory,
+        "output_directory": str(output_directory).strip(),
         "source": source_residue,
         "node_threshold": resolved_node_threshold,
         "node_threshold_use_condition": use_node_threshold_condition,
         "all_residue_as_target": all_residue_as_target,
         "create_output": True,
     }
+
+
+def _resolve_existing_file_path(path_value: str) -> str:
+    """Resolve a file path robustly and ensure it exists.
+
+    Supports absolute and relative paths. Relative paths are resolved against cwd.
+    """
+    raw = str(path_value or "").strip()
+    if not raw:
+        raise FileNotFoundError("Required file path is empty.")
+
+    expanded = os.path.expanduser(os.path.expandvars(raw))
+    candidate_paths = [expanded]
+
+    if not os.path.isabs(expanded):
+        candidate_paths.append(os.path.abspath(expanded))
+
+    for candidate in candidate_paths:
+        if os.path.isfile(candidate):
+            return os.path.normpath(candidate)
+
+    raise FileNotFoundError(raw)
+
+
+def validate_network_input_files(network_params: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate and normalize topology/response-time file paths before network calculation."""
+    pdb_path = _resolve_existing_file_path(network_params.get("pdb", ""))
+    response_path = _resolve_existing_file_path(network_params.get("retime_file", ""))
+
+    network_params["pdb"] = pdb_path
+    network_params["retime_file"] = response_path
+    return network_params
 
 
 def collect_target_residues(
@@ -208,6 +240,15 @@ def prepare_general_network_engine_from_ui(target: Any, atom_type: str = "CA") -
     initialize_network_runtime_state(target)
     run_context = build_network_run_context_from_ui(target)
     apply_network_run_context(target, run_context)
+
+    try:
+        target.network_params = validate_network_input_files(target.network_params)
+    except FileNotFoundError as file_error:
+        missing_path = str(file_error)
+        raise RuntimeError(
+            "Network preparation failed because an input file could not be found: "
+            f"{missing_path}. Please re-select topology and response-time files."
+        ) from file_error
 
     return build_network_engine(
         parameters=target.network_params,

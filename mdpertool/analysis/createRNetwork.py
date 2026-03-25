@@ -296,8 +296,10 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_t
         return network, structure_res_list, res_list, len_of_retimes_on_file
 
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return None, None, None, 0
+        raise RuntimeError(
+            "createRNetwork failed: "
+            f"pdb='{pdb}', response_time='{reTimeFile}', reason={e}"
+        ) from e
 
 
 def filter_pair_network(network, source, target, node_threshold=None):
@@ -467,7 +469,10 @@ class MultiTaskEngine:
             return self.network, self.res_id_list, len_of_re_times
 
         except Exception as error:
-            print(f"Error calculating general network: {error}")
+            raise RuntimeError(
+                "General network calculation failed: "
+                f"pdb='{self.pdb_file}', response_time='{self.re_time_file}', reason={error}"
+            ) from error
 
     def run_pair_network_calculation(self, targets):
         """
