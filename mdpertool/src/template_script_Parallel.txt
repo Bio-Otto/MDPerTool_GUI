@@ -566,20 +566,16 @@ def run_dissipation_md(name_of_changed_state_xml, last_pdb_file_path, new_dissip
 
 
 
-def run_perturbation_simulations(OUTPUT_DIRECTORY, state_file_path, name_of_changed_state_xml, last_pdb_file_path, undissipated_trajectory_name, new_dissipated_trajectory_name, log_obj):
+def run_perturbation_simulations(OUTPUT_DIRECTORY, state_file_path, name_of_changed_state_xml, last_pdb_file_path, undissipated_trajectory_name, new_dissipated_trajectory_name, log_obj, include_reference=False):
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        future_ref_md = executor.submit(run_reference_md, state_file_path, last_pdb_file_path, undissipated_trajectory_name, OUTPUT_DIRECTORY, log_obj)
-        future_dis_md = executor.submit(run_dissipation_md, name_of_changed_state_xml, last_pdb_file_path, new_dissipated_trajectory_name, OUTPUT_DIRECTORY, log_obj)
-
-        for future in as_completed([future_ref_md, future_dis_md]):
-            sim = future.result()
-            # Clean up reporters
-            try:
-                for reporter in sim.reporters[:]:
-                    sim.reporters.remove(reporter)
-            except Exception as E:
-                print("Error:", E)
+    if include_reference:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            future_ref_md = executor.submit(run_reference_md, state_file_path, last_pdb_file_path, undissipated_trajectory_name, OUTPUT_DIRECTORY, log_obj)
+            future_dis_md = executor.submit(run_dissipation_md, name_of_changed_state_xml, last_pdb_file_path, new_dissipated_trajectory_name, OUTPUT_DIRECTORY, log_obj)
+            for future in as_completed([future_ref_md, future_dis_md]):
+                future.result()
+    else:
+        run_dissipation_md(name_of_changed_state_xml, last_pdb_file_path, new_dissipated_trajectory_name, OUTPUT_DIRECTORY, log_obj)
 
 
 for i in range(len({{speed_factor}})):
@@ -590,7 +586,9 @@ for i in range(len({{speed_factor}})):
         write_dcd_cond = True
 
     if i == 0:
-        run_perturbation_simulations(OUTPUT_DIRECTORY, state_file_name, name_of_changed_state_xml, last_pdb_file_path, undissipated_trajectory_name, new_dissipated_trajectory_name, log_obj)
+        run_perturbation_simulations(OUTPUT_DIRECTORY, state_file_path, name_of_changed_state_xml, last_pdb_file_path, undissipated_trajectory_name, new_dissipated_trajectory_name, log_obj, include_reference=True)
+    else:
+        run_perturbation_simulations(OUTPUT_DIRECTORY, state_file_path, name_of_changed_state_xml, last_pdb_file_path, undissipated_trajectory_name, new_dissipated_trajectory_name, log_obj, include_reference=False)
 
         # Running both simulations in parallel
 

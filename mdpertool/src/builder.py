@@ -19,6 +19,7 @@ import tokenize
 import multiprocessing
 from PySide2.QtCore import Signal
 import logging
+import re
 
 
 class Advanced(QtCore.QThread):
@@ -26,6 +27,29 @@ class Advanced(QtCore.QThread):
     def __init__(self, parent=None):
         super(Advanced, self).__init__(parent)
         self.start_monitoring = False
+
+    @staticmethod
+    def _parse_speed_factors(speed_factor_text):
+        raw_text = str(speed_factor_text or '').strip()
+        if not raw_text:
+            return [4]
+
+        tokens = [token for token in re.split(r'[\s,;]+', raw_text) if token]
+        if len(tokens) == 1 and tokens[0].isdigit():
+            return [int(tokens[0])]
+
+        parsed_values = []
+        for token in tokens:
+            if token.isdigit():
+                parsed_values.append(int(token))
+
+        if parsed_values:
+            return parsed_values
+
+        if raw_text.isdigit():
+            return [int(raw_text)]
+
+        return [4]
 
     @Slot()
     def send_arg_to_Engine(self):
@@ -236,8 +260,7 @@ class Advanced(QtCore.QThread):
                                 water_padding=self.water_padding_lineEdit.text(),
                                 perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in
                                                     range(self.selected_residues_listWidget.count())],
-                                speed_factor=[int(r) if r.strip().isdigit() else r for r in
-                                              self.R_factor_ComboBox.currentText()],
+                                speed_factor=self._parse_speed_factors(self.R_factor_ComboBox.currentText()),
                                 perturb_simulation_time=self.run_duration_spinBox.value(),
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),
 

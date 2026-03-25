@@ -241,10 +241,12 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
 
     if not (_is_ascii_path(topology_file) and _is_ascii_path(ref_trajectory) and _is_ascii_path(modif_trajectory)):
         temp_ascii_dir = tempfile.mkdtemp(prefix='mdpertool_ascii_')
+        ref_extension = os.path.splitext(ref_trajectory)[1] if ref_trajectory is not None else '.dcd'
+        mod_extension = os.path.splitext(modif_trajectory)[1] if modif_trajectory is not None else '.dcd'
         topology_path = _copy_to_ascii_temp_path(topology_file, temp_ascii_dir, 'topology.pdb')
         if ref_trajectory is not None:
-            ref_trajectory_path = _copy_to_ascii_temp_path(ref_trajectory, temp_ascii_dir, 'reference.dcd')
-        modif_trajectory_path = _copy_to_ascii_temp_path(modif_trajectory, temp_ascii_dir, 'modified.dcd')
+            ref_trajectory_path = _copy_to_ascii_temp_path(ref_trajectory, temp_ascii_dir, 'reference' + ref_extension)
+        modif_trajectory_path = _copy_to_ascii_temp_path(modif_trajectory, temp_ascii_dir, 'modified' + mod_extension)
 
         if logger_object is not None:
             logger_object.info("Using temporary ASCII-safe file paths for decomposition.")
