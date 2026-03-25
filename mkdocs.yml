@@ -1,0 +1,40 @@
+site_name: MDPerTool
+site_description: A Software Tool for Investigation of Allosteric Communication within Proteins
+site_author: Bio-Otto
+site_url: https://bio-otto.github.io/MDPerTool_GUI/
+repo_url: https://github.com/Bio-Otto/MDPerTool_GUI
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quickstart.md
+  - User Guide:
+    - GUI Interface: gui_usage.md
+    - Command Line (CLI): cli_usage.md
+  - Tutorials:
+    - Energy Dissipation: tutorials/energy_dissipation.md
+
+plugins:
+  - search
