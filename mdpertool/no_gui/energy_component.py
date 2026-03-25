@@ -206,20 +206,20 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
     precision = 'mixed'
 
     if platform_type == 'OpenCL':
-        properties = {'OpenCLPrecision': 'double'}
+        properties = {'Precision': 'double'}
         if device_id_active:
-            properties['OpenCLDeviceIndex'] = '1'
+            properties['DeviceIndex'] = '1'
 
     elif platform_type == 'CUDA':
-        properties = {'CudaPrecision': 'double'}
+        properties = {'Precision': 'double'}
         if device_id_active:
-            properties['CudaDeviceIndex'] = '1'
+            properties['DeviceIndex'] = '1'
 
     elif platform_type == 'CPU':
         if logger_object is not None:
             logger_object.info("The CPU platform always uses 'mixed' precision.")
             logger_object.info("Simulation process will use %s Thread(s)" % num_of_threads)
-        properties = {'CpuThreads': '%s' % num_of_threads}
+        properties = {'Threads': '%s' % num_of_threads}
 
     elif platform_type == 'Reference':
         if logger_object is not None:
@@ -322,7 +322,7 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
                                       current_platform_type, decomposition_platform_error)
 
             current_platform = Platform.getPlatformByName('CPU')
-            current_properties = {'CpuThreads': '%s' % num_of_threads}
+            current_properties = {'Threads': '%s' % num_of_threads}
             current_platform_type = 'CPU'
 
             if logger_object is not None:

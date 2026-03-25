@@ -266,18 +266,18 @@ def _resolve_platform_properties(platform_name, requested_precision):
 
     if platform_name == 'CPU':
         resolved_precision = 'mixed'
-        resolved_properties = {'CpuThreads': '{{Number_of_CPU}}'}
+        resolved_properties = {'Threads': '{{Number_of_CPU}}'}
     elif platform_name == 'Reference':
         resolved_precision = 'double'
         resolved_properties = None
     elif platform_name == 'OpenCL':
-        resolved_properties = {'OpenCLPrecision': requested_precision}
+        resolved_properties = {'Precision': requested_precision}
         if {{Device_ID_active}}:
-            resolved_properties['OpenCLDeviceIndex'] = '{{Device_Number}}'
+            resolved_properties['DeviceIndex'] = '{{Device_Number}}'
     elif platform_name == 'CUDA':
-        resolved_properties = {'CudaPrecision': requested_precision, 'DeterministicForces': 'True'}
+        resolved_properties = {'Precision': requested_precision, 'DeterministicForces': 'True'}
         if {{Device_ID_active}}:
-            resolved_properties['CudaDeviceIndex'] = '{{Device_Number}}'
+            resolved_properties['DeviceIndex'] = '{{Device_Number}}'
 
     return resolved_properties, resolved_precision
 

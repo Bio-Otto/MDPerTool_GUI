@@ -176,20 +176,20 @@ def residue_based_decomposition(topol, trj_pos_list, start_res, stop_res, output
     precision = 'mixed'
 
     if platform_name == 'OpenCL':
-        properties = {'OpenCLPrecision': 'double'}
+        properties = {'Precision': 'double'}
         if device_id_active:
-            properties['OpenCLDeviceIndex'] = '1'
+            properties['DeviceIndex'] = '1'
 
     elif platform_name == 'CUDA':
-        properties = {'CudaPrecision': 'double'}
+        properties = {'Precision': 'double'}
         if device_id_active:
-            properties['CudaDeviceIndex'] = '1'
+            properties['DeviceIndex'] = '1'
 
     elif platform_name == 'CPU':
         if logger_object is not None:
             logger_object.info("The CPU platform always uses 'mixed' precision.")
             logger_object.info("Simulation process will use %s Thread(s)" % num_of_threads)
-        properties = {'CpuThreads': '%s' % num_of_threads}
+        properties = {'Threads': '%s' % num_of_threads}
 
     elif platform_name == 'Reference':
         if logger_object is not None:
