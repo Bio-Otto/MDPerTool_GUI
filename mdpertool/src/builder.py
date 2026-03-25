@@ -3,6 +3,7 @@ from src.mplwidget import WidgetPlot, PlotCanvas
 from src.omm_runner import Communicate, OpenMMScriptRunner, Graphs
 from src.pyside_dynamic import loadUi
 import src.ui_functions as UIF
+from src.message import Message_Boxes
 
 from PySide2 import QtCore
 from PySide2.QtCore import Slot, QThread

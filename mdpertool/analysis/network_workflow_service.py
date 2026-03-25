@@ -67,6 +67,25 @@ def validate_network_input_files(network_params: Dict[str, Any]) -> Dict[str, An
     pdb_path = _resolve_existing_file_path(network_params.get("pdb", ""))
     response_path = _resolve_existing_file_path(network_params.get("retime_file", ""))
 
+    if os.path.getsize(response_path) == 0:
+        raise RuntimeError(
+            "Response-time CSV is empty. Please run decomposition/response-time calculation again "
+            "or select a valid responseTimes_*.csv file."
+        )
+
+    has_data_row = False
+    with open(response_path, "r", encoding="utf-8", errors="ignore") as response_file:
+        for line in response_file:
+            if line.strip():
+                has_data_row = True
+                break
+
+    if not has_data_row:
+        raise RuntimeError(
+            "Response-time CSV has no readable data rows. "
+            "Please regenerate response times and retry network analysis."
+        )
+
     network_params["pdb"] = pdb_path
     network_params["retime_file"] = response_path
     return network_params
@@ -249,6 +268,8 @@ def prepare_general_network_engine_from_ui(target: Any, atom_type: str = "CA") -
             "Network preparation failed because an input file could not be found: "
             f"{missing_path}. Please re-select topology and response-time files."
         ) from file_error
+    except RuntimeError:
+        raise
 
     return build_network_engine(
         parameters=target.network_params,

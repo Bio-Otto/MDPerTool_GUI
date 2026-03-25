@@ -69,7 +69,26 @@ class PlotCanvas(FigureCanvas):
 
 
 def getResponseTimeGraph(responseTimeFile):
-    responses_file = pd.read_csv(responseTimeFile, header=None)
+    try:
+        responses_file = pd.read_csv(responseTimeFile, header=None)
+    except pd.errors.EmptyDataError:
+        row, col = 0, 0
+        response_count = []
+        filename_parts = os.path.splitext(responseTimeFile)
+        plot_name = "x%s" % str(filename_parts[0].split('_')[-1])
+        fit_curve = []
+        metrics = {
+            "na_reason_code": "empty_response_file",
+            "fit_status": "unavailable",
+            "responded_fraction": None,
+            "fit_rmse": None,
+        }
+        try:
+            _write_analysis_manifest(responseTimeFile, metrics)
+        except Exception as err:
+            print(f"Warning: could not write analysis manifest: {err}")
+        return row, col, response_count, plot_name, fit_curve, metrics
+
     response_time_column = responses_file.values.flatten()
     response_time_column_max = response_time_column.max()
 
