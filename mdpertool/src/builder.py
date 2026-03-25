@@ -260,7 +260,7 @@ class Advanced(QtCore.QThread):
                                 water_padding=self.water_padding_lineEdit.text(),
                                 perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in
                                                     range(self.selected_residues_listWidget.count())],
-                                speed_factor=self._parse_speed_factors(self.R_factor_ComboBox.currentText()),
+                                speed_factor=Advanced._parse_speed_factors(self.R_factor_ComboBox.currentText()),
                                 perturb_simulation_time=self.run_duration_spinBox.value(),
                                 perturb_simulation_time_unit=self.perturb_time_unit_comboBox.currentText(),
 
