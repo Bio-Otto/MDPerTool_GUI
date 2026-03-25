@@ -23,56 +23,30 @@ def initialize_advanced_platform_options(main_window):
     main_window : MainWindow
         Reference to main GUI window
     """
-    # Store references for later access
-    main_window.determinism_checkBox = None
-    main_window.use_cpu_pme_checkBox = None
-    main_window.use_blocking_sync_checkBox = None
-    
-    # Try to find the platform settings tab/frame
-    # Platforms are typically in a GroupBox or Tab - look for equ_platform_comboBox parent
-    platform_combo = main_window.equ_platform_comboBox
-    if not platform_combo:
-        return  # UI not initialized properly
-    
-    # Find the parent layout of platform controls (usually a QGridLayout or QVBoxLayout)
-    parent_widget = platform_combo.parent()
-    if not parent_widget:
-        parent_widget = main_window
-    
-    # === DETERMINISM CHECKBOX (CUDA/OpenCL only) ===
-    main_window.determinism_checkBox = QtWidgets.QCheckBox("Deterministic Forces")
-    main_window.determinism_checkBox.setEnabled(False)  # Disabled by default
-    main_window.determinism_checkBox.setChecked(True)  # Enabled by default when available
+    # Bind widgets that are defined in MAIN_GUI.ui
+    main_window.determinism_checkBox = getattr(main_window, "determinism_checkBox", None)
+    main_window.use_cpu_pme_checkBox = getattr(main_window, "use_cpu_pme_checkBox", None)
+    main_window.use_blocking_sync_checkBox = getattr(main_window, "use_blocking_sync_checkBox", None)
+
+    platform_combo = getattr(main_window, "equ_platform_comboBox", None)
+    if (not platform_combo or
+            main_window.determinism_checkBox is None or
+            main_window.use_cpu_pme_checkBox is None or
+            main_window.use_blocking_sync_checkBox is None):
+        return
+
     main_window.determinism_checkBox.setToolTip(
         "Enable deterministic force calculations for reproducible simulations.\n"
         "CUDA/OpenCL only. Slightly reduces performance."
     )
-    
-    # === ADVANCED OPTIONS COLLAPSIBLE GROUP ===
-    main_window.advanced_options_group = QtWidgets.QGroupBox("Advanced OpenMM Options")
-    main_window.advanced_options_group.setCheckable(False)  # Not collapsible in basic version
-    advanced_layout = QtWidgets.QVBoxLayout()
-    
-    # UseCpuPme option
-    main_window.use_cpu_pme_checkBox = QtWidgets.QCheckBox("Use CPU-based PME")
-    main_window.use_cpu_pme_checkBox.setEnabled(False)
     main_window.use_cpu_pme_checkBox.setToolTip(
         "Use CPU for PME (Particle Mesh Ewald) calculations instead of GPU.\n"
         "Useful for CPU-intensive PME or mixed workloads."
     )
-    advanced_layout.addWidget(main_window.use_cpu_pme_checkBox)
-    
-    # UseBlockingSync option (CUDA only)
-    main_window.use_blocking_sync_checkBox = QtWidgets.QCheckBox("Use Blocking Sync (CUDA)")
-    main_window.use_blocking_sync_checkBox.setEnabled(False)
-    main_window.use_blocking_sync_checkBox.setChecked(False)
     main_window.use_blocking_sync_checkBox.setToolTip(
         "Allow CPU to sleep while GPU works. Slightly improves perf but blocks other CPU work.\n"
         "CUDA only."
     )
-    advanced_layout.addWidget(main_window.use_blocking_sync_checkBox)
-    
-    main_window.advanced_options_group.setLayout(advanced_layout)
     
     # === CONNECT PLATFORM CHANGES TO UPDATE AVAILABILTY ===
     main_window.equ_platform_comboBox.currentTextChanged.connect(

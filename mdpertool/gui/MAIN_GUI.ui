@@ -556,7 +556,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="icons_path.qrc">
+   <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
     <normaloff>:/big_icons/icons/big_icons/style_icon_48x48.png</normaloff>:/big_icons/icons/big_icons/style_icon_48x48.png</iconset>
   </property>
   <property name="styleSheet">
@@ -997,7 +997,7 @@ QPushButton:pressed {
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset resource="icons_path.qrc">
+                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                        <normaloff>:/16x16/icons/16x16/cil-window-minimize.png</normaloff>:/16x16/icons/16x16/cil-window-minimize.png</iconset>
                      </property>
                     </widget>
@@ -1029,7 +1029,7 @@ QPushButton:pressed {
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset resource="icons_path.qrc">
+                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                        <normaloff>:/16x16/icons/16x16/cil-window-maximize.png</normaloff>:/16x16/icons/16x16/cil-window-maximize.png</iconset>
                      </property>
                     </widget>
@@ -1061,7 +1061,7 @@ QPushButton:pressed {
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset resource="icons_path.qrc">
+                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                        <normaloff>:/16x16/icons/16x16/cil-x.png</normaloff>:/16x16/icons/16x16/cil-x.png</iconset>
                      </property>
                     </widget>
@@ -1434,7 +1434,7 @@ background-color: rgb(68, 72, 76);</string>
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1489,7 +1489,7 @@ QPushButton:pressed
                          <string/>
                         </property>
                         <property name="icon">
-                         <iconset resource="icons_path.qrc">
+                         <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                           <normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</iconset>
                         </property>
                        </widget>
@@ -1531,7 +1531,7 @@ QPushButton:pressed
                          <string/>
                         </property>
                         <property name="icon">
-                         <iconset resource="icons_path.qrc">
+                         <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                           <normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</iconset>
                         </property>
                        </widget>
@@ -1674,7 +1674,7 @@ margin-bottom: 4px
                              <string>Activate</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="icons_path.qrc">
+                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                               <normaloff>:/24x24/icons/24x24/cil-cursor.png</normaloff>:/24x24/icons/24x24/cil-cursor.png</iconset>
                             </property>
                            </widget>
@@ -1735,7 +1735,7 @@ margin-bottom: 4px
                              <string>Deactivate</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="icons_path.qrc">
+                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                               <normaloff>:/20x20/icons/20x20/cil-x.png</normaloff>:/20x20/icons/20x20/cil-x.png</iconset>
                             </property>
                            </widget>
@@ -1796,7 +1796,7 @@ margin-bottom: 4px
                              <string>Refresh</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="icons_path.qrc">
+                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-reload.png</normaloff>:/16x16/icons/16x16/cil-reload.png</iconset>
                             </property>
                            </widget>
@@ -1857,7 +1857,7 @@ margin-bottom: 4px
                              <string>Beautiful Snap</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="icons_path.qrc">
+                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-camera.png</normaloff>:/16x16/icons/16x16/cil-camera.png</iconset>
                             </property>
                            </widget>
@@ -1918,7 +1918,7 @@ margin-bottom: 4px
                              <string>Save as png</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="icons_path.qrc">
+                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-data-transfer-down.png</normaloff>:/16x16/icons/16x16/cil-data-transfer-down.png</iconset>
                             </property>
                            </widget>
@@ -2446,7 +2446,7 @@ QPushButton:pressed
                               <string>Get Figure</string>
                              </property>
                              <property name="icon">
-                              <iconset resource="icons_path.qrc">
+                              <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                <normaloff>:/16x16/icons/16x16/cil-image-plus.png</normaloff>:/16x16/icons/16x16/cil-image-plus.png</iconset>
                              </property>
                             </widget>
@@ -2517,7 +2517,7 @@ QPushButton:pressed
                            <string/>
                           </property>
                           <property name="icon">
-                           <iconset resource="icons_path.qrc">
+                           <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                             <normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</iconset>
                           </property>
                           <property name="flat">
@@ -4230,7 +4230,7 @@ QPushButton:pressed {
                                       <string/>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="icons_path.qrc">
+                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</iconset>
                                      </property>
                                     </widget>
@@ -4280,7 +4280,7 @@ QPushButton:pressed {
                                       <string/>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="icons_path.qrc">
+                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</iconset>
                                      </property>
                                     </widget>
@@ -4865,7 +4865,7 @@ QPushButton:pressed {
                                <string>Run</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="icons_path.qrc">
+                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-media-play.png</normaloff>:/16x16/icons/16x16/cil-media-play.png</iconset>
                               </property>
                              </widget>
@@ -4903,7 +4903,7 @@ QPushButton:pressed {
                                <string>Quit</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="icons_path.qrc">
+                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-account-logout.png</normaloff>:/16x16/icons/16x16/cil-account-logout.png</iconset>
                               </property>
                              </widget>
@@ -4948,7 +4948,7 @@ QPushButton:pressed
                                <string>İmport Project</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="icons_path.qrc">
+                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-action-undo.png</normaloff>:/16x16/icons/16x16/cil-action-undo.png</iconset>
                               </property>
                              </widget>
@@ -4996,7 +4996,7 @@ QPushButton:pressed
                                <string>Export Project</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="icons_path.qrc">
+                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-save.png</normaloff>:/16x16/icons/16x16/cil-save.png</iconset>
                               </property>
                              </widget>
@@ -5034,7 +5034,7 @@ QPushButton:pressed {
                                <string>Stop</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="icons_path.qrc">
+                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-media-stop.png</normaloff>:/16x16/icons/16x16/cil-media-stop.png</iconset>
                               </property>
                              </widget>
@@ -5097,7 +5097,7 @@ QPushButton:pressed
                                <string>Load Test Case</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="icons_path.qrc">
+                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</iconset>
                               </property>
                              </widget>
@@ -5116,7 +5116,7 @@ QPushButton:pressed
                             <property name="maximumSize">
                              <size>
                               <width>16777215</width>
-                              <height>700</height>
+                              <height>850</height>
                              </size>
                             </property>
                             <property name="font">
@@ -5270,7 +5270,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                                 </property>
                                 <property name="maximumSize">
                                  <size>
-                                  <width>650</width>
+                                  <width>16777215</width>
                                   <height>90</height>
                                  </size>
                                 </property>
@@ -5548,19 +5548,21 @@ QComboBox:disabled {
                                 <property name="minimumSize">
                                  <size>
                                   <width>0</width>
-                                  <height>190</height>
+                                  <height>300</height>
                                  </size>
                                 </property>
                                 <property name="maximumSize">
                                  <size>
                                   <width>16777215</width>
-                                  <height>190</height>
+                                  <height>330</height>
                                  </size>
                                 </property>
                                 <property name="font">
                                  <font>
                                   <family>Segoe UI Semibold</family>
                                   <pointsize>10</pointsize>
+                                  <weight>50</weight>
+                                  <bold>false</bold>
                                  </font>
                                 </property>
                                 <property name="styleSheet">
@@ -5592,13 +5594,122 @@ QGroupBox::indicator {
                                  <string>Platform and Properties</string>
                                 </property>
                                 <layout class="QGridLayout" name="gridLayout">
-                                 <item row="0" column="0">
-                                  <widget class="QLabel" name="label_38">
+                                 <item row="4" column="0">
+                                  <widget class="QLabel" name="determinism_label">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>85</width>
+                                     <height>0</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>85</width>
+                                     <height>16777215</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                     <weight>75</weight>
+                                     <bold>true</bold>
+                                     <underline>true</underline>
+                                    </font>
+                                   </property>
+                                   <property name="text">
+                                    <string>Advanced:</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="2" column="1">
+                                  <widget class="QSpinBox" name="Number_CPU_spinBox_2">
+                                   <property name="enabled">
+                                    <bool>true</bool>
+                                   </property>
                                    <property name="sizePolicy">
                                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                      <horstretch>0</horstretch>
                                      <verstretch>0</verstretch>
                                     </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>170</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>170</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="layoutDirection">
+                                    <enum>Qt::RightToLeft</enum>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QSpinBox{
+	background-color: rgb(27, 29, 35);
+	border-radius: 5px;
+	border: 2px solid rgb(27, 29, 35);
+	padding: 5px;
+	padding-left: 5px;
+}
+QSpinBox:hover{
+	border: 2px solid rgb(64, 71, 88);
+}
+QSpinBox QAbstractItemView {
+	color: rgb(85, 170, 255);	
+	background-color: rgb(27, 29, 35);
+	padding: 5px;
+	selection-background-color: rgb(39, 44, 54);
+}
+
+
+QAbstractSpinBox:disabled {
+    color: #f5f5f5;
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+}
+
+
+QSpinBox::up-button { width: 20px; }
+QSpinBox::down-button { width: 20px; }</string>
+                                   </property>
+                                   <property name="minimum">
+                                    <number>2</number>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="1" column="0">
+                                  <widget class="QLabel" name="label_39">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>70</width>
+                                     <height>0</height>
+                                    </size>
                                    </property>
                                    <property name="maximumSize">
                                     <size>
@@ -5613,7 +5724,41 @@ QGroupBox::indicator {
                                     </font>
                                    </property>
                                    <property name="text">
-                                    <string>Platform: </string>
+                                    <string>Device ID: </string>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="2" column="0">
+                                  <widget class="QLabel" name="label_35">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>85</width>
+                                     <height>0</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>85</width>
+                                     <height>16777215</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="text">
+                                    <string>Threads:</string>
+                                   </property>
+                                   <property name="alignment">
+                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                                    </property>
                                   </widget>
                                  </item>
@@ -5719,6 +5864,121 @@ QComboBox:disabled {
                                    </item>
                                   </widget>
                                  </item>
+                                 <item row="1" column="1">
+                                  <widget class="QComboBox" name="Device_Number_comboBox">
+                                   <property name="enabled">
+                                    <bool>false</bool>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>110</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>180</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QComboBox {
+    background-color: rgb(27, 29, 35); /* Dark background */
+    border-radius: 5px; /* Rounded corners */
+    border: 2px solid rgb(27, 29, 35); /* Border same as background */
+    padding: 1px 18px 1px 10px; /* Padding for text */
+    min-width: 6em; /* Minimum width */
+    color: #E0E0E0; /* Light grey text color */
+}
+
+QComboBox:hover {
+    border: 2px solid rgb(64, 71, 88); /* Border color on hover */
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2C2F36; /* Background for dropdown items */
+    selection-background-color: rgb(200, 5, 100); /* Selected item background */
+    selection-color: #FFFFFF; /* Selected item text color */
+    color: #E0E0E0; /* Default text color */
+    border: 1px solid #404758; /* Border for dropdown menu */
+}
+
+QComboBox:editable {
+    background-color: rgb(0, 180, 95); /* Editable combo box background */
+    color: #FFFFFF; /* Editable combo box text color */
+}
+
+QComboBox:on {
+    padding-top: 3px; /* Shift text when popup opens */
+    padding-left: 4px;
+    text-align: center; /* Center text alignment */
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding; /* Positioning of dropdown button */
+    subcontrol-position: top right;
+    width: 20px;
+    border-left-width: 2px;
+    border-left-color: darkgray;
+    border-left-style: solid; /* Single line border */
+    border-top-right-radius: 3px; /* Rounded corners same as QComboBox */
+    border-bottom-right-radius: 3px;
+    background-color: rgb(27, 29, 35); /* Background color for dropdown button */
+}
+
+QComboBox::down-arrow {
+    image: url(:/16x16/icons/16x16/cil-arrow-bottom.png); /* Arrow image */
+}
+
+QComboBox::down-arrow:on {
+    top: 1px; /* Shift arrow when popup is open */
+    left: 1px;
+}
+
+QComboBox:disabled {
+    background-color: rgb(93, 83, 91); /* Background for disabled state */
+    color: #B0B0B0; /* Text color for disabled state */
+}
+</string>
+                                   </property>
+                                   <item>
+                                    <property name="text">
+                                     <string>1</string>
+                                    </property>
+                                   </item>
+                                  </widget>
+                                 </item>
+                                 <item row="0" column="0">
+                                  <widget class="QLabel" name="label_38">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>80</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="text">
+                                    <string>Platform: </string>
+                                   </property>
+                                  </widget>
+                                 </item>
                                  <item row="0" column="2">
                                   <widget class="QLabel" name="label_27">
                                    <property name="sizePolicy">
@@ -5755,6 +6015,149 @@ QComboBox:disabled {
                                    </property>
                                    <property name="alignment">
                                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="1" column="2">
+                                  <widget class="QCheckBox" name="Device_ID_checkBox">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>120</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>130</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+	border-radius: 5px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+
+QCheckBox:disabled {
+    color: #f5f5f5;
+	border: 2px solid rgb(27, 29, 35);
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+	margin-left: 0px;
+	padding-left: 13px;
+}
+
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Use Device ID</string>
+                                   </property>
+                                   <property name="shortcut">
+                                    <string notr="true"/>
+                                   </property>
+                                   <property name="checked">
+                                    <bool>false</bool>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="2" column="2">
+                                  <widget class="QCheckBox" name="All_CPU_checkBox">
+                                   <property name="enabled">
+                                    <bool>true</bool>
+                                   </property>
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>120</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>130</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="layoutDirection">
+                                    <enum>Qt::LeftToRight</enum>
+                                   </property>
+                                   <property name="autoFillBackground">
+                                    <bool>false</bool>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+	border-radius: 5px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+QCheckBox:disabled {
+    color: #f5f5f5;
+	border: 2px solid rgb(27, 29, 35);
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+	margin-left: 0px;
+	padding-left: 13px;
+}
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+
+
+</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>All CPU</string>
                                    </property>
                                   </widget>
                                  </item>
@@ -5861,199 +6264,11 @@ QComboBox:disabled {
                                    </item>
                                   </widget>
                                  </item>
-                                 <item row="1" column="0">
-                                  <widget class="QLabel" name="label_39">
-                                   <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                     <horstretch>0</horstretch>
-                                     <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                   </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>70</width>
-                                     <height>0</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>80</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="text">
-                                    <string>Device ID: </string>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item row="1" column="1">
-                                  <widget class="QComboBox" name="Device_Number_comboBox">
+                                 <item row="6" column="1" colspan="2">
+                                  <widget class="QCheckBox" name="determinism_checkBox">
                                    <property name="enabled">
                                     <bool>false</bool>
                                    </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>110</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>180</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="styleSheet">
-                                    <string notr="true">QComboBox {
-    background-color: rgb(27, 29, 35); /* Dark background */
-    border-radius: 5px; /* Rounded corners */
-    border: 2px solid rgb(27, 29, 35); /* Border same as background */
-    padding: 1px 18px 1px 10px; /* Padding for text */
-    min-width: 6em; /* Minimum width */
-    color: #E0E0E0; /* Light grey text color */
-}
-
-QComboBox:hover {
-    border: 2px solid rgb(64, 71, 88); /* Border color on hover */
-}
-
-QComboBox QAbstractItemView {
-    background-color: #2C2F36; /* Background for dropdown items */
-    selection-background-color: rgb(200, 5, 100); /* Selected item background */
-    selection-color: #FFFFFF; /* Selected item text color */
-    color: #E0E0E0; /* Default text color */
-    border: 1px solid #404758; /* Border for dropdown menu */
-}
-
-QComboBox:editable {
-    background-color: rgb(0, 180, 95); /* Editable combo box background */
-    color: #FFFFFF; /* Editable combo box text color */
-}
-
-QComboBox:on {
-    padding-top: 3px; /* Shift text when popup opens */
-    padding-left: 4px;
-    text-align: center; /* Center text alignment */
-}
-
-QComboBox::drop-down {
-    subcontrol-origin: padding; /* Positioning of dropdown button */
-    subcontrol-position: top right;
-    width: 20px;
-    border-left-width: 2px;
-    border-left-color: darkgray;
-    border-left-style: solid; /* Single line border */
-    border-top-right-radius: 3px; /* Rounded corners same as QComboBox */
-    border-bottom-right-radius: 3px;
-    background-color: rgb(27, 29, 35); /* Background color for dropdown button */
-}
-
-QComboBox::down-arrow {
-    image: url(:/16x16/icons/16x16/cil-arrow-bottom.png); /* Arrow image */
-}
-
-QComboBox::down-arrow:on {
-    top: 1px; /* Shift arrow when popup is open */
-    left: 1px;
-}
-
-QComboBox:disabled {
-    background-color: rgb(93, 83, 91); /* Background for disabled state */
-    color: #B0B0B0; /* Text color for disabled state */
-}
-</string>
-                                   </property>
-                                   <item>
-                                    <property name="text">
-                                     <string>1</string>
-                                    </property>
-                                   </item>
-                                  </widget>
-                                 </item>
-                                 <item row="1" column="2">
-                                  <widget class="QCheckBox" name="Device_ID_checkBox">
-                                   <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                     <horstretch>0</horstretch>
-                                     <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                   </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>120</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>130</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="styleSheet">
-                                    <string notr="true">QCheckBox {
-    spacing: 5px;
-	margin-left: 15px;
-	border-radius: 5px;
-}
-
-QCheckBox::indicator {
-    width: 15px;
-    height: 15px;
-}
-
-QCheckBox::indicator:unchecked {
-border-image: url(:/16x16/icons/16x16/cil-circle.png);
-
-}
-
-
-QCheckBox:disabled {
-    color: #f5f5f5;
-	border: 2px solid rgb(27, 29, 35);
-    background-color: rgb(93, 83, 91);
-    border-color: #e0e0e0;
-	margin-left: 0px;
-	padding-left: 13px;
-}
-
-
-QCheckBox::indicator:checked {
-	border-image: url(:/20x20/icons/20x20/cil-check.png);
-}
-</string>
-                                   </property>
-                                   <property name="text">
-                                    <string>Use Device ID</string>
-                                   </property>
-                                   <property name="shortcut">
-                                    <string notr="true"/>
-                                   </property>
-                                   <property name="checked">
-                                    <bool>false</bool>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item row="2" column="0">
-                                  <widget class="QLabel" name="label_35">
                                    <property name="sizePolicy">
                                     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                                      <horstretch>0</horstretch>
@@ -6062,50 +6277,7 @@ QCheckBox::indicator:checked {
                                    </property>
                                    <property name="minimumSize">
                                     <size>
-                                     <width>85</width>
-                                     <height>0</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>85</width>
-                                     <height>16777215</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="text">
-                                    <string>Threads:</string>
-                                   </property>
-                                   <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item row="2" column="1">
-                                  <widget class="QSpinBox" name="Number_CPU_spinBox_2">
-                                   <property name="enabled">
-                                    <bool>true</bool>
-                                   </property>
-                                   <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                     <horstretch>0</horstretch>
-                                     <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                   </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>170</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>170</width>
+                                     <width>240</width>
                                      <height>33</height>
                                     </size>
                                    </property>
@@ -6114,78 +6286,6 @@ QCheckBox::indicator:checked {
                                      <family>Segoe UI</family>
                                      <pointsize>10</pointsize>
                                     </font>
-                                   </property>
-                                   <property name="layoutDirection">
-                                    <enum>Qt::RightToLeft</enum>
-                                   </property>
-                                   <property name="styleSheet">
-                                    <string notr="true">QSpinBox{
-	background-color: rgb(27, 29, 35);
-	border-radius: 5px;
-	border: 2px solid rgb(27, 29, 35);
-	padding: 5px;
-	padding-left: 5px;
-}
-QSpinBox:hover{
-	border: 2px solid rgb(64, 71, 88);
-}
-QSpinBox QAbstractItemView {
-	color: rgb(85, 170, 255);	
-	background-color: rgb(27, 29, 35);
-	padding: 5px;
-	selection-background-color: rgb(39, 44, 54);
-}
-
-
-QAbstractSpinBox:disabled {
-    color: #f5f5f5;
-    background-color: rgb(93, 83, 91);
-    border-color: #e0e0e0;
-}
-
-
-QSpinBox::up-button { width: 20px; }
-QSpinBox::down-button { width: 20px; }</string>
-                                   </property>
-                                   <property name="minimum">
-                                    <number>2</number>
-                                   </property>
-                                  </widget>
-                                 </item>
-                                 <item row="2" column="2">
-                                  <widget class="QCheckBox" name="All_CPU_checkBox">
-                                   <property name="enabled">
-                                    <bool>true</bool>
-                                   </property>
-                                   <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                     <horstretch>0</horstretch>
-                                     <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                   </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>120</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>130</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="layoutDirection">
-                                    <enum>Qt::LeftToRight</enum>
-                                   </property>
-                                   <property name="autoFillBackground">
-                                    <bool>false</bool>
                                    </property>
                                    <property name="styleSheet">
                                     <string notr="true">QCheckBox {
@@ -6215,13 +6315,135 @@ QCheckBox:disabled {
 
 QCheckBox::indicator:checked {
 	border-image: url(:/20x20/icons/20x20/cil-check.png);
-}
-
-
-</string>
+}</string>
                                    </property>
                                    <property name="text">
-                                    <string>All CPU</string>
+                                    <string>Deterministic Forces (CUDA/OpenCL)</string>
+                                   </property>
+                                   <property name="checked">
+                                    <bool>true</bool>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="7" column="1" colspan="2">
+                                  <widget class="QCheckBox" name="use_cpu_pme_checkBox">
+                                   <property name="enabled">
+                                    <bool>false</bool>
+                                   </property>
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>240</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+	border-radius: 5px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+QCheckBox:disabled {
+    color: #f5f5f5;
+	border: 2px solid rgb(27, 29, 35);
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+	margin-left: 0px;
+	padding-left: 13px;
+}
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Use CPU-based PME (CUDA/OpenCL)</string>
+                                   </property>
+                                   <property name="checked">
+                                    <bool>false</bool>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="8" column="1" colspan="2">
+                                  <widget class="QCheckBox" name="use_blocking_sync_checkBox">
+                                   <property name="enabled">
+                                    <bool>false</bool>
+                                   </property>
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>240</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+	border-radius: 5px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+QCheckBox:disabled {
+    color: #f5f5f5;
+	border: 2px solid rgb(27, 29, 35);
+    background-color: rgb(93, 83, 91);
+    border-color: #e0e0e0;
+	margin-left: 0px;
+	padding-left: 13px;
+}
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Use Blocking Sync (CUDA only)</string>
+                                   </property>
+                                   <property name="checked">
+                                    <bool>false</bool>
                                    </property>
                                   </widget>
                                  </item>
@@ -6584,7 +6806,7 @@ QComboBox:disabled {
                                 <property name="maximumSize">
                                  <size>
                                   <width>16777215</width>
-                                  <height>240</height>
+                                  <height>260</height>
                                  </size>
                                 </property>
                                 <property name="font">
@@ -6940,7 +7162,7 @@ QLineEdit:focus {
 }</string>
                                    </property>
                                    <property name="text">
-                                    <string>0.1*molar</string>
+                                    <string>0.15*molar</string>
                                    </property>
                                   </widget>
                                  </item>
@@ -7072,7 +7294,7 @@ QLineEdit:focus {
 }</string>
                                    </property>
                                    <property name="text">
-                                    <string>1.0*nanometer</string>
+                                    <string>0.9*nanometer</string>
                                    </property>
                                   </widget>
                                  </item>
@@ -7156,7 +7378,7 @@ QLineEdit:focus {
 }</string>
                                    </property>
                                    <property name="text">
-                                    <string>1.2*nanometer</string>
+                                    <string>1.0*nanometer</string>
                                    </property>
                                   </widget>
                                  </item>
@@ -8516,7 +8738,7 @@ QLineEdit:focus {
                             <property name="sizeHint" stdset="0">
                              <size>
                               <width>20</width>
-                              <height>40</height>
+                              <height>10</height>
                              </size>
                             </property>
                            </spacer>
@@ -11685,7 +11907,7 @@ QPushButton:pressed {
                                         <string/>
                                        </property>
                                        <property name="icon">
-                                        <iconset resource="icons_path.qrc">
+                                        <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                          <normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</iconset>
                                        </property>
                                       </widget>
@@ -11729,7 +11951,7 @@ QPushButton:pressed {
                                         <string/>
                                        </property>
                                        <property name="icon">
-                                        <iconset resource="icons_path.qrc">
+                                        <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                          <normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</iconset>
                                        </property>
                                       </widget>
@@ -12331,7 +12553,7 @@ QPushButton:pressed {
                                       <string>Stop</string>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="icons_path.qrc">
+                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-media-stop.png</normaloff>:/16x16/icons/16x16/cil-media-stop.png</iconset>
                                      </property>
                                     </widget>
@@ -12378,7 +12600,7 @@ QPushButton:pressed {
                                       <string>CALCULATE</string>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="icons_path.qrc">
+                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-arrow-right.png</normaloff>:/16x16/icons/16x16/cil-arrow-right.png</iconset>
                                      </property>
                                     </widget>
@@ -12457,7 +12679,7 @@ QPushButton:pressed
                                       <string>Load Test Case</string>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="icons_path.qrc">
+                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</iconset>
                                      </property>
                                     </widget>
@@ -14369,8 +14591,8 @@ QCommandLinkButton:pressed {
   </widget>
  </widget>
  <resources>
-  <include location="icons_path.qrc"/>
-  <include location="files.qrc"/>
+  <include location="MDPerTool_GUI/mdpertool/gui/icons_path.qrc"/>
+  <include location="MDPerTool_GUI/mdpertool/gui/files.qrc"/>
  </resources>
  <connections/>
 </ui>
