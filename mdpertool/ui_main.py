@@ -507,6 +507,9 @@ class MainWindow(QtWidgets.QMainWindow):
         UIF.Functions.precision_combobox_settings(self, eq_md_indexes=eq_md_precission_indexes,
                                                   per_md_indexes=per_md_precission_indexes)
 
+        # ===== INITIALIZE ADVANCED PLATFORM OPTIONS (Determinism, advanced settings) =====
+        UIF.Functions.initialize_advanced_platform_options(self)
+
     def stop_button_clicked(self):
         self.__stop = True
         was_stopped = False

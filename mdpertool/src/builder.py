@@ -293,20 +293,20 @@ class Advanced_Helper_Functions(QtCore.QThread):
     def selected_platform(self, platform_name, Device_ID_active, precision):
 
         if platform_name == 'OpenCL' and Device_ID_active == True:
-            properties = {'OpenCLPrecision': '%s' % precision,
-                          'OpenCLDeviceIndex': '%s' % self.Device_Number_comboBox.currentText()}
+            properties = {'Precision': '%s' % precision,
+                          'DeviceIndex': '%s' % self.Device_Number_comboBox.currentText()}
             return platform_name, properties, precision
 
         if platform_name == 'OpenCL' and Device_ID_active == False:
-            properties = {'OpenCLPrecision': '%s' % precision}
+            properties = {'Precision': '%s' % precision}
             return platform_name, properties, precision
 
         if platform_name == 'CUDA' and Device_ID_active == True:
-            properties = {'CudaPrecision': '%s' % precision, 'CudaDeviceIndex': '%s' % self.Device_Index_Number}
+            properties = {'Precision': '%s' % precision, 'DeviceIndex': '%s' % self.Device_Index_Number, 'DeterministicForces': 'true'}
             return platform_name, properties, precision
 
         if platform_name == 'CUDA' and not Device_ID_active:
-            properties = {'CudaPrecision': '%s' % precision}
+            properties = {'Precision': '%s' % precision, 'DeterministicForces': 'true'}
             return platform_name, properties, precision
 
         if platform_name == 'CPU':
@@ -314,11 +314,11 @@ class Advanced_Helper_Functions(QtCore.QThread):
             if self.All_CPU_checkBox.isChecked():
                 cpu_count = multiprocessing.cpu_count()
                 print("Simulation process will use %s Thread(s) (ALL available CPU cores)" % cpu_count)
-                properties = {'CpuThreads': '%s' % cpu_count}
+                properties = {'Threads': '%s' % cpu_count}
             else:
                 thread_count = self.Number_CPU_spinBox_2.value()
                 print("Simulation process will use %s Thread(s)" % thread_count)
-                properties = {'CpuThreads': '%s' % thread_count}
+                properties = {'Threads': '%s' % thread_count}
             precision = 'mixed'
             return platform_name, properties, precision
 

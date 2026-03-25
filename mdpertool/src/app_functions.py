@@ -8,7 +8,12 @@ from PySide2.QtWidgets import (
     QTableWidgetItem,
     QTabBar,
     QVBoxLayout,
+    QHBoxLayout,
     QListWidgetItem,
+    QCheckBox,
+    QGroupBox,
+    QLabel,
+    QSpinBox,
 )
 from PySide2.QtCore import Qt, Slot, QMutexLocker, QMutex
 from PySide2.QtGui import QColor
@@ -22,6 +27,10 @@ from gui.ui_styles import Style
 from .checkBox_menu import ChecklistDialog
 from .message import Message_Boxes
 from .PyMolWidget import PymolQtWidget
+from ._advanced_platform_options import (
+    initialize_advanced_platform_options,
+    get_advanced_platform_properties,
+)
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
 from analysis.createRNetwork import (Pymol_Visualize_Path, Shortest_Path_Visualize)
@@ -2794,3 +2803,8 @@ class pdb_Tools:
             with open(new_outpath, "w") as outfile:
                 PDBFile.writeFile(fixer.topology, fixer.positions, outfile, keepIds=True)
             return new_outpath
+
+    @staticmethod
+    def initialize_advanced_platform_options(self):
+        """Initialize advanced platform options (Determinism, UseCpuPme, etc.) in UI."""
+        initialize_advanced_platform_options(self)
