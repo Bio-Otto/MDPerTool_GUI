@@ -2648,6 +2648,15 @@ class Functions:
 
         self.run_duration_doubleSpinBox.setValue(new_time)
 
+    @staticmethod
+    def initialize_advanced_platform_options(main_window):
+        """Initialize advanced platform options (Determinism, UseCpuPme, etc.) in UI."""
+        try:
+            from ._advanced_platform_options import initialize_advanced_platform_options as init_advanced_opts
+            init_advanced_opts(main_window)
+        except Exception as e:
+            print(f"Warning: Could not initialize advanced platform options: {e}")
+
 
 class InputFile:
     fetch_result = False
