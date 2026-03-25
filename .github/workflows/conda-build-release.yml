@@ -133,6 +133,8 @@ jobs:
           fi
           conda install -y anaconda-client
           anaconda --version
+          # Login with token
+          anaconda login --hostname api.anaconda.org --username bio-otto --password "$TOKEN" --secure-ssl true
           mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
           if [ "${#PACKAGES[@]}" -eq 0 ]; then
             echo "No package file found to upload"
@@ -140,7 +142,7 @@ jobs:
           fi
           for PACKAGE in "${PACKAGES[@]}"; do
             echo "Uploading $PACKAGE"
-            anaconda --token "$TOKEN" upload -u bio-otto "$PACKAGE" --skip-existing || true
+            anaconda upload "$PACKAGE" --skip-existing || true
           done
 
       - name: Create GitHub Release
