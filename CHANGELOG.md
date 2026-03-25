@@ -6,13 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
+- Advanced OpenMM option widgets in GUI: `determinism_checkBox`, `use_cpu_pme_checkBox`, and `use_blocking_sync_checkBox`
+- New `determinism_label` in the platform settings area
 
 ### Fixed
 - `KeyError`s in the `*_experiments` dictionaries because `Path`s were used as keys
+- Advanced option visibility/availability now updates correctly based on selected platform (`CUDA`, `OpenCL`, `CPU`, `Reference`)
 
 ### Changed
 - Vectorize derivative computation in `Simulation` class
 - Update Intersphinx versions in documentation
+- Advanced option initialization now binds to widgets defined in `MAIN_GUI.ui` instead of creating detached runtime widgets
 
 ### Removed
 
