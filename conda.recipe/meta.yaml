@@ -1,6 +1,6 @@
 
 {% set name = "mdpertool" %}
-{% set version = "0.0.3" %}
+{% set version = "0.0.4" %}
 
 
 package:
@@ -19,7 +19,7 @@ source:
 build:
   noarch: python
   #preserve_egg_dir: True
-  number: 5
+  number: 0
   #skip: True  # [win or py2k]
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
@@ -70,7 +70,7 @@ test:
     - mdpertool --help
     - mdpertool cli --help
     - mdpertool gui --help
-    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.3'"
+    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.4'"
   imports:
     - mdpertool
 

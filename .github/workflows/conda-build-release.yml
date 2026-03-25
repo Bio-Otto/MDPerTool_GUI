@@ -5,35 +5,41 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (example: v0.0.5)'
+        required: true
+        type: string
+      publish_to_anaconda:
+        description: 'Upload package to anaconda.org'
+        required: false
+        default: true
+        type: boolean
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.9']
+    name: Build noarch conda package
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.9'
           channels: conda-forge,defaults
           channel-priority: strict
           auto-activate: true
           activate-environment: base
           miniconda-version: latest
 
-      - name: Install build tools
+      - name: Install build tooling
         shell: bash -el {0}
         run: |
           conda install -y conda-build anaconda-client
@@ -42,44 +48,37 @@ jobs:
         shell: bash -el {0}
         run: |
           mkdir -p build_output
-          echo "Building on ${{ matrix.os }}..."
-          conda build conda.recipe \
-            -c conda-forge \
-            --output-folder build_output \
-            --no-test || echo "Build failed, checking for partial outputs..."
-          ls -la build_output/noarch/ 2>/dev/null || echo "No noarch directory found"
+          conda build conda.recipe -c conda-forge --output-folder build_output
+          find build_output -type f | head -100
 
-      - name: List build outputs
-        shell: bash -el {0}
-        if: always()
-        run: |
-          echo "Build output directory:"
-          find build_output -type f 2>/dev/null | head -20 || echo "No build outputs found"
-          echo ""
-          echo "Looking for packages:"
-          find build_output -name "*.conda" -o -name "*.tar.bz2" 2>/dev/null | head -10 || echo "No packages found"
-
-      - name: Upload artifacts
-        if: always()
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: conda-pkg-${{ matrix.os }}
-          path: build_output
-          retention-days: 7
-          if-no-files-found: warn
+          name: conda-pkg
+          path: build_output/**/*
+          retention-days: 14
+          if-no-files-found: error
 
   release:
-    name: Create Release
+    name: Publish release and package
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') && success()
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Resolve tag name
+        id: tag
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "name=${{ github.event.inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Download artifacts
         uses: actions/download-artifact@v5
         with:
+          name: conda-pkg
           path: artifacts
 
       - name: Setup Miniconda for upload
@@ -94,6 +93,7 @@ jobs:
           miniconda-version: latest
 
       - name: Upload package to anaconda.org
+        if: github.event_name == 'push' || github.event.inputs.publish_to_anaconda == 'true'
         shell: bash -el {0}
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
@@ -104,32 +104,22 @@ jobs:
             echo "No Anaconda token found. Set ANACONDA_TOKEN or ANACONDA_API_TOKEN in repository secrets."
             exit 1
           fi
-          export ANACONDA_API_TOKEN="$TOKEN"
-          echo "Anaconda token detected (length: ${#TOKEN})."
-          conda install -y anaconda-client
-          echo "Artifacts downloaded:"
-          find artifacts -type f | head -100 || true
-          PACKAGE=$(find artifacts/conda-pkg-windows-latest -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
-          if [ -z "$PACKAGE" ]; then
-            PACKAGE=$(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
-          fi
+          PACKAGE=$(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | head -1)
           if [ -z "$PACKAGE" ]; then
             echo "No package file found to upload"
             exit 1
           fi
-          echo "Uploading $PACKAGE"
-          anaconda --token "$TOKEN" upload -u bio-otto "$PACKAGE" --force
+          anaconda --token "$TOKEN" upload -u bio-otto "$PACKAGE" --skip-existing
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.name }}
           files: |
             artifacts/**/*.conda
             artifacts/**/*.tar.bz2
           overwrite_files: true
           fail_on_unmatched_files: false
-          append_body: true
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
