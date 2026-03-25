@@ -60,6 +60,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.process = None
         self.stop_requested = False
         self.shutdown_requested = threading.Event()
+        self.error_alert_sent = False
 
         self.openmm_script_code = script
         self._queue = queue.Queue()
@@ -237,6 +238,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.status = 'Running...'
         _headers = []
         decompose_started = None
+        self.error_alert_sent = False
 
         while not self.shutdown_requested.is_set():
             try:
@@ -382,8 +384,21 @@ class OpenMMScriptRunner(QtCore.QObject):
             if msg != "Progress Finished Succesfully :)":
                 if not self._safe_emit(self.Signals.inform_about_situation, msg):
                     return
-                if "error" in msg.lower() or "traceback" in msg.lower() or "exception" in msg.lower():
-                    self._safe_emit(self.Signals.finish_alert, msg)
+                normalized = msg.strip()
+                lowered = normalized.lower()
+                is_traceback_boilerplate = (
+                    lowered.startswith("traceback (most recent call last)")
+                    or lowered.startswith("file ")
+                    or "log_obj.error(" in lowered
+                )
+                is_error_line = (
+                    "error" in lowered
+                    or "exception" in lowered
+                    or "filenotfounderror" in lowered
+                )
+                if is_error_line and not is_traceback_boilerplate and not self.error_alert_sent:
+                    self._safe_emit(self.Signals.finish_alert, normalized)
+                    self.error_alert_sent = True
             else:
                 self.decomp_data.append(int(100))
                 # self.Signals.decomp_process.emit(self.decomp_data)

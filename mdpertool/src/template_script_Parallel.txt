@@ -621,6 +621,18 @@ for i in range(len({{speed_factor}})):
     except Exception as e:
         print("ERROR: ", e)
         log_obj.error(e, stack_info=True, exc_info=True)
+        raise
+
+    required_decomposition_inputs = [
+        last_pdb_file_path,
+        reference_traj_file_for_pos,
+        dissipation_traj_file_for_pos,
+    ]
+    missing_decomposition_inputs = [p for p in required_decomposition_inputs if not os.path.exists(p)]
+    if missing_decomposition_inputs:
+        raise FileNotFoundError(
+            "Required decomposition input file(s) are missing: " + ", ".join(missing_decomposition_inputs)
+        )
 
     try:
 
@@ -652,13 +664,20 @@ for i in range(len({{speed_factor}})):
 
 
         # --> RESPONSE TIME CSV EXPORTER
+        response_output_path = os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i]))
         getResidueResponseTimes(os.path.join(OUTPUT_DIRECTORY, 'reference_energy_file.csv'),
                                 os.path.join(OUTPUT_DIRECTORY, 'modified_energy_file_%s.csv' % int({{speed_factor}}[i])),
-                                outputName=os.path.join(OUTPUT_DIRECTORY, 'responseTimes_%s.csv' % int({{speed_factor}}[i])))
+                                outputName=response_output_path)
+
+        if (not os.path.exists(response_output_path)) or os.path.getsize(response_output_path) == 0:
+            raise RuntimeError(
+                "Response-time CSV could not be produced or is empty: " + response_output_path
+            )
 
     except Exception as e:
         print("ERROR: ", e)
         log_obj.error(e, stack_info=True, exc_info=True)
+        raise
 
     try:
         del XTC_file_path, ref_simulation, dis_simulation, simulation
