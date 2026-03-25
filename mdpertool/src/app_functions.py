@@ -2805,6 +2805,10 @@ class pdb_Tools:
             return new_outpath
 
     @staticmethod
-    def initialize_advanced_platform_options(self):
+    def initialize_advanced_platform_options(main_window):
         """Initialize advanced platform options (Determinism, UseCpuPme, etc.) in UI."""
-        initialize_advanced_platform_options(self)
+        try:
+            from ._advanced_platform_options import initialize_advanced_platform_options as init_advanced_opts
+            init_advanced_opts(main_window)
+        except Exception as e:
+            print(f"Warning: Could not initialize advanced platform options: {e}")
