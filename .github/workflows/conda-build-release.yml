@@ -132,17 +132,23 @@ jobs:
             exit 1
           fi
           conda install -y anaconda-client
-          anaconda --version
-          # Login with token
-          anaconda login --hostname api.anaconda.org --username bio-otto --password "$TOKEN" --secure-ssl true
+          
+          # Use BINSTAR_TOKEN / ANACONDA_API_TOKEN instead of interactive login
+          export BINSTAR_TOKEN="$TOKEN"
+          export ANACONDA_API_TOKEN="$TOKEN"
+          
+          echo "Testing token authentication..."
+          binstar whoami || true
+          
           mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
           if [ "${#PACKAGES[@]}" -eq 0 ]; then
             echo "No package file found to upload"
             exit 1
           fi
+          
           for PACKAGE in "${PACKAGES[@]}"; do
             echo "Uploading $PACKAGE"
-            anaconda upload "$PACKAGE" --skip-existing || true
+            binstar upload -u bio-otto "$PACKAGE" --skip-existing
           done
 
       - name: Create GitHub Release
