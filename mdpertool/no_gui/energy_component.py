@@ -309,9 +309,13 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
                                          selection_md="resid %s" % j, swithing_distance=1.0 * unit.nanometers,
                                          use_switchin_dist=True)
         except Exception as decomposition_platform_error:
+            platform_error_text = str(decomposition_platform_error)
             fallback_needed = current_platform_type in ('OpenCL', 'CUDA') and (
-                    'No compatible OpenCL platform is available' in str(decomposition_platform_error)
-                    or 'No compatible CUDA platform is available' in str(decomposition_platform_error)
+                    'No compatible OpenCL platform is available' in platform_error_text
+                    or 'No compatible CUDA platform is available' in platform_error_text
+                    or 'CUDA_ERROR_UNSUPPORTED_PTX_VERSION' in platform_error_text
+                    or 'Error loading CUDA module' in platform_error_text
+                    or 'PTX' in platform_error_text
             )
 
             if not fallback_needed:
@@ -320,6 +324,10 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
             if logger_object is not None:
                 logger_object.warning("Decomposition platform '%s' is unavailable (%s). Falling back to CPU.",
                                       current_platform_type, decomposition_platform_error)
+                logger_object.warning(
+                    "Detected CUDA/OpenCL runtime incompatibility. "
+                    "Please align NVIDIA driver and conda cudatoolkit/cuda-toolkit versions for GPU runs."
+                )
 
             current_platform = Platform.getPlatformByName('CPU')
             current_properties = {'Threads': '%s' % num_of_threads}

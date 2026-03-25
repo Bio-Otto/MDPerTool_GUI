@@ -36,6 +36,27 @@ conda activate mdpertool
 conda install --override-channels -c bio-otto -c conda-forge mdpertool
 ```
 
+For automatic cross-platform CUDA-aware installation (single command, no extra user tuning):
+
+```sh
+python scripts/bootstrap_mdpertool_env.py
+```
+
+This installer automatically:
+- Detects GPU/driver CUDA capability via `nvidia-smi` (if available)
+- Applies a matching `cudatoolkit` pin when appropriate
+- Runs `openmm.testInstallation`
+- If a CUDA PTX/runtime mismatch is detected, retries compatible toolkit pins automatically
+- Leaves the environment ready for `mdpertool gui`
+
+Useful options:
+
+```sh
+python scripts/bootstrap_mdpertool_env.py --dry-run
+python scripts/bootstrap_mdpertool_env.py --cpu-only
+python scripts/bootstrap_mdpertool_env.py --cudatoolkit-pin cudatoolkit=11.8
+```
+
 This single `mdpertool` package provides both `mdpertool gui` and `mdpertool cli`.
 Avoid `pip install pyside2` inside Python 3.11 environments, as it can cause Qt binary compatibility errors.
 
