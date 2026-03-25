@@ -267,8 +267,19 @@ def get_residue_response_times(reference_name, perturbed_name, output_name='resp
 
     reference_energies = pd.read_csv(reference_name)
     perturbed_energies = pd.read_csv(perturbed_name)
-
-    energy_diff = reference_energies.sub(perturbed_energies)
+    
+    # Handle potential column mismatches or metadata columns
+    # We only subtract columns that exist in both to avoid NaN explosions
+    common_cols = reference_energies.columns.intersection(perturbed_energies.columns)
+    
+    if len(common_cols) == 0:
+        # Fallback: if names differ entirely, strip white spaces or just use values
+        energy_diff = pd.DataFrame(
+            reference_energies.values - perturbed_energies.values,
+            columns=reference_energies.columns
+        )
+    else:
+        energy_diff = reference_energies[common_cols].sub(perturbed_energies[common_cols])
 
     if response_threshold is not None and float(response_threshold) > 0.0:
         energy_diff = energy_diff.mask(energy_diff.abs() < float(response_threshold), 0.0)
@@ -286,14 +297,20 @@ def get_residue_response_times(reference_name, perturbed_name, output_name='resp
             residue_response_times.append(num_frames)
 
     response_time_array = np.asarray(residue_response_times)
-    np.savetxt(output_name, response_time_array, delimiter=',')
-    _write_response_metrics(output_name, response_time_array, num_frames)
-    return response_time_array
+    
+    # OS getcwd() hatalarını (özellikle temp thread içinde) bypass etmek için 
+    try:
+        abs_output_name = os.path.abspath(output_name)
+    except FileNotFoundError:
+        abs_output_name = output_name if os.path.isabs(output_name) else output_name
 
+    try:
+        np.savetxt(abs_output_name, response_time_array, delimiter=',')
+    except FileNotFoundError:
+        with open(abs_output_name, 'wb') as f:
+            np.savetxt(f, response_time_array, delimiter=',')
 
-def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTimes.csv',
-                           responseThreshold=DEFAULT_RESPONSE_THRESHOLD):
-    """Backward-compatible wrapper for legacy callers."""
+    _write_response_metrics(abs_output_name, response_time_array, num_frames)
 
     return get_residue_response_times(
         referenceName,
