@@ -312,6 +312,12 @@ def get_residue_response_times(reference_name, perturbed_name, output_name='resp
 
     _write_response_metrics(abs_output_name, response_time_array, num_frames)
 
+    return response_time_array
+
+
+def getResidueResponseTimes(referenceName, perturbedName, outputName='responseTimes.csv',
+                           responseThreshold=DEFAULT_RESPONSE_THRESHOLD):
+    """Backward-compatible wrapper for legacy callers."""
     return get_residue_response_times(
         referenceName,
         perturbedName,
