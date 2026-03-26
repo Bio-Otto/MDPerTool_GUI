@@ -1,6 +1,6 @@
 
 {% set name = "mdpertool" %}
-{% set version = "0.0.5" %}
+{% set version = "0.0.6" %}
 
 
 package:
@@ -70,7 +70,7 @@ test:
     - mdpertool --help
     - mdpertool cli --help
     - mdpertool gui --help
-    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.5'"
+    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.6'"
   imports:
     - mdpertool
 
