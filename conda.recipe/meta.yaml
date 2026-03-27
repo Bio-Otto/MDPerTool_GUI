@@ -34,6 +34,7 @@ requirements:
 
   run:
     - python >=3.9,<3.12
+    - setuptools <70.0.0
     - lxml
     - pyside2 >=5.15,<6
     - matplotlib
@@ -82,7 +83,14 @@ about:
   license_family: MIT
   license_file: LICENSE
   summary: "A Software Tool for Investigation of Allosteric Communication within Proteins via Energy Dissipation Concept"
-  description: "The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform. Each residual energy calculation required for the concept can be calculated using OpenMMs flexible and useful infrastructure.In addition, you can use the package only for energy decomposition. For this, it will be sufficient to specify a XTC or a DCD file in the script."
+  description: |
+    The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform.
+    
+    IMPORTANT INSTALLATION INSTRUCTION:
+    Anaconda's default install command might miss required dependencies. To install this package correctly, please run the following command in your terminal:
+    
+    conda install -c conda-forge -c bio-otto mdpertool
+    
   dev_url: "https://github.com/Bio-Otto/MDPerTool_GUI"
 
 extra:
