@@ -15,19 +15,19 @@ def generate_pc_bar_plot(df_metrics: pd.DataFrame, output_image: str):
     try:
         import os
         norm_output_image = os.path.normpath(output_image)
-        print(f"[DEBUG][PC Plot] PNG path: {norm_output_image}")
-        print(f"[DEBUG][PC Plot] DataFrame head:")
-        print(df_metrics.head())
+        #print(f"[DEBUG][PC Plot] PNG path: {norm_output_image}")
+        #print(f"[DEBUG][PC Plot] DataFrame head:")
+        #print(df_metrics.head())
         # Sadece pozitif PC'si olan en yüksek 30 rezidüyü gösterelim ki grafik okunabilir olsun
         df_plot = df_metrics[df_metrics['Propagation_Coefficient (PC)'] > 0].copy()
         df_plot = df_plot.sort_values('Propagation_Coefficient (PC)', ascending=False).head(30)
 
-        print(f"[DEBUG][PC Plot] Plot DataFrame head:")
-        print(df_plot.head())
+        #print(f"[DEBUG][PC Plot] Plot DataFrame head:")
+        #print(df_plot.head())
 
         # Bar plot verilerini print et
-        print(f"[DEBUG][PC Plot] Bar X: {df_plot['Residue_ID'].tolist()}")
-        print(f"[DEBUG][PC Plot] Bar Y: {df_plot['Propagation_Coefficient (PC)'].tolist()}")
+        #print(f"[DEBUG][PC Plot] Bar X: {df_plot['Residue_ID'].tolist()}")
+        #print(f"[DEBUG][PC Plot] Bar Y: {df_plot['Propagation_Coefficient (PC)'].tolist()}")
 
         plt.figure(figsize=(10, 6))
         if df_plot.empty:
@@ -42,16 +42,18 @@ def generate_pc_bar_plot(df_metrics: pd.DataFrame, output_image: str):
             plt.tight_layout()
         try:
             plt.savefig(norm_output_image, dpi=300)
-            print(f"[DEBUG][PC Plot] PNG saved: {norm_output_image}")
+            #print(f"[DEBUG][PC Plot] PNG saved: {norm_output_image}")
             # Kısa ve sade bir test yoluna da kaydet
             test_path = os.path.normpath('C:/PC_plot_test.png')
             plt.savefig(test_path, dpi=300)
-            print(f"[DEBUG][PC Plot] Test PNG saved: {test_path}")
+            #print(f"[DEBUG][PC Plot] Test PNG saved: {test_path}")
         except Exception as e:
-            print(f"[PC Plot Hatası] PNG kaydedilemedi: {e}")
+            #print(f"[PC Plot Hatası] PNG kaydedilemedi: {e}")
+            pass
         plt.close()
     except Exception as e:
-        print(f"[PC Plot Hatası] Bar plot çizilemedi: {e}")
+        pass
+        #print(f"[PC Plot Hatası] Bar plot çizilemedi: {e}")
 
 def generate_pymol_macro(df_metrics: pd.DataFrame, output_pml: str, source_node: str):
     """
@@ -90,7 +92,8 @@ def generate_pymol_macro(df_metrics: pd.DataFrame, output_pml: str, source_node:
         with open(output_pml, "w") as f:
             f.write("\n".join(lines))
     except Exception as e:
-        print(f"[PC PyMOL Error] PyMOL makrosu oluşturulamadı: {e}")
+        pass
+        #print(f"[PC PyMOL Error] PyMOL makrosu oluşturulamadı: {e}")
 
 
 def calculate_propagation_coefficient(G: nx.DiGraph, source_node: str, output_csv: str = "propagation_coefficients.csv"):
@@ -110,14 +113,14 @@ def calculate_propagation_coefficient(G: nx.DiGraph, source_node: str, output_cs
     """
     
     if source_node not in G.nodes():
-        print(f"[PC HATA] {source_node} ağı içinde bulunamadı.")
+        #print(f"[PC HATA] {source_node} ağı içinde bulunamadı.")
         return None
 
     # 1. Hiyerarşik Katmanları Belirle (Shortest Path / BFS uzaklığı)
     try:
         layers = nx.single_source_shortest_path_length(G, source_node)
     except Exception as e:
-        print("[PC HATA] Kaynak düğümden ağa ulaşılamadı veya ağ bağlantısız!", e)
+        #print("[PC HATA] Kaynak düğümden ağa ulaşılamadı veya ağ bağlantısız!", e)
         return None
 
     # Düğümleri katmanlarına göre grupla
@@ -210,15 +213,15 @@ def execute_network_metrics_workflow(G: nx.DiGraph, source_node: str, output_dir
     plot_filename = os.path.join(output_directory, f"{prefix}propagation_plot.png")
     pml_filename = os.path.join(output_directory, f"{prefix}pymol_heatmap.pml")
     
-    print(f"[*] Calculating Propagation Coefficients for source '{source_node}'. Output will be assigned to {csv_filename}")
+    #print(f"[*] Calculating Propagation Coefficients for source '{source_node}'. Output will be assigned to {csv_filename}")
     
     df = calculate_propagation_coefficient(G, source_node, csv_filename)
     if df is not None:
-        print("[PC] İlk 5 satır:\n", df.head())
+        #print("[PC] İlk 5 satır:\n", df.head())
         # Plot ve PyMOL senaryolarını tetikle
         generate_pc_bar_plot(df, plot_filename)
         generate_pymol_macro(df, pml_filename, source_node)
-        print(f"[+] PC analysis successfully completed and visual outputs saved.")
-    else:
-        print("[PC] DataFrame None döndü!")
+        #print(f"[+] PC analysis successfully completed and visual outputs saved.")
+    #else:
+        #print("[PC] DataFrame None döndü!")
     return df
