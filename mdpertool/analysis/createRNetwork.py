@@ -383,6 +383,17 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
         log = f'Source: {source}  Target: {target}\nTotal node number of source-target pair network is: {len(clean_network.nodes())}'
         if write_out:
             nx.write_gml(clean_network, os.path.join(out_directory, pairNetworkName))
+            try:
+                # Modulu import edip Propagation Coefficient hesaplatıyoruz ve .gml dosyasının yanına CSV olarak koyuyoruz
+                from analysis.network_metrics_calculator import execute_network_metrics_workflow
+                execute_network_metrics_workflow(
+                    G=clean_network,
+                    source_node=source,
+                    output_directory=out_directory,
+                    prefix=f"PC_Score_{source}_{target}_"
+                )
+            except Exception as e:
+                print(f"[Warning] PC Matrix calculation could not execute correctly. Error: {e}")
     else:
         log = f'Source: {source}  Target: {target}\nPair network not created (missing node(s) or node threshold condition).'
 
