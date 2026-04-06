@@ -59,7 +59,6 @@ from analysis.analysis_presenters import (
     populate_critical_residue_table,
     populate_reachability_qc,
     populate_residue_response_table,
-    populate_domain_summary_table,
     populate_network_summary_table,
     populate_motif_summary_table,
     populate_significance_table,
@@ -491,61 +490,6 @@ class Functions:
             plot_tab_layout = QtWidgets.QVBoxLayout(plot_tab)
             plot_tab_layout.setContentsMargins(0, 0, 0, 0)
             plot_tab_layout.setObjectName("analysis_plot_tab_layout")
-
-            metrics_tab = QtWidgets.QWidget()
-            metrics_tab.setObjectName("analysis_metrics_tab")
-            metrics_tab_layout = QtWidgets.QVBoxLayout(metrics_tab)
-            metrics_tab_layout.setContentsMargins(0, 0, 0, 0)
-            metrics_tab_layout.setObjectName("analysis_metrics_tab_layout")
-
-            qc_tab = QtWidgets.QWidget()
-            qc_tab.setObjectName("analysis_qc_tab")
-            qc_tab_layout = QtWidgets.QVBoxLayout(qc_tab)
-            qc_tab_layout.setContentsMargins(0, 0, 0, 0)
-            qc_tab_layout.setObjectName("analysis_qc_tab_layout")
-
-            provenance_tab = QtWidgets.QWidget()
-            provenance_tab.setObjectName("analysis_provenance_tab")
-            provenance_tab_layout = QtWidgets.QVBoxLayout(provenance_tab)
-            provenance_tab_layout.setContentsMargins(0, 0, 0, 0)
-            provenance_tab_layout.setObjectName("analysis_provenance_tab_layout")
-
-            metrics_table = QtWidgets.QTableWidget(metrics_tab)
-            metrics_table.setObjectName("response_metrics_table")
-            metrics_table.setColumnCount(2)
-            metrics_table.setRowCount(11)
-            metrics_table.setHorizontalHeaderLabels(["Metric", "Value"])
-            metrics_table.horizontalHeader().setStretchLastSection(True)
-            metrics_table.verticalHeader().setVisible(False)
-            metrics_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
-            metrics_table.setMinimumSize(QtCore.QSize(0, 0))
-            metrics_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-            metrics_tab_layout.addWidget(metrics_table)
-
-            qc_table = QtWidgets.QTableWidget(qc_tab)
-            qc_table.setObjectName("response_qc_table")
-            qc_table.setColumnCount(2)
-            qc_table.setRowCount(6)
-            qc_table.setHorizontalHeaderLabels(["QC Metric", "Value"])
-            qc_table.horizontalHeader().setStretchLastSection(True)
-            qc_table.verticalHeader().setVisible(False)
-            qc_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
-            qc_table.setMinimumSize(QtCore.QSize(0, 0))
-            qc_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-            qc_tab_layout.addWidget(qc_table)
-
-            provenance_table = QtWidgets.QTableWidget(provenance_tab)
-            provenance_table.setObjectName("analysis_provenance_table")
-            provenance_table.setColumnCount(2)
-            provenance_table.setRowCount(4)
-            provenance_table.setHorizontalHeaderLabels(["Field", "Value"])
-            provenance_table.horizontalHeader().setStretchLastSection(True)
-            provenance_table.verticalHeader().setVisible(False)
-            provenance_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
-            provenance_table.setMinimumSize(QtCore.QSize(0, 0))
-            provenance_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-            provenance_tab_layout.addWidget(provenance_table)
-
             # --> Response Dynamics Tab
             response_dynamics_tab = QtWidgets.QWidget()
             response_dynamics_tab.setObjectName("analysis_response_dynamics_tab")
@@ -633,6 +577,17 @@ class Functions:
             response_dynamics_tabwidget.setObjectName("analysis_response_dynamics_tabwidget")
             response_dynamics_tab_layout.addWidget(response_dynamics_tabwidget)
 
+            # ==================== GROUP 1: RESPONSE DYNAMICS (Core Findings) ====================
+            rd_group_widget = QtWidgets.QWidget()
+            rd_group_widget.setObjectName("analysis_rd_group_widget")
+            rd_group_layout = QtWidgets.QVBoxLayout(rd_group_widget)
+            rd_group_layout.setContentsMargins(0, 0, 0, 0)
+
+            rd_group_tabwidget = QtWidgets.QTabWidget(rd_group_widget)
+            rd_group_tabwidget.setObjectName("analysis_rd_group_tabwidget")
+            rd_group_layout.addWidget(rd_group_tabwidget)
+            rd_group_widget.setLayout(rd_group_layout)
+
             # Per-residue response time table
             residue_response_tab = QtWidgets.QWidget()
             residue_response_tab.setObjectName("analysis_residue_response_tab")
@@ -650,26 +605,7 @@ class Functions:
             residue_response_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             residue_response_table.setMinimumSize(QtCore.QSize(0, 280))
             residue_response_tab_layout.addWidget(residue_response_table)
-            response_dynamics_tabwidget.addTab(residue_response_tab, "Per-Residue")
-
-            # Domain summary table
-            domain_summary_tab = QtWidgets.QWidget()
-            domain_summary_tab.setObjectName("analysis_domain_summary_tab")
-            domain_summary_tab_layout = QtWidgets.QVBoxLayout(domain_summary_tab)
-            domain_summary_tab_layout.setContentsMargins(0, 0, 0, 0)
-            domain_summary_tab_layout.setObjectName("analysis_domain_summary_tab_layout")
-
-            domain_summary_table = QtWidgets.QTableWidget(domain_summary_tab)
-            domain_summary_table.setObjectName("domain_summary_table")
-            domain_summary_table.setColumnCount(5)
-            domain_summary_table.setHorizontalHeaderLabels(["Domain", "# Residues", "Mean (ps)", "Min (ps)", "Max (ps)"])
-            domain_summary_table.horizontalHeader().setStretchLastSection(True)
-            domain_summary_table.verticalHeader().setVisible(False)
-            domain_summary_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-            domain_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
-            domain_summary_table.setMinimumSize(QtCore.QSize(0, 280))
-            domain_summary_tab_layout.addWidget(domain_summary_table)
-            response_dynamics_tabwidget.addTab(domain_summary_tab, "Domain Summary")
+            rd_group_tabwidget.addTab(residue_response_tab, "Per-Residue")
 
             # Target-level pathway summary table
             pathway_summary_tab = QtWidgets.QWidget()
@@ -688,7 +624,7 @@ class Functions:
             pathway_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             pathway_summary_table.setMinimumSize(QtCore.QSize(0, 280))
             pathway_summary_tab_layout.addWidget(pathway_summary_table)
-            response_dynamics_tabwidget.addTab(pathway_summary_tab, "Pathway Analysis")
+            rd_group_tabwidget.addTab(pathway_summary_tab, "Pathway Analysis")
 
             # Critical residue ranking table
             critical_residue_tab = QtWidgets.QWidget()
@@ -707,7 +643,20 @@ class Functions:
             critical_residue_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             critical_residue_table.setMinimumSize(QtCore.QSize(0, 280))
             critical_residue_tab_layout.addWidget(critical_residue_table)
-            response_dynamics_tabwidget.addTab(critical_residue_tab, "Critical Residues")
+            rd_group_tabwidget.addTab(critical_residue_tab, "Critical Residues")
+
+            response_dynamics_tabwidget.addTab(rd_group_widget, "Response Dynamics")
+
+            # ==================== GROUP 2: NETWORK ANALYSIS (Optional) ====================
+            na_group_widget = QtWidgets.QWidget()
+            na_group_widget.setObjectName("analysis_na_group_widget")
+            na_group_layout = QtWidgets.QVBoxLayout(na_group_widget)
+            na_group_layout.setContentsMargins(0, 0, 0, 0)
+
+            na_group_tabwidget = QtWidgets.QTabWidget(na_group_widget)
+            na_group_tabwidget.setObjectName("analysis_na_group_tabwidget")
+            na_group_layout.addWidget(na_group_tabwidget)
+            na_group_widget.setLayout(na_group_layout)
 
             network_summary_tab = QtWidgets.QWidget()
             network_summary_tab.setObjectName("analysis_network_summary_tab")
@@ -735,7 +684,7 @@ class Functions:
             network_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             network_summary_table.setMinimumSize(QtCore.QSize(0, 220))
             network_summary_tab_layout.addWidget(network_summary_table)
-            response_dynamics_tabwidget.addTab(network_summary_tab, "Network Summary")
+            na_group_tabwidget.addTab(network_summary_tab, "Topology")
 
             motif_summary_tab = QtWidgets.QWidget()
             motif_summary_tab.setObjectName("analysis_motif_summary_tab")
@@ -760,7 +709,7 @@ class Functions:
             motif_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             motif_summary_table.setMinimumSize(QtCore.QSize(0, 220))
             motif_summary_tab_layout.addWidget(motif_summary_table)
-            response_dynamics_tabwidget.addTab(motif_summary_tab, "Motif Summary")
+            na_group_tabwidget.addTab(motif_summary_tab, "Motifs")
 
             significance_tab = QtWidgets.QWidget()
             significance_tab.setObjectName("analysis_significance_tab")
@@ -787,7 +736,7 @@ class Functions:
             significance_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             significance_table.setMinimumSize(QtCore.QSize(0, 160))
             significance_tab_layout.addWidget(significance_table)
-            response_dynamics_tabwidget.addTab(significance_tab, "Significance")
+            na_group_tabwidget.addTab(significance_tab, "Enrichment")
 
             # Super-hub (critical hub residues) table
             superhub_tab = QtWidgets.QWidget()
@@ -812,7 +761,79 @@ class Functions:
             superhub_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
             superhub_table.setMinimumSize(QtCore.QSize(0, 220))
             superhub_tab_layout.addWidget(superhub_table)
-            response_dynamics_tabwidget.addTab(superhub_tab, "Super-Hubs")
+            na_group_tabwidget.addTab(superhub_tab, "Super-Hubs")
+
+            response_dynamics_tabwidget.addTab(na_group_widget, "Network Analysis")
+
+            # ==================== GROUP 3: QC & METRICS (Quality Control & Details) ====================
+            qc_group_widget = QtWidgets.QWidget()
+            qc_group_widget.setObjectName("analysis_qc_group_widget")
+            qc_group_layout = QtWidgets.QVBoxLayout(qc_group_widget)
+            qc_group_layout.setContentsMargins(0, 0, 0, 0)
+
+            qc_group_tabwidget = QtWidgets.QTabWidget(qc_group_widget)
+            qc_group_tabwidget.setObjectName("analysis_qc_group_tabwidget")
+            qc_group_layout.addWidget(qc_group_tabwidget)
+            qc_group_widget.setLayout(qc_group_layout)
+
+            # Metrics table
+            metrics_tab = QtWidgets.QWidget()
+            metrics_tab.setObjectName("analysis_metrics_tab")
+            metrics_tab_layout = QtWidgets.QVBoxLayout(metrics_tab)
+            metrics_tab_layout.setContentsMargins(0, 0, 0, 0)
+            metrics_tab_layout.setObjectName("analysis_metrics_tab_layout")
+
+            metrics_table = QtWidgets.QTableWidget(metrics_tab)
+            metrics_table.setObjectName("metrics_table")
+            metrics_table.setColumnCount(2)
+            metrics_table.setHorizontalHeaderLabels(["Metric", "Value"])
+            metrics_table.horizontalHeader().setStretchLastSection(True)
+            metrics_table.verticalHeader().setVisible(False)
+            metrics_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            metrics_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            metrics_table.setMinimumSize(QtCore.QSize(0, 200))
+            metrics_tab_layout.addWidget(metrics_table)
+            qc_group_tabwidget.addTab(metrics_tab, "Fit Metrics")
+
+            # QC table
+            qc_tab = QtWidgets.QWidget()
+            qc_tab.setObjectName("analysis_qc_tab")
+            qc_tab_layout = QtWidgets.QVBoxLayout(qc_tab)
+            qc_tab_layout.setContentsMargins(0, 0, 0, 0)
+            qc_tab_layout.setObjectName("analysis_qc_tab_layout")
+
+            qc_table = QtWidgets.QTableWidget(qc_tab)
+            qc_table.setObjectName("qc_table")
+            qc_table.setColumnCount(2)
+            qc_table.setHorizontalHeaderLabels(["Check", "Status"])
+            qc_table.horizontalHeader().setStretchLastSection(True)
+            qc_table.verticalHeader().setVisible(False)
+            qc_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            qc_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            qc_table.setMinimumSize(QtCore.QSize(0, 160))
+            qc_tab_layout.addWidget(qc_table)
+            qc_group_tabwidget.addTab(qc_tab, "Quality Check")
+
+            # Provenance table
+            provenance_tab = QtWidgets.QWidget()
+            provenance_tab.setObjectName("analysis_provenance_tab")
+            provenance_tab_layout = QtWidgets.QVBoxLayout(provenance_tab)
+            provenance_tab_layout.setContentsMargins(0, 0, 0, 0)
+            provenance_tab_layout.setObjectName("analysis_provenance_tab_layout")
+
+            provenance_table = QtWidgets.QTableWidget(provenance_tab)
+            provenance_table.setObjectName("provenance_table")
+            provenance_table.setColumnCount(2)
+            provenance_table.setHorizontalHeaderLabels(["Property", "Value"])
+            provenance_table.horizontalHeader().setStretchLastSection(True)
+            provenance_table.verticalHeader().setVisible(False)
+            provenance_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            provenance_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            provenance_table.setMinimumSize(QtCore.QSize(0, 200))
+            provenance_tab_layout.addWidget(provenance_table)
+            qc_group_tabwidget.addTab(provenance_tab, "Provenance")
+
+            response_dynamics_tabwidget.addTab(qc_group_widget, "QC & Metrics")
 
             # Apply the same table style used by residues_conservation_tableWidget
             table_style = ""
@@ -825,7 +846,6 @@ class Functions:
                     qc_table,
                     provenance_table,
                     residue_response_table,
-                    domain_summary_table,
                     pathway_summary_table,
                     critical_residue_table,
                     network_summary_table,
@@ -1859,7 +1879,6 @@ class Functions:
                         residue_names=residue_names,
                     )
                     populate_residue_response_table(residue_response_table, response_payload['residue_rows'])
-                    populate_domain_summary_table(domain_summary_table, response_payload['domain_rows'])
                     populate_metrics_table(metrics_table, response_payload['metrics_rows'])
                     populate_provenance_table(provenance_table, response_payload['provenance_rows'])
                 except Exception as analyzer_error:
