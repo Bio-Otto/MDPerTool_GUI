@@ -66,6 +66,49 @@ def populate_domain_summary_table(table: QTableWidget, rows: Sequence[Tuple[str,
         table.setItem(row_idx, 4, QTableWidgetItem(f"{max_time:.2f}"))
 
 
+def populate_network_summary_table(
+    table: QTableWidget,
+    rows: Sequence[Tuple[str, int, int, int, int, float, str, float, float]],
+) -> None:
+    table.setRowCount(len(rows))
+    for row_idx, row in enumerate(rows):
+        (
+            network_name,
+            node_count,
+            edge_count,
+            radius,
+            diameter,
+            characteristic_path_length,
+            shortest_paths_text,
+            average_neighbors,
+            clustering_coefficient,
+        ) = row
+
+        table.setItem(row_idx, 0, QTableWidgetItem(str(network_name)))
+        table.setItem(row_idx, 1, QTableWidgetItem(str(node_count)))
+        table.setItem(row_idx, 2, QTableWidgetItem(str(edge_count)))
+        table.setItem(row_idx, 3, QTableWidgetItem(str(radius)))
+        table.setItem(row_idx, 4, QTableWidgetItem(str(diameter)))
+        table.setItem(row_idx, 5, QTableWidgetItem(f"{characteristic_path_length:.3f}"))
+        table.setItem(row_idx, 6, QTableWidgetItem(str(shortest_paths_text)))
+        table.setItem(row_idx, 7, QTableWidgetItem(f"{average_neighbors:.3f}"))
+        table.setItem(row_idx, 8, QTableWidgetItem(f"{clustering_coefficient:.3f}"))
+
+
+def populate_motif_summary_table(
+    table: QTableWidget,
+    rows: Sequence[Tuple[str, str, int, int, str, str]],
+) -> None:
+    table.setRowCount(len(rows))
+    for row_idx, (size_name, motif_id, edge_count, occurrence, frequency_pct, scope_name) in enumerate(rows):
+        table.setItem(row_idx, 0, QTableWidgetItem(str(size_name)))
+        table.setItem(row_idx, 1, QTableWidgetItem(str(motif_id)))
+        table.setItem(row_idx, 2, QTableWidgetItem(str(edge_count)))
+        table.setItem(row_idx, 3, QTableWidgetItem(str(occurrence)))
+        table.setItem(row_idx, 4, QTableWidgetItem(str(frequency_pct)))
+        table.setItem(row_idx, 5, QTableWidgetItem(str(scope_name)))
+
+
 def populate_metrics_table(table: QTableWidget, rows: Sequence[Tuple[str, str]]) -> None:
     table.setRowCount(len(rows))
     for row_idx, (metric_label, value_text) in enumerate(rows):

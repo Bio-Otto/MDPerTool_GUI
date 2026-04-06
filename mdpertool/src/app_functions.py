@@ -41,6 +41,8 @@ from analysis.pathway_analysis import (
     extract_target_graph_pairs,
     build_done_message,
 )
+from analysis.network_summary_service import build_network_summary_rows, build_union_graph, build_intersection_graph
+from analysis.network_motif_service import build_motif_summary_rows
 from analysis.response_dynamics_service import build_response_dynamics_payload
 from analysis.network_workflow_service import (
     prepare_general_network_engine_from_ui,
@@ -56,6 +58,8 @@ from analysis.analysis_presenters import (
     populate_reachability_qc,
     populate_residue_response_table,
     populate_domain_summary_table,
+    populate_network_summary_table,
+    populate_motif_summary_table,
     populate_metrics_table,
     populate_qc_table,
     populate_provenance_table,
@@ -701,6 +705,59 @@ class Functions:
             critical_residue_tab_layout.addWidget(critical_residue_table)
             response_dynamics_tabwidget.addTab(critical_residue_tab, "Critical Residues")
 
+            network_summary_tab = QtWidgets.QWidget()
+            network_summary_tab.setObjectName("analysis_network_summary_tab")
+            network_summary_tab_layout = QtWidgets.QVBoxLayout(network_summary_tab)
+            network_summary_tab_layout.setContentsMargins(0, 0, 0, 0)
+            network_summary_tab_layout.setObjectName("analysis_network_summary_tab_layout")
+
+            network_summary_table = QtWidgets.QTableWidget(network_summary_tab)
+            network_summary_table.setObjectName("network_summary_table")
+            network_summary_table.setColumnCount(9)
+            network_summary_table.setHorizontalHeaderLabels([
+                "Network",
+                "Nodes",
+                "Edges",
+                "Radius",
+                "Diameter",
+                "Characteristic Path",
+                "Shortest Paths",
+                "Avg Neighbors",
+                "Clustering",
+            ])
+            network_summary_table.horizontalHeader().setStretchLastSection(True)
+            network_summary_table.verticalHeader().setVisible(False)
+            network_summary_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            network_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            network_summary_table.setMinimumSize(QtCore.QSize(0, 220))
+            network_summary_tab_layout.addWidget(network_summary_table)
+            response_dynamics_tabwidget.addTab(network_summary_tab, "Network Summary")
+
+            motif_summary_tab = QtWidgets.QWidget()
+            motif_summary_tab.setObjectName("analysis_motif_summary_tab")
+            motif_summary_tab_layout = QtWidgets.QVBoxLayout(motif_summary_tab)
+            motif_summary_tab_layout.setContentsMargins(0, 0, 0, 0)
+            motif_summary_tab_layout.setObjectName("analysis_motif_summary_tab_layout")
+
+            motif_summary_table = QtWidgets.QTableWidget(motif_summary_tab)
+            motif_summary_table.setObjectName("motif_summary_table")
+            motif_summary_table.setColumnCount(6)
+            motif_summary_table.setHorizontalHeaderLabels([
+                "Size",
+                "Motif ID",
+                "Edges",
+                "Occurrence",
+                "Frequency",
+                "Scope",
+            ])
+            motif_summary_table.horizontalHeader().setStretchLastSection(True)
+            motif_summary_table.verticalHeader().setVisible(False)
+            motif_summary_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            motif_summary_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            motif_summary_table.setMinimumSize(QtCore.QSize(0, 220))
+            motif_summary_tab_layout.addWidget(motif_summary_table)
+            response_dynamics_tabwidget.addTab(motif_summary_tab, "Motif Summary")
+
             # Apply the same table style used by residues_conservation_tableWidget
             table_style = ""
             if hasattr(self, 'residues_conservation_tableWidget') and self.residues_conservation_tableWidget is not None:
@@ -715,6 +772,8 @@ class Functions:
                     domain_summary_table,
                     pathway_summary_table,
                     critical_residue_table,
+                    network_summary_table,
+                    motif_summary_table,
                 ]:
                     table_widget.setStyleSheet(table_style)
 
@@ -1996,6 +2055,34 @@ class Functions:
                     done_message_shown = True
 
             _refresh_pathway_and_critical_views(show_done_message=True)
+
+            try:
+                network_summary_rows = build_network_summary_rows(self.initial_network, all_graph_list)
+                populate_network_summary_table(network_summary_table, network_summary_rows)
+            except Exception as summary_error:
+                import sys
+                print(f"Warning: Could not build network summary table: {summary_error}", file=sys.stderr)
+
+            try:
+                intersection_graph = build_intersection_graph(all_graph_list)
+                if intersection_graph.number_of_nodes() > 0:
+                    motif_scope = "Intersection"
+                    motif_graph = intersection_graph
+                else:
+                    motif_scope = "Union"
+                    motif_graph = build_union_graph(all_graph_list)
+
+                motif_rows = build_motif_summary_rows(
+                    graph=motif_graph,
+                    scope_name=motif_scope,
+                    motif_sizes=(3, 4),
+                    max_combinations=400000,
+                    top_k_per_size=10,
+                )
+                populate_motif_summary_table(motif_summary_table, motif_rows)
+            except Exception as motif_error:
+                import sys
+                print(f"Warning: Could not build motif summary table: {motif_error}", file=sys.stderr)
 
             def _show_selected_shortest_path(item):
                 selected_row = shortest_path_listWidget.currentRow()
