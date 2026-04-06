@@ -206,3 +206,17 @@ def populate_provenance_table(table: QTableWidget, rows: Sequence[Tuple[str, str
 
         table.setItem(row_idx, 0, prov_key_item)
         table.setItem(row_idx, 1, prov_value_item)
+
+
+def populate_superhub_table(
+    table: QTableWidget,
+    rows: Sequence[Tuple[str, int, float, float, str]],
+) -> None:
+    """Populate superhub residue table (top criticial hubs in core network)."""
+    table.setRowCount(len(rows))
+    for row_idx, (node_label, degree, betweenness, closeness, neighbors) in enumerate(rows):
+        table.setItem(row_idx, 0, QTableWidgetItem(str(node_label)))
+        table.setItem(row_idx, 1, QTableWidgetItem(str(degree)))
+        table.setItem(row_idx, 2, QTableWidgetItem(f"{betweenness:.6f}"))
+        table.setItem(row_idx, 3, QTableWidgetItem(f"{closeness:.6f}"))
+        table.setItem(row_idx, 4, QTableWidgetItem(str(neighbors)))

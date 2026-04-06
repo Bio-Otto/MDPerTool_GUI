@@ -17,6 +17,7 @@ from .analysis_presenters import (
 	populate_metrics_table,
 	populate_qc_table,
 	populate_provenance_table,
+	populate_superhub_table,
 )
 from .response_dynamics_service import build_response_dynamics_payload
 from .network_workflow_service import (
@@ -72,6 +73,7 @@ __all__ = [
 	"populate_metrics_table",
 	"populate_qc_table",
 	"populate_provenance_table",
+	"populate_superhub_table",
 	"build_response_dynamics_payload",
 	"collect_network_parameters",
 	"collect_target_residues",

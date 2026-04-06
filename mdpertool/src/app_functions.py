@@ -44,6 +44,7 @@ from analysis.pathway_analysis import (
 from analysis.network_summary_service import build_network_summary_rows, build_union_graph, build_intersection_graph
 from analysis.network_motif_service import build_motif_summary_rows
 from analysis.network_significance_service import build_network_significance_rows
+from analysis.network_superhub_service import build_superhub_rows
 from analysis.response_dynamics_service import build_response_dynamics_payload
 from analysis.network_workflow_service import (
     prepare_general_network_engine_from_ui,
@@ -62,6 +63,7 @@ from analysis.analysis_presenters import (
     populate_network_summary_table,
     populate_motif_summary_table,
     populate_significance_table,
+    populate_superhub_table,
     populate_metrics_table,
     populate_qc_table,
     populate_provenance_table,
@@ -787,6 +789,31 @@ class Functions:
             significance_tab_layout.addWidget(significance_table)
             response_dynamics_tabwidget.addTab(significance_tab, "Significance")
 
+            # Super-hub (critical hub residues) table
+            superhub_tab = QtWidgets.QWidget()
+            superhub_tab.setObjectName("analysis_superhub_tab")
+            superhub_tab_layout = QtWidgets.QVBoxLayout(superhub_tab)
+            superhub_tab_layout.setContentsMargins(0, 0, 0, 0)
+            superhub_tab_layout.setObjectName("analysis_superhub_tab_layout")
+
+            superhub_table = QtWidgets.QTableWidget(superhub_tab)
+            superhub_table.setObjectName("superhub_table")
+            superhub_table.setColumnCount(5)
+            superhub_table.setHorizontalHeaderLabels([
+                "Node",
+                "Degree",
+                "Betweenness",
+                "Closeness",
+                "Connected Neighbors",
+            ])
+            superhub_table.horizontalHeader().setStretchLastSection(True)
+            superhub_table.verticalHeader().setVisible(False)
+            superhub_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            superhub_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            superhub_table.setMinimumSize(QtCore.QSize(0, 220))
+            superhub_tab_layout.addWidget(superhub_table)
+            response_dynamics_tabwidget.addTab(superhub_tab, "Super-Hubs")
+
             # Apply the same table style used by residues_conservation_tableWidget
             table_style = ""
             if hasattr(self, 'residues_conservation_tableWidget') and self.residues_conservation_tableWidget is not None:
@@ -803,6 +830,7 @@ class Functions:
                     critical_residue_table,
                     network_summary_table,
                     motif_summary_table,
+                    superhub_table,
                     significance_table,
                 ]:
                     table_widget.setStyleSheet(table_style)
@@ -2125,6 +2153,14 @@ class Functions:
             except Exception as significance_error:
                 import sys
                 print(f"Warning: Could not build significance table: {significance_error}", file=sys.stderr)
+
+            try:
+                superhub_graph = intersection_graph if 'intersection_graph' in locals() and intersection_graph.number_of_nodes() > 0 else build_union_graph(all_graph_list)
+                superhub_rows = build_superhub_rows(graph=superhub_graph, top_k=5)
+                populate_superhub_table(superhub_table, superhub_rows)
+            except Exception as superhub_error:
+                import sys
+                print(f"Warning: Could not build superhub table: {superhub_error}", file=sys.stderr)
 
             def _show_selected_shortest_path(item):
                 selected_row = shortest_path_listWidget.currentRow()

@@ -6,10 +6,31 @@ import json
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Mapping, Optional
+from urllib import request
 
 import numpy as np
 
 from analysis.residue_response_analyzer import ResidueResponseAnalyzer
+
+
+def _can_reach_domain_annotation_service(timeout_seconds: float = 2.0) -> bool:
+    """Return True when at least one annotation endpoint is reachable."""
+    probe_urls = [
+        "https://rest.uniprot.org/uniprotkb/search?query=reviewed:true&size=1",
+        "https://www.ebi.ac.uk/",
+    ]
+
+    for probe_url in probe_urls:
+        try:
+            req = request.Request(probe_url, method="GET")
+            with request.urlopen(req, timeout=timeout_seconds) as response:
+                status = getattr(response, "status", 200)
+                if int(status) < 500:
+                    return True
+        except Exception:
+            continue
+
+    return False
 
 
 def build_response_dynamics_payload(
@@ -53,30 +74,35 @@ def build_response_dynamics_payload(
             for _, row_data in residue_summary_df.iterrows()
         ]
 
-        groups = response_analyzer.get_residue_groups_by_threshold()
-        payload["domain_rows"] = [
-            (
-                "Fast Responders",
-                len(groups["fast"]),
-                np.mean(response_analyzer.response_times_ps[groups["fast"]]) if groups["fast"] else 0.0,
-                np.min(response_analyzer.response_times_ps[groups["fast"]]) if groups["fast"] else 0.0,
-                np.max(response_analyzer.response_times_ps[groups["fast"]]) if groups["fast"] else 0.0,
-            ),
-            (
-                "Medium Responders",
-                len(groups["medium"]),
-                np.mean(response_analyzer.response_times_ps[groups["medium"]]) if groups["medium"] else 0.0,
-                np.min(response_analyzer.response_times_ps[groups["medium"]]) if groups["medium"] else 0.0,
-                np.max(response_analyzer.response_times_ps[groups["medium"]]) if groups["medium"] else 0.0,
-            ),
-            (
-                "Slow Responders",
-                len(groups["slow"]),
-                np.mean(response_analyzer.response_times_ps[groups["slow"]]) if groups["slow"] else 0.0,
-                np.min(response_analyzer.response_times_ps[groups["slow"]]) if groups["slow"] else 0.0,
-                np.max(response_analyzer.response_times_ps[groups["slow"]]) if groups["slow"] else 0.0,
-            ),
-        ]
+        # Domain annotation-based summary is intentionally internet-gated.
+        # If annotation services are unreachable, skip domain summary calculation.
+        if _can_reach_domain_annotation_service():
+            groups = response_analyzer.get_residue_groups_by_threshold()
+            payload["domain_rows"] = [
+                (
+                    "Fast Responders",
+                    len(groups["fast"]),
+                    np.mean(response_analyzer.response_times_ps[groups["fast"]]) if groups["fast"] else 0.0,
+                    np.min(response_analyzer.response_times_ps[groups["fast"]]) if groups["fast"] else 0.0,
+                    np.max(response_analyzer.response_times_ps[groups["fast"]]) if groups["fast"] else 0.0,
+                ),
+                (
+                    "Medium Responders",
+                    len(groups["medium"]),
+                    np.mean(response_analyzer.response_times_ps[groups["medium"]]) if groups["medium"] else 0.0,
+                    np.min(response_analyzer.response_times_ps[groups["medium"]]) if groups["medium"] else 0.0,
+                    np.max(response_analyzer.response_times_ps[groups["medium"]]) if groups["medium"] else 0.0,
+                ),
+                (
+                    "Slow Responders",
+                    len(groups["slow"]),
+                    np.mean(response_analyzer.response_times_ps[groups["slow"]]) if groups["slow"] else 0.0,
+                    np.min(response_analyzer.response_times_ps[groups["slow"]]) if groups["slow"] else 0.0,
+                    np.max(response_analyzer.response_times_ps[groups["slow"]]) if groups["slow"] else 0.0,
+                ),
+            ]
+        else:
+            payload["domain_rows"] = []
 
     metrics_order = [
         ("total_residues", "Total Residues"),
