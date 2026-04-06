@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import csv
+import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
@@ -108,17 +109,47 @@ def read_target_items_from_widgets(
 ) -> Dict[str, List[str]]:
     """Read all/selected target residue labels from UI widgets."""
     all_target_items = [
-        target_res_combo_box.itemText(index)[:-1]
+        target_res_combo_box.itemText(index).strip()
         for index in range(target_res_combo_box.count())
     ]
     selected_target_items = [
-        selected_target_residues_list_widget.item(index).text()[:-1]
+        selected_target_residues_list_widget.item(index).text().strip()
         for index in range(selected_target_residues_list_widget.count())
     ]
     return {
         "all_target_items": all_target_items,
         "selected_target_items": selected_target_items,
     }
+
+
+def _resolve_residue_label(requested_label: str, available_residues: Sequence[str]) -> str:
+    """Resolve requested residue name against available residue labels.
+
+    Supports exact labels (ASN17A), legacy duplicate labels (ASN17X), and base
+    labels (ASN17) by choosing chain A if present, otherwise first match.
+    """
+    token = str(requested_label or "").strip()
+    if not token:
+        return token
+
+    available_list = [str(item).strip() for item in available_residues if str(item).strip()]
+    if token in set(available_list):
+        return token
+
+    base_match = re.match(r'^([A-Za-z]{3}\d+)[A-Za-z]*$', token)
+    base_label = base_match.group(1) if base_match else token
+
+    candidates = [
+        residue for residue in available_list
+        if residue.startswith(base_label)
+    ]
+    if candidates:
+        preferred = f"{base_label}A"
+        if preferred in candidates:
+            return preferred
+        return sorted(candidates)[0]
+
+    return token
 
 
 def collect_conservation_settings(
@@ -222,7 +253,7 @@ def build_network_run_context_from_ui(target: Any) -> Dict[str, Any]:
         response_time_file=target.response_time_lineEdit.text(),
         output_file_name=target.PPI_Network_name_lineedit.text(),
         output_directory=target.net_output_directory_lineedit.text(),
-        source_residue=target.source_res_comboBox.currentText()[:-1],
+        source_residue=target.source_res_comboBox.currentText().strip(),
         node_threshold=target.node_threshold_spinBox.value(),
         use_node_threshold_condition=target.node_threshold_checkBox.isChecked(),
         all_residue_as_target=target.all_targets_checkBox.isChecked(),
@@ -453,18 +484,29 @@ def validate_general_network_inputs(
             "message": "The number of residues in the topology file you have provided is not equal to the response time file.",
         }
 
-    available_residues = set(residue_ids)
-    if source_residue not in available_residues:
+    available_residue_list = list(residue_ids)
+    available_residues = set(available_residue_list)
+    resolved_source_residue = _resolve_residue_label(source_residue, available_residue_list)
+
+    if resolved_source_residue not in available_residues:
         return {
             "status": "source_missing",
             "title": "Source Residue Not Found",
             "message": f"Selected source residue '{source_residue}' is not present in the loaded topology/response-time dataset.",
         }
 
-    valid_targets = [
-        target for target in target_residues if target in available_residues and target != source_residue
+    resolved_targets = [
+        _resolve_residue_label(target, available_residue_list)
+        for target in target_residues
     ]
-    skipped_targets = [target for target in target_residues if target not in available_residues]
+
+    valid_targets = [
+        target for target in resolved_targets if target in available_residues and target != resolved_source_residue
+    ]
+    skipped_targets = [
+        target for target in target_residues
+        if _resolve_residue_label(target, available_residue_list) not in available_residues
+    ]
 
     if not valid_targets:
         return {
@@ -477,6 +519,7 @@ def validate_general_network_inputs(
 
     return {
         "status": "ok",
+        "resolved_source_residue": resolved_source_residue,
         "valid_targets": valid_targets,
         "skipped_targets": skipped_targets,
     }
@@ -489,13 +532,19 @@ def validate_general_network_from_target(
     response_time_count: int,
 ) -> Dict[str, Any]:
     """Validate general-network outputs using attributes on UI host object."""
-    return validate_general_network_inputs(
+    validation_result = validate_general_network_inputs(
         initial_network=initial_network,
         residue_ids=residue_ids,
         response_time_count=response_time_count,
         source_residue=target.source,
         target_residues=target._target_residues_for_calc,
     )
+
+    if validation_result.get("status") == "ok":
+        target.source = validation_result.get("resolved_source_residue", target.source)
+        target._target_residues_for_calc = validation_result.get("valid_targets", target._target_residues_for_calc)
+
+    return validation_result
 
 
 def build_validation_warning_payload(validation_result: Dict[str, Any]) -> Optional[Dict[str, str]]:

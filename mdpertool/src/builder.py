@@ -258,7 +258,7 @@ class Advanced(QtCore.QThread):
                                 model_water=self.water_model,
                                 water_active=water_active,  # FORCEFIELD if protein include obc or gbvi
                                 water_padding=self.water_padding_lineEdit.text(),
-                                perturbed_res_list=[self.selected_residues_listWidget.item(x).text()[:-1] for x in
+                                perturbed_res_list=[self.selected_residues_listWidget.item(x).text().strip() for x in
                                                     range(self.selected_residues_listWidget.count())],
                                 speed_factor=Advanced._parse_speed_factors(self.R_factor_ComboBox.currentText()),
                                 perturb_simulation_time=self.run_duration_spinBox.value(),

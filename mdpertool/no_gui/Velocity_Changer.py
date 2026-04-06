@@ -4,6 +4,44 @@ import mdtraj as md
 import openmm as mm
 import xml.etree.ElementTree as ET
 import os
+import re
+
+
+def _parse_selected_residue_token(token):
+    """Parse residue token like ASN17A, ASN17-A, or ASN17."""
+    raw = str(token or '').strip()
+    match = re.match(r'^([A-Za-z]{3})(\d+)(?:[-_]?([A-Za-z]))?$', raw)
+    if not match:
+        return None
+    return {
+        'name': match.group(1).upper(),
+        'resseq': int(match.group(2)),
+        'chain': (match.group(3) or '').upper(),
+    }
+
+
+def _safe_chain_id_from_residue(residue):
+    """Best-effort chain identifier extraction from MDTraj residue object."""
+    chain_obj = getattr(residue, 'chain', None)
+    if chain_obj is None:
+        return ''
+
+    for attr_name in ('chain_id', 'id', 'name'):
+        chain_value = getattr(chain_obj, attr_name, None)
+        if chain_value is None:
+            continue
+        chain_text = str(chain_value).strip()
+        if chain_text:
+            return chain_text.upper()
+
+    chain_index = getattr(chain_obj, 'index', None)
+    if chain_index is None:
+        return ''
+    try:
+        # Common convention for simple multimer chains.
+        return chr(ord('A') + int(chain_index))
+    except Exception:
+        return ''
 
 
 def convert_res_to_atoms(pdb_path, selected_res, atom_to_extract=None):
@@ -35,17 +73,34 @@ def convert_res_to_atoms(pdb_path, selected_res, atom_to_extract=None):
         topology = traj.topology
 
         selected_res_atoms = []
+        parsed_tokens = [_parse_selected_residue_token(token) for token in selected_res]
 
-        # Create a lookup of residue strings for comparison
-        residue_lookup = {str(res): res for res in topology.residues}
+        for parsed_token, raw_token in zip(parsed_tokens, selected_res):
+            if parsed_token is None:
+                # Keep backward compatibility with legacy residue string style.
+                for residue in topology.residues:
+                    if str(residue).strip() != str(raw_token).strip():
+                        continue
+                    for atom in residue.atoms:
+                        if atom_to_extract is None or atom.name == atom_to_extract:
+                            selected_res_atoms.append(atom.index)
+                continue
 
-        # Find matching residues
-        for res_str in selected_res:
-            if res_str in residue_lookup:
-                residue = residue_lookup[res_str]
-                # Get all atoms for this residue
+            target_name = parsed_token['name']
+            target_resseq = parsed_token['resseq']
+            target_chain = parsed_token['chain']
+
+            for residue in topology.residues:
+                residue_name = str(getattr(residue, 'name', '')).upper()
+                residue_resseq = int(getattr(residue, 'resSeq', -1))
+                residue_chain = _safe_chain_id_from_residue(residue)
+
+                if residue_name != target_name or residue_resseq != target_resseq:
+                    continue
+                if target_chain and residue_chain != target_chain:
+                    continue
+
                 for atom in residue.atoms:
-                    # If atom_to_extract is specified, only add matching atoms
                     if atom_to_extract is None or atom.name == atom_to_extract:
                         selected_res_atoms.append(atom.index)
 

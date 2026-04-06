@@ -51,7 +51,7 @@ class NetworkParametersManager:
         retime_file = response_time_lineEdit.text()
         outputFileName = PPI_Network_name_lineedit.text()
         output_directory = net_output_directory_lineedit.text()
-        source = source_res_comboBox.currentText()[:-1]
+        source = source_res_comboBox.currentText().strip()
         node_threshold = node_threshold_spinBox.value()
         node_threshold_use_condition = node_threshold_checkBox.isChecked()
         all_residue_as_target = all_targets_checkBox.isChecked()

@@ -1,2 +1,2 @@
 total_residues,responded_residues,non_responded_residues,max_frame,t_half_empirical_frame,t_half_fit_frame,k_d,fit_rmse,selected_model,aic_logistic,aic_gompertz,responded_fraction,fit_status,na_reason_code
-447,447,0,999,645.0,568.6123571369411,0.010416438449890644,39.13780645936086,logistic,7338.1778338945605,8689.461010343146,1.0,ok,none
+447,447,0,999,520.0,447.96978757832267,0.012200061171646416,36.272402343577134,logistic,7186.11437220975,8347.549643978084,1.0,ok,none

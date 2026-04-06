@@ -33,7 +33,7 @@ from ._advanced_platform_options import (
 )
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Pymol_Visualize_Path, Shortest_Path_Visualize)
+from analysis.createRNetwork import (Pymol_Visualize_Path, Shortest_Path_Visualize, get_residues)
 from analysis.pathway_analysis import (
     summarize_target_pathways,
     build_critical_residue_rows,
@@ -303,6 +303,8 @@ class Functions:
                         msg = QMessageBox()
                         msg.setIcon(QMessageBox.Information)
                         msg.setWindowTitle("Network Metric Calculation")
+                        msg.setStyleSheet(Style.MessageBox_stylesheet)
+                        msg.setAttribute(QtCore.Qt.WA_StyledBackground, True)
                         msg.setText(f"Propagation Coefficient (PC) analysis effectively completed!\n\nFound {len(pc_plots)} plot(s) in:\n{out_dir}")
                         msg.addButton(QMessageBox.Ok)
                         btn_open = msg.addButton("Show Plots", QMessageBox.ActionRole)
@@ -632,8 +634,8 @@ class Functions:
 
             residue_response_table = QtWidgets.QTableWidget(residue_response_tab)
             residue_response_table.setObjectName("residue_response_table")
-            residue_response_table.setColumnCount(4)
-            residue_response_table.setHorizontalHeaderLabels(["Residue ID", "Name", "Response Frame", "Response Time (ps)"])
+            residue_response_table.setColumnCount(3)
+            residue_response_table.setHorizontalHeaderLabels(["Residue ID", "Name", "Response Frame"])
             residue_response_table.horizontalHeader().setStretchLastSection(True)
             residue_response_table.verticalHeader().setVisible(False)
             residue_response_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -782,7 +784,7 @@ class Functions:
                                 widget.setMaximumSize(QtCore.QSize(520, 1200))
                                 ax = widget.canvas.figure.subplots()
                                 bars = ax.barh(df_plot['Residue_ID'], df_plot['Propagation_Coefficient (PC)'], color='salmon', edgecolor='black')
-                                ax.set_yticklabels(df_plot['Residue_ID'], rotation=0, fontsize=8)
+                                ax.tick_params(axis='y', labelsize=8)
                                 ax.set_xlabel('Propagation Coefficient (PC)', fontsize=10, fontweight='bold', labelpad=2)
                                 ax.set_ylabel('Residue', fontsize=10, fontweight='bold', labelpad=2)
                                 ax.set_title('Signal Propagation Capacity', fontsize=12, fontweight='bold')
@@ -797,7 +799,7 @@ class Functions:
                                 plot_widgets.append(widget)
                                 plot_titles.append(os.path.basename(csv_file))
                             except Exception as e:
-                                err_lbl = QtWidgets.QLabel(f"Error plotting {os.path.basename(csv_file)}")
+                                err_lbl = QtWidgets.QLabel(f"Error plotting {os.path.basename(csv_file)}: {e}")
                                 stacked_widget.addWidget(err_lbl)
                         # Navigation buttons
                         nav_layout = QtWidgets.QHBoxLayout()
@@ -870,8 +872,8 @@ class Functions:
                         lbl = QtWidgets.QLabel("No PC metrics found.")
                         lbl.setAlignment(QtCore.Qt.AlignCenter)
                         pc_plots_layout.addWidget(lbl)
-            except Exception:
-                lbl = QtWidgets.QLabel("Error loading PC plots.")
+            except Exception as e:
+                lbl = QtWidgets.QLabel(f"Error loading PC plots: {e}")
                 pc_plots_layout.addWidget(lbl)
             # --- END PLOT SUB-TABS ---
 
@@ -1723,8 +1725,22 @@ class Functions:
                 source_residue_text = self.source_res_comboBox.currentText()
                 row, col, response_count, plot_name, fit_curve, metrics = getResponseTimeGraph(response_file_path)
 
+                residue_names = None
                 try:
-                    response_payload = build_response_dynamics_payload(response_file_path, metrics, frame_time_delta=1.0)
+                    pdb_path = self.boundForm_pdb_lineedit.text().strip()
+                    if pdb_path and os.path.exists(pdb_path):
+                        _, residue_names = get_residues(pdb_path)
+                except Exception as residue_name_error:
+                    import sys
+                    print(f"Warning: Could not derive residue names from topology file: {residue_name_error}", file=sys.stderr)
+
+                try:
+                    response_payload = build_response_dynamics_payload(
+                        response_file_path,
+                        metrics,
+                        frame_time_delta=1.0,
+                        residue_names=residue_names,
+                    )
                     populate_residue_response_table(residue_response_table, response_payload['residue_rows'])
                     populate_domain_summary_table(domain_summary_table, response_payload['domain_rows'])
                     populate_metrics_table(metrics_table, response_payload['metrics_rows'])
@@ -1950,7 +1966,7 @@ class Functions:
 
             def _refresh_pathway_and_critical_views(show_done_message=False):
                 nonlocal done_message_shown
-                local_source_res = self.source_res_comboBox.currentText()[:-1]
+                local_source_res = self.source_res_comboBox.currentText().strip()
                 pathway_rows_local, residue_path_hits_local, shortest_path_strings_local, all_paths_messages_local = summarize_target_pathways(
                     local_source_res,
                     target_res_list,
@@ -2076,8 +2092,10 @@ class Functions:
                                                 color='magenta', shortest_path=True)
 
         for node in processed_path:
-            resID_of_node = int(''.join(list(filter(str.isdigit, node))))
-            PyMOL_Widget.resi_label_add('resi ' + str(resID_of_node))
+            pymol_selection = PyMOL_Widget._build_residue_selection_query(node)
+            if pymol_selection is None:
+                continue
+            PyMOL_Widget.resi_label_add(pymol_selection)
 
         # MAKE PYMOL VISUALIZATION BETTER
         PyMOL_Widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)

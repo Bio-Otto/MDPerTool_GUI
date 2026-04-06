@@ -29,6 +29,52 @@ except ImportError:
 
 import networkx as nx
 from typing import Callable, Optional, Tuple, List
+import re
+
+
+def _make_unique_residue_label(base_label, occurrence_index):
+    """Create a deterministic unique residue label for duplicated residues.
+
+    First occurrence keeps base label, then duplicates are suffixed with X, XX, ...
+    """
+    if occurrence_index <= 1:
+        return base_label
+    return base_label + ('X' * (occurrence_index - 1))
+
+
+def _get_chain_id_from_residue(residue):
+    """Best-effort chain id extraction from Bio.PDB residue object."""
+    try:
+        chain = residue.get_parent()
+        chain_id = getattr(chain, 'id', None)
+        if chain_id is None:
+            return ''
+        return str(chain_id).strip()
+    except Exception:
+        return ''
+
+
+def _build_residue_label(residue, occurrence_counter):
+    """Create preferred residue label: RES123A (chain-aware), fallback to RES123X scheme."""
+    res_id = residue.get_id()[1]
+    res_name = residue.get_resname()
+    base_label = f"{res_name}{res_id}"
+    chain_id = _get_chain_id_from_residue(residue)
+
+    if chain_id:
+        return f"{base_label}{chain_id}"
+
+    occurrence_counter[base_label] = occurrence_counter.get(base_label, 0) + 1
+    return _make_unique_residue_label(base_label, occurrence_counter[base_label])
+
+
+def _strip_label_variant_suffix(label):
+    """Normalize labels like ASN17A / ASN17X / ASN17XX to ASN17 for dimension reconciliation."""
+    token = str(label or '').strip()
+    match = re.match(r'^([A-Za-z]{3}\d+)[A-Za-z]*$', token)
+    if match:
+        return match.group(1)
+    return token
 
 
 def get_residue_coordinates(pdb_file, query_res_list, atom_name='CA'):
@@ -44,14 +90,13 @@ def get_residue_coordinates(pdb_file, query_res_list, atom_name='CA'):
     dict: Dictionary with residue labels as keys and atom coordinates as values.
     """
     coordinates = {}
+    occurrence_counter = {}
     p = PDBParser()
     structure = p.get_structure('prot', pdb_file)
     for model in structure:
         for chain in model:
             for residue in chain:
-                res_id = residue.get_id()[1]
-                res_name = residue.get_resname()
-                residue_label = res_name + str(res_id)
+                residue_label = _build_residue_label(residue, occurrence_counter)
 
                 if residue_label in query_res_list:
                     try:
@@ -109,7 +154,13 @@ def Pymol_Visualize_Path(graph, pdb_file):
     intersection_edge_list = list(graph.edges)
     coords = check_dissipated_residues_coordinates(pdb_file, intersection_node_list, 'CA')
 
-    arrow_coordinates = [(coords[edge[0]], coords[edge[1]]) for edge in intersection_edge_list]
+    arrow_coordinates = []
+    for edge in intersection_edge_list:
+        node_a, node_b = edge[0], edge[1]
+        if node_a not in coords or node_b not in coords:
+            # Skip edges that cannot be mapped to coordinates (e.g., missing atom or label mismatch).
+            continue
+        arrow_coordinates.append((coords[node_a], coords[node_b]))
 
     return arrow_coordinates, intersection_node_list
 
@@ -170,7 +221,8 @@ def get_residues(pdb_file):
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure('prot', pdb_file)
     residue_list = [res for res in structure.get_residues() if res.get_id()[0] == ' ']
-    res_id_list = [res.get_resname() + str(res.get_id()[1]) for res in residue_list]
+    occurrence_counter = {}
+    res_id_list = [_build_residue_label(res, occurrence_counter) for res in residue_list]
     return residue_list, res_id_list
 
 
@@ -225,23 +277,116 @@ def load_response_times(reTimeFile):
     Returns:
     list: A list of response times (float).
     """
-    reTimeList = []
-    with open(reTimeFile, 'r') as file:
-        reTimeList = [float(line.strip()) for line in file]
-    return reTimeList
+    def _try_parse_float(token):
+        try:
+            return float(token)
+        except (TypeError, ValueError):
+            return None
+
+    re_time_list = []
+    with open(reTimeFile, 'r', encoding='utf-8', errors='ignore') as file:
+        for line_number, raw_line in enumerate(file, start=1):
+            line = raw_line.strip()
+            if not line:
+                continue
+
+            # Accept both legacy plain format (one numeric value per line)
+            # and labeled CSV rows such as "ALA12, 145".
+            parsed_value = None
+            csv_tokens = [token.strip() for token in line.split(',') if token.strip()]
+            if csv_tokens:
+                for token in reversed(csv_tokens):
+                    parsed_value = _try_parse_float(token)
+                    if parsed_value is not None:
+                        break
+
+            if parsed_value is None:
+                whitespace_tokens = line.split()
+                for token in reversed(whitespace_tokens):
+                    parsed_value = _try_parse_float(token)
+                    if parsed_value is not None:
+                        break
+
+            if parsed_value is None:
+                raise ValueError(
+                    f"Could not parse a numeric response time at line {line_number}: '{line}'"
+                )
+
+            re_time_list.append(parsed_value)
+
+    if not re_time_list:
+        raise ValueError("Response-time file contains no numeric values.")
+
+    return re_time_list
+
+
+def _reconcile_residue_response_dimensions(residue_objects, residue_labels, response_times):
+    """Reconcile residue list with response-time count for monomer/multimer runs.
+
+    For multimer structures, if response values correspond to unique residue labels
+    (e.g. one-chain response profile), values are expanded to all duplicated chain
+    copies so the network preserves the full structure size.
+    """
+    residue_count = len(residue_labels)
+    response_count = len(response_times)
+
+    if residue_count == response_count:
+        return residue_objects, residue_labels, list(response_times)
+
+    unique_labels = []
+    seen_labels = set()
+    for residue_label in residue_labels:
+        if residue_label in seen_labels:
+            continue
+        seen_labels.add(residue_label)
+        unique_labels.append(residue_label)
+
+    unique_count = len(unique_labels)
+
+    if unique_count == response_count:
+        label_to_response = {
+            label: response_times[index]
+            for index, label in enumerate(unique_labels)
+        }
+        expanded_response_times = [label_to_response[label] for label in residue_labels]
+        return residue_objects, residue_labels, expanded_response_times
+
+    # Chain-aware support: if labels are RES123A/RES123B and responses are one-chain sized,
+    # expand by base residue key (RES123) to all chain copies.
+    base_labels = [_strip_label_variant_suffix(label) for label in residue_labels]
+    unique_base_labels = []
+    seen_base_labels = set()
+    for base_label in base_labels:
+        if base_label in seen_base_labels:
+            continue
+        seen_base_labels.add(base_label)
+        unique_base_labels.append(base_label)
+
+    if len(unique_base_labels) == response_count:
+        base_to_response = {
+            base_label: response_times[index]
+            for index, base_label in enumerate(unique_base_labels)
+        }
+        expanded_response_times = [base_to_response[base_label] for base_label in base_labels]
+        return residue_objects, residue_labels, expanded_response_times
+
+    raise ValueError(
+        "Residue count and response-time count mismatch: "
+        f"residues={residue_count}, response_times={response_count}, "
+        f"unique_residues={unique_count}"
+    )
 
 
 def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_type='CA', write_out=False,
                    out_directory='', progress_callback=None, verbose=False):
     try:
         structure_res_list, res_list = get_residues(pdb)
-        reTimeList = load_response_times(reTimeFile)
-
-        if len(structure_res_list) != len(reTimeList):
-            raise ValueError(
-                f"Residue count and response-time count mismatch: residues={len(structure_res_list)}, "
-                f"response_times={len(reTimeList)}"
-            )
+        reTimeList_raw = load_response_times(reTimeFile)
+        structure_res_list, res_list, reTimeList = _reconcile_residue_response_dimensions(
+            structure_res_list,
+            res_list,
+            reTimeList_raw,
+        )
 
         distance_cutoff = float(cutoff)
         network = nx.Graph()
@@ -254,15 +399,22 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_t
         last_progress_value = -1
 
         # Add nodes and properties to the graph
+        occurrence_counter = {}
+        used_node_names = {}
         for idx, res in enumerate(structure_res_list):
             res_pos = res['CA'].coord if method == 'selected_atom' and atom_type == 'CA' else calc_center_of_mass(res)
-            node_name = res_list[idx]
+            base_name = res_list[idx]
 
-            if network.has_node(node_name):
-                node_name += 'X'
-                res_list[idx] = node_name
-                if verbose:
-                    print(f"Residue of the same name was found. Residue name changed to {node_name}.")
+            used_node_names[base_name] = used_node_names.get(base_name, 0) + 1
+            if used_node_names[base_name] <= 1:
+                node_name = base_name
+            else:
+                occurrence_counter[base_name] = occurrence_counter.get(base_name, 0) + 1
+                node_name = _make_unique_residue_label(base_name, occurrence_counter[base_name] + 1)
+            res_list[idx] = node_name
+
+            if verbose and used_node_names[base_name] > 1:
+                print(f"Residue of the same name was found. Residue name changed to {node_name}.")
 
             network.add_node(node_name, posx=str(res_pos[0]), posy=str(res_pos[1]), posz=str(res_pos[2]),
                              retime=reTimeList[idx])

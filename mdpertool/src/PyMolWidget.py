@@ -2,6 +2,7 @@ import os.path
 import sys
 import threading
 import time
+import re
 from pathlib import Path
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtCore import Qt, QThread, Signal, QTimer, QCoreApplication
@@ -288,10 +289,63 @@ class PymolQtWidget(QGLWidget):
 
     def selection_color(self, selection):
         try:
-            # self._pymol.cmd.color('red', 'resi %s' %s[3])
-            self.resicolor('resi %s' % selection[3:-1])
+            selection_query = self._build_residue_selection_query(selection)
+            if selection_query is not None:
+                self.resicolor(selection_query)
         except Exception as ErrorExp:
             print("ERROR on PyMOL (selection_color): ", ErrorExp)
+
+    def _build_residue_selection_query(self, residue_text):
+        """Build PyMOL selection from labels like ASN17, ASN17X, ASN17A."""
+        token = str(residue_text or "").strip()
+        if not token:
+            return None
+
+        # First, resolve against structure-derived unique labels (ASN17, ASN17X, ...).
+        unique_label_map = self._build_unique_label_selection_map()
+        if token in unique_label_map:
+            return unique_label_map[token]
+
+        # Accept typical combo/list format: RES + residue_number + optional_chain_id.
+        match = re.match(r'^[A-Za-z]{3}(\d+)([A-Za-z]?)$', token)
+        if not match:
+            return None
+
+        residue_number = match.group(1)
+        chain_id = match.group(2)
+
+        if chain_id:
+            return f"resi {residue_number} and chain {chain_id}"
+        return f"resi {residue_number}"
+
+    def _build_unique_label_selection_map(self):
+        """Map labels like ASN17/ASN17X/ASN17A to chain-aware PyMOL selections."""
+        label_map = {}
+        occurrence_counter = {}
+
+        self._pymol.stored.ca_rows = []
+        selection_scope = f'{self.mol_name} and name ca' if self.mol_name else 'name ca'
+        self._pymol.cmd.iterate(
+            selection_scope,
+            'stored.ca_rows.append((resn, resi, chain))',
+            _self=self._pymol.cmd,
+        )
+
+        for resn, resi, chain in self._pymol.stored.ca_rows:
+            base_label = f"{resn}{resi}"
+            occurrence_counter[base_label] = occurrence_counter.get(base_label, 0) + 1
+            occurrence_index = occurrence_counter[base_label]
+
+            unique_label = base_label if occurrence_index == 1 else base_label + ('X' * (occurrence_index - 1))
+            chain_aware_selection = f"resi {resi} and chain {chain}" if chain else f"resi {resi}"
+
+            label_map[unique_label] = chain_aware_selection
+
+            # Also support explicit chain-suffix labels (e.g., ASN17A).
+            if chain:
+                label_map[f"{base_label}{chain}"] = chain_aware_selection
+
+        return label_map
 
     def resicolor(self, selection):
         try:
@@ -320,7 +374,8 @@ class PymolQtWidget(QGLWidget):
 
             label_selection = '%s and name ca' % selection
             self._pymol.cmd.set('label_color', 'green', label_selection)
-            self._pymol.cmd.label(label_selection, '"%s-%s" % (resn, resi)')
+            # Include chain ID in label text so duplicated residue numbers across chains stay distinguishable.
+            self._pymol.cmd.label(label_selection, '"%s-%s%s" % (resn, resi, chain)')
             self._pymol.cmd.set('label_position', '(1, 1, 6)')
             self._pymol.cmd.set('label_size', '14')
 
@@ -370,10 +425,13 @@ class PymolQtWidget(QGLWidget):
 
         self._pymol.cmd.hide('surface')
 
-        self._pymol.stored.residues = []
-        self._pymol.cmd.iterate('name ca', 'stored.residues.append(resi)', _self=self._pymol.cmd)
-
-        start_res_number = [int(x) for x in self._pymol.stored.residues][0]
+        self._pymol.stored.ca_atom_indices = []
+        # Collect exact CA atom indices in PyMOL iteration order to preserve chain-aware mapping.
+        self._pymol.cmd.iterate(
+            f'{self.mol_name} and name ca',
+            'stored.ca_atom_indices.append(index)',
+            _self=self._pymol.cmd,
+        )
 
         # load the protein
         if mol is None:
@@ -406,12 +464,22 @@ class PymolQtWidget(QGLWidget):
         # clear out the old B Factors
         self._pymol.cmd.alter('all', 'b=0.0')
 
-        # ---> obj = self._pymol.cmd.get_object_list(mol)[0]
-        counter = start_res_number
-        for line in stored:
-            bfact = float(line)
-            self._pymol.cmd.alter("%s and resi %s and n. CA" % (str(self.mol_name), counter), "b=%s" % bfact)
-            counter = counter + 1
+        # Apply each response value to the corresponding CA atom index.
+        assignment_count = min(len(stored), len(self._pymol.stored.ca_atom_indices))
+        if len(stored) != len(self._pymol.stored.ca_atom_indices):
+            print(
+                f"Warning: response count ({len(stored)}) and CA atom count "
+                f"({len(self._pymol.stored.ca_atom_indices)}) do not match; "
+                f"applying first {assignment_count} values."
+            )
+
+        for i in range(assignment_count):
+            bfact = float(stored[i])
+            atom_index = self._pymol.stored.ca_atom_indices[i]
+            self._pymol.cmd.alter(
+                f"{self.mol_name} and index {atom_index}",
+                f"b={bfact}"
+            )
 
         self._pymol.cmd.spectrum('b', spectrum, minimum=0, maximum=max(stored))
         self._pymol.cmd.recolor()

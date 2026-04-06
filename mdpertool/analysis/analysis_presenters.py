@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence, Tuple
 
 from PySide2 import QtCore
-from PySide2.QtGui import QColor
+from PySide2.QtGui import QColor, QBrush
 from PySide2.QtWidgets import QTableWidget, QTableWidgetItem
 
 
@@ -48,13 +48,12 @@ def populate_reachability_qc(table: QTableWidget, reachable_count: int, unreacha
     table.setItem(start_row + 1, 1, QTableWidgetItem(str(unreachable_count)))
 
 
-def populate_residue_response_table(table: QTableWidget, rows: Sequence[Tuple[str, str, str, str]]) -> None:
+def populate_residue_response_table(table: QTableWidget, rows: Sequence[Tuple[str, str, str]]) -> None:
     table.setRowCount(len(rows))
-    for row_idx, (residue_id, residue_name, response_frame, response_time_ps) in enumerate(rows):
+    for row_idx, (residue_id, residue_name, response_frame) in enumerate(rows):
         table.setItem(row_idx, 0, QTableWidgetItem(str(residue_id)))
         table.setItem(row_idx, 1, QTableWidgetItem(str(residue_name)))
         table.setItem(row_idx, 2, QTableWidgetItem(str(response_frame)))
-        table.setItem(row_idx, 3, QTableWidgetItem(str(response_time_ps)))
 
 
 def populate_domain_summary_table(table: QTableWidget, rows: Sequence[Tuple[str, int, float, float, float]]) -> None:
@@ -95,22 +94,22 @@ def populate_qc_table(table: QTableWidget, rows: Sequence[Tuple[str, str]]) -> N
 
         if qc_key == "fit_ok":
             if str(qc_value).lower() == "yes":
-                qc_value_item.setBackground(QColor("#77dd77"))
+                qc_value_item.setBackground(QBrush(QColor("#77dd77")))
                 qc_value_item.setToolTip("Fit quality check passed.")
             else:
-                qc_value_item.setBackground(QColor("#ff686b"))
+                qc_value_item.setBackground(QBrush(QColor("#ff686b")))
                 qc_value_item.setToolTip("Fit quality check failed or unavailable.")
 
         if qc_key == "rmse_level":
             rmse_level_value = str(qc_value).lower()
             if rmse_level_value == "low":
-                qc_value_item.setBackground(QColor("#77dd77"))
+                qc_value_item.setBackground(QBrush(QColor("#77dd77")))
                 qc_value_item.setToolTip("Low fit error.")
             elif rmse_level_value == "medium":
-                qc_value_item.setBackground(QColor("#f6bc66"))
+                qc_value_item.setBackground(QBrush(QColor("#f6bc66")))
                 qc_value_item.setToolTip("Moderate fit error.")
             elif rmse_level_value == "high":
-                qc_value_item.setBackground(QColor("#ff686b"))
+                qc_value_item.setBackground(QBrush(QColor("#ff686b")))
                 qc_value_item.setToolTip("High fit error; inspect curve carefully.")
             else:
                 qc_value_item.setToolTip("RMSE not available.")
@@ -137,11 +136,11 @@ def populate_provenance_table(table: QTableWidget, rows: Sequence[Tuple[str, str
         if prov_key == "manifest_exists":
             prov_value_lower = str(prov_value).lower()
             if prov_value_lower == "yes":
-                prov_value_item.setBackground(QColor("#77dd77"))
+                prov_value_item.setBackground(QBrush(QColor("#77dd77")))
             elif prov_value_lower == "error":
-                prov_value_item.setBackground(QColor("#ff686b"))
+                prov_value_item.setBackground(QBrush(QColor("#ff686b")))
             else:
-                prov_value_item.setBackground(QColor("#f6bc66"))
+                prov_value_item.setBackground(QBrush(QColor("#f6bc66")))
 
         if prov_key == "manifest_path":
             prov_value_item.setToolTip("Analysis manifest location on disk.")
