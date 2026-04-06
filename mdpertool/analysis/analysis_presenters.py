@@ -109,6 +109,22 @@ def populate_motif_summary_table(
         table.setItem(row_idx, 5, QTableWidgetItem(str(scope_name)))
 
 
+def populate_significance_table(
+    table: QTableWidget,
+    rows: Sequence[Tuple[str, int, int, int, float, str, str, str]],
+) -> None:
+    table.setRowCount(len(rows))
+    for row_idx, (label, population_size, success_size, overlap_count, p_value, candidate_nodes, overlap_nodes, description) in enumerate(rows):
+        table.setItem(row_idx, 0, QTableWidgetItem(str(label)))
+        table.setItem(row_idx, 1, QTableWidgetItem(str(population_size)))
+        table.setItem(row_idx, 2, QTableWidgetItem(str(success_size)))
+        table.setItem(row_idx, 3, QTableWidgetItem(str(overlap_count)))
+        table.setItem(row_idx, 4, QTableWidgetItem(f"{p_value:.4e}"))
+        table.setItem(row_idx, 5, QTableWidgetItem(str(candidate_nodes)))
+        table.setItem(row_idx, 6, QTableWidgetItem(str(overlap_nodes)))
+        table.setItem(row_idx, 7, QTableWidgetItem(str(description)))
+
+
 def populate_metrics_table(table: QTableWidget, rows: Sequence[Tuple[str, str]]) -> None:
     table.setRowCount(len(rows))
     for row_idx, (metric_label, value_text) in enumerate(rows):

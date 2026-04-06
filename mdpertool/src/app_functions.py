@@ -43,6 +43,7 @@ from analysis.pathway_analysis import (
 )
 from analysis.network_summary_service import build_network_summary_rows, build_union_graph, build_intersection_graph
 from analysis.network_motif_service import build_motif_summary_rows
+from analysis.network_significance_service import build_network_significance_rows
 from analysis.response_dynamics_service import build_response_dynamics_payload
 from analysis.network_workflow_service import (
     prepare_general_network_engine_from_ui,
@@ -60,6 +61,7 @@ from analysis.analysis_presenters import (
     populate_domain_summary_table,
     populate_network_summary_table,
     populate_motif_summary_table,
+    populate_significance_table,
     populate_metrics_table,
     populate_qc_table,
     populate_provenance_table,
@@ -758,6 +760,33 @@ class Functions:
             motif_summary_tab_layout.addWidget(motif_summary_table)
             response_dynamics_tabwidget.addTab(motif_summary_tab, "Motif Summary")
 
+            significance_tab = QtWidgets.QWidget()
+            significance_tab.setObjectName("analysis_significance_tab")
+            significance_tab_layout = QtWidgets.QVBoxLayout(significance_tab)
+            significance_tab_layout.setContentsMargins(0, 0, 0, 0)
+            significance_tab_layout.setObjectName("analysis_significance_tab_layout")
+
+            significance_table = QtWidgets.QTableWidget(significance_tab)
+            significance_table.setObjectName("significance_table")
+            significance_table.setColumnCount(8)
+            significance_table.setHorizontalHeaderLabels([
+                "Label",
+                "Population",
+                "Candidate Set",
+                "Overlap",
+                "P-value",
+                "Candidate Nodes",
+                "Overlap Nodes",
+                "Description",
+            ])
+            significance_table.horizontalHeader().setStretchLastSection(True)
+            significance_table.verticalHeader().setVisible(False)
+            significance_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            significance_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            significance_table.setMinimumSize(QtCore.QSize(0, 160))
+            significance_tab_layout.addWidget(significance_table)
+            response_dynamics_tabwidget.addTab(significance_tab, "Significance")
+
             # Apply the same table style used by residues_conservation_tableWidget
             table_style = ""
             if hasattr(self, 'residues_conservation_tableWidget') and self.residues_conservation_tableWidget is not None:
@@ -774,6 +803,7 @@ class Functions:
                     critical_residue_table,
                     network_summary_table,
                     motif_summary_table,
+                    significance_table,
                 ]:
                     table_widget.setStyleSheet(table_style)
 
@@ -2083,6 +2113,18 @@ class Functions:
             except Exception as motif_error:
                 import sys
                 print(f"Warning: Could not build motif summary table: {motif_error}", file=sys.stderr)
+
+            try:
+                significance_graph = intersection_graph if 'intersection_graph' in locals() and intersection_graph.number_of_nodes() > 0 else build_union_graph(all_graph_list)
+                significance_rows = build_network_significance_rows(
+                    initial_graph=self.initial_network,
+                    core_graph=significance_graph,
+                    betweenness_rank_size=20,
+                )
+                populate_significance_table(significance_table, significance_rows)
+            except Exception as significance_error:
+                import sys
+                print(f"Warning: Could not build significance table: {significance_error}", file=sys.stderr)
 
             def _show_selected_shortest_path(item):
                 selected_row = shortest_path_listWidget.currentRow()
