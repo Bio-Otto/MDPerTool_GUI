@@ -13,6 +13,36 @@ import csv
 import pandas as pd
 
 
+def _build_unique_residue_labels(residues):
+    """Build stable, unique residue labels (name+id+chain) for energy CSV columns."""
+    labels = []
+    seen = {}
+
+    for residue in residues:
+        chain_id = ''
+        try:
+            chain_id = str(getattr(getattr(residue, 'chain', None), 'id', '') or '')
+        except Exception:
+            chain_id = ''
+
+        if not chain_id:
+            try:
+                chain_index = getattr(getattr(residue, 'chain', None), 'index', None)
+                if chain_index is not None:
+                    chain_id = f"chain{chain_index}"
+            except Exception:
+                chain_id = ''
+
+        base_label = f"{residue.name}{residue.id}{chain_id}"
+        seen[base_label] = seen.get(base_label, 0) + 1
+        if seen[base_label] == 1:
+            labels.append(base_label)
+        else:
+            labels.append(f"{base_label}_dup{seen[base_label]}")
+
+    return labels
+
+
 def _is_ascii_path(path):
     if path is None:
         return True
@@ -268,8 +298,8 @@ def process_energy_data(topology_file, protein_ff, water_ff, ref_trajectory, mod
     system = forcefield.createSystem(modeller.topology, nonbondedMethod=CutoffNonPeriodic, nonbondedCutoff=nonbonded_cutoff)
 
     # Get residues and create a list of residue names
-    residues = modeller.topology.residues()
-    res_name_list = [residue.name + residue.id for residue in residues]
+    residues = list(modeller.topology.residues())
+    res_name_list = _build_unique_residue_labels(residues)
 
 
 

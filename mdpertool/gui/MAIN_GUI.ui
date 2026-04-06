@@ -556,7 +556,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+   <iconset resource="icons_path.qrc">
     <normaloff>:/big_icons/icons/big_icons/style_icon_48x48.png</normaloff>:/big_icons/icons/big_icons/style_icon_48x48.png</iconset>
   </property>
   <property name="styleSheet">
@@ -997,7 +997,7 @@ QPushButton:pressed {
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                      <iconset resource="icons_path.qrc">
                        <normaloff>:/16x16/icons/16x16/cil-window-minimize.png</normaloff>:/16x16/icons/16x16/cil-window-minimize.png</iconset>
                      </property>
                     </widget>
@@ -1029,7 +1029,7 @@ QPushButton:pressed {
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                      <iconset resource="icons_path.qrc">
                        <normaloff>:/16x16/icons/16x16/cil-window-maximize.png</normaloff>:/16x16/icons/16x16/cil-window-maximize.png</iconset>
                      </property>
                     </widget>
@@ -1061,7 +1061,7 @@ QPushButton:pressed {
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                      <iconset resource="icons_path.qrc">
                        <normaloff>:/16x16/icons/16x16/cil-x.png</normaloff>:/16x16/icons/16x16/cil-x.png</iconset>
                      </property>
                     </widget>
@@ -1489,7 +1489,7 @@ QPushButton:pressed
                          <string/>
                         </property>
                         <property name="icon">
-                         <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                         <iconset resource="icons_path.qrc">
                           <normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</iconset>
                         </property>
                        </widget>
@@ -1531,7 +1531,7 @@ QPushButton:pressed
                          <string/>
                         </property>
                         <property name="icon">
-                         <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                         <iconset resource="icons_path.qrc">
                           <normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-right-alt.png</iconset>
                         </property>
                        </widget>
@@ -1674,7 +1674,7 @@ margin-bottom: 4px
                              <string>Activate</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                             <iconset resource="icons_path.qrc">
                               <normaloff>:/24x24/icons/24x24/cil-cursor.png</normaloff>:/24x24/icons/24x24/cil-cursor.png</iconset>
                             </property>
                            </widget>
@@ -1735,7 +1735,7 @@ margin-bottom: 4px
                              <string>Deactivate</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                             <iconset resource="icons_path.qrc">
                               <normaloff>:/20x20/icons/20x20/cil-x.png</normaloff>:/20x20/icons/20x20/cil-x.png</iconset>
                             </property>
                            </widget>
@@ -1796,7 +1796,7 @@ margin-bottom: 4px
                              <string>Refresh</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                             <iconset resource="icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-reload.png</normaloff>:/16x16/icons/16x16/cil-reload.png</iconset>
                             </property>
                            </widget>
@@ -1857,7 +1857,7 @@ margin-bottom: 4px
                              <string>Beautiful Snap</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                             <iconset resource="icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-camera.png</normaloff>:/16x16/icons/16x16/cil-camera.png</iconset>
                             </property>
                            </widget>
@@ -1918,7 +1918,7 @@ margin-bottom: 4px
                              <string>Save as png</string>
                             </property>
                             <property name="icon">
-                             <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                             <iconset resource="icons_path.qrc">
                               <normaloff>:/16x16/icons/16x16/cil-data-transfer-down.png</normaloff>:/16x16/icons/16x16/cil-data-transfer-down.png</iconset>
                             </property>
                            </widget>
@@ -2446,7 +2446,7 @@ QPushButton:pressed
                               <string>Get Figure</string>
                              </property>
                              <property name="icon">
-                              <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                              <iconset resource="icons_path.qrc">
                                <normaloff>:/16x16/icons/16x16/cil-image-plus.png</normaloff>:/16x16/icons/16x16/cil-image-plus.png</iconset>
                              </property>
                             </widget>
@@ -2517,7 +2517,7 @@ QPushButton:pressed
                            <string/>
                           </property>
                           <property name="icon">
-                           <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                           <iconset resource="icons_path.qrc">
                             <normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</normaloff>:/16x16/icons/16x16/cil-chevron-circle-up-alt.png</iconset>
                           </property>
                           <property name="flat">
@@ -4230,7 +4230,7 @@ QPushButton:pressed {
                                       <string/>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                      <iconset resource="icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</iconset>
                                      </property>
                                     </widget>
@@ -4280,7 +4280,7 @@ QPushButton:pressed {
                                       <string/>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                      <iconset resource="icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</iconset>
                                      </property>
                                     </widget>
@@ -4865,7 +4865,7 @@ QPushButton:pressed {
                                <string>Run</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                               <iconset resource="icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-media-play.png</normaloff>:/16x16/icons/16x16/cil-media-play.png</iconset>
                               </property>
                              </widget>
@@ -4903,7 +4903,7 @@ QPushButton:pressed {
                                <string>Quit</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                               <iconset resource="icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-account-logout.png</normaloff>:/16x16/icons/16x16/cil-account-logout.png</iconset>
                               </property>
                              </widget>
@@ -4948,7 +4948,7 @@ QPushButton:pressed
                                <string>İmport Project</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                               <iconset resource="icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-action-undo.png</normaloff>:/16x16/icons/16x16/cil-action-undo.png</iconset>
                               </property>
                              </widget>
@@ -4996,7 +4996,7 @@ QPushButton:pressed
                                <string>Export Project</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                               <iconset resource="icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-save.png</normaloff>:/16x16/icons/16x16/cil-save.png</iconset>
                               </property>
                              </widget>
@@ -5034,7 +5034,7 @@ QPushButton:pressed {
                                <string>Stop</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                               <iconset resource="icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-media-stop.png</normaloff>:/16x16/icons/16x16/cil-media-stop.png</iconset>
                               </property>
                              </widget>
@@ -5097,7 +5097,7 @@ QPushButton:pressed
                                <string>Load Test Case</string>
                               </property>
                               <property name="icon">
-                               <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                               <iconset resource="icons_path.qrc">
                                 <normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</iconset>
                               </property>
                              </widget>
@@ -7559,6 +7559,12 @@ QCheckBox::indicator:checked {
                                   <verstretch>0</verstretch>
                                  </sizepolicy>
                                 </property>
+                                <property name="maximumSize">
+                                 <size>
+                                  <width>16777215</width>
+                                  <height>150</height>
+                                 </size>
+                                </property>
                                 <property name="font">
                                  <font>
                                   <family>Segoe UI</family>
@@ -7608,6 +7614,12 @@ QGroupBox::indicator {
                                  </property>
                                  <item row="2" column="0" colspan="3">
                                   <widget class="QGroupBox" name="groupBox_10">
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>16777215</width>
+                                     <height>80</height>
+                                    </size>
+                                   </property>
                                    <property name="font">
                                     <font>
                                      <family>Segoe UI</family>
@@ -7677,7 +7689,7 @@ QGroupBox::title:disabled {
                                       <property name="maximumSize">
                                        <size>
                                         <width>115</width>
-                                        <height>38</height>
+                                        <height>35</height>
                                        </size>
                                       </property>
                                       <property name="font">
@@ -7711,7 +7723,7 @@ QGroupBox::title:disabled {
                                       <property name="maximumSize">
                                        <size>
                                         <width>221</width>
-                                        <height>16777215</height>
+                                        <height>35</height>
                                        </size>
                                       </property>
                                       <property name="styleSheet">
@@ -7753,7 +7765,7 @@ QLineEdit:focus {
                                       <property name="maximumSize">
                                        <size>
                                         <width>110</width>
-                                        <height>38</height>
+                                        <height>35</height>
                                        </size>
                                       </property>
                                       <property name="font">
@@ -7827,7 +7839,7 @@ QCheckBox::indicator:checked {
                                    <property name="maximumSize">
                                     <size>
                                      <width>125</width>
-                                     <height>16777215</height>
+                                     <height>35</height>
                                     </size>
                                    </property>
                                    <property name="font">
@@ -7861,7 +7873,7 @@ QCheckBox::indicator:checked {
                                    <property name="maximumSize">
                                     <size>
                                      <width>100</width>
-                                     <height>16777215</height>
+                                     <height>35</height>
                                     </size>
                                    </property>
                                    <property name="font">
@@ -7976,7 +7988,7 @@ QGroupBox::indicator {
                                    <property name="maximumSize">
                                     <size>
                                      <width>16777215</width>
-                                     <height>105</height>
+                                     <height>120</height>
                                     </size>
                                    </property>
                                    <property name="font">
@@ -8198,6 +8210,12 @@ QCheckBox::indicator:checked {
                                  </item>
                                  <item>
                                   <widget class="QGroupBox" name="DCD_Reporter_Options_groupBox">
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>16777215</width>
+                                     <height>120</height>
+                                    </size>
+                                   </property>
                                    <property name="font">
                                     <font>
                                      <family>Segoe UI</family>
@@ -8404,7 +8422,7 @@ QLineEdit:focus {
                                    <property name="maximumSize">
                                     <size>
                                      <width>16777215</width>
-                                     <height>135</height>
+                                     <height>120</height>
                                     </size>
                                    </property>
                                    <property name="font">
@@ -8598,7 +8616,7 @@ QLineEdit:focus {
                                    <property name="maximumSize">
                                     <size>
                                      <width>16777215</width>
-                                     <height>90</height>
+                                     <height>80</height>
                                     </size>
                                    </property>
                                    <property name="font">
@@ -8667,7 +8685,7 @@ QGroupBox::title:disabled {
                                       <property name="maximumSize">
                                        <size>
                                         <width>131</width>
-                                        <height>16777215</height>
+                                        <height>35</height>
                                        </size>
                                       </property>
                                       <property name="font">
@@ -8692,6 +8710,12 @@ QGroupBox::title:disabled {
                                       <property name="minimumSize">
                                        <size>
                                         <width>256</width>
+                                        <height>35</height>
+                                       </size>
+                                      </property>
+                                      <property name="maximumSize">
+                                       <size>
+                                        <width>16777215</width>
                                         <height>35</height>
                                        </size>
                                       </property>
@@ -8722,6 +8746,19 @@ QLineEdit:focus {
                                     </item>
                                    </layout>
                                   </widget>
+                                 </item>
+                                 <item>
+                                  <spacer name="verticalSpacer_3">
+                                   <property name="orientation">
+                                    <enum>Qt::Vertical</enum>
+                                   </property>
+                                   <property name="sizeHint" stdset="0">
+                                    <size>
+                                     <width>20</width>
+                                     <height>40</height>
+                                    </size>
+                                   </property>
+                                  </spacer>
                                  </item>
                                 </layout>
                                </widget>
@@ -11907,7 +11944,7 @@ QPushButton:pressed {
                                         <string/>
                                        </property>
                                        <property name="icon">
-                                        <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                        <iconset resource="icons_path.qrc">
                                          <normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-left.png</iconset>
                                        </property>
                                       </widget>
@@ -11951,7 +11988,7 @@ QPushButton:pressed {
                                         <string/>
                                        </property>
                                        <property name="icon">
-                                        <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                        <iconset resource="icons_path.qrc">
                                          <normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</normaloff>:/16x16/icons/16x16/cil-chevron-double-right.png</iconset>
                                        </property>
                                       </widget>
@@ -12553,7 +12590,7 @@ QPushButton:pressed {
                                       <string>Stop</string>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                      <iconset resource="icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-media-stop.png</normaloff>:/16x16/icons/16x16/cil-media-stop.png</iconset>
                                      </property>
                                     </widget>
@@ -12600,7 +12637,7 @@ QPushButton:pressed {
                                       <string>CALCULATE</string>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                      <iconset resource="icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-arrow-right.png</normaloff>:/16x16/icons/16x16/cil-arrow-right.png</iconset>
                                      </property>
                                     </widget>
@@ -12679,7 +12716,7 @@ QPushButton:pressed
                                       <string>Load Test Case</string>
                                      </property>
                                      <property name="icon">
-                                      <iconset resource="MDPerTool_GUI/mdpertool/gui/icons_path.qrc">
+                                      <iconset resource="icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</iconset>
                                      </property>
                                     </widget>
@@ -14591,8 +14628,8 @@ QCommandLinkButton:pressed {
   </widget>
  </widget>
  <resources>
-  <include location="MDPerTool_GUI/mdpertool/gui/icons_path.qrc"/>
-  <include location="MDPerTool_GUI/mdpertool/gui/files.qrc"/>
+  <include location="icons_path.qrc"/>
+  <include location="files.qrc"/>
  </resources>
  <connections/>
 </ui>

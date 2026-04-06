@@ -1176,24 +1176,24 @@ class MainWindow(QtWidgets.QMainWindow):
             output_directory = self.net_output_directory_lineedit.text()
 
             if not os.path.exists(output_directory):
-                msgbox = QMessageBox(QMessageBox.Question, "No Output Directory Specified",
+                msgbox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "No Output Directory Specified",
                                      ("No output directory specified.\n\n"
                                       "Would you like to specify one? If not, "
                                       "the system will create an output folder named 'out_for_net_analysis'."))
 
-                msgbox.setIcon(QMessageBox.Question)
-                msgbox.addButton(QMessageBox.Yes)
-                msgbox.addButton(QMessageBox.No)
-                msgbox.setDefaultButton(QMessageBox.Yes)
+                msgbox.setIcon(QtWidgets.QMessageBox.Question)
+                msgbox.addButton(QtWidgets.QMessageBox.Yes)
+                msgbox.addButton(QtWidgets.QMessageBox.No)
+                msgbox.setDefaultButton(QtWidgets.QMessageBox.Yes)
                 msgbox.setStyleSheet(Style.MessageBox_stylesheet)
                 msgbox.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
                 user_response = msgbox.exec_()
 
-                if user_response == QMessageBox.Yes:
+                if user_response == QtWidgets.QMessageBox.Yes:
                     return False
 
-                if user_response == QMessageBox.No:
+                if user_response == QtWidgets.QMessageBox.No:
                     output_directory = os.path.join(safe_getcwd(), "out_for_net_analysis")
                     Path(output_directory).mkdir(parents=True, exist_ok=True)
 

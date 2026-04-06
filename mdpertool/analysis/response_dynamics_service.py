@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Dict, List, Tuple, Mapping
+from pathlib import Path
+from typing import Any, Dict, List, Tuple, Mapping, Optional
 
 import numpy as np
 
@@ -15,6 +16,7 @@ def build_response_dynamics_payload(
     possible_path: str,
     metrics: Mapping[Any, Any],
     frame_time_delta: float = 1.0,
+    residue_names: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """Build UI-friendly payloads for response-dynamics tables."""
     payload: Dict[str, Any] = {
@@ -25,8 +27,10 @@ def build_response_dynamics_payload(
         "provenance_rows": [],
     }
 
-    response_metrics_file = possible_path.replace("responseTimes.csv", "responseTimes_metrics.csv")
-    response_fit_file = possible_path.replace("responseTimes.csv", "responseTimes_fit_curve.csv")
+    response_path = Path(possible_path)
+    response_stem = response_path.with_suffix("")
+    response_metrics_file = str(response_stem) + "_metrics.csv"
+    response_fit_file = str(response_stem) + "_fit_curve.csv"
 
     if os.path.isfile(possible_path) and os.path.isfile(response_metrics_file) and os.path.isfile(response_fit_file):
         response_analyzer = ResidueResponseAnalyzer(
@@ -36,15 +40,15 @@ def build_response_dynamics_payload(
             frame_time_delta=frame_time_delta,
         )
 
-        residue_summary_df = response_analyzer.get_per_residue_summary(
-            [f"RES_{i + 1}" for i in range(response_analyzer.num_residues)]
-        )
+        if residue_names is None:
+            residue_names = [f"RES_{i + 1}" for i in range(response_analyzer.num_residues)]
+
+        residue_summary_df = response_analyzer.get_per_residue_summary(residue_names)
         payload["residue_rows"] = [
             (
                 str(row_data["residue_id"]),
                 str(row_data["residue_name"]),
                 str(row_data["response_time_frame"]),
-                f"{row_data['response_time_ps']:.2f}",
             )
             for _, row_data in residue_summary_df.iterrows()
         ]

@@ -1,0 +1,10 @@
+Residue,Layer_N,In_Degree_m_i,Out_Degree_n_i,Layer_Pass_Through_l,Propagation_Coefficient_PC
+Source,0,0,4,0,0.0
+E,1,3,1,0,0.375
+A,1,1,2,0,0.25
+B,1,1,2,0,0.25
+C,1,1,1,0,0.125
+Hub_Node,2,2,2,0,1.0
+D,2,2,0,0,0.0
+Target1,3,1,0,0,0.0
+Target2,3,1,0,0,0.0

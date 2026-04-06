@@ -41,10 +41,10 @@ class ResidueManager:
             List of target residue names
         """
         if all_residue_as_target:
-            return [target_res_comboBox.itemText(i)[:-1] 
+            return [target_res_comboBox.itemText(i).strip()
                    for i in range(target_res_comboBox.count())]
         else:
-            return [selected_target_residues_listWidget.item(x).text()[:-1]
+            return [selected_target_residues_listWidget.item(x).text().strip()
                    for x in range(selected_target_residues_listWidget.count())]
 
     def _get_conservation_settings(

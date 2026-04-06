@@ -33,7 +33,7 @@ from ._advanced_platform_options import (
 )
 import multiprocessing as mp
 from analysis.pdbsum_conservation_puller import get_conservation_scores
-from analysis.createRNetwork import (Pymol_Visualize_Path, Shortest_Path_Visualize)
+from analysis.createRNetwork import (Pymol_Visualize_Path, Shortest_Path_Visualize, get_residues)
 from analysis.pathway_analysis import (
     summarize_target_pathways,
     build_critical_residue_rows,
@@ -291,6 +291,34 @@ class Functions:
                 self._active_network_engine = None
             if len(self.network_holder) != 0:
                 self.plot_signal.plot_network.emit()
+
+            # Show PC computation results if they exist in the output directory
+            try:
+                out_dir = getattr(self, '_network_output_directory', getattr(self, 'output_directory', ''))
+                if out_dir and os.path.exists(out_dir):
+                    import glob
+                    pc_plots = glob.glob(os.path.join(out_dir, "PC_Score_*_propagation_plot.png"))
+                    if pc_plots:
+                        from PySide2.QtWidgets import QMessageBox
+                        msg = QMessageBox()
+                        msg.setIcon(QMessageBox.Information)
+                        msg.setWindowTitle("Network Metric Calculation")
+                        msg.setStyleSheet(Style.MessageBox_stylesheet)
+                        msg.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+                        msg.setText(f"Propagation Coefficient (PC) analysis effectively completed!\n\nFound {len(pc_plots)} plot(s) in:\n{out_dir}")
+                        msg.addButton(QMessageBox.Ok)
+                        btn_open = msg.addButton("Show Plots", QMessageBox.ActionRole)
+                        msg.exec_()
+                        
+                        if msg.clickedButton() == btn_open:
+                            import subprocess
+                            for plot in pc_plots:
+                                if os.name == 'nt':
+                                    os.startfile(plot)
+                                else:
+                                    subprocess.call(['xdg-open', plot])
+            except Exception as e:
+                print(f"[Warning] Error opening PC Plots: {e}")
 
     def print_output(self, s):
         self.network_holder.append(s[0])
@@ -606,8 +634,8 @@ class Functions:
 
             residue_response_table = QtWidgets.QTableWidget(residue_response_tab)
             residue_response_table.setObjectName("residue_response_table")
-            residue_response_table.setColumnCount(4)
-            residue_response_table.setHorizontalHeaderLabels(["Residue ID", "Name", "Response Frame", "Response Time (ps)"])
+            residue_response_table.setColumnCount(3)
+            residue_response_table.setHorizontalHeaderLabels(["Residue ID", "Name", "Response Frame"])
             residue_response_table.horizontalHeader().setStretchLastSection(True)
             residue_response_table.verticalHeader().setVisible(False)
             residue_response_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -706,10 +734,148 @@ class Functions:
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
             dissipation_curve_widget.setSizePolicy(sizePolicy)
             dissipation_curve_widget.setMinimumSize(QtCore.QSize(0, 400))
-            dissipation_curve_widget.setMaximumSize(QtCore.QSize(520, 520))
+            dissipation_curve_widget.setMaximumSize(QtCore.QSize(520, 1200))
             dissipation_curve_widget.setObjectName("dissipation_curve_widget")
+            
+            # --- START PLOT SUB-TABS ---
+            plot_inner_tabwidget = QtWidgets.QTabWidget(plot_tab)
+            plot_tab_layout.addWidget(plot_inner_tabwidget)
 
-            plot_tab_layout.addWidget(dissipation_curve_widget)
+            # Sub-Tab 1: Response Time Graph
+            res_time_tab = QtWidgets.QWidget()
+            res_time_layout = QtWidgets.QVBoxLayout(res_time_tab)
+            res_time_layout.addWidget(dissipation_curve_widget)
+            plot_inner_tabwidget.addTab(res_time_tab, "Response Time Graph")
+
+            # Sub-Tab 2: Propagation Coefficient Plots
+            pc_plots_tab = QtWidgets.QWidget()
+            pc_plots_layout = QtWidgets.QVBoxLayout(pc_plots_tab)
+            plot_inner_tabwidget.addTab(pc_plots_tab, "Propagation Coefficient")
+            
+            try:
+                out_dir = getattr(self, '_network_output_directory', getattr(self, 'output_directory', ''))
+                if out_dir and os.path.exists(out_dir):
+                    import glob
+                    import pandas as pd
+                    pc_metric_files = glob.glob(os.path.join(out_dir, "PC_Score_*_propagation_metrics.csv"))
+
+                    if pc_metric_files:
+                        stacked_widget = QtWidgets.QStackedWidget()
+                        plot_widgets = []
+                        plot_titles = []
+                        for csv_file in pc_metric_files:
+                            try:
+                                df = pd.read_csv(csv_file)
+                                df_plot = df[df['Propagation_Coefficient (PC)'] > 0].copy()
+                                df_plot = df_plot.sort_values('Propagation_Coefficient (PC)', ascending=False).head(30)
+                                if df_plot.empty:
+                                    continue
+                                widget = WidgetPlot()
+                                # Response time graph ile aynı ebatlar ve layout
+                                toolbarSizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                                widget.toolbar.setSizePolicy(toolbarSizePolicy)
+                                plot_layout = QtWidgets.QVBoxLayout()
+                                plot_layout.addWidget(widget.toolbar)
+                                plot_layout.addWidget(widget.canvas)
+                                widget.setLayout(plot_layout)
+                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+                                widget.setSizePolicy(sizePolicy)
+                                widget.setMinimumSize(QtCore.QSize(0, 500))
+                                widget.setMaximumSize(QtCore.QSize(520, 1200))
+                                ax = widget.canvas.figure.subplots()
+                                bars = ax.barh(df_plot['Residue_ID'], df_plot['Propagation_Coefficient (PC)'], color='salmon', edgecolor='black')
+                                ax.tick_params(axis='y', labelsize=8)
+                                ax.set_xlabel('Propagation Coefficient (PC)', fontsize=10, fontweight='bold', labelpad=2)
+                                ax.set_ylabel('Residue', fontsize=10, fontweight='bold', labelpad=2)
+                                ax.set_title('Signal Propagation Capacity', fontsize=12, fontweight='bold')
+                                ax.set_ylim(-0.5, len(df_plot['Residue_ID'])-0.5)
+                                # Response time graph ile aynı şekilde tight_layout ve margin
+                                try:
+                                    widget.canvas.figure.tight_layout(rect=(0.15, 0.05, 0.95, 0.95)) #left, bottom, right, top
+                                except Exception:
+                                    widget.canvas.figure.tight_layout()
+                                widget.canvas.draw()
+                                stacked_widget.addWidget(widget)
+                                plot_widgets.append(widget)
+                                plot_titles.append(os.path.basename(csv_file))
+                            except Exception as e:
+                                err_lbl = QtWidgets.QLabel(f"Error plotting {os.path.basename(csv_file)}: {e}")
+                                stacked_widget.addWidget(err_lbl)
+                        # Navigation buttons
+                        nav_layout = QtWidgets.QHBoxLayout()
+                        prev_btn = QtWidgets.QPushButton('Previous')
+                        next_btn = QtWidgets.QPushButton('Next')
+                        nav_btn_style = """
+                        QPushButton {
+                            color: white;
+                            border: 2px solid rgb(52, 59, 72);
+                            border-radius: 5px;
+                            background-color: rgb(110, 105, 225);
+                            border-width: 1px;
+                            padding: 5px 12px;
+                            font-size: 11px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(22, 200, 244);
+                            border: 2px solid rgb(61, 70, 86);
+                        }
+                        QPushButton:pressed {
+                            background-color: rgb(15, 133, 163);
+                            border: 2px solid rgb(43, 50, 61);
+                        }
+                        """
+                        prev_btn.setStyleSheet(nav_btn_style)
+                        next_btn.setStyleSheet(nav_btn_style)
+                        title_lbl = QtWidgets.QLabel()
+                        title_lbl.setAlignment(QtCore.Qt.AlignCenter)
+                        title_lbl.setStyleSheet("""
+                            QLabel {
+                                color: #fff;
+                                background: transparent;
+                                font-size: 12px;
+                                font-weight: bold;
+                                padding: 4px 12px;
+                                border-radius: 4px;
+                                letter-spacing: 0.5px;
+                            }
+                        """)
+                        nav_layout.addWidget(prev_btn)
+                        nav_layout.addWidget(title_lbl)
+                        nav_layout.addWidget(next_btn)
+                        def update_title(idx):
+                            if 0 <= idx < len(plot_titles):
+                                title_lbl.setText(plot_titles[idx])
+                            else:
+                                title_lbl.setText("")
+                        def goto_prev():
+                            idx = stacked_widget.currentIndex()
+                            if idx > 0:
+                                stacked_widget.setCurrentIndex(idx - 1)
+                                update_title(idx - 1)
+                        def goto_next():
+                            idx = stacked_widget.currentIndex()
+                            if idx < stacked_widget.count() - 1:
+                                stacked_widget.setCurrentIndex(idx + 1)
+                                update_title(idx + 1)
+                        prev_btn.clicked.connect(goto_prev)
+                        next_btn.clicked.connect(goto_next)
+                        if plot_widgets:
+                            stacked_widget.setCurrentIndex(0)
+                            update_title(0)
+                        pc_plots_layout.addLayout(nav_layout)
+                        # stacked_widget'ın genişliği parent ile birlikte büyüsün
+                        stacked_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+                        stacked_widget.setMinimumSize(QtCore.QSize(0, 500))
+                        stacked_widget.setMaximumSize(QtCore.QSize(520, 1200))
+                        pc_plots_layout.addWidget(stacked_widget, stretch=1)
+                    else:
+                        lbl = QtWidgets.QLabel("No PC metrics found.")
+                        lbl.setAlignment(QtCore.Qt.AlignCenter)
+                        pc_plots_layout.addWidget(lbl)
+            except Exception as e:
+                lbl = QtWidgets.QLabel(f"Error loading PC plots: {e}")
+                pc_plots_layout.addWidget(lbl)
+            # --- END PLOT SUB-TABS ---
 
             analysis_data_tabwidget.addTab(paths_tab, "Paths")
             analysis_data_tabwidget.addTab(plot_tab, "Plot")
@@ -1559,8 +1725,22 @@ class Functions:
                 source_residue_text = self.source_res_comboBox.currentText()
                 row, col, response_count, plot_name, fit_curve, metrics = getResponseTimeGraph(response_file_path)
 
+                residue_names = None
                 try:
-                    response_payload = build_response_dynamics_payload(response_file_path, metrics, frame_time_delta=1.0)
+                    pdb_path = self.boundForm_pdb_lineedit.text().strip()
+                    if pdb_path and os.path.exists(pdb_path):
+                        _, residue_names = get_residues(pdb_path)
+                except Exception as residue_name_error:
+                    import sys
+                    print(f"Warning: Could not derive residue names from topology file: {residue_name_error}", file=sys.stderr)
+
+                try:
+                    response_payload = build_response_dynamics_payload(
+                        response_file_path,
+                        metrics,
+                        frame_time_delta=1.0,
+                        residue_names=residue_names,
+                    )
                     populate_residue_response_table(residue_response_table, response_payload['residue_rows'])
                     populate_domain_summary_table(domain_summary_table, response_payload['domain_rows'])
                     populate_metrics_table(metrics_table, response_payload['metrics_rows'])
@@ -1786,7 +1966,7 @@ class Functions:
 
             def _refresh_pathway_and_critical_views(show_done_message=False):
                 nonlocal done_message_shown
-                local_source_res = self.source_res_comboBox.currentText()[:-1]
+                local_source_res = self.source_res_comboBox.currentText().strip()
                 pathway_rows_local, residue_path_hits_local, shortest_path_strings_local, all_paths_messages_local = summarize_target_pathways(
                     local_source_res,
                     target_res_list,
@@ -1912,8 +2092,10 @@ class Functions:
                                                 color='magenta', shortest_path=True)
 
         for node in processed_path:
-            resID_of_node = int(''.join(list(filter(str.isdigit, node))))
-            PyMOL_Widget.resi_label_add('resi ' + str(resID_of_node))
+            pymol_selection = PyMOL_Widget._build_residue_selection_query(node)
+            if pymol_selection is None:
+                continue
+            PyMOL_Widget.resi_label_add(pymol_selection)
 
         # MAKE PYMOL VISUALIZATION BETTER
         PyMOL_Widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
