@@ -43,6 +43,9 @@ from analysis.pathway_analysis import (
 )
 from analysis.network_summary_service import build_network_summary_rows, build_union_graph, build_intersection_graph
 from analysis.network_motif_service import build_motif_summary_rows
+from analysis.network_motif_visualization import build_motif_visual_rows, render_motif_gallery
+from analysis.network_actionable_service import build_actionable_residue_rows
+from analysis.network_ipc_service import build_intermolecular_propagation_rows
 from analysis.network_significance_service import build_network_significance_rows
 from analysis.network_superhub_service import build_superhub_rows
 from analysis.response_dynamics_service import build_response_dynamics_payload
@@ -63,6 +66,8 @@ from analysis.analysis_presenters import (
     populate_motif_summary_table,
     populate_significance_table,
     populate_superhub_table,
+    populate_actionable_insights_table,
+    populate_intermolecular_propagation_table,
     populate_metrics_table,
     populate_qc_table,
     populate_provenance_table,
@@ -475,22 +480,6 @@ class Functions:
             shortest_path_listWidget.setObjectName("shortest_path_listWidget")
             paths_tab_layout.addWidget(shortest_path_listWidget)
 
-            tables_tab = QtWidgets.QWidget()
-            tables_tab.setObjectName("analysis_tables_tab")
-            tables_tab_layout = QtWidgets.QVBoxLayout(tables_tab)
-            tables_tab_layout.setContentsMargins(0, 0, 0, 0)
-            tables_tab_layout.setObjectName("analysis_tables_tab_layout")
-
-            tables_tabwidget = QtWidgets.QTabWidget(tables_tab)
-            tables_tabwidget.setObjectName("analysis_tables_tabwidget")
-            tables_tab_layout.addWidget(tables_tabwidget)
-
-            plot_tab = QtWidgets.QWidget()
-            plot_tab.setObjectName("analysis_plot_tab")
-            plot_tab_layout = QtWidgets.QVBoxLayout(plot_tab)
-            plot_tab_layout.setContentsMargins(0, 0, 0, 0)
-            plot_tab_layout.setObjectName("analysis_plot_tab_layout")
-            # --> Response Dynamics Tab
             response_dynamics_tab = QtWidgets.QWidget()
             response_dynamics_tab.setObjectName("analysis_response_dynamics_tab")
             response_dynamics_tab_layout = QtWidgets.QVBoxLayout(response_dynamics_tab)
@@ -576,6 +565,22 @@ class Functions:
             response_dynamics_tabwidget = QtWidgets.QTabWidget(response_dynamics_tab)
             response_dynamics_tabwidget.setObjectName("analysis_response_dynamics_tabwidget")
             response_dynamics_tab_layout.addWidget(response_dynamics_tabwidget)
+
+            plot_tab = QtWidgets.QWidget()
+            plot_tab.setObjectName("analysis_plot_tab")
+            plot_tab_layout = QtWidgets.QVBoxLayout(plot_tab)
+            plot_tab_layout.setContentsMargins(0, 0, 0, 0)
+            plot_tab_layout.setObjectName("analysis_plot_tab_layout")
+
+            tables_tab = QtWidgets.QWidget()
+            tables_tab.setObjectName("analysis_tables_tab")
+            tables_tab_layout = QtWidgets.QVBoxLayout(tables_tab)
+            tables_tab_layout.setContentsMargins(0, 0, 0, 0)
+            tables_tab_layout.setObjectName("analysis_tables_tab_layout")
+
+            tables_tabwidget = QtWidgets.QTabWidget(tables_tab)
+            tables_tabwidget.setObjectName("analysis_tables_tabwidget")
+            tables_tab_layout.addWidget(tables_tabwidget)
 
             # ==================== GROUP 1: RESPONSE DYNAMICS (Core Findings) ====================
             rd_group_widget = QtWidgets.QWidget()
@@ -694,7 +699,7 @@ class Functions:
 
             motif_summary_table = QtWidgets.QTableWidget(motif_summary_tab)
             motif_summary_table.setObjectName("motif_summary_table")
-            motif_summary_table.setColumnCount(6)
+            motif_summary_table.setColumnCount(7)
             motif_summary_table.setHorizontalHeaderLabels([
                 "Size",
                 "Motif ID",
@@ -702,6 +707,7 @@ class Functions:
                 "Occurrence",
                 "Frequency",
                 "Scope",
+                "Example Residues",
             ])
             motif_summary_table.horizontalHeader().setStretchLastSection(True)
             motif_summary_table.verticalHeader().setVisible(False)
@@ -762,6 +768,56 @@ class Functions:
             superhub_table.setMinimumSize(QtCore.QSize(0, 220))
             superhub_tab_layout.addWidget(superhub_table)
             na_group_tabwidget.addTab(superhub_tab, "Super-Hubs")
+
+            ipc_tab = QtWidgets.QWidget()
+            ipc_tab.setObjectName("analysis_ipc_tab")
+            ipc_tab_layout = QtWidgets.QVBoxLayout(ipc_tab)
+            ipc_tab_layout.setContentsMargins(0, 0, 0, 0)
+            ipc_tab_layout.setObjectName("analysis_ipc_tab_layout")
+
+            ipc_table = QtWidgets.QTableWidget(ipc_tab)
+            ipc_table.setObjectName("ipc_table")
+            ipc_table.setColumnCount(7)
+            ipc_table.setHorizontalHeaderLabels([
+                "Residue",
+                "Chain",
+                "In Degree",
+                "Out Degree",
+                "IPC",
+                "Role",
+                "Rationale",
+            ])
+            ipc_table.horizontalHeader().setStretchLastSection(True)
+            ipc_table.verticalHeader().setVisible(False)
+            ipc_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            ipc_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            ipc_table.setMinimumSize(QtCore.QSize(0, 220))
+            ipc_tab_layout.addWidget(ipc_table)
+            na_group_tabwidget.addTab(ipc_tab, "IPC")
+
+            actionable_tab = QtWidgets.QWidget()
+            actionable_tab.setObjectName("analysis_actionable_tab")
+            actionable_tab_layout = QtWidgets.QVBoxLayout(actionable_tab)
+            actionable_tab_layout.setContentsMargins(0, 0, 0, 0)
+            actionable_tab_layout.setObjectName("analysis_actionable_tab_layout")
+
+            actionable_table = QtWidgets.QTableWidget(actionable_tab)
+            actionable_table.setObjectName("actionable_table")
+            actionable_table.setColumnCount(5)
+            actionable_table.setHorizontalHeaderLabels([
+                "Residue",
+                "Action Score",
+                "Path Hits",
+                "Priority",
+                "Rationale",
+            ])
+            actionable_table.horizontalHeader().setStretchLastSection(True)
+            actionable_table.verticalHeader().setVisible(False)
+            actionable_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            actionable_table.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            actionable_table.setMinimumSize(QtCore.QSize(0, 200))
+            actionable_tab_layout.addWidget(actionable_table)
+            na_group_tabwidget.addTab(actionable_tab, "Actionable Insights")
 
             response_dynamics_tabwidget.addTab(na_group_widget, "Network Analysis")
 
@@ -833,7 +889,9 @@ class Functions:
             provenance_tab_layout.addWidget(provenance_table)
             qc_group_tabwidget.addTab(provenance_tab, "Provenance")
 
-            response_dynamics_tabwidget.addTab(qc_group_widget, "QC & Metrics")
+            # QC tables are kept for internal bookkeeping but hidden from the main UI
+            # because they are often empty/noisy for end users.
+            qc_group_widget.hide()
 
             # Apply the same table style used by residues_conservation_tableWidget
             table_style = ""
@@ -851,7 +909,9 @@ class Functions:
                     network_summary_table,
                     motif_summary_table,
                     superhub_table,
+                    ipc_table,
                     significance_table,
+                    actionable_table,
                 ]:
                     table_widget.setStyleSheet(table_style)
 
@@ -1996,6 +2056,8 @@ class Functions:
             if os.path.exists(possible_path.strip()) and possible_path.split('.')[-1] == 'csv':
                 _refresh_response_dynamics_views(possible_path)
 
+            motif_visual_rows = []
+
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
             pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
@@ -2021,15 +2083,85 @@ class Functions:
             self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
             horizontalLayout.addWidget(analysis_settings_groupBox)
 
+            analysis_3d_tabwidget = QtWidgets.QTabWidget(pyMOL_3D_analysis_frame)
+            analysis_3d_layout = QVBoxLayout(pyMOL_3D_analysis_frame)
+            analysis_3d_layout.setContentsMargins(0, 0, 0, 0)
+            analysis_3d_layout.addWidget(analysis_3d_tabwidget)
+
             Protein3DNetworkView = PymolQtWidget(self)
             Protein3DNetworkView.change_default_background()
-            verticalLayoutProteinNetworkView = QVBoxLayout(pyMOL_3D_analysis_frame)
-            verticalLayoutProteinNetworkView.addWidget(Protein3DNetworkView)
-            self.setLayout(verticalLayoutProteinNetworkView)
             Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
             Protein3DNetworkView.update()
             Protein3DNetworkView.show()
-            verticalLayoutProteinNetworkView.setContentsMargins(0, 0, 0, 0)
+
+            pymol_tab = QtWidgets.QWidget()
+            pymol_tab_layout = QVBoxLayout(pymol_tab)
+            pymol_tab_layout.setContentsMargins(0, 0, 0, 0)
+            pymol_tab_layout.addWidget(Protein3DNetworkView)
+            analysis_3d_tabwidget.addTab(pymol_tab, "PyMOL")
+
+            motif_tab = QtWidgets.QWidget()
+            motif_tab_layout = QVBoxLayout(motif_tab)
+            motif_tab_layout.setContentsMargins(0, 0, 0, 0)
+            motif_hint = QtWidgets.QLabel("Top motif şekilleri burada küçük bir galeri olarak gösterilir.")
+            motif_hint.setWordWrap(True)
+            motif_hint.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+            motif_hint.setStyleSheet("color: #d7d7d7; font-size: 11px; padding: 4px 6px;")
+            motif_gallery_widget = WidgetPlot(self)
+            motif_gallery_toolbar_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            motif_gallery_widget.toolbar.setSizePolicy(motif_gallery_toolbar_policy)
+            motif_gallery_layout = QtWidgets.QVBoxLayout()
+            motif_gallery_layout.addWidget(motif_gallery_widget.toolbar)
+            motif_gallery_layout.addWidget(motif_gallery_widget.canvas)
+            motif_gallery_widget.setLayout(motif_gallery_layout)
+            motif_gallery_widget.setMinimumSize(QtCore.QSize(0, 320))
+            motif_gallery_widget.setMaximumSize(QtCore.QSize(16777215, 16777215))
+            motif_tab_layout.addWidget(motif_hint)
+            motif_tab_layout.addWidget(motif_gallery_widget)
+
+            motif_residue_list_hint = QtWidgets.QLabel("Motif örnek rezidüleri")
+            motif_residue_list_hint.setStyleSheet("color: #d7d7d7; font-size: 11px; padding: 2px 6px;")
+            motif_residue_list_widget = QtWidgets.QListWidget(motif_tab)
+            motif_residue_list_widget.setMinimumHeight(120)
+            motif_residue_list_widget.setMaximumHeight(180)
+            motif_residue_list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+            motif_residue_list_widget.setStyleSheet("""
+                QListWidget {
+                    background-color: rgb(27, 29, 35);
+                    color: white;
+                    border: 1px solid rgb(52, 59, 72);
+                    border-radius: 4px;
+                }
+                QListWidget::item {
+                    padding: 4px 6px;
+                }
+                QListWidget::item:selected {
+                    background-color: rgb(110, 105, 225);
+                }
+            """)
+            motif_tab_layout.addWidget(motif_residue_list_hint)
+            motif_tab_layout.addWidget(motif_residue_list_widget)
+
+            motif_highlight_button = QtWidgets.QPushButton("Highlight Selected Motif in PyMOL", motif_tab)
+            motif_highlight_button.setMinimumHeight(30)
+            motif_tab_layout.addWidget(motif_highlight_button)
+            analysis_3d_tabwidget.addTab(motif_tab, "Motif View")
+
+            def _highlight_selected_motif():
+                current_item = motif_residue_list_widget.currentItem()
+                if current_item is None:
+                    return
+
+                residue_text = str(current_item.data(QtCore.Qt.UserRole) or "").strip()
+                if not residue_text:
+                    residue_text = str(current_item.text()).split("|", 1)[-1].strip()
+
+                residue_labels = [label.strip() for label in residue_text.split(",") if label.strip() and label.strip() != "N/A"]
+                if residue_labels:
+                    Protein3DNetworkView.highlight_residue_labels(residue_labels)
+
+            motif_highlight_button.clicked.connect(_highlight_selected_motif)
+            motif_residue_list_widget.itemDoubleClicked.connect(lambda _: _highlight_selected_motif())
 
             def _apply_response_coloring():
                 selected_response_path = str(self.response_time_lineEdit.text()).strip()
@@ -2088,6 +2220,7 @@ class Functions:
 
             done_message_shown = False
             current_shortest_path_graphs = []
+            latest_critical_rows = []
 
             if self.initial_network is not None and len(self.initial_network.nodes()) > 0:
                 global_betweenness = nx.betweenness_centrality(self.initial_network)
@@ -2124,6 +2257,7 @@ class Functions:
                 populate_reachability_qc(qc_table, reachable_count, unreachable_count)
 
                 critical_rows_local = build_critical_residue_rows(residue_path_hits_local, global_betweenness, top_n=20)
+                latest_critical_rows[:] = critical_rows_local
                 populate_critical_residue_table(critical_residue_table, critical_rows_local)
 
                 if show_done_message:
@@ -2157,6 +2291,25 @@ class Functions:
                     top_k_per_size=10,
                 )
                 populate_motif_summary_table(motif_summary_table, motif_rows)
+
+                motif_visual_rows = build_motif_visual_rows(
+                    graph=motif_graph,
+                    scope_name=motif_scope,
+                    motif_sizes=(3, 4),
+                    max_combinations=400000,
+                    top_k_per_size=2,
+                )
+                motif_residue_list_widget.clear()
+                for size_name, motif_id, _motif_key, _edge_count, occurrence, frequency_text, _scope_name, example_residues in motif_visual_rows:
+                    item_text = f"{motif_id} ({size_name}, {occurrence} hits, {frequency_text}) | {example_residues}"
+                    item = QtWidgets.QListWidgetItem(item_text)
+                    item.setData(QtCore.Qt.UserRole, example_residues)
+                    motif_residue_list_widget.addItem(item)
+                if motif_residue_list_widget.count() > 0:
+                    motif_residue_list_widget.setCurrentRow(0)
+                    _highlight_selected_motif()
+                if 'motif_gallery_widget' in locals():
+                    render_motif_gallery(motif_gallery_widget, motif_visual_rows)
             except Exception as motif_error:
                 import sys
                 print(f"Warning: Could not build motif summary table: {motif_error}", file=sys.stderr)
@@ -2177,6 +2330,16 @@ class Functions:
                 superhub_graph = intersection_graph if 'intersection_graph' in locals() and intersection_graph.number_of_nodes() > 0 else build_union_graph(all_graph_list)
                 superhub_rows = build_superhub_rows(graph=superhub_graph, top_k=5)
                 populate_superhub_table(superhub_table, superhub_rows)
+
+                ipc_rows = build_intermolecular_propagation_rows(graph=superhub_graph, top_n=20)
+                populate_intermolecular_propagation_table(ipc_table, ipc_rows)
+
+                actionable_rows = build_actionable_residue_rows(
+                    critical_rows=latest_critical_rows,
+                    superhub_rows=superhub_rows,
+                    top_n=12,
+                )
+                populate_actionable_insights_table(actionable_table, actionable_rows)
             except Exception as superhub_error:
                 import sys
                 print(f"Warning: Could not build superhub table: {superhub_error}", file=sys.stderr)
@@ -2782,6 +2945,10 @@ class Functions:
                     str(template['Inputs']['perturbation run duration unit']), QtCore.Qt.MatchFixedString))
             self.Number_CPU_spinBox.setValue(int(template['Inputs']['perturbation threading number']))
             self.perturbation_All_CPU_checkBox.setChecked(template['Inputs']['perturbation all cpu is active'])
+
+            # Restore key simulation toggles from saved workspace configuration.
+            simulation_cfg = template.get('Simulation', {}) if isinstance(template, dict) else {}
+            self.rigid_water_checkBox.setChecked(bool(simulation_cfg.get('rigid water is active', True)))
 
         except Exception as Err:
             pass

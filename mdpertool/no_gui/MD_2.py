@@ -126,10 +126,14 @@ class Reference_MD_Engine:
         forcefield = app.ForceField(self.protein_ff, self.water_ff)
 
         print('Constructing an OpenMM System')
-        # self.system = forcefield.createSystem(topology, nonbondedMethod=app.PME,
-        #                                       nonbondedCutoff=self.nonbondedCutoff,
-        #                                       constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
-        self.system = forcefield.createSystem(topology, nonbondedMethod=CutoffNonPeriodic, nonbondedCutoff=self.nonbondedCutoff)
+        self.system = forcefield.createSystem(
+            topology,
+            nonbondedMethod=app.PME,
+            nonbondedCutoff=self.nonbondedCutoff,
+            constraints=None,
+            rigidWater=True,
+            ewaldErrorTolerance=1e-5,
+        )
 
 
         if self.use_switching_distance:

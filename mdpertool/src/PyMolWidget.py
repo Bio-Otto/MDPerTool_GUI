@@ -14,7 +14,10 @@ from pymol.cgo import *
 from pymol.vfont import plain
 from pymol import cmd, cgo, CmdException, selector, stored
 from chempy import cpv
-from src.pdb_intro_1aki import pdb_id_1aki
+try:
+    from .pdb_intro_1aki import pdb_id_1aki
+except ImportError:
+    from src.pdb_intro_1aki import pdb_id_1aki
 from lxml import etree
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -381,6 +384,33 @@ class PymolQtWidget(QGLWidget):
 
         except Exception as expression:
             print("ERROR on PyMOL (Labeling): ", expression)
+
+    def highlight_residue_labels(self, residue_labels, color='hotpink', label=True):
+        try:
+            selections = []
+            for residue_label in residue_labels or []:
+                selection_query = self._build_residue_selection_query(residue_label)
+                if selection_query:
+                    selections.append(f'({selection_query})')
+
+            if not selections:
+                return
+
+            combined_selection = ' or '.join(selections)
+            self._pymol.cmd.delete('motif_highlight')
+            self._pymol.cmd.select('motif_highlight', combined_selection)
+            self._pymol.cmd.show('sticks', 'motif_highlight')
+            self._pymol.cmd.color(color, 'motif_highlight')
+
+            if label:
+                label_selection = 'motif_highlight and name ca'
+                self._pymol.cmd.set('label_color', 'white', label_selection)
+                self._pymol.cmd.label(label_selection, '"%s-%s%s" % (resn, resi, chain)')
+                self._pymol.cmd.set('label_size', '12')
+
+            self._pymolProcess()
+        except Exception as expression:
+            print("ERROR on PyMOL (highlight_residue_labels): ", expression)
 
     def clear_all_labels(self):
         self._pymol.cmd.label('all', '')

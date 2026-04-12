@@ -200,7 +200,7 @@ class Advanced(QtCore.QThread):
                       % StateData_freq)
 
             ## NONBOUNDED CUTOFF ACTIVE OR NOT
-            if self.nonBounded_Method_comboBox.currentText == 'NoCutoff':
+            if self.nonBounded_Method_comboBox.currentText() == 'NoCutoff':
                 Nonbounded_cutoff_active = False
 
             # if self.Additional_Integrators_checkBox.isChecked():

@@ -97,16 +97,17 @@ def populate_network_summary_table(
 
 def populate_motif_summary_table(
     table: QTableWidget,
-    rows: Sequence[Tuple[str, str, int, int, str, str]],
+    rows: Sequence[Tuple[str, str, int, int, str, str, str]],
 ) -> None:
     table.setRowCount(len(rows))
-    for row_idx, (size_name, motif_id, edge_count, occurrence, frequency_pct, scope_name) in enumerate(rows):
+    for row_idx, (size_name, motif_id, edge_count, occurrence, frequency_pct, scope_name, example_residues) in enumerate(rows):
         table.setItem(row_idx, 0, QTableWidgetItem(str(size_name)))
         table.setItem(row_idx, 1, QTableWidgetItem(str(motif_id)))
         table.setItem(row_idx, 2, QTableWidgetItem(str(edge_count)))
         table.setItem(row_idx, 3, QTableWidgetItem(str(occurrence)))
         table.setItem(row_idx, 4, QTableWidgetItem(str(frequency_pct)))
         table.setItem(row_idx, 5, QTableWidgetItem(str(scope_name)))
+        table.setItem(row_idx, 6, QTableWidgetItem(str(example_residues)))
 
 
 def populate_significance_table(
@@ -220,3 +221,31 @@ def populate_superhub_table(
         table.setItem(row_idx, 2, QTableWidgetItem(f"{betweenness:.6f}"))
         table.setItem(row_idx, 3, QTableWidgetItem(f"{closeness:.6f}"))
         table.setItem(row_idx, 4, QTableWidgetItem(str(neighbors)))
+
+
+def populate_intermolecular_propagation_table(
+    table: QTableWidget,
+    rows: Sequence[Tuple[str, str, int, int, float, str, str]],
+) -> None:
+    table.setRowCount(len(rows))
+    for row_idx, (residue, chain_label, in_degree, out_degree, ipc_value, role, rationale) in enumerate(rows):
+        table.setItem(row_idx, 0, QTableWidgetItem(str(residue)))
+        table.setItem(row_idx, 1, QTableWidgetItem(str(chain_label)))
+        table.setItem(row_idx, 2, QTableWidgetItem(str(in_degree)))
+        table.setItem(row_idx, 3, QTableWidgetItem(str(out_degree)))
+        table.setItem(row_idx, 4, QTableWidgetItem(f"{ipc_value:.4f}"))
+        table.setItem(row_idx, 5, QTableWidgetItem(str(role)))
+        table.setItem(row_idx, 6, QTableWidgetItem(str(rationale)))
+
+
+def populate_actionable_insights_table(
+    table: QTableWidget,
+    rows: Sequence[Tuple[str, float, int, str, str]],
+) -> None:
+    table.setRowCount(len(rows))
+    for row_idx, (residue, score, path_hits, priority, rationale) in enumerate(rows):
+        table.setItem(row_idx, 0, QTableWidgetItem(str(residue)))
+        table.setItem(row_idx, 1, QTableWidgetItem(f"{score:.3f}"))
+        table.setItem(row_idx, 2, QTableWidgetItem(str(path_hits)))
+        table.setItem(row_idx, 3, QTableWidgetItem(str(priority)))
+        table.setItem(row_idx, 4, QTableWidgetItem(str(rationale)))

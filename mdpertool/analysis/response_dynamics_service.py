@@ -10,7 +10,7 @@ from urllib import request
 
 import numpy as np
 
-from analysis.residue_response_analyzer import ResidueResponseAnalyzer
+from .residue_response_analyzer import ResidueResponseAnalyzer
 
 
 def _can_reach_domain_annotation_service(timeout_seconds: float = 2.0) -> bool:

@@ -18,7 +18,11 @@ from .analysis_presenters import (
 	populate_qc_table,
 	populate_provenance_table,
 	populate_superhub_table,
+	populate_actionable_insights_table,
 )
+from .network_actionable_service import build_actionable_residue_rows
+from .network_ipc_service import build_intermolecular_propagation_rows, execute_intermolecular_propagation_workflow
+from .network_motif_visualization import build_motif_visual_rows, render_motif_gallery
 from .response_dynamics_service import build_response_dynamics_payload
 from .network_workflow_service import (
 	collect_network_parameters,
@@ -74,6 +78,12 @@ __all__ = [
 	"populate_qc_table",
 	"populate_provenance_table",
 	"populate_superhub_table",
+	"populate_actionable_insights_table",
+	"build_actionable_residue_rows",
+	"build_intermolecular_propagation_rows",
+	"execute_intermolecular_propagation_workflow",
+	"build_motif_visual_rows",
+	"render_motif_gallery",
 	"build_response_dynamics_payload",
 	"collect_network_parameters",
 	"collect_target_residues",

@@ -550,8 +550,9 @@ for i in range(len({{speed_factor}})):
         forcefield = app.ForceField('{{protein_ff}}', '{{water_ff}}')
 
         log_obj.info("Constructing NVE System".format())
-        reference_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
-                                                   constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
+        reference_system = forcefield.createSystem(topology, nonbondedMethod={{NonBoundedMethod}},
+                       {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
+                       constraints=None, rigidWater={{Rigid_Water}}, ewaldErrorTolerance=1e-5)
 
         if {{use_switching_distance}} == True:
             log_obj.info("System will use Switching Distance".format())
@@ -641,8 +642,9 @@ for i in range(len({{speed_factor}})):
     forcefield = app.ForceField('{{protein_ff}}', '{{water_ff}}')
 
     log_obj.info("Constructing an OpenMM System".format())
-    perturbed_system = forcefield.createSystem(topology, nonbondedMethod=app.PME, nonbondedCutoff={{NonBounded_cutoff}},
-                                               constraints=None, rigidWater=True, ewaldErrorTolerance=1e-5)
+    perturbed_system = forcefield.createSystem(topology, nonbondedMethod={{NonBoundedMethod}},
+                                               {{#Nonbounded_cutoff_active}}nonbondedCutoff={{NonBounded_cutoff}},{{/Nonbounded_cutoff_active}}
+                                               constraints=None, rigidWater={{Rigid_Water}}, ewaldErrorTolerance=1e-5)
 
     if {{use_switching_distance}} == True:
         log_obj.info("System will use Switching Distance".format())

@@ -10,6 +10,7 @@ from openmm import unit, Platform, Context, System, Integrator, LangevinMiddleIn
 import time
 import json
 import os
+import logging
 from datetime import datetime, timezone
 from .write_outputs import write_folder, lof_file_settings
 from logging.config import dictConfig
@@ -214,13 +215,17 @@ def run_mdpertool_from_cli(args):
 
     if args.output is None:
         OUTPUT_DIRECTORY = os.getcwd()
-        created_file_for_work, OUTPUT_FOLDER_NAME = write_folder(OUTPUT_DIRECTORY, top=args.topology,
-                                                                 res="_".join(args.perturbed_residues),
-                                                                 ff=args.protein_ff + '_' + args.water_ff,
-                                                                 just_min_or_md=args.just_minimize)
+    else:
+        OUTPUT_DIRECTORY = os.path.abspath(args.output)
+        os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
+
+    created_file_for_work, OUTPUT_FOLDER_NAME = write_folder(OUTPUT_DIRECTORY, top=args.topology,
+                                                             res="_".join(args.perturbed_residues),
+                                                             ff=args.protein_ff + '_' + args.water_ff,
+                                                             just_min_or_md=args.just_minimize)
 
     ### LOG FILE
-    logging_config = lof_file_settings(file_name=OUTPUT_FOLDER_NAME)
+    logging_config = lof_file_settings(file_name=created_file_for_work)
     dictConfig(logging_config)
     api_logger = logging.getLogger('api_logger')
     batch_process_logger = logging.getLogger('batch_process_logger')

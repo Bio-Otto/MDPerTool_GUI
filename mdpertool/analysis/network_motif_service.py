@@ -8,7 +8,7 @@ from typing import Dict, List, Sequence, Tuple
 import networkx as nx
 
 
-MotifRow = Tuple[str, str, int, int, str, str]
+MotifRow = Tuple[str, str, int, int, str, str, str]
 
 
 def _canonical_motif_key(subgraph: nx.DiGraph) -> str:
@@ -38,22 +38,23 @@ def _count_connected_induced_motifs(
     graph: nx.DiGraph,
     motif_size: int,
     max_combinations: int,
-) -> Tuple[Dict[str, int], int, str]:
+) -> Tuple[Dict[str, int], Dict[str, Tuple[str, ...]], int, str]:
     """Count connected induced motifs for a specific size.
 
     Returns motif count map, total connected motif count, and status text.
     """
     node_count = graph.number_of_nodes()
     if node_count < motif_size:
-        return {}, 0, "not_enough_nodes"
+        return {}, {}, 0, "not_enough_nodes"
 
     combo_estimate = 1
     for i in range(motif_size):
         combo_estimate = combo_estimate * (node_count - i) // (i + 1)
     if combo_estimate > max_combinations:
-        return {}, 0, f"skipped_too_many_combinations({combo_estimate})"
+        return {}, {}, 0, f"skipped_too_many_combinations({combo_estimate})"
 
     motif_counter: Dict[str, int] = {}
+    motif_examples: Dict[str, Tuple[str, ...]] = {}
     connected_count = 0
 
     for node_group in combinations(graph.nodes(), motif_size):
@@ -66,8 +67,10 @@ def _count_connected_induced_motifs(
         connected_count += 1
         key = _canonical_motif_key(subgraph)
         motif_counter[key] = motif_counter.get(key, 0) + 1
+        if key not in motif_examples:
+            motif_examples[key] = tuple(str(node) for node in node_group)
 
-    return motif_counter, connected_count, "ok"
+    return motif_counter, motif_examples, connected_count, "ok"
 
 
 def build_motif_summary_rows(
@@ -80,7 +83,7 @@ def build_motif_summary_rows(
     """Build motif summary rows for analysis table.
 
     Row schema:
-    (size, motif_id, edge_count, occurrence, frequency_pct, scope)
+    (size, motif_id, edge_count, occurrence, frequency_pct, scope, example_residues)
     """
     if graph is None:
         return []
@@ -88,7 +91,7 @@ def build_motif_summary_rows(
     rows: List[MotifRow] = []
 
     for motif_size in motif_sizes:
-        motif_counter, connected_count, status = _count_connected_induced_motifs(
+        motif_counter, motif_examples, connected_count, status = _count_connected_induced_motifs(
             graph=graph,
             motif_size=motif_size,
             max_combinations=max_combinations,
@@ -103,6 +106,7 @@ def build_motif_summary_rows(
                     0,
                     status,
                     scope_name,
+                    "N/A",
                 )
             )
             continue
@@ -116,6 +120,7 @@ def build_motif_summary_rows(
                     0,
                     "0.00%",
                     scope_name,
+                    "N/A",
                 )
             )
             continue
@@ -124,6 +129,7 @@ def build_motif_summary_rows(
         for idx, (motif_key, occurrence) in enumerate(sorted_items, start=1):
             edge_count = motif_key.count('1')
             frequency_pct = (occurrence / connected_count) * 100.0
+            example_residues = ", ".join(motif_examples.get(motif_key, ())) or "N/A"
             rows.append(
                 (
                     f"{motif_size}-node",
@@ -132,6 +138,7 @@ def build_motif_summary_rows(
                     occurrence,
                     f"{frequency_pct:.2f}%",
                     scope_name,
+                    example_residues,
                 )
             )
 

@@ -18,6 +18,17 @@ This section provides a step-by-step practical guide for performing allosteric n
 - **Set simulation parameters:** Define the magnitude of energy input and simulation time.
 - **Run the simulation:** MDPerTool will perform the energy dissipation simulation and calculate residue response times.
 
+### Simulation Ensemble Policy (Important)
+
+For the perturbation stage, MDPerTool uses matching **reference** and **dissipation** runs with thermostat and barostat disabled (NVE-like propagation window).
+
+- **Reference MD:** no thermostat, no barostat
+- **Dissipation MD:** no thermostat, no barostat
+
+This choice is intentional: after injecting the perturbation, the protocol tracks how the signal propagates before external temperature/pressure coupling can damp, redistribute, or mask the intrinsic directionality of energy flow.
+
+In practice, a user may still prepare an equilibrated starting state with conventional NVT/NPT steps beforehand. However, the comparative pair used for response-time extraction should be generated under the same uncoupled conditions.
+
 ---
 
 ## 3. Analyzing Results

@@ -143,6 +143,23 @@ _Energy dissipation curve and Boltzmann fit._
 
 ---
 
+## 2.1 Methodological Note: Thermostat/Barostat During Perturbation
+
+The equilibration and the perturbation-propagation phases serve different purposes and should not be mixed conceptually.
+
+- **Equilibration phase:** Conventional NVT/NPT coupling can be used to prepare a stable starting state.
+- **Perturbation phase (response-time extraction):** Reference and dissipation trajectories should be generated with thermostat and barostat disabled (NVE-like window) and identical numerical settings.
+
+Rationale:
+
+- External thermal/pressure coupling acts as an additional energy pathway.
+- During early-time signal transmission, this coupling can smooth or damp local energy contrasts and obscure causality.
+- Using paired uncoupled trajectories improves interpretability of the difference signal used to derive residue response times.
+
+This is aligned with the conceptual motivation in the original energy dissipation framework, where the focus is the intrinsic intramolecular propagation pattern after a defined perturbation event.
+
+---
+
 
 ## 3. Residue Response Time and Protein Dynamic Modules
 

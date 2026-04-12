@@ -136,7 +136,7 @@ class Classic_MD_Engine:
 
         ## FIXING PDB
         print('pdb file fixing and preparing for simulation ...')
-        fixed_pdb_name = fix_pdb(self.pdb_path, self.output_directory)
+        fixed_pdb_name = fix_pdb(self.pdb_path, output=self.output_directory)
 
         print('Loading pdb to simulation engine ...')
         pdb = app.PDBFile(fixed_pdb_name)
@@ -145,17 +145,17 @@ class Classic_MD_Engine:
         residue_control = [r for r in pdb.topology.residues()]  # build a list of residues
 
         # print(residue_control)
-        pert_res_len = len(user_selected_res)
-        pert_len_must = 0
+        selected_residue_set = set(user_selected_res)
+        found_selected_residues = set()
         for index in range(len(residue_control)):
             ind = residue_control[index].id
             nm = residue_control[index].name
             resi = str(nm) + str(ind)
             if resi in user_selected_res:
                 print("TOPOLOGY INCLUDING RESIDUE %s" % resi)
-                pert_len_must += 1
+                found_selected_residues.add(resi)
 
-        if pert_res_len != pert_len_must:
+        if not selected_residue_set.issubset(found_selected_residues):
             print("OHH NO! YOUR SELECTED RESIDUES NOT IN TOPOLOGY")
             import shutil
             try:
