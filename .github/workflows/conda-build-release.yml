@@ -86,18 +86,15 @@ jobs:
         shell: bash -el {0}
         run: |
           set -euo pipefail
-          PACKAGE=$(find build_output -type f \( -name 'mdpertool-*.conda' -o -name 'mdpertool-*.tar.bz2' \) | sort | head -1)
-          if [ -z "$PACKAGE" ]; then
-            echo "No package found in build_output"
-            exit 1
-          fi
-          echo "Installing: $PACKAGE"
 
-          conda create -y -n smoke python=${{ matrix.python-version }}
-          conda install -y -n smoke \
+          # Index build_output as a local conda channel so deps are resolved
+          conda index build_output
+
+          conda create -y -n smoke \
+            -c "$(pwd)/build_output" \
             -c conda-forge \
             -c defaults \
-            "$PACKAGE"
+            "mdpertool=0.0.8" "python=${{ matrix.python-version }}"
 
           conda run -n smoke python -c "import openmm; print('openmm', openmm.__version__)"
           conda run -n smoke python -c "from mdpertool._version import __version__; print('mdpertool', __version__)"
