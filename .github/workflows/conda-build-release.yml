@@ -57,6 +57,7 @@ jobs:
       - name: Install build tooling
         shell: bash -el {0}
         run: |
+          conda remove -y conda-content-trust --force || true
           conda install -y conda-build anaconda-client
           conda info
 
@@ -152,6 +153,7 @@ jobs:
             exit 1
           fi
 
+          conda remove -y conda-content-trust --force || true
           conda install -y anaconda-client
           export BINSTAR_TOKEN="$TOKEN"
           export ANACONDA_API_TOKEN="$TOKEN"
