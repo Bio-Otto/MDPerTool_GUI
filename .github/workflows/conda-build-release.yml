@@ -24,13 +24,8 @@ env:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11']
+    name: Build noarch package
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -39,8 +34,8 @@ jobs:
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
+          auto-update-conda: false
+          python-version: '3.11'
           channels: conda-forge,defaults
           channel-priority: strict
           auto-activate: true
@@ -50,7 +45,8 @@ jobs:
       - name: Install build tooling
         shell: bash -el {0}
         run: |
-          conda install -y conda-build anaconda-client
+          conda install -y conda=24.11.* conda-build=24.11.* libarchive anaconda-client
+          conda info
 
       - name: Build conda package
         shell: bash -el {0}
@@ -67,7 +63,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v5
         with:
-          name: conda-pkg-${{ matrix.os }}
+          name: conda-pkg-noarch
           path: build_output/**/*
           retention-days: 14
           if-no-files-found: error
