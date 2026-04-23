@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.9']
+        python-version: ['3.11']
 
     steps:
       - name: Checkout repository
@@ -118,7 +118,10 @@ jobs:
         shell: bash -el {0}
         run: |
           set -euo pipefail
-          mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
+          mapfile -t PACKAGES < <(find artifacts -type f \( -path "*/noarch/mdpertool-*.conda" -o -path "*/noarch/mdpertool-*.tar.bz2" \) | sort -u)
+          if [ "${#PACKAGES[@]}" -eq 0 ]; then
+            mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
+          fi
           if [ "${#PACKAGES[@]}" -eq 0 ]; then
             echo "No package artifact found"
             exit 1
@@ -128,7 +131,7 @@ jobs:
           echo "Using package artifact: $PACKAGE"
 
           conda create -y -n mdpertool-smoke "python=${{ matrix.python-version }}"
-          conda run -n mdpertool-smoke conda install -y \
+          conda install -y -n mdpertool-smoke \
             --override-channels \
             --strict-channel-priority \
             -c conda-forge \
@@ -167,7 +170,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: '3.9'
+          python-version: '3.11'
           channels: conda-forge,defaults
           channel-priority: strict
           auto-activate: true
