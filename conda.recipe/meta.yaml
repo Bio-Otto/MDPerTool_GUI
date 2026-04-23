@@ -2,39 +2,28 @@
 {% set name = "mdpertool" %}
 {% set version = "0.0.8" %}
 
-
 package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
-channels:
-  - conda-forge
-  - defaults
-
 source:
-  #git_url: https://github.com/Bio-Otto/MDPerTool_GUI.git
-  #sha256: b1fbb8193e9a75736ad3eaa9f53cdab0fe53d5b3c26bc1ac48f67a5b71ed56ca
   path: ..
 
 build:
-  noarch: python
-  #preserve_egg_dir: True
   number: 0
-  #skip: True  # [win or py2k]
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: python -m pip install . --no-deps --ignore-installed -vv
   entry_points:
     - mdpertool = mdpertool.launcher:run_mdpertool
-
 
 requirements:
   host:
     - pip
-    - python
+    - python >=3.10,<3.14
     - setuptools
 
   run:
-    - python >=3.10,<3.13
-    - setuptools <70.0.0
+    - python >=3.10,<3.14
+    - setuptools
     - lxml
     - pyside2 >=5.15,<6
     - matplotlib
@@ -53,29 +42,16 @@ requirements:
     - parmed
     - mdtraj >=1.9.7
     - mdanalysis
-    #- pyvis
-
-
-#test:
-#  imports:
-#    - mdpertool
-
-#  commands:
-#    - mdpertool -gui
 
 test:
   requires:
     - pytest
-
   commands:
     - mdpertool --help
     - mdpertool cli --help
-    - mdpertool gui --help
-    python -c "from mdpertool._version import __version__; assert __version__ == '0.0.8'"
+    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.8'"
   imports:
     - mdpertool
-
-
 
 about:
   home: "https://github.com/Bio-Otto/MDPerTool_GUI"
@@ -84,19 +60,19 @@ about:
   license_file: LICENSE
   summary: "A Software Tool for Investigation of Allosteric Communication within Proteins via Energy Dissipation Concept"
   description: |
-    The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform.
-    
-    IMPORTANT INSTALLATION INSTRUCTION:
-    For standard environments, install with a single command:
-    
-    conda install bio-otto::mdpertool
-    
-    If your environment has strict Python pins and solver conflicts appear, use:
-    
-    conda create -n mdpertool python=3.11
-    conda activate mdpertool
-    conda install -c conda-forge bio-otto::mdpertool
-    
+    A tool for investigating allosteric communication in proteins via the Energy Dissipation Concept,
+    powered by OpenMM (CUDA supported).
+
+    INSTALLATION — the Anaconda page shows a short command that omits required channels.
+    Use the full command below instead:
+
+      conda create -n mdpertool -c conda-forge -c bio-otto bio-otto::mdpertool
+      conda activate mdpertool
+
+    Or into an existing environment (Python 3.10–3.13 required):
+
+      conda install -c conda-forge -c bio-otto bio-otto::mdpertool
+
   dev_url: "https://github.com/Bio-Otto/MDPerTool_GUI"
 
 extra:

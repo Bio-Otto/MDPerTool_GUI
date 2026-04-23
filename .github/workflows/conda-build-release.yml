@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release tag (example: v0.0.5)'
+        description: 'Release tag (example: v0.0.8)'
         required: true
         type: string
       publish_to_anaconda:
@@ -23,19 +23,31 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
-    name: Build noarch package
-    runs-on: ubuntu-latest
+  build-and-smoke:
+    name: Build (${{ matrix.label }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+        os: [ubuntu-latest, macos-13, windows-latest]
+        include:
+          - os: ubuntu-latest
+            label: linux-64
+          - os: macos-13
+            label: osx-64
+          - os: windows-latest
+            label: win-64
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: false
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
           channel-priority: strict
           auto-activate: true
@@ -45,7 +57,7 @@ jobs:
       - name: Install build tooling
         shell: bash -el {0}
         run: |
-          conda install -y conda=24.11.* conda-build=24.11.* libarchive anaconda-client
+          conda install -y conda-build anaconda-client
           conda info
 
       - name: Build conda package
@@ -56,77 +68,44 @@ jobs:
           conda build conda.recipe \
             -c conda-forge \
             --output-folder build_output \
+            --python ${{ matrix.python-version }} \
             --no-test
-          find build_output -type f | head -100
+          echo "--- Build output ---"
+          find build_output -type f
 
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@v5
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: conda-pkg-noarch
-          path: build_output/**/*
+          name: conda-pkg-${{ matrix.label }}-py${{ matrix.python-version }}
+          path: build_output/**/*.conda
           retention-days: 14
           if-no-files-found: error
 
-  install-smoke:
-    name: Fresh Install Smoke (${{ matrix.os }}, py${{ matrix.python-version }})
-    needs: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11']
-
-    steps:
-      - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          channels: conda-forge,defaults
-          channel-priority: strict
-          auto-activate: true
-          activate-environment: base
-          miniconda-version: latest
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v5
-        with:
-          path: artifacts
-
-      - name: Create clean env and install package artifact
+      - name: Smoke test — install from build output
         shell: bash -el {0}
         run: |
           set -euo pipefail
-          PACKAGE="$(find artifacts -type f \( -path '*/noarch/mdpertool-*.conda' -o -path '*/noarch/mdpertool-*.tar.bz2' \) | sort -u | head -n 1)"
+          PACKAGE=$(find build_output -type f \( -name 'mdpertool-*.conda' -o -name 'mdpertool-*.tar.bz2' \) | sort | head -1)
           if [ -z "$PACKAGE" ]; then
-            PACKAGE="$(find artifacts -type f \( -name 'mdpertool-*.conda' -o -name 'mdpertool-*.tar.bz2' \) | sort -u | head -n 1)"
-          fi
-          if [ -z "$PACKAGE" ]; then
-            echo "No package artifact found"
+            echo "No package found in build_output"
             exit 1
           fi
-          echo "Using package artifact: $PACKAGE"
+          echo "Installing: $PACKAGE"
 
-          conda create -y -n mdpertool-smoke "python=${{ matrix.python-version }}"
-          conda install -y -n mdpertool-smoke \
-            --override-channels \
-            --strict-channel-priority \
+          conda create -y -n smoke python=${{ matrix.python-version }}
+          conda install -y -n smoke \
             -c conda-forge \
+            -c defaults \
             "$PACKAGE"
 
-      - name: Smoke test installed package
-        shell: bash -el {0}
-        run: |
-          set -euo pipefail
-          conda run -n mdpertool-smoke python -c "import openmm; print(openmm.__version__)"
-          conda run -n mdpertool-smoke mdpertool --help
-          conda run -n mdpertool-smoke mdpertool cli --help
+          conda run -n smoke python -c "import openmm; print('openmm', openmm.__version__)"
+          conda run -n smoke python -c "from mdpertool._version import __version__; print('mdpertool', __version__)"
+          conda run -n smoke mdpertool --help
+          conda run -n smoke mdpertool cli --help
 
   release:
     name: Publish release and package
-    needs: [build, install-smoke]
+    needs: [build-and-smoke]
     runs-on: ubuntu-latest
 
     steps:
@@ -140,15 +119,19 @@ jobs:
             echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v5
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
+          pattern: conda-pkg-*
+
+      - name: List downloaded artifacts
+        run: find artifacts -type f
 
       - name: Setup Miniconda for upload
         uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
+          auto-update-conda: false
           python-version: '3.11'
           channels: conda-forge,defaults
           channel-priority: strict
@@ -156,7 +139,7 @@ jobs:
           activate-environment: base
           miniconda-version: latest
 
-      - name: Upload package to anaconda.org
+      - name: Upload packages to anaconda.org
         if: github.event_name == 'push' || github.event.inputs.publish_to_anaconda == 'true'
         shell: bash -el {0}
         env:
@@ -168,23 +151,23 @@ jobs:
             echo "No Anaconda token found. Set ANACONDA_TOKEN or ANACONDA_API_TOKEN in repository secrets."
             exit 1
           fi
+
           conda install -y anaconda-client
-          
-          # Use BINSTAR_TOKEN / ANACONDA_API_TOKEN instead of interactive login
           export BINSTAR_TOKEN="$TOKEN"
           export ANACONDA_API_TOKEN="$TOKEN"
-          
-          echo "Testing token authentication..."
+
+          echo "Checking token..."
           binstar whoami || true
-          
+
           mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
           if [ "${#PACKAGES[@]}" -eq 0 ]; then
-            echo "No package file found to upload"
+            echo "No packages found to upload"
             exit 1
           fi
-          
+
+          echo "Uploading ${#PACKAGES[@]} package(s)..."
           for PACKAGE in "${PACKAGES[@]}"; do
-            echo "Uploading $PACKAGE"
+            echo "  -> $PACKAGE"
             binstar upload -u bio-otto "$PACKAGE" --skip-existing
           done
 
@@ -192,9 +175,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.name }}
-          files: |
-            artifacts/**/*.conda
-            artifacts/**/*.tar.bz2
+          files: artifacts/**/*.conda
           overwrite_files: true
           fail_on_unmatched_files: false
           generate_release_notes: true
