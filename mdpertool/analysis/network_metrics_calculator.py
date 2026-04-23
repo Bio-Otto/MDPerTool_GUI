@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 import re
+from threading import Lock
+
+
+_PC_PLOT_LOCK = Lock()
 
 def generate_pc_bar_plot(df_metrics: pd.DataFrame, output_image: str):
     """
@@ -13,44 +17,27 @@ def generate_pc_bar_plot(df_metrics: pd.DataFrame, output_image: str):
     ve .png olarak kaydeder.
     """
     try:
-        import os
-        norm_output_image = os.path.normpath(output_image)
-        #print(f"[DEBUG][PC Plot] PNG path: {norm_output_image}")
-        #print(f"[DEBUG][PC Plot] DataFrame head:")
-        #print(df_metrics.head())
-        # Sadece pozitif PC'si olan en yüksek 30 rezidüyü gösterelim ki grafik okunabilir olsun
-        df_plot = df_metrics[df_metrics['Propagation_Coefficient (PC)'] > 0].copy()
-        df_plot = df_plot.sort_values('Propagation_Coefficient (PC)', ascending=False).head(30)
+        with _PC_PLOT_LOCK:
+            norm_output_image = os.path.normpath(output_image)
+            df_plot = df_metrics[df_metrics['Propagation_Coefficient (PC)'] > 0].copy()
+            df_plot = df_plot.sort_values('Propagation_Coefficient (PC)', ascending=False).head(30)
 
-        #print(f"[DEBUG][PC Plot] Plot DataFrame head:")
-        #print(df_plot.head())
+            fig, ax = plt.subplots(figsize=(10, 6))
+            if df_plot.empty:
+                ax.text(0.5, 0.5, 'No data to plot', fontsize=16, ha='center', va='center')
+                ax.axis('off')
+            else:
+                ax.bar(df_plot['Residue_ID'], df_plot['Propagation_Coefficient (PC)'], color='salmon', edgecolor='black')
+                ax.tick_params(axis='x', rotation=45, labelsize=9)
+                ax.set_ylabel('Propagation Coefficient (PC)', fontsize=12, fontweight='bold')
+                ax.set_xlabel('Residue', fontsize=12, fontweight='bold')
+                ax.set_title('Top Allosteric Super-Hubs (Signal Propagation Capacity)', fontsize=14, fontweight='bold')
+                fig.tight_layout()
 
-        # Bar plot verilerini print et
-        #print(f"[DEBUG][PC Plot] Bar X: {df_plot['Residue_ID'].tolist()}")
-        #print(f"[DEBUG][PC Plot] Bar Y: {df_plot['Propagation_Coefficient (PC)'].tolist()}")
-
-        plt.figure(figsize=(10, 6))
-        if df_plot.empty:
-            plt.text(0.5, 0.5, 'No data to plot', fontsize=16, ha='center', va='center')
-            plt.axis('off')
-        else:
-            plt.bar(df_plot['Residue_ID'], df_plot['Propagation_Coefficient (PC)'], color='salmon', edgecolor='black')
-            plt.xticks(rotation=45, ha='right', fontsize=9)
-            plt.ylabel('Propagation Coefficient (PC)', fontsize=12, fontweight='bold')
-            plt.xlabel('Residue', fontsize=12, fontweight='bold')
-            plt.title('Top Allosteric Super-Hubs (Signal Propagation Capacity)', fontsize=14, fontweight='bold')
-            plt.tight_layout()
-        try:
-            plt.savefig(norm_output_image, dpi=300)
-            #print(f"[DEBUG][PC Plot] PNG saved: {norm_output_image}")
-            # Kısa ve sade bir test yoluna da kaydet
+            fig.savefig(norm_output_image, dpi=300)
             test_path = os.path.normpath('C:/PC_plot_test.png')
-            plt.savefig(test_path, dpi=300)
-            #print(f"[DEBUG][PC Plot] Test PNG saved: {test_path}")
-        except Exception as e:
-            #print(f"[PC Plot Hatası] PNG kaydedilemedi: {e}")
-            pass
-        plt.close()
+            fig.savefig(test_path, dpi=300)
+            plt.close(fig)
     except Exception as e:
         pass
         #print(f"[PC Plot Hatası] Bar plot çizilemedi: {e}")

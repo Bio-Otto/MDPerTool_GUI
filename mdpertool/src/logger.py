@@ -3,6 +3,9 @@ import logging
 import logging.config
 
 
+LOGGER_NAME = 'mdpertool'
+
+
 def _make_stream_encoding_safe(stream):
     if stream is None:
         return stream
@@ -37,10 +40,32 @@ def Logger(file_name):
     console_handler = logging.StreamHandler(stream=safe_stdout)
     console_handler.setFormatter(formatter)
 
-    # Create and configure the logger
-    logger = logging.getLogger()
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    # Create and configure the logger once to avoid duplicate handlers.
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.propagate = False
+
+    target_log_file = file_handler.baseFilename
+    configured_log_file = getattr(logger, '_mdpertool_log_file', None)
+    needs_reconfigure = (
+        not getattr(logger, '_mdpertool_configured', False)
+        or configured_log_file != target_log_file
+    )
+
+    if needs_reconfigure:
+        for existing_handler in list(logger.handlers):
+            logger.removeHandler(existing_handler)
+            try:
+                existing_handler.close()
+            except Exception:
+                pass
+
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+        logger._mdpertool_configured = True
+        logger._mdpertool_log_file = target_log_file
+    else:
+        file_handler.close()
+
     logger.setLevel(logging.INFO)  # Set the logging level to INFO
 
     # Add a custom logging level

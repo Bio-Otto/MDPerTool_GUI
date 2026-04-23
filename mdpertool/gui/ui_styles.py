@@ -229,4 +229,25 @@ QMessageBox QPushButton
             background: #05b8cc;
             width: 10px;
         }
+
+        QProgressDialog QPushButton {
+            color: white;
+            border: 2px solid rgb(52, 59, 72);
+            border-radius: 5px;
+            background-color: rgb(253, 1, 136);
+            border-width: 1px;
+            min-width: 96px;
+            min-height: 28px;
+            padding: 4px 10px;
+        }
+
+        QProgressDialog QPushButton:hover {
+            background-color: rgb(22, 200, 244);
+            border: 2px solid rgb(61, 70, 86);
+        }
+
+        QProgressDialog QPushButton:pressed {
+            background-color: rgb(15, 133, 163);
+            border: 2px solid rgb(43, 50, 61);
+        }
     """

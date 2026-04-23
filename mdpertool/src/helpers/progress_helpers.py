@@ -36,7 +36,10 @@ class ProgressDialogManager:
         if frameless:
             dialog.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         if size is not None:
-            dialog.setFixedSize(size[0], size[1])
+            # Use a minimum size instead of a hard fixed size so controls are not clipped
+            # under different DPI/font scale settings.
+            dialog.setMinimumSize(size[0], size[1])
+            dialog.resize(size[0], size[1])
         dialog.setAutoClose(auto_close)
         dialog.setAutoReset(auto_reset)
         # Apply stylesheet BEFORE showing to ensure proper rendering
@@ -44,11 +47,27 @@ class ProgressDialogManager:
             dialog.setStyleSheet(self.stylesheet)
             # Force stylesheet application to child widgets
             for child in dialog.findChildren(QtWidgets.QWidget):
-                if isinstance(child, (QtWidgets.QLabel, QtWidgets.QProgressBar)):
+                if isinstance(child, (QtWidgets.QLabel, QtWidgets.QProgressBar, QtWidgets.QPushButton)):
                     child.setStyleSheet(self.stylesheet)
         dialog.show()
         dialog.setValue(minimum)
         # Process events immediately to ensure dialog is rendered
+        QtWidgets.QApplication.processEvents()
+
+        # Ensure cancel button remains fully visible when present.
+        cancel_button = dialog.findChild(QtWidgets.QPushButton)
+        if cancel_button is not None:
+            cancel_button.setMinimumWidth(96)
+            cancel_button.setMinimumHeight(30)
+
+        try:
+            content_size = dialog.sizeHint()
+            target_width = max(dialog.minimumWidth(), content_size.width() + 20)
+            target_height = max(dialog.minimumHeight(), content_size.height() + 20)
+            dialog.resize(target_width, target_height)
+        except Exception:
+            pass
+
         QtWidgets.QApplication.processEvents()
         self.dialog = dialog
         return dialog

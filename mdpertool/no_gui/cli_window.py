@@ -23,6 +23,15 @@ except Exception:
     mdpertool_version = "unknown"
 
 
+def _resolve_output_directory(output_argument):
+    if output_argument is None:
+        return os.getcwd()
+
+    output_directory = os.path.abspath(output_argument)
+    os.makedirs(output_directory, exist_ok=True)
+    return output_directory
+
+
 def _write_run_manifest(output_directory, args, generated_response_files, group_summary_path, start_time, end_time):
     metrics_files = [os.path.splitext(file_path)[0] + '_metrics.csv' for file_path in generated_response_files]
     fit_curve_files = [os.path.splitext(file_path)[0] + '_fit_curve.csv' for file_path in generated_response_files]
@@ -213,11 +222,7 @@ def run_mdpertool_from_cli(args):
 
     start_time = time.time()
 
-    if args.output is None:
-        OUTPUT_DIRECTORY = os.getcwd()
-    else:
-        OUTPUT_DIRECTORY = os.path.abspath(args.output)
-        os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
+    OUTPUT_DIRECTORY = _resolve_output_directory(args.output)
 
     created_file_for_work, OUTPUT_FOLDER_NAME = write_folder(OUTPUT_DIRECTORY, top=args.topology,
                                                              res="_".join(args.perturbed_residues),

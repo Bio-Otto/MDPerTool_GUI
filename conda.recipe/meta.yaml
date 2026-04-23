@@ -1,6 +1,6 @@
 
 {% set name = "mdpertool" %}
-{% set version = "0.0.7" %}
+{% set version = "0.0.8" %}
 
 
 package:
@@ -33,14 +33,14 @@ requirements:
     - setuptools
 
   run:
-    - python >=3.9,<3.12
+    - python >=3.10,<3.13
     - setuptools <70.0.0
     - lxml
     - pyside2 >=5.15,<6
     - matplotlib
     - pandas
     - pyqtgraph
-    - openmm >=8.0,<8.2
+    - openmm >=8.5,<8.6
     - networkx
     - pdbfixer
     - pyopengl
@@ -71,7 +71,7 @@ test:
     - mdpertool --help
     - mdpertool cli --help
     - mdpertool gui --help
-    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.7'"
+    python -c "from mdpertool._version import __version__; assert __version__ == '0.0.8'"
   imports:
     - mdpertool
 
@@ -89,7 +89,7 @@ about:
     IMPORTANT INSTALLATION INSTRUCTION:
     Anaconda's default install command might miss required dependencies. To install this package correctly, please run the following command in your terminal:
     
-    conda install -c conda-forge -c bio-otto mdpertool
+    conda create -n mdpertool -c conda-forge -c bio-otto python=3.11 mdpertool
     
   dev_url: "https://github.com/Bio-Otto/MDPerTool_GUI"
 

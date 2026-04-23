@@ -39,6 +39,7 @@ def config_template():
             'friction': '91.0/picosecond',
             'temperature': '310.0 * kelvin',
             'nonbonded method': 'PME',
+            'optimize pme': False,
             'constraints': None,
             'rigid water is active': True,
             'nonbonded cutoff': '1.2 * nanometer',

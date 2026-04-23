@@ -41,7 +41,6 @@ class UIFunctions:
                                                                                 "program?", Style.MessageBox_stylesheet)
 
             if close_answer == QMessageBox.Yes:
-                self.thread_main.exit()
                 self.close()
             if close_answer == QMessageBox.No:
                 pass

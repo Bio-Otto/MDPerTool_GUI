@@ -16,8 +16,13 @@ from openmm.app import StateDataReporter
 import subprocess
 import tempfile
 from datetime import datetime
+from typing import Any
 from .message import Message_Boxes
 from gui.ui_styles import Style
+
+
+logger = logging.getLogger(__name__)
+MESSAGE_BOXES = Message_Boxes()
 
 
 ##############################################################################
@@ -39,25 +44,35 @@ class Communicate(QtCore.QObject):
 
 
 class OpenMMScriptRunner(QtCore.QObject):
-    plots_created = bool
-    openmm_script_code = str
-    status = str
-    pid_idents = []
+    plots_created: bool
+    openmm_script_code: str
+    status: str
+    pid_idents: list[int]
     Signals = Communicate()
-    plotdata = dict
-    process = None
-    decomp_data = []
-    speed_data = []
-    classic_md_remain_data = []
-    reference_md_remain_data = []
-    dissipation_md_remain_data = []
-    pymol_statu = str
+    plotdata: dict[str, np.ndarray]
+    process: subprocess.Popen | None
+    decomp_data: list[float]
+    speed_data: list[float]
+    classic_md_remain_data: list[Any]
+    reference_md_remain_data: list[Any]
+    dissipation_md_remain_data: list[Any]
+    pymol_statu: str
 
 
     def __init__(self, script):
         super(OpenMMScriptRunner, self).__init__()
         self.plots_created = False
+        self.status = 'Running...'
+        self.pid_idents = []
+        self.Signals = self.__class__.Signals
+        self.plotdata = {}
         self.process = None
+        self.decomp_data = []
+        self.speed_data = []
+        self.classic_md_remain_data = []
+        self.reference_md_remain_data = []
+        self.dissipation_md_remain_data = []
+        self.pymol_statu = ''
         self.stop_requested = False
         self.shutdown_requested = threading.Event()
         self.error_alert_sent = False
@@ -75,7 +90,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         self.t1.start()
         self.t2.start()
 
-    def _safe_emit(self, signal_obj, payload):
+    def _safe_emit(self, signal_obj: Any, payload: Any):
         if self.shutdown_requested.is_set():
             return False
         try:
@@ -91,8 +106,8 @@ class OpenMMScriptRunner(QtCore.QObject):
         if hasattr(self, '_queue'):
             try:
                 self._queue.put(None)
-            except Exception:
-                pass
+            except (RuntimeError, ValueError) as exc:
+                logger.debug("Failed to send shutdown sentinel to queue: %s", exc)
         if hasattr(self, 't2') and self.t2.is_alive():
             self.t2.join(timeout=2)
         if was_stopped:
@@ -106,18 +121,18 @@ class OpenMMScriptRunner(QtCore.QObject):
                 self.stop_requested = True
                 self.process.terminate()
                 self.process.wait(timeout=3)
-        except Exception:
+        except (subprocess.TimeoutExpired, OSError, ValueError):
             try:
                 if self.process is not None and self.process.poll() is None:
                     self.process.kill()
-            except Exception:
-                pass
+            except (OSError, RuntimeError, ValueError) as exc:
+                logger.debug("Failed to kill OpenMM child process during shutdown: %s", exc)
 
         if hasattr(self, '_queue'):
             try:
                 self._queue.put(None)
-            except Exception:
-                pass
+            except (RuntimeError, ValueError) as exc:
+                logger.debug("Failed to enqueue shutdown marker: %s", exc)
 
         if hasattr(self, 't2') and self.t2.is_alive():
             self.t2.join(timeout=2)
@@ -132,6 +147,13 @@ class OpenMMScriptRunner(QtCore.QObject):
                 except UnicodeDecodeError:
                     continue
             return raw_line.decode('utf-8', errors='replace')
+
+        def _subprocess_creationflags():
+            creationflags = 0
+            if os.name == 'nt':
+                creationflags |= getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+                creationflags |= getattr(subprocess, 'BELOW_NORMAL_PRIORITY_CLASS', 0)
+            return creationflags
 
         def fix_code():
             itoks = tokenize.generate_tokens(StringIO(code).readline)
@@ -160,7 +182,7 @@ class OpenMMScriptRunner(QtCore.QObject):
             with open(debug_script_path, 'w', encoding='utf-8') as debug_script_file:
                 debug_script_file.write(code)
             queue.put(f"INFO | Debug script saved: {debug_script_path}")
-        except Exception as debug_file_error:
+        except (OSError, RuntimeError, ValueError) as debug_file_error:
             queue.put(f"WARNING | Unable to save debug script file: {debug_file_error}")
 
         try:
@@ -173,12 +195,17 @@ class OpenMMScriptRunner(QtCore.QObject):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 bufsize=0,
-                env=child_env
+                env=child_env,
+                creationflags=_subprocess_creationflags(),
             )
+
+            if self.process.stdout is None:
+                raise RuntimeError("OpenMM child process stdout is unavailable.")
 
             for output in iter(self.process.stdout.readline, b''):
                 if output:
-                    queue.put(_safe_decode(output).rstrip('\r\n'))
+                    decoded_output = _safe_decode(output)
+                    queue.put(str(decoded_output).rstrip('\r\n'))
 
             self.process.wait()
 
@@ -193,7 +220,7 @@ class OpenMMScriptRunner(QtCore.QObject):
                 # raise subprocess.CalledProcessError(self.process.returncode, 'Script execution has been stoped by the '
                 #                                                             'User!')
 
-        except (subprocess.CalledProcessError, OSError, Exception) as e:
+        except (subprocess.CalledProcessError, OSError, RuntimeError, ValueError) as e:
             logging.exception("Exception while running generated OpenMM script")
             queue.put(f"CRITICAL | Runner exception: {e}")
             queue.put(traceback.format_exc())
@@ -209,8 +236,7 @@ class OpenMMScriptRunner(QtCore.QObject):
         if self.process is not None and self.process.poll() is None:
             try:
                 """Close Application Question Message Box."""
-                close_answer = Message_Boxes.Question_message(self, "Are you sure!", "Do you really want to stop the "
-                                                                                     "run?",
+                close_answer = MESSAGE_BOXES.Question_message("Are you sure!", "Do you really want to stop the run?",
                                                               Style.MessageBox_stylesheet)
 
                 if close_answer == QMessageBox.Yes:
@@ -226,12 +252,12 @@ class OpenMMScriptRunner(QtCore.QObject):
                 if close_answer == QMessageBox.No:
                     return False
 
-            except Exception as inst:
-                Message_Boxes.Critical_message(self, 'An unexpected error has occurred!', str(inst),
+            except (RuntimeError, ValueError) as inst:
+                MESSAGE_BOXES.Critical_message('An unexpected error has occurred!', str(inst),
                                                Style.MessageBox_stylesheet)
                 return False
         else:
-            Message_Boxes.Information_message(self, "Info", "There is no an active run", Style.MessageBox_stylesheet)
+            MESSAGE_BOXES.Information_message("Info", "There is no an active run", Style.MessageBox_stylesheet)
             return False
 
     def queue_consumer(self, q):
@@ -323,6 +349,7 @@ class OpenMMScriptRunner(QtCore.QObject):
             except Exception as queue_consumer_error:
                 if self.shutdown_requested.is_set():
                     break
+                logger.debug("Queue consumer recovered from parsing error: %s", queue_consumer_error)
                 time.sleep(0.1)
 
         self.status = 'Done'
@@ -354,14 +381,14 @@ class OpenMMScriptRunner(QtCore.QObject):
                 elif k == 'Reference MD Progress (%)':
                     try:
                         self.plotdata.pop('Progress (%)')
-                    except:
+                    except KeyError:
                         pass
                     self.plotdata = {**{k: updated}, **self.plotdata}
 
                 elif k == 'Dissipation MD Progress (%)':
                     try:
                         self.plotdata.pop('Reference MD Progress (%)')
-                    except:
+                    except KeyError:
                         pass
                     self.plotdata = {**{k: updated}, **self.plotdata}
                 else:
@@ -553,19 +580,19 @@ class Graphs(QWidget):
 
             # time_remaining = np.array(data["Time Remaining"])[-1]
             # print(list(data.keys()))
-            self.runner.Signals.run_speed.emit(data["Speed (ns/day)"])
+            self.runner._safe_emit(self.runner.Signals.run_speed, data["Speed (ns/day)"])
 
             if list(data.keys())[0] == 'Progress (%)':
-                self.runner.Signals.classic_md_remain_time.emit(data["Time Remaining"])
+                self.runner._safe_emit(self.runner.Signals.classic_md_remain_time, data["Time Remaining"])
 
             if list(data.keys())[0] == 'Reference MD Progress (%)':
-                self.runner.Signals.reference_md_remain_time.emit(data["Time Remaining"])
+                self.runner._safe_emit(self.runner.Signals.reference_md_remain_time, data["Time Remaining"])
 
             if list(data.keys())[0] == 'Dissipation MD Progress (%)':
-                self.runner.Signals.dissipation_md_remain_time.emit(data["Time Remaining"])
+                self.runner._safe_emit(self.runner.Signals.dissipation_md_remain_time, data["Time Remaining"])
 
                 if data["Time Remaining"][-1] == "0:00":
-                    self.runner.Signals.run_speed.emit("--")
+                    self.runner._safe_emit(self.runner.Signals.run_speed, "--")
 
             if x.shape == y_temp.shape:
                 if self.current_step_keeper is not None and len(self.current_step_keeper) > 1:
@@ -602,15 +629,13 @@ class Graphs(QWidget):
 
                     self.current_step_keeper = x
 
-                except Exception as err:
-                    import traceback
-                    print("ERROR 1: %s" % err)
-                    traceback.print_exc()
+                except (RuntimeError, ValueError, TypeError) as err:
+                    logger.exception("Graph rendering update failed: %s", err)
             else:
                 pass
 
-        except Exception as e:
-            print("ERROR 2: %s" % e)
+        except (KeyError, ValueError, TypeError, RuntimeError) as err:
+            logger.exception("Graph data update failed: %s", err)
 
     def updating_decomposion(self, data_decomp):
         pass
@@ -621,7 +646,7 @@ class Graphs(QWidget):
     def run_script(self, contents):
         self.contents = contents
         self.runner = OpenMMScriptRunner(self.contents)
-        self.runner.Signals.dataSignal.connect(lambda plotdata: self.update_graph(plotdata))
+        getattr(self.runner.Signals.dataSignal, 'connect')(lambda plotdata: self.update_graph(plotdata))
         # self.runner.Signals.decomp_process.connect(lambda decomp_data: self.updating_decomposion(decomp_data))
         # self.runner.Signals.run_speed.connect(lambda speed_data: self.updating_current_speed(speed_data))
 
@@ -639,8 +664,8 @@ class Graphs(QWidget):
             self.elapsed_time = 0.0
             return True
 
-        except Exception as Run_Stop_Error:
-            Message_Boxes.Information_message(self, "There is no an active run!", str(Run_Stop_Error),
+        except (AttributeError, RuntimeError) as Run_Stop_Error:
+            MESSAGE_BOXES.Information_message("There is no an active run!", str(Run_Stop_Error),
                                               Style.MessageBox_stylesheet)
             return False
 # if __name__ == '__main__':

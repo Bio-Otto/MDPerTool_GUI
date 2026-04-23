@@ -1,5 +1,9 @@
 import os
+import logging
 from PySide2.QtWidgets import QFileDialog, QMessageBox
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -82,7 +86,8 @@ class browse_file:
             self.output_file = QFileDialog.getExistingDirectory(options=options)
             self.Output_Folder_textEdit.setText(self.output_file)
             return True
-        except:
+        except (OSError, RuntimeError, ValueError) as exc:
+            logger.warning("Unable to choose output directory: %s", exc)
             return False
 
     def available_platforms(self):

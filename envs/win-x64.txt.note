@@ -1,0 +1,16 @@
+# NOTE: Explicit lock files (win-x64.txt, etc) are deprecated in favor of environment YAML files.
+# The explicit lock format is fragile across channels and platform updates.
+# 
+# RECOMMENDED: Use the YAML files for platform-specific installation:
+# 
+# For Windows (win64_updated.yml):
+#   conda env create -f envs/win64_updated.yml
+#   
+# For Linux (linux64_env.yml):
+#   conda env create -f envs/linux64_env.yml
+#   
+# For macOS (winx64_env.yml, cross-platform):
+#   conda env create -f envs/winx64_env.yml
+#
+# Or use the recommended installation command from README.md:
+#   conda create -n mdpertool -c conda-forge -c bio-otto python=3.11 mdpertool

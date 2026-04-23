@@ -20,6 +20,7 @@ from no_gui.response_time_creator import *
 from no_gui.apply_pdbfixer import fix_pdb
 from no_gui.write_outputs import *
 from no_gui.energy_component import *
+from no_gui.optimizepme import optimizePME
 
 from openmm import unit
 from openmm import *
@@ -32,6 +33,9 @@ from sys import stdout
 import platform as pl
 import time
 import math
+import json
+import io
+from contextlib import redirect_stdout, redirect_stderr
 import argparse
 import multiprocessing as mp
 from pathlib import Path, PureWindowsPath
@@ -260,9 +264,11 @@ def _resolve_openmm_platform(requested_platform_name, logger):
     )
 
 
-def _resolve_platform_properties(platform_name, requested_precision):
+def _resolve_platform_properties(platform_name, requested_precision, requested_properties):
     resolved_precision = requested_precision
-    resolved_properties = None
+    resolved_properties = dict(requested_properties or {})
+
+    generic_use_cpu_pme = resolved_properties.pop('UseCpuPme', None)
 
     if platform_name == 'CPU':
         resolved_precision = 'mixed'
@@ -271,15 +277,50 @@ def _resolve_platform_properties(platform_name, requested_precision):
         resolved_precision = 'double'
         resolved_properties = None
     elif platform_name == 'OpenCL':
-        resolved_properties = {'Precision': requested_precision}
+        resolved_properties['Precision'] = requested_precision
         if {{Device_ID_active}}:
             resolved_properties['DeviceIndex'] = '{{Device_Number}}'
+        resolved_properties.pop('DeterministicForces', None)
+        resolved_properties.pop('UseBlockingSync', None)
+        if generic_use_cpu_pme is not None:
+            resolved_properties['OpenCLUseCpuPme'] = generic_use_cpu_pme
     elif platform_name == 'CUDA':
-        resolved_properties = {'Precision': requested_precision, 'DeterministicForces': 'True'}
+        resolved_properties['Precision'] = requested_precision
+        resolved_properties.setdefault('DeterministicForces', 'true')
         if {{Device_ID_active}}:
             resolved_properties['DeviceIndex'] = '{{Device_Number}}'
+        if generic_use_cpu_pme is not None:
+            resolved_properties['CudaUseCpuPme'] = generic_use_cpu_pme
+
+    if resolved_properties == {}:
+        resolved_properties = None
 
     return resolved_properties, resolved_precision
+
+
+def _collect_pme_configuration(system, platform_name, properties):
+    pme_cutoff_nm = None
+    for force in system.getForces():
+        if isinstance(force, NonbondedForce) and force.getNonbondedMethod() == NonbondedForce.PME:
+            pme_cutoff_nm = float(force.getCutoffDistance().value_in_unit(nanometer))
+            break
+
+    cpu_pme_key = None
+    if platform_name == 'CUDA':
+        cpu_pme_key = 'CudaUseCpuPme'
+    elif platform_name == 'OpenCL':
+        cpu_pme_key = 'OpenCLUseCpuPme'
+
+    cpu_pme_value = None
+    if cpu_pme_key is not None and isinstance(properties, dict):
+        cpu_pme_value = properties.get(cpu_pme_key)
+
+    return {
+        'platform': platform_name,
+        'nonbonded_cutoff_nm': pme_cutoff_nm,
+        'cpu_pme_property_key': cpu_pme_key,
+        'cpu_pme_property_value': cpu_pme_value,
+    }
 
 
 simulation_last_time = 0
@@ -333,7 +374,94 @@ integrator = mm.{{integrator_kind}}Integrator({{#Additional_Integrator}}{{Temper
 
 requested_platform_name = '{{platform}}'
 runtime_platform_name, platform = _resolve_openmm_platform(requested_platform_name, log_obj)
-properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
+properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}', {{{properties_literal}}})
+
+{{#optimize_pme}}
+selected_nonbonded_method = '{{NonBoundedMethod}}'
+pme_summary_path = os.path.join('{{output_folder}}', 'pme_optimization_summary.json')
+if selected_nonbonded_method == 'PME' and runtime_platform_name in ('CUDA', 'OpenCL'):
+    optimize_properties = dict(properties or {})
+    min_cutoff = 0.8 * nanometer
+    if {{use_switching_distance}}:
+        min_cutoff = max(min_cutoff, {{switching_distance}} + (0.01 * nanometer))
+
+    max_cutoff = {{NonBounded_cutoff}}
+    if min_cutoff >= max_cutoff:
+        log_obj.warning(
+            "Skipping PME optimization because min cutoff (%s) is not smaller than max cutoff (%s).",
+            min_cutoff,
+            max_cutoff,
+        )
+        with open(pme_summary_path, 'w', encoding='utf-8') as pme_summary_file:
+            json.dump(
+                {
+                    'optimize_pme': 'skipped',
+                    'reason': 'invalid_cutoff_range',
+                    'min_cutoff_nm': float(min_cutoff.value_in_unit(nanometer)),
+                    'max_cutoff_nm': float(max_cutoff.value_in_unit(nanometer)),
+                },
+                pme_summary_file,
+                indent=2,
+            )
+    else:
+        try:
+            # optimizePME is very verbose; capture its console output to avoid overwhelming GUI log streaming.
+            optimize_stdout = io.StringIO()
+            optimize_stderr = io.StringIO()
+            optimize_started_at = time.time()
+            with redirect_stdout(optimize_stdout), redirect_stderr(optimize_stderr):
+                optimizePME(system, integrator, modeller.positions, platform, optimize_properties, min_cutoff, max_cutoff)
+            optimize_elapsed_s = round(time.time() - optimize_started_at, 3)
+
+            properties = optimize_properties
+            summary_payload = {'optimize_pme': 'applied'}
+            summary_payload.update(_collect_pme_configuration(system, runtime_platform_name, properties))
+            summary_payload['elapsed_seconds'] = optimize_elapsed_s
+            with open(pme_summary_path, 'w', encoding='utf-8') as pme_summary_file:
+                json.dump(summary_payload, pme_summary_file, indent=2)
+
+            captured_stdout_lines = [line for line in optimize_stdout.getvalue().splitlines() if line.strip()]
+            captured_stderr_lines = [line for line in optimize_stderr.getvalue().splitlines() if line.strip()]
+            if captured_stdout_lines:
+                log_obj.info(
+                    "PME optimization completed in %s s. Captured %d stdout line(s); last line: %s",
+                    optimize_elapsed_s,
+                    len(captured_stdout_lines),
+                    captured_stdout_lines[-1],
+                )
+            else:
+                log_obj.info("PME optimization completed in %s s.", optimize_elapsed_s)
+            if captured_stderr_lines:
+                log_obj.warning(
+                    "PME optimization emitted %d stderr line(s); last line: %s",
+                    len(captured_stderr_lines),
+                    captured_stderr_lines[-1],
+                )
+            log_obj.info("PME optimization completed. Resolved properties: %s", properties)
+        except Exception as optimize_error:
+            log_obj.warning("PME optimization failed, continuing with default PME settings: %s", optimize_error)
+            with open(pme_summary_path, 'w', encoding='utf-8') as pme_summary_file:
+                json.dump(
+                    {
+                        'optimize_pme': 'failed',
+                        'reason': str(optimize_error),
+                    },
+                    pme_summary_file,
+                    indent=2,
+                )
+else:
+    with open(pme_summary_path, 'w', encoding='utf-8') as pme_summary_file:
+        json.dump(
+            {
+                'optimize_pme': 'skipped',
+                'reason': 'requires_pme_with_cuda_or_opencl',
+                'platform': runtime_platform_name,
+                'nonbonded_method': selected_nonbonded_method,
+            },
+            pme_summary_file,
+            indent=2,
+        )
+{{/optimize_pme}}
 
 if runtime_platform_name == 'CPU':
     log_obj.info("The CPU platform always uses 'mixed' precision.")
@@ -354,7 +482,7 @@ except Exception as simulation_init_error:
         simulation_init_error,
     )
     runtime_platform_name, platform = _resolve_openmm_platform('CPU', log_obj)
-    properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
+    properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}', {{{properties_literal}}})
     if properties is None:
         simulation = app.Simulation(modeller.topology, system, integrator, platform)
     else:
@@ -540,7 +668,7 @@ for i in range(len({{speed_factor}})):
         ################################################################################################################
         ################################ REFERENCE MD PROCESS USING MDPerTool v0.1 #####################################
         ################################################################################################################
-        properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
+        properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}', {{{properties_literal}}})
 
         # we'll just take the topology from here...
         pdb = app.PDBFile(last_pdb_file_path)
@@ -631,7 +759,7 @@ for i in range(len({{speed_factor}})):
     ################################# DISSIPATION MD PROCESS USING MDPerTool v0.1 ######################################
     ####################################################################################################################
 
-    properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}')
+    properties, precision = _resolve_platform_properties(runtime_platform_name, '{{precision}}', {{{properties_literal}}})
     log_obj.info("System will use %s Platform with %s Precision" % (runtime_platform_name, precision))
 
     # we'll just take the topology from here...

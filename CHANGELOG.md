@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.0.8] - 2026-04-23
+### Changed
+- **BREAKING: OpenMM 8.5.1 required** (upgraded from 8.0-8.2 series)
+  - All users must update OpenMM to >=8.5.1 
+  - Existing 0.0.7 installations using OpenMM 8.0-8.2 remain stable on old version
+  - New 0.0.8 is incompatible with older OpenMM versions
+- Updated Python compatibility to >=3.10,<3.13 (from >=3.9,<3.12)
+- Modernized conda environment YAML files with explicit Python 3.11 and OpenMM 8.5.1 pins
+- **Fixed conda package selection issue**: version bump ensures solver doesn't select legacy 0.0.7 (OpenMM 8.0) when installing
+
+### Added
+- Cross-platform CI smoke tests before release (Windows/macOS/Linux, Python 3.10-3.12)
+- Explicit dependency alignment in setup.py, setup.cfg, and conda.recipe/meta.yaml
+
+### Fixed
+- Python version constraint inconsistency between setup.py and conda recipe that caused confusing solver behavior
+
 ## [Unreleased]
 ### Added
 - Advanced OpenMM option widgets in GUI: `determinism_checkBox`, `use_cpu_pme_checkBox`, and `use_blocking_sync_checkBox`

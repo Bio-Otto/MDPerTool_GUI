@@ -241,13 +241,21 @@ def build_network_run_context(
 
 def build_network_run_context_from_ui(target: Any) -> Dict[str, Any]:
     """Build network run context directly from UI host object widgets/fields."""
+    cpu_count = max(1, int(os.cpu_count() or 1))
+    use_all_network_cpu = bool(
+        getattr(target, "Network_Calc_CPU_checkBox", None)
+        and target.Network_Calc_CPU_checkBox.isChecked()
+    )
+    requested_threads = int(target.Number_of_thread_for_network_spinBox.value())
+    number_of_threads = cpu_count if use_all_network_cpu else max(2, min(requested_threads, cpu_count))
+
     target_item_payload = read_target_items_from_widgets(
         target_res_combo_box=target.target_res_comboBox,
         selected_target_residues_list_widget=target.selected_target_residues_listWidget,
     )
 
     return build_network_run_context(
-        number_of_threads=target.Number_of_thread_for_network_spinBox.value(),
+        number_of_threads=number_of_threads,
         pdb_file=target.boundForm_pdb_lineedit.text(),
         cutoff=target.network_cutoff_spinBox.value(),
         response_time_file=target.response_time_lineEdit.text(),
@@ -327,22 +335,70 @@ def prepare_network_ui_for_run(
     label: str = "Calculating network...",
     title: str = "Network Calculation",
 ) -> Any:
-    """Disable UI and open indeterminate progress dialog for network run."""
-    target.setEnabled(False)
-    return progress_manager.show_indeterminate(
+    """Open progress dialog and temporarily lock network input controls only."""
+    _set_network_controls_enabled(target, enabled=False)
+    try:
+        target.setEnabled(False)
+    except Exception:
+        pass
+    return progress_manager.show(
         label=label,
         title=title,
-        window_modal=False,
+        minimum=0,
+        maximum=100,
+        window_modal=True,
         frameless=True,
-        size=(400, 100),
-        cancel_button_text=None,
+        size=(430, 132),
+        cancel_button_text="Cancel",
     )
 
 
 def restore_network_ui_after_run(target: Any, progress_manager: Any) -> None:
-    """Close progress UI and re-enable host window after run/error."""
+    """Close progress UI and re-enable network controls after run/error."""
     progress_manager.close(process_events=True)
-    target.setEnabled(True)
+    _set_network_controls_enabled(target, enabled=True)
+    try:
+        target.setEnabled(True)
+    except Exception:
+        pass
+
+
+def _set_network_controls_enabled(target: Any, enabled: bool) -> None:
+    """Enable/disable only network-related controls to keep progress dialog responsive."""
+    control_names = (
+        "network_calculate_pushButton",
+        "source_res_comboBox",
+        "target_res_comboBox",
+        "selected_target_residues_listWidget",
+        "add_residue_to_targets_pushButton",
+        "discard_residue_from_targets_pushButton",
+        "all_targets_checkBox",
+        "node_threshold_checkBox",
+        "node_threshold_spinBox",
+        "network_cutoff_spinBox",
+        "Number_of_thread_for_network_spinBox",
+        "Network_Calc_CPU_checkBox",
+        "response_time_upload_Button",
+        "upload_boundForm_pdb_Button",
+        "output_directory_button",
+        "get_conserv_score_pushButton",
+        "use_conservation_checkBox",
+        "conservation_PDB_ID_lineEdit",
+        "conservation_pdb_chain_id_lineedit",
+        "conserv_score_doubleSpinBox",
+        "atomPair_checkBox",
+        "Calpha_checkBox",
+        "center_of_mass_checkBox",
+    )
+
+    for control_name in control_names:
+        control = getattr(target, control_name, None)
+        if control is None:
+            continue
+        try:
+            control.setEnabled(enabled)
+        except Exception:
+            continue
 
 
 def start_pair_network_workers(
@@ -373,11 +429,14 @@ def wire_general_network_worker(
     worker: Any,
     on_ready: Any,
     on_failed: Any,
+    on_progress: Any = None,
 ) -> None:
     """Wire general-network worker signals and lifecycle handlers."""
     thread.started.connect(worker.run)
     worker.finished.connect(on_ready)
     worker.failed.connect(on_failed)
+    if on_progress is not None and hasattr(worker, "progress"):
+        worker.progress.connect(on_progress)
     worker.finished.connect(thread.quit)
     worker.failed.connect(thread.quit)
     worker.finished.connect(worker.deleteLater)
@@ -392,6 +451,7 @@ def start_general_network_background_worker(
     worker_class: Any,
     on_ready: Any,
     on_failed: Any,
+    on_progress: Any = None,
 ) -> Dict[str, Any]:
     """Create, wire, and start general-network thread/worker; store references on target."""
     thread = thread_class(target)
@@ -403,6 +463,7 @@ def start_general_network_background_worker(
         worker=worker,
         on_ready=on_ready,
         on_failed=on_failed,
+        on_progress=on_progress,
     )
 
     target._general_network_thread = thread

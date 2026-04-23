@@ -31,6 +31,7 @@ def write_folder(directory, top, res, ff, just_min_or_md):
 def lof_file_settings(file_name):
     logging_config = dict(
         version=1,
+        disable_existing_loggers=False,
         formatters={
             'verbose': {
                 'format': ("[%(asctime)s] %(levelname)s "
@@ -64,11 +65,13 @@ def lof_file_settings(file_name):
         loggers={
             'api_logger': {
                 'handlers': ['api-logger', 'console'],
-                'level': logging.DEBUG
+                'level': logging.DEBUG,
+                'propagate': False,
             },
             'batch_process_logger': {
                 'handlers': ['batch-process-logger', 'console'],
-                'level': logging.DEBUG
+                'level': logging.DEBUG,
+                'propagate': False,
             }
         }
     )

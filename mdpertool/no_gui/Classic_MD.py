@@ -2,10 +2,10 @@
 # IMPORTS
 from openmm import app
 import openmm as mm
+from openmm import NonbondedForce
 from openmm.unit import femtosecond, picosecond, nanometer, kelvin, angstrom, atmospheres
 from sys import stdout
 from .apply_pdbfixer import fix_pdb
-from openmm import *
 from mdtraj.reporters import XTCReporter
 from .optimizepme import *
 

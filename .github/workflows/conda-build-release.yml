@@ -87,9 +87,64 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+  install-smoke:
+    name: Fresh Install Smoke (${{ matrix.os }}, py${{ matrix.python-version }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge,defaults
+          channel-priority: strict
+          auto-activate: true
+          activate-environment: base
+          miniconda-version: latest
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+
+      - name: Create clean env and install package artifact
+        shell: bash -el {0}
+        run: |
+          set -euo pipefail
+          mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
+          if [ "${#PACKAGES[@]}" -eq 0 ]; then
+            echo "No package artifact found"
+            exit 1
+          fi
+
+          PACKAGE="${PACKAGES[0]}"
+          echo "Using package artifact: $PACKAGE"
+
+          conda create -y -n mdpertool-smoke "python=${{ matrix.python-version }}"
+          conda run -n mdpertool-smoke conda install -y \
+            --override-channels \
+            --strict-channel-priority \
+            -c conda-forge \
+            "$PACKAGE"
+
+      - name: Smoke test installed package
+        shell: bash -el {0}
+        run: |
+          set -euo pipefail
+          conda run -n mdpertool-smoke python -c "import openmm; print(openmm.__version__)"
+          conda run -n mdpertool-smoke mdpertool --help
+          conda run -n mdpertool-smoke mdpertool cli --help
+
   release:
     name: Publish release and package
-    needs: build
+    needs: [build, install-smoke]
     runs-on: ubuntu-latest
 
     steps:

@@ -13,6 +13,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
+from threading import Lock
+
+
+_IPC_PLOT_LOCK = Lock()
 
 
 IPCRow = Tuple[str, str, int, int, float, str, str]
@@ -114,18 +118,19 @@ def _write_ipc_bar_plot(rows: Sequence[IPCRow], output_image: str) -> None:
 	if not rows:
 		return
 
-	labels = [row[0] for row in rows]
-	values = [row[4] for row in rows]
+	with _IPC_PLOT_LOCK:
+		labels = [row[0] for row in rows]
+		values = [row[4] for row in rows]
 
-	plt.figure(figsize=(10, 6))
-	plt.bar(labels, values, color="#4c78a8", edgecolor="black")
-	plt.xticks(rotation=45, ha="right", fontsize=9)
-	plt.ylabel("Intermolecular Propagation Coefficient (IPC)", fontsize=11)
-	plt.xlabel("Residue", fontsize=11)
-	plt.title("Top Inter-Subunit Propagation Residues", fontsize=13, fontweight="bold")
-	plt.tight_layout()
-	plt.savefig(output_image, dpi=300)
-	plt.close()
+		fig, ax = plt.subplots(figsize=(10, 6))
+		ax.bar(labels, values, color="#4c78a8", edgecolor="black")
+		ax.tick_params(axis="x", rotation=45, labelsize=9)
+		ax.set_ylabel("Intermolecular Propagation Coefficient (IPC)", fontsize=11)
+		ax.set_xlabel("Residue", fontsize=11)
+		ax.set_title("Top Inter-Subunit Propagation Residues", fontsize=13, fontweight="bold")
+		fig.tight_layout()
+		fig.savefig(output_image, dpi=300)
+		plt.close(fig)
 
 
 def execute_intermolecular_propagation_workflow(

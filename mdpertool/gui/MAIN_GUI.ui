@@ -4776,6 +4776,12 @@ QCheckBox::indicator:checked {
                                </item>
                                <item row="0" column="0">
                                 <widget class="QCheckBox" name="realTime_active_checkBox">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
                                  <property name="font">
                                   <font>
                                    <family>Segoe UI</family>
@@ -7382,70 +7388,6 @@ QLineEdit:focus {
                                    </property>
                                   </widget>
                                  </item>
-                                 <item row="0" column="2">
-                                  <widget class="QCheckBox" name="rigid_water_checkBox">
-                                   <property name="enabled">
-                                    <bool>true</bool>
-                                   </property>
-                                   <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                     <horstretch>0</horstretch>
-                                     <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                   </property>
-                                   <property name="minimumSize">
-                                    <size>
-                                     <width>140</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="maximumSize">
-                                    <size>
-                                     <width>140</width>
-                                     <height>33</height>
-                                    </size>
-                                   </property>
-                                   <property name="font">
-                                    <font>
-                                     <family>Segoe UI</family>
-                                     <pointsize>10</pointsize>
-                                    </font>
-                                   </property>
-                                   <property name="styleSheet">
-                                    <string notr="true">QCheckBox {
-    spacing: 5px;
-	margin-left: 15px;
-}
-
-QCheckBox::indicator {
-    width: 15px;
-    height: 15px;
-}
-
-QCheckBox::indicator:unchecked {
-border-image: url(:/16x16/icons/16x16/cil-circle.png);
-
-}
-
-
-QCheckBox::indicator:checked {
-	border-image: url(:/20x20/icons/20x20/cil-check.png);
-}
-
-
-</string>
-                                   </property>
-                                   <property name="text">
-                                    <string>Rigid water</string>
-                                   </property>
-                                   <property name="checked">
-                                    <bool>true</bool>
-                                   </property>
-                                   <property name="tristate">
-                                    <bool>false</bool>
-                                   </property>
-                                  </widget>
-                                 </item>
                                  <item row="3" column="0">
                                   <widget class="QLabel" name="label_45">
                                    <property name="sizePolicy">
@@ -7537,6 +7479,128 @@ QCheckBox::indicator:checked {
                                     <bool>true</bool>
                                    </property>
                                    <property name="tristate">
+                                    <bool>false</bool>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="1" column="2">
+                                  <widget class="QCheckBox" name="rigid_water_checkBox">
+                                   <property name="enabled">
+                                    <bool>true</bool>
+                                   </property>
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>140</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>140</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+
+
+</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Rigid water</string>
+                                   </property>
+                                   <property name="checked">
+                                    <bool>true</bool>
+                                   </property>
+                                   <property name="tristate">
+                                    <bool>false</bool>
+                                   </property>
+                                  </widget>
+                                 </item>
+                                 <item row="0" column="2">
+                                  <widget class="QCheckBox" name="optimize_pme_checkBox">
+                                   <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                     <horstretch>0</horstretch>
+                                     <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                   </property>
+                                   <property name="minimumSize">
+                                    <size>
+                                     <width>140</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="maximumSize">
+                                    <size>
+                                     <width>140</width>
+                                     <height>33</height>
+                                    </size>
+                                   </property>
+                                   <property name="font">
+                                    <font>
+                                     <family>Segoe UI</family>
+                                     <pointsize>10</pointsize>
+                                    </font>
+                                   </property>
+                                   <property name="styleSheet">
+                                    <string notr="true">QCheckBox {
+    spacing: 5px;
+	margin-left: 15px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+}
+
+QCheckBox::indicator:unchecked {
+border-image: url(:/16x16/icons/16x16/cil-circle.png);
+
+}
+
+
+QCheckBox::indicator:checked {
+	border-image: url(:/20x20/icons/20x20/cil-check.png);
+}
+
+
+</string>
+                                   </property>
+                                   <property name="text">
+                                    <string>Optimize PME</string>
+                                   </property>
+                                   <property name="checked">
                                     <bool>false</bool>
                                    </property>
                                   </widget>
@@ -12545,103 +12609,11 @@ QGroupBox::indicator {
 }</string>
                                 </property>
                                 <property name="title">
-                                 <string>Start/ Stop</string>
+                                 <string>Calculation / Test Case Load</string>
                                 </property>
                                 <layout class="QHBoxLayout" name="horizontalLayout_38">
                                  <item>
                                   <layout class="QHBoxLayout" name="horizontalLayout_30">
-                                   <item>
-                                    <widget class="QPushButton" name="stop_pushButton_3">
-                                     <property name="sizePolicy">
-                                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                       <horstretch>0</horstretch>
-                                       <verstretch>0</verstretch>
-                                      </sizepolicy>
-                                     </property>
-                                     <property name="minimumSize">
-                                      <size>
-                                       <width>0</width>
-                                       <height>33</height>
-                                      </size>
-                                     </property>
-                                     <property name="font">
-                                      <font>
-                                       <family>Segoe UI</family>
-                                       <pointsize>9</pointsize>
-                                      </font>
-                                     </property>
-                                     <property name="styleSheet">
-                                      <string notr="true">QPushButton {
- 	color: white; 
-	border: 2px solid rgb(52, 59, 72);
-	border-radius: 5px;	
-	background-color: rgb(0, 180, 95);
-}
-QPushButton:hover {
-	background-color: rgb(0, 152, 84);
-	border: 2px solid rgb(61, 70, 86);
-}
-QPushButton:pressed {	
-	background-color: rgb(220, 5, 100);
-	border: 2px solid rgb(43, 50, 61);
-}</string>
-                                     </property>
-                                     <property name="text">
-                                      <string>Stop</string>
-                                     </property>
-                                     <property name="icon">
-                                      <iconset resource="icons_path.qrc">
-                                       <normaloff>:/16x16/icons/16x16/cil-media-stop.png</normaloff>:/16x16/icons/16x16/cil-media-stop.png</iconset>
-                                     </property>
-                                    </widget>
-                                   </item>
-                                   <item>
-                                    <widget class="QPushButton" name="network_calculate_pushButton">
-                                     <property name="sizePolicy">
-                                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                       <horstretch>0</horstretch>
-                                       <verstretch>0</verstretch>
-                                      </sizepolicy>
-                                     </property>
-                                     <property name="minimumSize">
-                                      <size>
-                                       <width>0</width>
-                                       <height>33</height>
-                                      </size>
-                                     </property>
-                                     <property name="font">
-                                      <font>
-                                       <family>Segoe UI</family>
-                                       <pointsize>9</pointsize>
-                                      </font>
-                                     </property>
-                                     <property name="styleSheet">
-                                      <string notr="true">QPushButton {
-	color: white; 
-	border: 2px solid rgb(52, 59, 72);
-	border-radius: 5px;	
-	background-color: rgb(0, 180, 95);
-}
-QPushButton:hover {
-	background-color: rgb(220, 5, 100);
-	border: 2px solid rgb(61, 70, 86);
-}
-QPushButton:pressed {	
-	background-color: rgb(190, 5, 100);
-	border: 2px solid rgb(43, 50, 61);
-}
-
-</string>
-                                     </property>
-                                     <property name="text">
-                                      <string>CALCULATE</string>
-                                     </property>
-                                     <property name="icon">
-                                      <iconset resource="icons_path.qrc">
-                                       <normaloff>:/16x16/icons/16x16/cil-arrow-right.png</normaloff>:/16x16/icons/16x16/cil-arrow-right.png</iconset>
-                                     </property>
-                                    </widget>
-                                   </item>
                                    <item>
                                     <widget class="QPushButton" name="load_analysis_sample_pushButton">
                                      <property name="sizePolicy">
@@ -12718,6 +12690,53 @@ QPushButton:pressed
                                      <property name="icon">
                                       <iconset resource="icons_path.qrc">
                                        <normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</normaloff>:/16x16/icons/16x16/cil-cloud-upload.png</iconset>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QPushButton" name="network_calculate_pushButton">
+                                     <property name="sizePolicy">
+                                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                       <horstretch>0</horstretch>
+                                       <verstretch>0</verstretch>
+                                      </sizepolicy>
+                                     </property>
+                                     <property name="minimumSize">
+                                      <size>
+                                       <width>0</width>
+                                       <height>33</height>
+                                      </size>
+                                     </property>
+                                     <property name="font">
+                                      <font>
+                                       <family>Segoe UI</family>
+                                       <pointsize>9</pointsize>
+                                      </font>
+                                     </property>
+                                     <property name="styleSheet">
+                                      <string notr="true">QPushButton {
+	color: white; 
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(0, 180, 95);
+}
+QPushButton:hover {
+	background-color: rgb(220, 5, 100);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(190, 5, 100);
+	border: 2px solid rgb(43, 50, 61);
+}
+
+</string>
+                                     </property>
+                                     <property name="text">
+                                      <string>CALCULATE</string>
+                                     </property>
+                                     <property name="icon">
+                                      <iconset resource="icons_path.qrc">
+                                       <normaloff>:/16x16/icons/16x16/cil-arrow-right.png</normaloff>:/16x16/icons/16x16/cil-arrow-right.png</iconset>
                                      </property>
                                     </widget>
                                    </item>

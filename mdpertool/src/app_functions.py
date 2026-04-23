@@ -1,5 +1,6 @@
 import os.path
 import tempfile
+import logging
 from functools import partial
 import networkx as nx
 from PySide2.QtWidgets import (
@@ -42,16 +43,18 @@ from analysis.pathway_analysis import (
     build_done_message,
 )
 from analysis.network_summary_service import build_network_summary_rows, build_union_graph, build_intersection_graph
-from analysis.network_motif_service import build_motif_summary_rows
-from analysis.network_motif_visualization import build_motif_visual_rows, render_motif_gallery
+from analysis.network_motif_service import build_motif_analysis
+from analysis.network_motif_visualization import render_motif_gallery
 from analysis.network_actionable_service import build_actionable_residue_rows
 from analysis.network_ipc_service import build_intermolecular_propagation_rows
 from analysis.network_significance_service import build_network_significance_rows
 from analysis.network_superhub_service import build_superhub_rows
+from analysis.network_centrality_service import calculate_betweenness_with_progress
 from analysis.response_dynamics_service import build_response_dynamics_payload
 from analysis.network_workflow_service import (
     prepare_general_network_engine_from_ui,
     prepare_network_ui_for_run,
+    restore_network_ui_after_run,
     start_general_network_background_worker,
     handle_general_network_ready_callback,
     present_network_failure_warning,
@@ -96,6 +99,17 @@ colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8
           '#b39eb5', '#c6a4a4', '#ff694f', '#95b8d1', '#52b2cf', '#d3ab9e', '#fb6f92', '#872187',
           '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
+logger = logging.getLogger(__name__)
+
+
+def _get_integrator_time_step_value(main_window):
+    """Return the integrator time step value in femtoseconds.
+
+    The current GUI flow treats the step size as a fixed 2 fs value for the
+    run-duration/number-of-steps conversion.
+    """
+    return 2.0
+
 
 def _safe_getcwd():
     try:
@@ -107,15 +121,28 @@ def _safe_getcwd():
 class GeneralNetworkWorker(QtCore.QObject):
     finished = QtCore.Signal(object, object, int, object)
     failed = QtCore.Signal(str)
+    progress = QtCore.Signal(int)
 
     def __init__(self, engine):
         super().__init__()
         self.engine = engine
+        self._stop_requested = False
+
+    def stop(self):
+        self._stop_requested = True
+
+    def _cancel_requested(self):
+        return self._stop_requested
 
     @QtCore.Slot()
     def run(self):
         try:
-            initial_network, res_id_list, len_of_retimes = self.engine.calculate_general_network()
+            initial_network, res_id_list, len_of_retimes = self.engine.calculate_general_network(
+                cancel_callback=self._cancel_requested,
+                progress_callback=self.progress.emit,
+            )
+            if self._stop_requested:
+                raise RuntimeError("Network calculation cancelled.")
             self.finished.emit(initial_network, res_id_list, len_of_retimes, self.engine)
         except Exception as error:
             self.failed.emit(str(error))
@@ -287,50 +314,52 @@ class Functions:
         if self.active_workers == 0:
             pass
 
+    @Slot(int)
+    def _on_general_network_progress(self, progress_value):
+        progress_manager = Helper_Functions._get_progress_dialog_manager()
+        bounded = max(0, min(100, int(progress_value)))
+        # Reserve first 40% for general-network generation.
+        mapped = max(1, min(40, int((bounded / 100.0) * 40)))
+        try:
+            progress_manager.set_label(
+                f"[{mapped}%] Calculating network - building base graph...",
+                process_events=True,
+            )
+            progress_manager.set_value(mapped, process_events=True)
+        except Exception:
+            QtWidgets.QApplication.processEvents()
+
     def thread_complete(self):
         self._completed_workers = getattr(self, '_completed_workers', 0) + 1
         expected_workers = max(0, getattr(self, '_expected_workers', 0))
+
+        if expected_workers > 0:
+            progress_manager = Helper_Functions._get_progress_dialog_manager()
+            completion_ratio = min(1.0, float(self._completed_workers) / float(expected_workers))
+            mapped = 40 + int(completion_ratio * 40)
+            try:
+                progress_manager.set_label(
+                    f"[{mapped}%] Calculating network - pair pathways {self._completed_workers}/{expected_workers}",
+                    process_events=True,
+                )
+                progress_manager.set_value(mapped, process_events=True)
+            except Exception:
+                QtWidgets.QApplication.processEvents()
 
         if expected_workers > 0 and self._completed_workers >= expected_workers:
             if getattr(self, '_network_finalize_done', False):
                 return
             self._network_finalize_done = True
-            # Close progress dialog when all threads complete
-            Helper_Functions._get_progress_dialog_manager().close(process_events=True)
-            # Re-enable main window after calculation is done
-            self.setEnabled(True)
-            if hasattr(self, '_active_network_engine'):
-                self._active_network_engine = None
             if len(self.network_holder) != 0:
                 self.plot_signal.plot_network.emit()
-
-            # Show PC computation results if they exist in the output directory
-            try:
-                out_dir = getattr(self, '_network_output_directory', getattr(self, 'output_directory', ''))
-                if out_dir and os.path.exists(out_dir):
-                    import glob
-                    pc_plots = glob.glob(os.path.join(out_dir, "PC_Score_*_propagation_plot.png"))
-                    if pc_plots:
-                        from PySide2.QtWidgets import QMessageBox
-                        msg = QMessageBox()
-                        msg.setIcon(QMessageBox.Information)
-                        msg.setWindowTitle("Network Metric Calculation")
-                        msg.setStyleSheet(Style.MessageBox_stylesheet)
-                        msg.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-                        msg.setText(f"Propagation Coefficient (PC) analysis effectively completed!\n\nFound {len(pc_plots)} plot(s) in:\n{out_dir}")
-                        msg.addButton(QMessageBox.Ok)
-                        btn_open = msg.addButton("Show Plots", QMessageBox.ActionRole)
-                        msg.exec_()
-                        
-                        if msg.clickedButton() == btn_open:
-                            import subprocess
-                            for plot in pc_plots:
-                                if os.name == 'nt':
-                                    os.startfile(plot)
-                                else:
-                                    subprocess.call(['xdg-open', plot])
-            except Exception as e:
-                print(f"[Warning] Error opening PC Plots: {e}")
+            else:
+                # No graph payload to render; finalize UI state right away.
+                restore_network_ui_after_run(
+                    target=self,
+                    progress_manager=Helper_Functions._get_progress_dialog_manager(),
+                )
+                if hasattr(self, '_active_network_engine'):
+                    self._active_network_engine = None
 
     def print_output(self, s):
         self.network_holder.append(s[0])
@@ -338,12 +367,25 @@ class Functions:
 
     def calculate_intersection_network(self):
         """Start network calculation with Qt-safe background worker."""
+        Functions.apply_network_threadpool_limit(self)
+
         # Prepare progress dialog and UI state for background execution
         progress_manager = Helper_Functions._get_progress_dialog_manager(self)
         self.progress = prepare_network_ui_for_run(
             target=self,
             progress_manager=progress_manager,
         )
+        try:
+            progress_manager.set_label("[1%] Calculating network - preparing inputs...", process_events=True)
+            progress_manager.set_value(1, process_events=True)
+        except Exception:
+            QtWidgets.QApplication.processEvents()
+
+        try:
+            if self.progress is not None:
+                self.progress.canceled.connect(lambda: restore_network_ui_after_run(self, progress_manager))
+        except Exception as exc:
+            logger.debug("Could not attach cancel callback to progress dialog: %s", exc)
 
         try:
             engine = prepare_general_network_engine_from_ui(self, atom_type='CA')
@@ -355,6 +397,7 @@ class Functions:
                 worker_class=GeneralNetworkWorker,
                 on_ready=partial(Functions._on_general_network_ready, self),
                 on_failed=partial(Functions._on_general_network_failed, self),
+                on_progress=partial(Functions._on_general_network_progress, self),
             )
 
         except Exception as error:
@@ -371,6 +414,11 @@ class Functions:
     def _on_general_network_ready(self, initial_network, resId_List, len_of_reTimes, engine):
         progress_manager = Helper_Functions._get_progress_dialog_manager()
         self.initial_network = initial_network
+        try:
+            progress_manager.set_label("[40%] Calculating network - base graph ready, starting pair scans...", process_events=True)
+            progress_manager.set_value(40, process_events=True)
+        except Exception:
+            QtWidgets.QApplication.processEvents()
 
         warning_payload = handle_general_network_ready_callback(
             target=self,
@@ -397,11 +445,20 @@ class Functions:
             return
 
     def _on_general_network_failed(self, error_text):
+        error_text = str(error_text)
+        if getattr(self, '_shutdown_in_progress', False) or 'cancel' in error_text.lower():
+            progress_manager = Helper_Functions._get_progress_dialog_manager()
+            try:
+                restore_network_ui_after_run(target=self, progress_manager=progress_manager)
+            except Exception as exc:
+                logger.debug("Progress dialog close failed during network cancellation: %s", exc)
+            return
+
         progress_manager = Helper_Functions._get_progress_dialog_manager()
         present_network_failure_warning(
             target=self,
             progress_manager=progress_manager,
-            error_text=str(error_text),
+            error_text=error_text,
             phase='runtime',
             show_warning_fn=Message_Boxes.Warning_message,
             stylesheet=Style.MessageBox_stylesheet,
@@ -412,6 +469,16 @@ class Functions:
 
         clean_graph_list = []
         clean_log_list = []
+        analysis_tab_updates_suspended = False
+        pending_analysis_tab = None
+        progress_manager = Helper_Functions._get_progress_dialog_manager()
+
+        def _update_network_progress(label_text):
+            try:
+                progress_manager.set_label(label_text, process_events=True)
+            except RuntimeError as exc:
+                logger.debug("Progress label update failed; processing pending Qt events instead: %s", exc)
+                QtWidgets.QApplication.processEvents()
 
         if self.node_threshold is not None:
             # print("node threshold is NOT --> NONE")
@@ -430,7 +497,24 @@ class Functions:
 
         # CREATE AN INTERSECTION GRAPH AND WRITE TO GML FILE
         if len(clean_graph_list) > 0:
+            def _building_views_percent(percent, stage_text):
+                bounded_percent = max(0, min(100, int(percent)))
+                _update_network_progress(
+                    f"[{bounded_percent}%] Building analysis views - {stage_text}"
+                )
+                try:
+                    progress_manager.set_value(bounded_percent, process_events=True)
+                except Exception:
+                    QtWidgets.QApplication.processEvents()
+                QtWidgets.QApplication.processEvents()
+
+            _building_views_percent(80, "initializing")
+            QtWidgets.QApplication.processEvents()
             all_graph_list = clean_graph_list
+
+            self.analysis_TabWidget.setUpdatesEnabled(False)
+            analysis_tab_updates_suspended = True
+
             tab = QtWidgets.QWidget()
             tab.setObjectName("Analysis_" + str(self.tab_count_on_analysis))
 
@@ -446,6 +530,8 @@ class Functions:
             analysis_data_tabwidget.setObjectName("analysis_data_tabwidget")
             analysis_data_tabwidget.setMinimumSize(QtCore.QSize(450, 520))
             analysis_data_tabwidget.setMaximumSize(QtCore.QSize(520, 16777215))
+            _building_views_percent(82, "starting analysis tab assembly")
+            QtWidgets.QApplication.processEvents()
 
             paths_tab = QtWidgets.QWidget()
             paths_tab.setObjectName("analysis_paths_tab")
@@ -565,6 +651,7 @@ class Functions:
             response_dynamics_tabwidget = QtWidgets.QTabWidget(response_dynamics_tab)
             response_dynamics_tabwidget.setObjectName("analysis_response_dynamics_tabwidget")
             response_dynamics_tab_layout.addWidget(response_dynamics_tabwidget)
+            _building_views_percent(83, "configuring response tabs")
 
             plot_tab = QtWidgets.QWidget()
             plot_tab.setObjectName("analysis_plot_tab")
@@ -651,6 +738,7 @@ class Functions:
             rd_group_tabwidget.addTab(critical_residue_tab, "Critical Residues")
 
             response_dynamics_tabwidget.addTab(rd_group_widget, "Response Dynamics")
+            _building_views_percent(84, "assembling response dynamics tables")
 
             # ==================== GROUP 2: NETWORK ANALYSIS (Optional) ====================
             na_group_widget = QtWidgets.QWidget()
@@ -820,6 +908,7 @@ class Functions:
             na_group_tabwidget.addTab(actionable_tab, "Actionable Insights")
 
             response_dynamics_tabwidget.addTab(na_group_widget, "Network Analysis")
+            _building_views_percent(85, "assembling network analysis tables")
 
             # ==================== GROUP 3: QC & METRICS (Quality Control & Details) ====================
             qc_group_widget = QtWidgets.QWidget()
@@ -892,6 +981,7 @@ class Functions:
             # QC tables are kept for internal bookkeeping but hidden from the main UI
             # because they are often empty/noisy for end users.
             qc_group_widget.hide()
+            _building_views_percent(86, "assembling quality-control tables")
 
             # Apply the same table style used by residues_conservation_tableWidget
             table_style = ""
@@ -916,6 +1006,7 @@ class Functions:
                     table_widget.setStyleSheet(table_style)
 
             response_dynamics_tab.setLayout(response_dynamics_tab_layout)
+            _building_views_percent(87, "finalizing table layouts")
 
             # --> Dissipation Widget
             dissipation_curve_widget = WidgetPlot(self)
@@ -937,6 +1028,7 @@ class Functions:
             # --- START PLOT SUB-TABS ---
             plot_inner_tabwidget = QtWidgets.QTabWidget(plot_tab)
             plot_tab_layout.addWidget(plot_inner_tabwidget)
+            _building_views_percent(88, "configuring plot tabs")
 
             # Sub-Tab 1: Response Time Graph
             res_time_tab = QtWidgets.QWidget()
@@ -947,140 +1039,173 @@ class Functions:
             # Sub-Tab 2: Propagation Coefficient Plots
             pc_plots_tab = QtWidgets.QWidget()
             pc_plots_layout = QtWidgets.QVBoxLayout(pc_plots_tab)
-            plot_inner_tabwidget.addTab(pc_plots_tab, "Propagation Coefficient")
-            
-            try:
-                out_dir = getattr(self, '_network_output_directory', getattr(self, 'output_directory', ''))
-                if out_dir and os.path.exists(out_dir):
+            pc_plots_tab_index = plot_inner_tabwidget.addTab(pc_plots_tab, "Propagation Coefficient")
+
+            pc_plots_placeholder = QtWidgets.QLabel("Propagation Coefficient plots will load when this tab is opened.")
+            pc_plots_placeholder.setAlignment(QtCore.Qt.AlignCenter)
+            pc_plots_layout.addWidget(pc_plots_placeholder)
+            pc_plots_loaded = False
+
+            def _build_pc_plots_tab_once():
+                nonlocal pc_plots_loaded
+                if pc_plots_loaded:
+                    return
+                pc_plots_loaded = True
+
+                while pc_plots_layout.count() > 0:
+                    item = pc_plots_layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.deleteLater()
+
+                try:
+                    out_dir = getattr(self, '_network_output_directory', getattr(self, 'output_directory', ''))
+                    if not (out_dir and os.path.exists(out_dir)):
+                        lbl = QtWidgets.QLabel("No output directory found for PC plots.")
+                        lbl.setAlignment(QtCore.Qt.AlignCenter)
+                        pc_plots_layout.addWidget(lbl)
+                        return
+
                     import glob
                     import pandas as pd
-                    pc_metric_files = glob.glob(os.path.join(out_dir, "PC_Score_*_propagation_metrics.csv"))
 
-                    if pc_metric_files:
-                        stacked_widget = QtWidgets.QStackedWidget()
-                        plot_widgets = []
-                        plot_titles = []
-                        for csv_file in pc_metric_files:
-                            try:
-                                df = pd.read_csv(csv_file)
-                                df_plot = df[df['Propagation_Coefficient (PC)'] > 0].copy()
-                                df_plot = df_plot.sort_values('Propagation_Coefficient (PC)', ascending=False).head(30)
-                                if df_plot.empty:
-                                    continue
-                                widget = WidgetPlot()
-                                # Response time graph ile aynı ebatlar ve layout
-                                toolbarSizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-                                widget.toolbar.setSizePolicy(toolbarSizePolicy)
-                                plot_layout = QtWidgets.QVBoxLayout()
-                                plot_layout.addWidget(widget.toolbar)
-                                plot_layout.addWidget(widget.canvas)
-                                widget.setLayout(plot_layout)
-                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-                                widget.setSizePolicy(sizePolicy)
-                                widget.setMinimumSize(QtCore.QSize(0, 500))
-                                widget.setMaximumSize(QtCore.QSize(520, 1200))
-                                ax = widget.canvas.figure.subplots()
-                                bars = ax.barh(df_plot['Residue_ID'], df_plot['Propagation_Coefficient (PC)'], color='salmon', edgecolor='black')
-                                ax.tick_params(axis='y', labelsize=8)
-                                ax.set_xlabel('Propagation Coefficient (PC)', fontsize=10, fontweight='bold', labelpad=2)
-                                ax.set_ylabel('Residue', fontsize=10, fontweight='bold', labelpad=2)
-                                ax.set_title('Signal Propagation Capacity', fontsize=12, fontweight='bold')
-                                ax.set_ylim(-0.5, len(df_plot['Residue_ID'])-0.5)
-                                # Response time graph ile aynı şekilde tight_layout ve margin
-                                try:
-                                    widget.canvas.figure.tight_layout(rect=(0.15, 0.05, 0.95, 0.95)) #left, bottom, right, top
-                                except Exception:
-                                    widget.canvas.figure.tight_layout()
-                                widget.canvas.draw()
-                                stacked_widget.addWidget(widget)
-                                plot_widgets.append(widget)
-                                plot_titles.append(os.path.basename(csv_file))
-                            except Exception as e:
-                                err_lbl = QtWidgets.QLabel(f"Error plotting {os.path.basename(csv_file)}: {e}")
-                                stacked_widget.addWidget(err_lbl)
-                        # Navigation buttons
-                        nav_layout = QtWidgets.QHBoxLayout()
-                        prev_btn = QtWidgets.QPushButton('Previous')
-                        next_btn = QtWidgets.QPushButton('Next')
-                        nav_btn_style = """
-                        QPushButton {
-                            color: white;
-                            border: 2px solid rgb(52, 59, 72);
-                            border-radius: 5px;
-                            background-color: rgb(110, 105, 225);
-                            border-width: 1px;
-                            padding: 5px 12px;
-                            font-size: 11px;
-                        }
-                        QPushButton:hover {
-                            background-color: rgb(22, 200, 244);
-                            border: 2px solid rgb(61, 70, 86);
-                        }
-                        QPushButton:pressed {
-                            background-color: rgb(15, 133, 163);
-                            border: 2px solid rgb(43, 50, 61);
-                        }
-                        """
-                        prev_btn.setStyleSheet(nav_btn_style)
-                        next_btn.setStyleSheet(nav_btn_style)
-                        title_lbl = QtWidgets.QLabel()
-                        title_lbl.setAlignment(QtCore.Qt.AlignCenter)
-                        title_lbl.setStyleSheet("""
-                            QLabel {
-                                color: #fff;
-                                background: transparent;
-                                font-size: 12px;
-                                font-weight: bold;
-                                padding: 4px 12px;
-                                border-radius: 4px;
-                                letter-spacing: 0.5px;
-                            }
-                        """)
-                        nav_layout.addWidget(prev_btn)
-                        nav_layout.addWidget(title_lbl)
-                        nav_layout.addWidget(next_btn)
-                        def update_title(idx):
-                            if 0 <= idx < len(plot_titles):
-                                title_lbl.setText(plot_titles[idx])
-                            else:
-                                title_lbl.setText("")
-                        def goto_prev():
-                            idx = stacked_widget.currentIndex()
-                            if idx > 0:
-                                stacked_widget.setCurrentIndex(idx - 1)
-                                update_title(idx - 1)
-                        def goto_next():
-                            idx = stacked_widget.currentIndex()
-                            if idx < stacked_widget.count() - 1:
-                                stacked_widget.setCurrentIndex(idx + 1)
-                                update_title(idx + 1)
-                        prev_btn.clicked.connect(goto_prev)
-                        next_btn.clicked.connect(goto_next)
-                        if plot_widgets:
-                            stacked_widget.setCurrentIndex(0)
-                            update_title(0)
-                        pc_plots_layout.addLayout(nav_layout)
-                        # stacked_widget'ın genişliği parent ile birlikte büyüsün
-                        stacked_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-                        stacked_widget.setMinimumSize(QtCore.QSize(0, 500))
-                        stacked_widget.setMaximumSize(QtCore.QSize(520, 1200))
-                        pc_plots_layout.addWidget(stacked_widget, stretch=1)
-                    else:
+                    pc_metric_files = glob.glob(os.path.join(out_dir, "PC_Score_*_propagation_metrics.csv"))
+                    if not pc_metric_files:
                         lbl = QtWidgets.QLabel("No PC metrics found.")
                         lbl.setAlignment(QtCore.Qt.AlignCenter)
                         pc_plots_layout.addWidget(lbl)
-            except Exception as e:
-                lbl = QtWidgets.QLabel(f"Error loading PC plots: {e}")
-                pc_plots_layout.addWidget(lbl)
+                        return
+
+                    stacked_widget = QtWidgets.QStackedWidget()
+                    plot_widgets = []
+                    plot_titles = []
+
+                    for csv_file in pc_metric_files:
+                        try:
+                            df = pd.read_csv(csv_file)
+                            df_plot = df[df['Propagation_Coefficient (PC)'] > 0].copy()
+                            df_plot = df_plot.sort_values('Propagation_Coefficient (PC)', ascending=False).head(30)
+                            if df_plot.empty:
+                                continue
+                            widget = WidgetPlot()
+                            toolbarSizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                            widget.toolbar.setSizePolicy(toolbarSizePolicy)
+                            plot_layout = QtWidgets.QVBoxLayout()
+                            plot_layout.addWidget(widget.toolbar)
+                            plot_layout.addWidget(widget.canvas)
+                            widget.setLayout(plot_layout)
+                            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+                            widget.setSizePolicy(sizePolicy)
+                            widget.setMinimumSize(QtCore.QSize(0, 500))
+                            widget.setMaximumSize(QtCore.QSize(520, 1200))
+                            ax = widget.canvas.figure.subplots()
+                            ax.barh(df_plot['Residue_ID'], df_plot['Propagation_Coefficient (PC)'], color='salmon', edgecolor='black')
+                            ax.tick_params(axis='y', labelsize=8)
+                            ax.set_xlabel('Propagation Coefficient (PC)', fontsize=10, fontweight='bold', labelpad=2)
+                            ax.set_ylabel('Residue', fontsize=10, fontweight='bold', labelpad=2)
+                            ax.set_title('Signal Propagation Capacity', fontsize=12, fontweight='bold')
+                            ax.set_ylim(-0.5, len(df_plot['Residue_ID']) - 0.5)
+                            try:
+                                widget.canvas.figure.tight_layout(rect=(0.15, 0.05, 0.95, 0.95))
+                            except Exception as exc:
+                                logger.debug("tight_layout with custom rect failed, using default: %s", exc)
+                                widget.canvas.figure.tight_layout()
+                            widget.canvas.draw()
+                            stacked_widget.addWidget(widget)
+                            plot_widgets.append(widget)
+                            plot_titles.append(os.path.basename(csv_file))
+                        except Exception as e:
+                            err_lbl = QtWidgets.QLabel(f"Error plotting {os.path.basename(csv_file)}: {e}")
+                            stacked_widget.addWidget(err_lbl)
+
+                    nav_layout = QtWidgets.QHBoxLayout()
+                    prev_btn = QtWidgets.QPushButton('Previous')
+                    next_btn = QtWidgets.QPushButton('Next')
+                    nav_btn_style = """
+                    QPushButton {
+                        color: white;
+                        border: 2px solid rgb(52, 59, 72);
+                        border-radius: 5px;
+                        background-color: rgb(110, 105, 225);
+                        border-width: 1px;
+                        padding: 5px 12px;
+                        font-size: 11px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(22, 200, 244);
+                        border: 2px solid rgb(61, 70, 86);
+                    }
+                    QPushButton:pressed {
+                        background-color: rgb(15, 133, 163);
+                        border: 2px solid rgb(43, 50, 61);
+                    }
+                    """
+                    prev_btn.setStyleSheet(nav_btn_style)
+                    next_btn.setStyleSheet(nav_btn_style)
+                    title_lbl = QtWidgets.QLabel()
+                    title_lbl.setAlignment(QtCore.Qt.AlignCenter)
+                    title_lbl.setStyleSheet("""
+                        QLabel {
+                            color: #fff;
+                            background: transparent;
+                            font-size: 12px;
+                            font-weight: bold;
+                            padding: 4px 12px;
+                            border-radius: 4px;
+                            letter-spacing: 0.5px;
+                        }
+                    """)
+                    nav_layout.addWidget(prev_btn)
+                    nav_layout.addWidget(title_lbl)
+                    nav_layout.addWidget(next_btn)
+
+                    def update_title(idx):
+                        if 0 <= idx < len(plot_titles):
+                            title_lbl.setText(plot_titles[idx])
+                        else:
+                            title_lbl.setText("")
+
+                    def goto_prev():
+                        idx = stacked_widget.currentIndex()
+                        if idx > 0:
+                            stacked_widget.setCurrentIndex(idx - 1)
+                            update_title(idx - 1)
+
+                    def goto_next():
+                        idx = stacked_widget.currentIndex()
+                        if idx < stacked_widget.count() - 1:
+                            stacked_widget.setCurrentIndex(idx + 1)
+                            update_title(idx + 1)
+
+                    prev_btn.clicked.connect(goto_prev)
+                    next_btn.clicked.connect(goto_next)
+                    if plot_widgets:
+                        stacked_widget.setCurrentIndex(0)
+                        update_title(0)
+
+                    pc_plots_layout.addLayout(nav_layout)
+                    stacked_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+                    stacked_widget.setMinimumSize(QtCore.QSize(0, 500))
+                    stacked_widget.setMaximumSize(QtCore.QSize(520, 1200))
+                    pc_plots_layout.addWidget(stacked_widget, stretch=1)
+                except Exception as e:
+                    lbl = QtWidgets.QLabel(f"Error loading PC plots: {e}")
+                    lbl.setAlignment(QtCore.Qt.AlignCenter)
+                    pc_plots_layout.addWidget(lbl)
+
+            plot_inner_tabwidget.currentChanged.connect(
+                lambda idx: _build_pc_plots_tab_once() if idx == pc_plots_tab_index else None
+            )
             # --- END PLOT SUB-TABS ---
+            _building_views_percent(89, "plot tabs ready")
 
             analysis_data_tabwidget.addTab(paths_tab, "Paths")
             analysis_data_tabwidget.addTab(plot_tab, "Plot")
             tables_tabwidget.addTab(metrics_tab, "Metrics")
-            tables_tabwidget.addTab(qc_tab, "QC")
             tables_tabwidget.addTab(provenance_tab, "Provenance")
             tables_tabwidget.addTab(response_dynamics_tab, "Response Dynamics")
             analysis_data_tabwidget.addTab(tables_tab, "Tables")
+            _building_views_percent(90, "analysis tabs wired")
 
             last_inner_tab = int(getattr(self, '_analysis_data_tab_last_index', 0))
             if 0 <= last_inner_tab < analysis_data_tabwidget.count():
@@ -1919,6 +2044,8 @@ class Functions:
                 return reference_energy_file, modified_energy_file, discovered_reference, discovered_modified
 
             def _refresh_response_dynamics_views(response_file_path):
+                _building_views_percent(91, "loading response dynamics")
+                QtWidgets.QApplication.processEvents()
                 source_residue_text = self.source_res_comboBox.currentText()
                 row, col, response_count, plot_name, fit_curve, metrics = getResponseTimeGraph(response_file_path)
 
@@ -1938,6 +2065,8 @@ class Functions:
                         frame_time_delta=1.0,
                         residue_names=residue_names,
                     )
+                    _building_views_percent(92, "building response tables")
+                    QtWidgets.QApplication.processEvents()
                     populate_residue_response_table(residue_response_table, response_payload['residue_rows'])
                     populate_metrics_table(metrics_table, response_payload['metrics_rows'])
                     populate_provenance_table(provenance_table, response_payload['provenance_rows'])
@@ -1959,6 +2088,8 @@ class Functions:
                         plot_name=plot_name,
                         fitted_data=fit_curve,
                     )
+                _building_views_percent(93, "rendering response curves")
+                QtWidgets.QApplication.processEvents()
 
             def _recalculate_response_time_on_analysis():
                 selected_response_path = str(self.response_time_lineEdit.text()).strip()
@@ -2059,6 +2190,8 @@ class Functions:
             motif_visual_rows = []
 
             # ################################# ==> START - 3D WIDGETS LOCATING <== ################################## #
+            _building_views_percent(94, "preparing 3D containers")
+            QtWidgets.QApplication.processEvents()
             pyMOL_3D_analysis_frame = QtWidgets.QFrame(tab)
             pyMOL_3D_analysis_frame.setStyleSheet("QFrame {\n"
                                                   "   border: 1px solid black;\n"
@@ -2080,7 +2213,7 @@ class Functions:
             pyMOL_3D_analysis_frame.setObjectName("pyMOL_3D_analysis_frame")
             gridLayout.addWidget(pyMOL_3D_analysis_frame, 0, 2, 3, 1)
             horizontalLayout.addLayout(gridLayout)
-            self.analysis_TabWidget.addTab(tab, "Analysis " + str(self.tab_count_on_analysis))
+            pending_analysis_tab = tab
             horizontalLayout.addWidget(analysis_settings_groupBox)
 
             analysis_3d_tabwidget = QtWidgets.QTabWidget(pyMOL_3D_analysis_frame)
@@ -2088,25 +2221,55 @@ class Functions:
             analysis_3d_layout.setContentsMargins(0, 0, 0, 0)
             analysis_3d_layout.addWidget(analysis_3d_tabwidget)
 
-            Protein3DNetworkView = PymolQtWidget(self)
-            Protein3DNetworkView.change_default_background()
-            Protein3DNetworkView.loadMolFile(self.boundForm_pdb_lineedit.text())
-            Protein3DNetworkView.update()
-            Protein3DNetworkView.show()
+            _analysis_pymol_widget = None
+            _pymol_model_loaded = False
 
             pymol_tab = QtWidgets.QWidget()
             pymol_tab_layout = QVBoxLayout(pymol_tab)
             pymol_tab_layout.setContentsMargins(0, 0, 0, 0)
-            pymol_tab_layout.addWidget(Protein3DNetworkView)
+            pymol_placeholder = QtWidgets.QLabel("3D view will be initialized when needed.")
+            pymol_placeholder.setAlignment(QtCore.Qt.AlignCenter)
+            pymol_placeholder.setStyleSheet("color: #dddddd; background: transparent; font-size: 11px;")
+            pymol_tab_layout.addWidget(pymol_placeholder)
             analysis_3d_tabwidget.addTab(pymol_tab, "PyMOL")
+
+            def _get_analysis_pymol_widget():
+                nonlocal _analysis_pymol_widget
+                if _analysis_pymol_widget is not None:
+                    return _analysis_pymol_widget
+
+                _analysis_pymol_widget = PymolQtWidget(self)
+                _analysis_pymol_widget.change_default_background()
+                _analysis_pymol_widget.update()
+                _analysis_pymol_widget.show()
+
+                while pymol_tab_layout.count() > 0:
+                    item = pymol_tab_layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.deleteLater()
+
+                pymol_tab_layout.addWidget(_analysis_pymol_widget)
+                QtWidgets.QApplication.processEvents()
+                return _analysis_pymol_widget
+
+            def _ensure_analysis_pymol_loaded():
+                nonlocal _pymol_model_loaded
+                pymol_widget = _get_analysis_pymol_widget()
+                if _pymol_model_loaded:
+                    return pymol_widget
+
+                pdb_path = str(self.boundForm_pdb_lineedit.text()).strip()
+                if not pdb_path:
+                    return pymol_widget
+
+                pymol_widget.loadMolFile(pdb_path)
+                _pymol_model_loaded = True
+                return pymol_widget
 
             motif_tab = QtWidgets.QWidget()
             motif_tab_layout = QVBoxLayout(motif_tab)
             motif_tab_layout.setContentsMargins(0, 0, 0, 0)
-            motif_hint = QtWidgets.QLabel("Top motif şekilleri burada küçük bir galeri olarak gösterilir.")
-            motif_hint.setWordWrap(True)
-            motif_hint.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-            motif_hint.setStyleSheet("color: #d7d7d7; font-size: 11px; padding: 4px 6px;")
             motif_gallery_widget = WidgetPlot(self)
             motif_gallery_toolbar_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
             motif_gallery_widget.toolbar.setSizePolicy(motif_gallery_toolbar_policy)
@@ -2116,11 +2279,8 @@ class Functions:
             motif_gallery_widget.setLayout(motif_gallery_layout)
             motif_gallery_widget.setMinimumSize(QtCore.QSize(0, 320))
             motif_gallery_widget.setMaximumSize(QtCore.QSize(16777215, 16777215))
-            motif_tab_layout.addWidget(motif_hint)
             motif_tab_layout.addWidget(motif_gallery_widget)
 
-            motif_residue_list_hint = QtWidgets.QLabel("Motif örnek rezidüleri")
-            motif_residue_list_hint.setStyleSheet("color: #d7d7d7; font-size: 11px; padding: 2px 6px;")
             motif_residue_list_widget = QtWidgets.QListWidget(motif_tab)
             motif_residue_list_widget.setMinimumHeight(120)
             motif_residue_list_widget.setMaximumHeight(180)
@@ -2139,7 +2299,6 @@ class Functions:
                     background-color: rgb(110, 105, 225);
                 }
             """)
-            motif_tab_layout.addWidget(motif_residue_list_hint)
             motif_tab_layout.addWidget(motif_residue_list_widget)
 
             motif_highlight_button = QtWidgets.QPushButton("Highlight Selected Motif in PyMOL", motif_tab)
@@ -2158,7 +2317,9 @@ class Functions:
 
                 residue_labels = [label.strip() for label in residue_text.split(",") if label.strip() and label.strip() != "N/A"]
                 if residue_labels:
-                    Protein3DNetworkView.highlight_residue_labels(residue_labels)
+                    pymol_widget = _ensure_analysis_pymol_loaded()
+                    if pymol_widget is not None:
+                        pymol_widget.highlight_residue_labels(residue_labels)
 
             motif_highlight_button.clicked.connect(_highlight_selected_motif)
             motif_residue_list_widget.itemDoubleClicked.connect(lambda _: _highlight_selected_motif())
@@ -2166,7 +2327,9 @@ class Functions:
             def _apply_response_coloring():
                 selected_response_path = str(self.response_time_lineEdit.text()).strip()
                 if os.path.exists(selected_response_path) and selected_response_path.lower().endswith('.csv'):
-                    Protein3DNetworkView.show_energy_dissipation(response_time_file_path=selected_response_path)
+                    pymol_widget = _ensure_analysis_pymol_loaded()
+                    if pymol_widget is not None:
+                        pymol_widget.show_energy_dissipation(response_time_file_path=selected_response_path)
                     return
 
                 Message_Boxes.Warning_message(
@@ -2177,6 +2340,12 @@ class Functions:
                 )
 
             color_response_panel_pushButton.clicked.connect(_apply_response_coloring)
+
+            def _with_analysis_pymol_widget(callback):
+                pymol_widget = _get_analysis_pymol_widget()
+                if pymol_widget is not None:
+                    callback(pymol_widget)
+
             # ################################# ==> END - 3D WIDGETS LOCATING <== ################################## #
             # matplotlib_widget = WidgetPlot(self)
             # verticalLayout.addWidget(self.matplotlib_widget.toolbar)
@@ -2189,19 +2358,32 @@ class Functions:
                                                         hide_navigation_button)
 
             activate_pymol_navigation_on_analysis.clicked.connect(
-                lambda: Helper_Functions.activate_navigation_on_Pymol(self, Protein3DNetworkView))
+                lambda: _with_analysis_pymol_widget(
+                    lambda widget: Helper_Functions.activate_navigation_on_Pymol(self, widget)
+                ))
             deactivate_pymol_navigation_on_analysis.clicked.connect(
-                lambda: Helper_Functions.deactivate_navigation_on_Pymol(self, Protein3DNetworkView))
+                lambda: _with_analysis_pymol_widget(
+                    lambda widget: Helper_Functions.deactivate_navigation_on_Pymol(self, widget)
+                ))
             refresh_pushButton_on_analysis.clicked.connect(
-                lambda: Helper_Functions.clear_residue_labels(self, Protein3DNetworkView))
+                lambda: _with_analysis_pymol_widget(
+                    lambda widget: Helper_Functions.clear_residue_labels(self, widget)
+                ))
             ss_beatiful_snapshoot_on_analysis.clicked.connect(
-                lambda: Helper_Functions.show_beautiful_in_Pymol(self, Protein3DNetworkView))
+                lambda: _with_analysis_pymol_widget(
+                    lambda widget: Helper_Functions.show_beautiful_in_Pymol(self, widget)
+                ))
             get_figure_pushButton_on_analysis.clicked.connect(
-                lambda: Helper_Functions.save_as_png_Pymol(self, Protein3DNetworkView,
-                                                           width_horizontalSlider_on_analysis,
-                                                           height_horizontalSlider_on_analysis,
-                                                           dpi_horizontalSlider_on_analysis,
-                                                           ray_horizontalSlider_on_analysis))
+                lambda: _with_analysis_pymol_widget(
+                    lambda widget: Helper_Functions.save_as_png_Pymol(
+                        self,
+                        widget,
+                        width_horizontalSlider_on_analysis,
+                        height_horizontalSlider_on_analysis,
+                        dpi_horizontalSlider_on_analysis,
+                        ray_horizontalSlider_on_analysis,
+                    )
+                ))
 
             Helper_Functions.Handle_Save_Figure_Options_on_analysis(self, save_as_png_on_analysis_pushButton,
                                                                     hide_figure_settings_on_analysis_pushButton,
@@ -2219,11 +2401,24 @@ class Functions:
             ##########################################################################################################
 
             done_message_shown = False
+            pending_done_message = None
             current_shortest_path_graphs = []
             latest_critical_rows = []
 
             if self.initial_network is not None and len(self.initial_network.nodes()) > 0:
-                global_betweenness = nx.betweenness_centrality(self.initial_network)
+                _building_views_percent(95, "computing centrality")
+                QtWidgets.QApplication.processEvents()
+                def _centrality_progress(current_count, total_count):
+                    if total_count <= 0:
+                        return
+                    percent = int((current_count / total_count) * 100)
+                    mapped_percent = 95 + int(percent * 0.02)
+                    _building_views_percent(mapped_percent, "centrality map")
+
+                global_betweenness = calculate_betweenness_with_progress(
+                    self.initial_network,
+                    progress_callback=_centrality_progress,
+                )
             else:
                 global_betweenness = {}
 
@@ -2234,12 +2429,23 @@ class Functions:
             )
 
             def _refresh_pathway_and_critical_views(show_done_message=False):
-                nonlocal done_message_shown
+                nonlocal done_message_shown, pending_done_message
                 local_source_res = self.source_res_comboBox.currentText().strip()
+                _building_views_percent(98, "extracting pathways")
+                QtWidgets.QApplication.processEvents()
+
+                def _building_views_progress(current_count, total_count):
+                    if total_count <= 0:
+                        return
+                    percent = int((current_count / total_count) * 100)
+                    mapped_percent = 98 + int(percent * 0.01)
+                    _building_views_percent(mapped_percent, "pathway tables")
+
                 pathway_rows_local, residue_path_hits_local, shortest_path_strings_local, all_paths_messages_local = summarize_target_pathways(
                     local_source_res,
                     target_res_list,
                     target_graph_list,
+                    progress_callback=_building_views_progress,
                 )
 
                 shortest_path_listWidget.clear()
@@ -2250,6 +2456,8 @@ class Functions:
                     item = QListWidgetItem(shortest_path_text)
                     item.setBackground(QColor(colors[cnt % len(colors)]))
                     shortest_path_listWidget.addItem(item)
+                    if cnt % 100 == 0:
+                        QtWidgets.QApplication.processEvents()
 
                 pathway_rows_sorted = sorted(pathway_rows_local, key=lambda row: (row[3] == 'No Path', str(row[2]), row[0]))
                 populate_pathway_summary_table(pathway_summary_table, pathway_rows_sorted)
@@ -2259,15 +2467,26 @@ class Functions:
                 critical_rows_local = build_critical_residue_rows(residue_path_hits_local, global_betweenness, top_n=20)
                 latest_critical_rows[:] = critical_rows_local
                 populate_critical_residue_table(critical_residue_table, critical_rows_local)
+                _building_views_percent(99, "critical residue ranking")
+                QtWidgets.QApplication.processEvents()
 
                 if show_done_message:
-                    all_path_string = build_done_message(list(all_paths_messages_local))
-                    Message_Boxes.Information_message(self, "DONE !", all_path_string, Style.MessageBox_stylesheet)
-                    done_message_shown = True
+                    pending_done_message = build_done_message(list(all_paths_messages_local))
 
             _refresh_pathway_and_critical_views(show_done_message=True)
+            _building_views_percent(100, "analysis views ready")
+            QtWidgets.QApplication.processEvents()
+
+            if pending_analysis_tab is not None and self.analysis_TabWidget.indexOf(pending_analysis_tab) == -1:
+                self.analysis_TabWidget.addTab(pending_analysis_tab, "Analysis " + str(self.tab_count_on_analysis))
+                pending_analysis_tab = None
+            if analysis_tab_updates_suspended:
+                self.analysis_TabWidget.setUpdatesEnabled(True)
+                analysis_tab_updates_suspended = False
+            QtWidgets.QApplication.processEvents()
 
             try:
+                _update_network_progress("Calculating network: summarizing topology metrics...")
                 network_summary_rows = build_network_summary_rows(self.initial_network, all_graph_list)
                 populate_network_summary_table(network_summary_table, network_summary_rows)
             except Exception as summary_error:
@@ -2275,6 +2494,7 @@ class Functions:
                 print(f"Warning: Could not build network summary table: {summary_error}", file=sys.stderr)
 
             try:
+                _update_network_progress("Calculating network: detecting motif patterns...")
                 intersection_graph = build_intersection_graph(all_graph_list)
                 if intersection_graph.number_of_nodes() > 0:
                     motif_scope = "Intersection"
@@ -2283,38 +2503,47 @@ class Functions:
                     motif_scope = "Union"
                     motif_graph = build_union_graph(all_graph_list)
 
-                motif_rows = build_motif_summary_rows(
+                def _motif_progress(current_count, total_count):
+                    if total_count <= 0:
+                        return
+                    percent = int((current_count / total_count) * 100)
+                    _update_network_progress(
+                        f"Calculating network: detecting motif patterns... {percent}%"
+                    )
+
+                motif_analysis = build_motif_analysis(
                     graph=motif_graph,
                     scope_name=motif_scope,
                     motif_sizes=(3, 4),
                     max_combinations=400000,
-                    top_k_per_size=10,
+                    top_k_per_size_summary=10,
+                    top_k_per_size_visual=2,
+                    progress_callback=_motif_progress,
                 )
+                motif_rows = motif_analysis.get("summary_rows", [])
                 populate_motif_summary_table(motif_summary_table, motif_rows)
 
-                motif_visual_rows = build_motif_visual_rows(
-                    graph=motif_graph,
-                    scope_name=motif_scope,
-                    motif_sizes=(3, 4),
-                    max_combinations=400000,
-                    top_k_per_size=2,
-                )
+                motif_visual_rows = motif_analysis.get("visual_rows", [])
                 motif_residue_list_widget.clear()
-                for size_name, motif_id, _motif_key, _edge_count, occurrence, frequency_text, _scope_name, example_residues in motif_visual_rows:
+                for idx, (size_name, motif_id, _motif_key, _edge_count, occurrence, frequency_text, _scope_name, example_residues) in enumerate(motif_visual_rows):
                     item_text = f"{motif_id} ({size_name}, {occurrence} hits, {frequency_text}) | {example_residues}"
                     item = QtWidgets.QListWidgetItem(item_text)
                     item.setData(QtCore.Qt.UserRole, example_residues)
                     motif_residue_list_widget.addItem(item)
+                    if idx % 100 == 0:
+                        QtWidgets.QApplication.processEvents()
                 if motif_residue_list_widget.count() > 0:
                     motif_residue_list_widget.setCurrentRow(0)
                     _highlight_selected_motif()
                 if 'motif_gallery_widget' in locals():
+                    _update_network_progress("Calculating network: rendering motif gallery...")
                     render_motif_gallery(motif_gallery_widget, motif_visual_rows)
             except Exception as motif_error:
                 import sys
                 print(f"Warning: Could not build motif summary table: {motif_error}", file=sys.stderr)
 
             try:
+                _update_network_progress("Calculating network: enrichment significance analysis...")
                 significance_graph = intersection_graph if 'intersection_graph' in locals() and intersection_graph.number_of_nodes() > 0 else build_union_graph(all_graph_list)
                 significance_rows = build_network_significance_rows(
                     initial_graph=self.initial_network,
@@ -2327,6 +2556,7 @@ class Functions:
                 print(f"Warning: Could not build significance table: {significance_error}", file=sys.stderr)
 
             try:
+                _update_network_progress("Calculating network: superhub and IPC analysis...")
                 superhub_graph = intersection_graph if 'intersection_graph' in locals() and intersection_graph.number_of_nodes() > 0 else build_union_graph(all_graph_list)
                 superhub_rows = build_superhub_rows(graph=superhub_graph, top_k=5)
                 populate_superhub_table(superhub_table, superhub_rows)
@@ -2348,10 +2578,13 @@ class Functions:
                 selected_row = shortest_path_listWidget.currentRow()
                 if not (0 <= selected_row < len(current_shortest_path_graphs)):
                     return
+                pymol_widget = _ensure_analysis_pymol_loaded()
+                if pymol_widget is None:
+                    return
                 Functions.show_shortest_paths_on_3D_ProteinView(
                     self,
                     item,
-                    Protein3DNetworkView,
+                    pymol_widget,
                     current_shortest_path_graphs[selected_row],
                 )
 
@@ -2364,25 +2597,30 @@ class Functions:
             try:
                 if len(self.initial_network.nodes()) > 0:
                     try:
+                        _update_network_progress("Calculating network: preparing 3D view...")
+                        pymol_widget = _ensure_analysis_pymol_loaded()
+                        QtWidgets.QApplication.processEvents()
+                        if pymol_widget is None:
+                            raise RuntimeError("PyMOL widget could not be initialized.")
                         arrows_cordinates, intersection_node_list = Pymol_Visualize_Path(graph=self.initial_network,
                                                                                          pdb_file=self.pdb)
 
                         # ------------------> 3D NETWORK VISUALIZATION USING PYMOL / START <---------------------- #
-                        Protein3DNetworkView.show_energy_dissipation(response_time_file_path=self.retime_file)
+                        pymol_widget.show_energy_dissipation(response_time_file_path=self.retime_file)
 
                         for arrow_coord in arrows_cordinates:
-                            Protein3DNetworkView.create_interacting_Residues(atom1=arrow_coord[0],
-                                                                             atom2=arrow_coord[1],
-                                                                             radius=0.05, gap=0.4, hradius=0.4,
-                                                                             hlength=0.8, color='cyan')
+                            pymol_widget.create_interacting_Residues(atom1=arrow_coord[0],
+                                                                     atom2=arrow_coord[1],
+                                                                     radius=0.05, gap=0.4, hradius=0.4,
+                                                                     hlength=0.8, color='cyan')
 
                         # MAKE PYMOL VISUALIZATION BETTER
-                        Protein3DNetworkView._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
-                        Protein3DNetworkView._pymol.cmd.set('cartoon_oval_width', 0.2)
-                        Protein3DNetworkView._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
-                        Protein3DNetworkView._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
-                        Protein3DNetworkView.update()
-                        Protein3DNetworkView.show()
+                        pymol_widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+                        pymol_widget._pymol.cmd.set('cartoon_oval_width', 0.2)
+                        pymol_widget._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
+                        pymol_widget._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+                        pymol_widget.update()
+                        pymol_widget.show()
 
                         # --------------------> 2D NETWORK VISUALIZATION USING visJS / START <-------------------- #
                     except Exception as error:
@@ -2401,7 +2639,11 @@ class Functions:
                         # if j != '':
                         all = all + '\n' + j
                     if not done_message_shown:
+                        if pending_done_message:
+                            all = pending_done_message
+                        _update_network_progress("Calculating network: finalizing results...")
                         Message_Boxes.Information_message(self, "DONE !", all, Style.MessageBox_stylesheet)
+                        done_message_shown = True
                     del self.log_holder, self.network_holder
 
                 else:
@@ -2420,6 +2662,20 @@ class Functions:
                 "Try lowering the response threshold, adjusting cutoff values, or selecting a different source residue.",
                 Style.MessageBox_stylesheet,
             )
+
+        QtWidgets.QApplication.processEvents()
+
+        if analysis_tab_updates_suspended:
+            self.analysis_TabWidget.setUpdatesEnabled(True)
+            QtWidgets.QApplication.processEvents()
+
+        # Network post-processing is complete; now it is safe to release the progress UI.
+        restore_network_ui_after_run(
+            target=self,
+            progress_manager=Helper_Functions._get_progress_dialog_manager(),
+        )
+        if hasattr(self, '_active_network_engine'):
+            self._active_network_engine = None
 
     def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget, selected_graph):
         processed_path = [x.strip() for x in item.text().split('-->')]
@@ -2560,6 +2816,57 @@ class Functions:
 
         if self.All_CPU_checkBox.isChecked():
             self.Number_CPU_spinBox_2.setEnabled(False)
+
+    @staticmethod
+    def _resolve_network_thread_budget(self):
+        cpu_count = max(1, int(mp.cpu_count()))
+        network_checkbox = getattr(self, 'Network_Calc_CPU_checkBox', None)
+        network_spinbox = getattr(self, 'Number_of_thread_for_network_spinBox', None)
+
+        if network_checkbox is not None and network_checkbox.isChecked():
+            return cpu_count
+
+        if network_spinbox is None:
+            return min(2, cpu_count)
+
+        requested_threads = max(2, int(network_spinbox.value()))
+        return min(requested_threads, cpu_count)
+
+    @staticmethod
+    def apply_network_threadpool_limit(self):
+        threadpool = getattr(self, 'threadpool', None)
+        if threadpool is None:
+            return
+
+        thread_budget = Functions._resolve_network_thread_budget(self)
+        try:
+            threadpool.setMaxThreadCount(thread_budget)
+        except Exception as exc:
+            logger.debug("Could not apply network threadpool max thread count: %s", exc)
+
+    @staticmethod
+    def Network_Calc_CPU_Usage_State(self):
+        network_checkbox = getattr(self, 'Network_Calc_CPU_checkBox', None)
+        network_spinbox = getattr(self, 'Number_of_thread_for_network_spinBox', None)
+
+        if network_checkbox is None or network_spinbox is None:
+            return
+
+        cpu_count = max(1, int(mp.cpu_count()))
+
+        if network_checkbox.isChecked():
+            network_spinbox.blockSignals(True)
+            network_spinbox.setValue(cpu_count)
+            network_spinbox.blockSignals(False)
+            network_spinbox.setEnabled(False)
+        else:
+            network_spinbox.blockSignals(True)
+            if network_spinbox.value() < 2:
+                network_spinbox.setValue(2)
+            network_spinbox.blockSignals(False)
+            network_spinbox.setEnabled(True)
+
+        Functions.apply_network_threadpool_limit(self)
 
     # ########################################### ANALYSIS WINDOW FUNCTIONS ############################################
 
@@ -2883,13 +3190,17 @@ class Functions:
             template['Simulation']['water forcefield'] = self.water_forcefield_comboBox.currentText()
             template['Simulation']['water geometry padding'] = self.water_padding_lineEdit.text().strip()
             template['Simulation']['equilibrium integrator'] = self.integrator_kind_comboBox.currentText()
-            template['Simulation']['equilibrium time step'] = self.integrator_time_step_lineEdit.text().strip()
+            template['Simulation']['equilibrium time step'] = _get_integrator_time_step_value(self)
             template['Simulation']['equilibrium time step unit'] = self.integrator_time_step_unit.currentText()
             template['Simulation'][
                 'equilibrium additional integrator parameters'] = self.Additional_Integrators_checkBox.isChecked()
             template['Simulation']['friction'] = self.friction_lineEdit.text().strip()
             template['Simulation']['temperature'] = self.temperature_lineEdit.text().strip()
             template['Simulation']['nonbonded method'] = self.nonBounded_Method_comboBox.currentText()
+            template['Simulation']['optimize pme'] = bool(
+                getattr(self, 'optimize_pme_checkBox', None) is not None and
+                self.optimize_pme_checkBox.isChecked()
+            )
             template['Simulation']['constraints'] = self.system_constraints_comboBox.currentText()
             template['Simulation']['rigid water is active'] = self.rigid_water_checkBox.isChecked()
             template['Simulation']['nonbonded cutoff'] = self.nonbounded_CutOff_lineEdit.text()
@@ -2949,6 +3260,13 @@ class Functions:
             # Restore key simulation toggles from saved workspace configuration.
             simulation_cfg = template.get('Simulation', {}) if isinstance(template, dict) else {}
             self.rigid_water_checkBox.setChecked(bool(simulation_cfg.get('rigid water is active', True)))
+            if getattr(self, 'optimize_pme_checkBox', None) is not None:
+                self.optimize_pme_checkBox.setChecked(bool(simulation_cfg.get('optimize pme', False)))
+                try:
+                    from ._advanced_platform_options import _update_advanced_options_availability
+                    _update_advanced_options_availability(self)
+                except Exception:
+                    pass
 
         except Exception as Err:
             pass
@@ -3157,7 +3475,7 @@ class Functions:
 
         current_step = self.run_duration_doubleSpinBox.value()
         current_time_unit = self.long_simulation_time_unit.currentText()
-        current_integrator_time_step_value = float(self.integrator_time_step_lineEdit.text())
+        current_integrator_time_step_value = _get_integrator_time_step_value(self)
 
         if current_time_unit == 'nanosecond':
             new_step = int((current_step / current_integrator_time_step_value) * 1000000)
@@ -3165,13 +3483,17 @@ class Functions:
         if current_time_unit == 'picosecond':
             new_step = int((current_step / current_integrator_time_step_value) * 1000)
 
-        self.Number_of_steps_spinBox.setValue(new_step)
+        self.Number_of_steps_spinBox.blockSignals(True)
+        try:
+            self.Number_of_steps_spinBox.setValue(new_step)
+        finally:
+            self.Number_of_steps_spinBox.blockSignals(False)
 
     def number_of_steps_changed_from_advanced(self):
         global new_time
         current_step = int(self.Number_of_steps_spinBox.value())  # 1 ns
         current_time_unit = self.long_simulation_time_unit.currentText()  # ns
-        current_integrator_time_step_value = float(self.integrator_time_step_lineEdit.text())  # 2 fs
+        current_integrator_time_step_value = _get_integrator_time_step_value(self)  # 2 fs
 
         if current_time_unit == 'nanosecond':
             new_time = float((current_step * current_integrator_time_step_value) / 1000000)
@@ -3179,7 +3501,11 @@ class Functions:
         if current_time_unit == 'picosecond':
             new_time = float((current_step * current_integrator_time_step_value) / 1000)
 
-        self.run_duration_doubleSpinBox.setValue(new_time)
+        self.run_duration_doubleSpinBox.blockSignals(True)
+        try:
+            self.run_duration_doubleSpinBox.setValue(new_time)
+        finally:
+            self.run_duration_doubleSpinBox.blockSignals(False)
 
     @staticmethod
     def initialize_advanced_platform_options(main_window):

@@ -1,11 +1,44 @@
 ##########################################################################
 # IMPORTS
+import os
 from openmm import app
 import openmm as mm
-from openmm.unit import femtosecond, picosecond, nanometer, angstrom
+from openmm import NonbondedForce, VerletIntegrator
 from sys import stdout
-from openmm import *
 from mdtraj.reporters import XTCReporter
+
+
+def _validate_dissipation_inputs(
+    pdb_path,
+    state_file,
+    protein_ff,
+    water_ff,
+    time_step,
+    nonbondedCutoff,
+    use_switching_distance,
+    switching_distance,
+    dissipation_total_Steps,
+    platform_name,
+    output_directory,
+):
+    required_fields = {
+        'pdb_path': pdb_path,
+        'state_file': state_file,
+        'protein_ff': protein_ff,
+        'water_ff': water_ff,
+        'time_step': time_step,
+        'nonbondedCutoff': nonbondedCutoff,
+        'dissipation_total_Steps': dissipation_total_Steps,
+        'platform_name': platform_name,
+        'output_directory': output_directory,
+    }
+
+    missing = [name for name, value in required_fields.items() if value is None]
+    if missing:
+        raise ValueError("Missing required Dissipation MD argument(s): %s" % ', '.join(missing))
+
+    if use_switching_distance and switching_distance is None:
+        raise ValueError("switching_distance must be provided when use_switching_distance is True")
 
 
 class Dissipation_MD_Engine:
@@ -15,6 +48,29 @@ class Dissipation_MD_Engine:
                  Device_Index_Number=None, dissipation_total_Steps=None, platform_name=None, properties=None,
                  precision=None, CPU_Threads=None, report_interval=1, write_to_dcd=True, dcd_write_period=1,
                  write_to_xtc=False, xtc_write_period=1, dissipated_traj_name='dissipated_traj', output_directory=None):
+
+        _validate_dissipation_inputs(
+            pdb_path=pdb_path,
+            state_file=state_file,
+            protein_ff=protein_ff,
+            water_ff=water_ff,
+            time_step=time_step,
+            nonbondedCutoff=nonbondedCutoff,
+            use_switching_distance=use_switching_distance,
+            switching_distance=switching_distance,
+            dissipation_total_Steps=dissipation_total_Steps,
+            platform_name=platform_name,
+            output_directory=output_directory,
+        )
+
+        # Narrow Optional-typed constructor inputs after explicit validation.
+        assert protein_ff is not None
+        assert water_ff is not None
+        assert time_step is not None
+        assert nonbondedCutoff is not None
+        assert dissipation_total_Steps is not None
+        assert platform_name is not None
+        assert output_directory is not None
 
         print("Simulation parameters preparing for the start ...")
         self.use_switching_distance = use_switching_distance
@@ -102,9 +158,9 @@ class Dissipation_MD_Engine:
             print("Water Model for Solution 3: %s" % self.water_model)
 
         self.state_file = state_file
-        self.switching_distance = switching_distance * angstrom
-        self.time_step = time_step * femtosecond
-        self.nonbondedCutoff = nonbondedCutoff * angstrom
+        self.switching_distance = None if switching_distance is None else switching_distance * mm.unit.angstrom
+        self.time_step = (time_step / 1000.0) * mm.unit.picosecond  # pyright: ignore[reportAttributeAccessIssue]
+        self.nonbondedCutoff = nonbondedCutoff * mm.unit.angstrom
         self.dissipation_total_Steps = dissipation_total_Steps
         self.platform_name = platform_name
         self.properties = properties
@@ -126,7 +182,7 @@ class Dissipation_MD_Engine:
         print('Constructing an OpenMM System')
         self.system = forcefield.createSystem(
             topology,
-            nonbondedMethod=app.PME,
+            nonbondedMethod=app.PME,  # pyright: ignore[reportArgumentType]
             nonbondedCutoff=self.nonbondedCutoff,
             constraints=None,
             rigidWater=True,

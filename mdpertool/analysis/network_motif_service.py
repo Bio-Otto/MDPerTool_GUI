@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from itertools import combinations, permutations
-from typing import Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 import networkx as nx
 
@@ -38,6 +38,8 @@ def _count_connected_induced_motifs(
     graph: nx.DiGraph,
     motif_size: int,
     max_combinations: int,
+    progress_callback: Any = None,
+    pulse_every: int = 2000,
 ) -> Tuple[Dict[str, int], Dict[str, Tuple[str, ...]], int, str]:
     """Count connected induced motifs for a specific size.
 
@@ -57,11 +59,15 @@ def _count_connected_induced_motifs(
     motif_examples: Dict[str, Tuple[str, ...]] = {}
     connected_count = 0
 
-    for node_group in combinations(graph.nodes(), motif_size):
+    for combo_index, node_group in enumerate(combinations(graph.nodes(), motif_size), start=1):
         subgraph = nx.DiGraph(graph.subgraph(node_group).copy())
         if subgraph.number_of_edges() == 0:
+            if callable(progress_callback) and combo_index % pulse_every == 0:
+                progress_callback(combo_index, combo_estimate)
             continue
         if not nx.is_weakly_connected(subgraph):
+            if callable(progress_callback) and combo_index % pulse_every == 0:
+                progress_callback(combo_index, combo_estimate)
             continue
 
         connected_count += 1
@@ -70,7 +76,87 @@ def _count_connected_induced_motifs(
         if key not in motif_examples:
             motif_examples[key] = tuple(str(node) for node in node_group)
 
+        if callable(progress_callback) and combo_index % pulse_every == 0:
+            progress_callback(combo_index, combo_estimate)
+
+    if callable(progress_callback):
+        progress_callback(combo_estimate, combo_estimate)
+
     return motif_counter, motif_examples, connected_count, "ok"
+
+
+def build_motif_analysis(
+    graph: nx.DiGraph,
+    scope_name: str,
+    motif_sizes: Sequence[int] = (3, 4),
+    max_combinations: int = 400000,
+    top_k_per_size_summary: int = 10,
+    top_k_per_size_visual: int = 2,
+    progress_callback: Any = None,
+) -> Dict[str, List[Tuple[Any, ...]]]:
+    """Build both motif summary rows and visualization rows in one pass."""
+    if graph is None:
+        return {"summary_rows": [], "visual_rows": []}
+
+    summary_rows: List[MotifRow] = []
+    visual_rows: List[Tuple[Any, ...]] = []
+
+    for motif_size in motif_sizes:
+        size_prefix = f"{motif_size}-node"
+        motif_counter, motif_examples, connected_count, status = _count_connected_induced_motifs(
+            graph=graph,
+            motif_size=motif_size,
+            max_combinations=max_combinations,
+            progress_callback=progress_callback,
+        )
+
+        if status != "ok":
+            summary_rows.append((size_prefix, "N/A", 0, 0, status, scope_name, "N/A"))
+            continue
+
+        if connected_count == 0:
+            summary_rows.append((size_prefix, "N/A", 0, 0, "0.00%", scope_name, "N/A"))
+            continue
+
+        sorted_items = sorted(motif_counter.items(), key=lambda item: item[1], reverse=True)
+
+        for idx, (motif_key, occurrence) in enumerate(sorted_items[:top_k_per_size_summary], start=1):
+            edge_count = motif_key.count('1')
+            frequency_pct = (occurrence / connected_count) * 100.0
+            example_residues = ", ".join(motif_examples.get(motif_key, ())) or "N/A"
+            summary_rows.append(
+                (
+                    size_prefix,
+                    f"M{motif_size}_{idx:02d}",
+                    edge_count,
+                    occurrence,
+                    f"{frequency_pct:.2f}%",
+                    scope_name,
+                    example_residues,
+                )
+            )
+
+        for idx, (motif_key, occurrence) in enumerate(sorted_items[:top_k_per_size_visual], start=1):
+            edge_count = motif_key.count('1')
+            frequency_pct = (occurrence / connected_count) * 100.0
+            example_residues = ", ".join(motif_examples.get(motif_key, ())) or "N/A"
+            visual_rows.append(
+                (
+                    size_prefix,
+                    f"M{motif_size}_{idx:02d}",
+                    motif_key,
+                    edge_count,
+                    occurrence,
+                    f"{frequency_pct:.2f}%",
+                    scope_name,
+                    example_residues,
+                )
+            )
+
+    return {
+        "summary_rows": summary_rows,
+        "visual_rows": visual_rows,
+    }
 
 
 def build_motif_summary_rows(

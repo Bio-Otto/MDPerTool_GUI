@@ -247,6 +247,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.integrator_kind_comboBox.currentTextChanged.connect(self.Stocasthic_Changed)
         UIF.Functions.Send_Available_Platforms_to_GUI(self)
         UIF.Functions.maximum_thread_of_system(self)
+        UIF.Functions.Network_Calc_CPU_Usage_State(self)
         # self.mutator_checkBox.stateChanged.connect(lambda: UIF.Functions.mutator_isActive(self))
         self.platform_specific_precision_applying()
 
@@ -305,6 +306,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.source_res_comboBox.currentTextChanged.connect(self.response_time_graph_path_changed)
         self.all_targets_checkBox.stateChanged.connect(lambda: UIF.Functions.All_Residues_as_target_Changed(self))
         self.All_CPU_checkBox.stateChanged.connect(lambda: UIF.Functions.All_CPU_Usage_State(self))
+        self.Network_Calc_CPU_checkBox.stateChanged.connect(lambda: UIF.Functions.Network_Calc_CPU_Usage_State(self))
+        self.Number_of_thread_for_network_spinBox.valueChanged.connect(
+            lambda: UIF.Functions.apply_network_threadpool_limit(self)
+        )
         self.output_directory_button.clicked.connect(lambda: UIF.Functions.analysis_output_directory(self))
         self.upload_boundForm_pdb_Button.clicked.connect(lambda: self.upload_boundForm_pdb_from_local(manuel=True))
         self.add_residue_to_targets_pushButton.clicked.connect(lambda: UIF.Functions.add_residue_to_target_List(self))
@@ -467,6 +472,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.label_9.setText(f"{self.elapsed_time_text} | Stage: {self.current_run_stage} | {heartbeat}")
 
     def closeEvent(self, event):
+        self._shutdown_in_progress = True
+
+        # Hide immediately to avoid perceived UI freeze while cleanup runs.
+        try:
+            self.hide()
+            QtWidgets.QApplication.processEvents()
+        except Exception:
+            pass
+
+        def _stop_thread_fast(thread, quit_first=True, wait_ms=350, terminate_wait_ms=100):
+            if thread is None:
+                return
+            try:
+                if not thread.isRunning():
+                    return
+                if quit_first:
+                    thread.quit()
+                if not thread.wait(wait_ms):
+                    thread.terminate()
+                    thread.wait(terminate_wait_ms)
+            except Exception:
+                pass
+
         # Ensure the worker thread stops when the window is closed
         # Pencere kapatıldığında thread'i durdur
         worker = getattr(self, 'elapsed_time_worker', None)
@@ -483,10 +511,67 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception:
                 pass
 
+        try:
+            self.Real_Time_Graphs.shutdown_threads()
+        except Exception:
+            pass
+
+        general_network_worker = getattr(self, '_general_network_worker', None)
+        if general_network_worker is not None:
+            try:
+                general_network_worker.stop()
+            except Exception:
+                pass
+
+        # Stop any analysis/background QThreads that may still be alive.
+        try:
+            background_tasks = list(getattr(self, '_active_background_tasks', []))
+            for task_state in background_tasks:
+                thread = task_state.get('thread') if isinstance(task_state, dict) else None
+                _stop_thread_fast(thread)
+        except Exception:
+            pass
+
+        general_network_thread = getattr(self, '_general_network_thread', None)
+        _stop_thread_fast(general_network_thread)
+
+        threadpool = getattr(self, 'threadpool', None)
+        if threadpool is not None:
+            try:
+                threadpool.clear()
+                threadpool.waitForDone(300)
+            except Exception:
+                pass
+
         thread_main = getattr(self, 'thread_main', None)
-        if thread_main is not None and thread_main.isRunning():
-            thread_main.quit()
-            thread_main.wait()
+        _stop_thread_fast(thread_main)
+
+        try:
+            lingering_threads = []
+            if thread_main is not None and thread_main.isRunning():
+                lingering_threads.append('thread_main')
+            if general_network_thread is not None and general_network_thread.isRunning():
+                lingering_threads.append('_general_network_thread')
+            if general_network_worker is not None:
+                lingering_threads.append('_general_network_worker')
+            for idx, task_state in enumerate(list(getattr(self, '_active_background_tasks', []))):
+                t = task_state.get('thread') if isinstance(task_state, dict) else None
+                if t is not None and t.isRunning():
+                    lingering_threads.append(f'_active_background_tasks[{idx}]')
+
+            if lingering_threads:
+                print('[Shutdown] Lingering QThreads after closeEvent:', ', '.join(lingering_threads))
+
+            if threadpool is not None:
+                try:
+                    active_count = threadpool.activeThreadCount()
+                    if active_count:
+                        print(f'[Shutdown] QThreadPool active threads after closeEvent: {active_count}')
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
         event.accept()
 
     def platform_specific_precision_applying(self):

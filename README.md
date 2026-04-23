@@ -27,13 +27,15 @@
 
 ## 📥 Installation
 
+⚠️ **Important:** MDPerTool 0.0.8+ requires **OpenMM 8.5.1 or later**. If you are upgrading from v0.0.7, you must update OpenMM.
+
 To install MDPERTOOL using Conda (GUI + CLI in one package), use:
 
 ```sh
 # Cross-platform recommended install
-conda create -n mdpertool python=3.9
+conda create -n mdpertool python=3.11
 conda activate mdpertool
-conda install --override-channels -c bio-otto -c conda-forge mdpertool
+conda install --override-channels -c conda-forge -c bio-otto mdpertool
 ```
 
 For automatic cross-platform CUDA-aware installation (single command, no extra user tuning):
@@ -98,9 +100,9 @@ python ui_main.py
 ```sh
 git clone https://github.com/Bio-Otto/MDPerTool_GUI.git
 cd MDPerTool_GUI
-conda create -n mdpertool python=3.9
+conda create -n mdpertool python=3.11
 conda activate mdpertool
-conda install --override-channels -c bio-otto -c conda-forge mdpertool
+conda install --override-channels -c conda-forge -c bio-otto mdpertool
 ```
 <p align="right">
     <img src="https://github.com/Bio-Otto/MDPerTool_GUI/blob/gui_development/mdpertool/gui/icons/macOS-logo.png" width="50" title="Available on macOS">

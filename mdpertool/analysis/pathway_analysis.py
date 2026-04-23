@@ -14,6 +14,7 @@ def summarize_target_pathways(
     source_residue: str,
     targets: Sequence[str],
     graphs: Sequence[nx.Graph],
+    progress_callback=None,
 ) -> Tuple[List[PathwayRow], Dict[str, int], List[str], List[str]]:
     """Build per-target pathway rows and collect intermediate residue usage.
 
@@ -33,7 +34,9 @@ def summarize_target_pathways(
     shortest_path_strings: List[str] = []
     all_paths_messages: List[str] = []
 
-    for target_residue, graph in zip(targets, graphs):
+    total_targets = max(1, len(targets))
+
+    for index, (target_residue, graph) in enumerate(zip(targets, graphs), start=1):
         if source_residue in graph and target_residue in graph and nx.has_path(graph, source_residue, target_residue):
             shortest_path = nx.shortest_path(graph, source_residue, target_residue)
             path_length = max(0, len(shortest_path) - 1)
@@ -52,6 +55,9 @@ def summarize_target_pathways(
         else:
             node_count = len(graph.nodes()) if hasattr(graph, "nodes") else 0
             pathway_rows.append((target_residue, node_count, "N/A", "No Path"))
+
+        if callable(progress_callback):
+            progress_callback(index, total_targets)
 
     pathway_rows.sort(key=lambda row: (row[3] == "No Path", str(row[2]), row[0]))
     return pathway_rows, residue_path_hits, shortest_path_strings, all_paths_messages

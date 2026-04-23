@@ -41,28 +41,30 @@ class MonitorWorker(QThread):
                 if mod_time > self.last_mod_time:
                     self.last_mod_time = mod_time
                     self.file_updated.emit(self.pert_file_path)
-                time.sleep(2)
+                self._sleep_with_stop_check(2.0)
             except FileNotFoundError:
-                time.sleep(1)
+                self._sleep_with_stop_check(1.0)
                 continue
             except PermissionError:
-                time.sleep(0.5)
+                self._sleep_with_stop_check(0.5)
                 continue
             except Exception as e:
                 print(f"[ERROR] Exception in MonitorWorker: {e}")
-                time.sleep(1)
+                self._sleep_with_stop_check(1.0)
                 continue
 
+    def _sleep_with_stop_check(self, total_seconds, step_seconds=0.05):
+        elapsed = 0.0
+        while elapsed < total_seconds and not self._stop_thread_flag:
+            time.sleep(step_seconds)
+            elapsed += step_seconds
+
     def stop(self):
         """Stops the thread and waits for it to finish."""
         self._stop_thread_flag = True
-        self.wait(250)
-
-
-    def stop(self):
-        """Stops the thread and waits for it to finish."""
-        self._stop_thread_flag = True
-        self.wait(250)
+        if not self.wait(350):
+            self.terminate()
+            self.wait(100)
 
 
 class FileProcessorWorker(QThread):
@@ -81,6 +83,14 @@ class FileProcessorWorker(QThread):
             self.update_complete.emit()
         except Exception as e:
             print(f"[ERROR] Exception in FileProcessorWorker: {e}")
+
+    def stop(self):
+        """Best-effort stop for shutdown paths."""
+        if self.isRunning():
+            self.requestInterruption()
+            if not self.wait(350):
+                self.terminate()
+                self.wait(100)
 
 
 os.environ['QT_API'] = 'pyside2'
@@ -865,20 +875,29 @@ class PymolQtWidget(QGLWidget):
     def stop_monitoring(self):
         if self.monitor_thread is not None:
             self.monitor_thread.stop()
+            self.monitor_thread = None
 
-            self.cumulative_affected_atoms.clear()
-            self.ref_file_path = None
-            self.effected_atom_keeper = None
-            self.last_mod_time = 0
-            self.total_steps = 0
-            self.colored_atoms.clear()
-            self.colors_set.clear()
-            self.total_atom_count = None
-            self.effected_atom_count =None
-            self._velocity_to_pymol_index_cache.clear()
-            self._velocity_atom_index_map = []
-            self.color_order_counter = 0
-            self.last_processed_step = None
+        if self.processor_thread is not None:
+            self.processor_thread.stop()
+            self.processor_thread = None
+
+        self.cumulative_affected_atoms.clear()
+        self.ref_file_path = None
+        self.effected_atom_keeper = None
+        self.last_mod_time = 0
+        self.total_steps = 0
+        self.colored_atoms.clear()
+        self.colors_set.clear()
+        self.total_atom_count = None
+        self.effected_atom_count =None
+        self._velocity_to_pymol_index_cache.clear()
+        self._velocity_atom_index_map = []
+        self.color_order_counter = 0
+        self.last_processed_step = None
+
+    def shutdown_threads(self):
+        """Ensure all widget-owned workers are stopped during app shutdown."""
+        self.stop_monitoring()
 
     def parse_velocity_frame_at_step(self, filename, target_step):
         frame_atoms = None

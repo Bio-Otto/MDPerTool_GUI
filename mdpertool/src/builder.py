@@ -4,6 +4,7 @@ from src.omm_runner import Communicate, OpenMMScriptRunner, Graphs
 from src.pyside_dynamic import loadUi
 import src.ui_functions as UIF
 from src.message import Message_Boxes
+from src._advanced_platform_options import get_advanced_platform_properties
 
 from PySide2 import QtCore
 from PySide2.QtCore import Slot, QThread
@@ -20,6 +21,9 @@ import multiprocessing
 from PySide2.QtCore import Signal
 import logging
 import re
+
+
+logger = logging.getLogger(__name__)
 
 
 class Advanced(QtCore.QThread):
@@ -131,7 +135,8 @@ class Advanced(QtCore.QThread):
             else:
                 self.out_dir = os.path.abspath(self.out_dir.strip()).replace('\\', '/')
                 self.Output_Folder_textEdit.setText(self.out_dir)
-        except:
+        except Exception as exc:
+            logger.exception("Failed to resolve output directory: %s", exc)
             QMessageBox.critical(self, "Error", "An error occured while getting output directory")
 
         if self.selected_residues_listWidget.count() == 0:
@@ -166,7 +171,8 @@ class Advanced(QtCore.QThread):
                     if answer == QMessageBox.Ok:
                         return False
 
-        except:
+        except Exception as exc:
+            logger.exception("Failed to read nonbonded parameters: %s", exc)
             QMessageBox.critical(self, "Error", "An error occured while getting Nonbonded Parameters")
 
         try:
@@ -219,6 +225,28 @@ class Advanced(QtCore.QThread):
                                                                                                self.equ_platform_comboBox.currentText(),
                                                                                                Device_ID_active,
                                                                                                precision)
+
+            advanced_properties = get_advanced_platform_properties(self)
+            if properties is None:
+                properties = {}
+            if advanced_properties:
+                properties.update(advanced_properties)
+
+            optimize_pme_enabled = (
+                self.nonBounded_Method_comboBox.currentText() == 'PME' and
+                getattr(self, 'optimize_pme_checkBox', None) is not None and
+                self.optimize_pme_checkBox.isEnabled() and
+                self.optimize_pme_checkBox.isChecked()
+            )
+            if optimize_pme_enabled:
+                # optimizePME decides CPU-PME mode dynamically.
+                properties.pop('UseCpuPme', None)
+
+            if not properties:
+                properties = None
+
+            properties_literal = repr(properties)
+
             cuda_precision_prefix = None
             cuda_active = False
             if platform_name == 'CUDA':
@@ -247,6 +275,7 @@ class Advanced(QtCore.QThread):
                                 Number_of_CPU=self.Number_CPU_spinBox_2.value(),
                                 all_cpu=self.All_CPU_checkBox.isChecked(),
                                 platform=platform_name, properties=properties, precision=precision,
+                                properties_literal=properties_literal,
                                 cuda_active=cuda_active,
                                 cuda_precision_prefix=cuda_precision_prefix,
                                 properties_active=properties_active, CPU_properties_active=CPU_properties_active,
@@ -279,6 +308,7 @@ class Advanced(QtCore.QThread):
                                 Nonbounded_cutoff_active=Nonbounded_cutoff_active,
                                 use_switching_distance=use_switching_distance,
                                 switching_distance=self.switching_distance_lineEdit.text(),
+                                optimize_pme=optimize_pme_enabled,
                                 solvent_ionic_strength=self.ionic_strength_lineEdit.text(),
 
                                 Number_of_steps=self.Number_of_steps_spinBox.value(),

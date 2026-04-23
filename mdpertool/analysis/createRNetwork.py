@@ -2,6 +2,7 @@ import csv
 import pandas
 import copy
 import os
+import traceback
 import numpy as np
 from Bio.PDB import Residue
 from collections import OrderedDict
@@ -384,7 +385,7 @@ def _reconcile_residue_response_dimensions(residue_objects, residue_labels, resp
 
 
 def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_type='CA', write_out=False,
-                   out_directory='', progress_callback=None, verbose=False):
+                   out_directory='', progress_callback=None, verbose=False, cancel_callback=None):
     try:
         structure_res_list, res_list = get_residues(pdb)
         reTimeList_raw = load_response_times(reTimeFile)
@@ -430,7 +431,11 @@ def createRNetwork(pdb, cutoff, reTimeFile, outputFileName, method='any', atom_t
 
         # Add edges according to residue response time and cutoff distance
         for i, res1 in enumerate(structure_res_list):
+            if callable(cancel_callback) and cancel_callback():
+                raise RuntimeError("Network calculation cancelled.")
             for j in range(i + 1, residue_count):
+                if callable(cancel_callback) and cancel_callback():
+                    raise RuntimeError("Network calculation cancelled.")
                 res2 = structure_res_list[j]
                 if within_cutoff(res1, res2, distance_cutoff, method, atom_type):
                     network.add_edge(res_list[i], res_list[j])
@@ -518,7 +523,7 @@ def filter_pair_network(network, source, target, node_threshold=None):
 
 
 def pairNetworks(network, source, target, pairNetworkName, write_out, out_directory, progress_callback,
-                 node_threshold=None):
+                 node_threshold=None, cancel_callback=None):
     """
     Filters and creates a pair network between a source and target residue.
 
@@ -536,6 +541,9 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
         networkx.DiGraph: The filtered pair network.
         str: A log message with information about the pair network.
     """
+    if callable(cancel_callback) and cancel_callback():
+        return None, f'Source: {source}  Target: {target}\nPair network calculation cancelled.'
+
     clean_network = filter_pair_network(network, source, target, node_threshold)
     if clean_network is not None:
         log = f'Source: {source}  Target: {target}\nTotal node number of source-target pair network is: {len(clean_network.nodes())}'
@@ -564,8 +572,12 @@ def pairNetworks(network, source, target, pairNetworkName, write_out, out_direct
                 )
             except Exception as e:
                 print(f"[Warning] PC/IPC Matrix calculation could not execute correctly. Error: {e}")
+                traceback.print_exc()
     else:
         log = f'Source: {source}  Target: {target}\nPair network not created (missing node(s) or node threshold condition).'
+
+    if callable(cancel_callback) and cancel_callback():
+        return None, f'Source: {source}  Target: {target}\nPair network calculation cancelled.'
 
     progress_callback.emit([clean_network, log])
     return clean_network, log
@@ -630,7 +642,7 @@ class MultiTaskEngine:
         self.pdb_id = pdb_id
 
 
-    def calculate_general_network(self):
+    def calculate_general_network(self, cancel_callback=None, progress_callback=None):
         """
         Calculate the general network based on the provided PDB file and parameters.
 
@@ -646,6 +658,8 @@ class MultiTaskEngine:
                 outputFileName=self.output_file_name,
                 write_out=self.write_outputs,
                 out_directory=self.output_directory,
+                progress_callback=progress_callback,
+                cancel_callback=cancel_callback,
             )
             return self.network, self.res_id_list, len_of_re_times
 
@@ -670,7 +684,7 @@ class MultiTaskEngine:
                 self.work.append(
                     CalcNetWorker(
                         pairNetworks,
-                        network=copy.deepcopy(self.network),
+                        network=self.network,
                         source=self.source,
                         target=target,
                         pairNetworkName=f'{self.source}_{target}.gml',

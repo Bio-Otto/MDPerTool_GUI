@@ -14,7 +14,7 @@ long_description = (this_directory / 'README.md').read_text(encoding='utf-8')
 conda_packages = [
 
     "mdtraj<=1.9.9",
-    "openmm>=8.0,<8.2",
+    "openmm>=8.5,<8.6",
     "pymol-open-source>=2.5",
     "pyside2>=5.15,<6",
     "mdanalysis",
@@ -34,7 +34,7 @@ setup(
     author=version_ns['__author__'],
     author_email=version_ns['__author_email__'],
     license='MIT',
-    python_requires='>=3.9,<3.10',
+    python_requires='>=3.10,<3.13',
     classifiers=[
 
         "License :: OSI Approved :: MIT License",

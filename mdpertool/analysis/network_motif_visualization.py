@@ -24,6 +24,9 @@ def build_motif_visual_rows(
     if graph is None:
         return []
 
+    # Note: main workflow now prefers single-pass build_motif_analysis from
+    # network_motif_service to avoid recomputing motif counts twice.
+
     rows: List[MotifVisualRow] = []
 
     for motif_size in motif_sizes:
