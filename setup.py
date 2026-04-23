@@ -34,7 +34,7 @@ setup(
     author=version_ns['__author__'],
     author_email=version_ns['__author_email__'],
     license='MIT',
-    python_requires='>=3.10,<3.13',
+    python_requires='>=3.10,<3.14',
     classifiers=[
 
         "License :: OSI Approved :: MIT License",
