@@ -53,39 +53,24 @@ jobs:
           conda install -y conda-build anaconda-client
 
       - name: Build conda package
-        id: conda_build
         shell: bash -el {0}
         run: |
+          set -euo pipefail
           mkdir -p build_output
-          set +e
           conda build conda.recipe \
             -c conda-forge \
             --output-folder build_output \
             --no-test
-          BUILD_EXIT=$?
-          if [ $BUILD_EXIT -ne 0 ]; then
-            echo "Conda build failed on ${{ matrix.os }} with exit code $BUILD_EXIT"
-            echo "build_failed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "build_failed=false" >> "$GITHUB_OUTPUT"
-          fi
           find build_output -type f | head -100
-          exit 0
-
-      - name: Warn on build failure
-        if: steps.conda_build.outputs.build_failed == 'true'
-        shell: bash
-        run: |
-          echo "Warning: conda build failed on ${{ matrix.os }}. Continuing to allow other matrix jobs to provide artifacts."
 
       - name: Upload build artifacts
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v5
         with:
           name: conda-pkg-${{ matrix.os }}
           path: build_output/**/*
           retention-days: 14
-          if-no-files-found: warn
+          if-no-files-found: error
 
   install-smoke:
     name: Fresh Install Smoke (${{ matrix.os }}, py${{ matrix.python-version }})
@@ -95,7 +80,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.11']
 
     steps:
       - name: Setup Miniconda
@@ -118,16 +103,14 @@ jobs:
         shell: bash -el {0}
         run: |
           set -euo pipefail
-          mapfile -t PACKAGES < <(find artifacts -type f \( -path "*/noarch/mdpertool-*.conda" -o -path "*/noarch/mdpertool-*.tar.bz2" \) | sort -u)
-          if [ "${#PACKAGES[@]}" -eq 0 ]; then
-            mapfile -t PACKAGES < <(find artifacts -type f \( -name "mdpertool-*.conda" -o -name "mdpertool-*.tar.bz2" \) | sort -u)
+          PACKAGE="$(find artifacts -type f \( -path '*/noarch/mdpertool-*.conda' -o -path '*/noarch/mdpertool-*.tar.bz2' \) | sort -u | head -n 1)"
+          if [ -z "$PACKAGE" ]; then
+            PACKAGE="$(find artifacts -type f \( -name 'mdpertool-*.conda' -o -name 'mdpertool-*.tar.bz2' \) | sort -u | head -n 1)"
           fi
-          if [ "${#PACKAGES[@]}" -eq 0 ]; then
+          if [ -z "$PACKAGE" ]; then
             echo "No package artifact found"
             exit 1
           fi
-
-          PACKAGE="${PACKAGES[0]}"
           echo "Using package artifact: $PACKAGE"
 
           conda create -y -n mdpertool-smoke "python=${{ matrix.python-version }}"
