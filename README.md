@@ -32,10 +32,16 @@
 To install MDPERTOOL using Conda (GUI + CLI in one package), use:
 
 ```sh
+conda install bio-otto::mdpertool
+```
+
+If your environment has strict Python pins (for example `python=3.13`) and solver conflicts appear, use the compatibility-safe flow below:
+
+```sh
 # Cross-platform recommended install
 conda create -n mdpertool python=3.11
 conda activate mdpertool
-conda install --override-channels -c conda-forge -c bio-otto mdpertool
+conda install -c conda-forge bio-otto::mdpertool
 ```
 
 For automatic cross-platform CUDA-aware installation (single command, no extra user tuning):

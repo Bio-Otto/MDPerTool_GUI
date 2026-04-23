@@ -87,9 +87,15 @@ about:
     The Program applying Energy Dissipation Concept using powerfull OpenMM Molecular Dynamic Toolkit, which also supports the Cuda platform.
     
     IMPORTANT INSTALLATION INSTRUCTION:
-    Anaconda's default install command might miss required dependencies. To install this package correctly, please run the following command in your terminal:
+    For standard environments, install with a single command:
     
-    conda create -n mdpertool -c conda-forge -c bio-otto python=3.11 mdpertool
+    conda install bio-otto::mdpertool
+    
+    If your environment has strict Python pins and solver conflicts appear, use:
+    
+    conda create -n mdpertool python=3.11
+    conda activate mdpertool
+    conda install -c conda-forge bio-otto::mdpertool
     
   dev_url: "https://github.com/Bio-Otto/MDPerTool_GUI"
 
