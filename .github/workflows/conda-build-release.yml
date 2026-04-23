@@ -65,11 +65,26 @@ jobs:
         shell: bash -el {0}
         run: |
           set -euo pipefail
+
+          # Write the target Python version into the variant config so
+          # conda-build uses exactly this version (--python flag is unreliable
+          # across conda-build versions).
+          cat > conda.recipe/conda_build_config.yaml << 'VAREOF'
+python:
+  - "${{ matrix.python-version }}"
+
+pin_run_as_build:
+  python:
+    min_pin: x.x
+    max_pin: x.x
+VAREOF
+          echo "Variant config written:"
+          cat conda.recipe/conda_build_config.yaml
+
           mkdir -p build_output
           conda build conda.recipe \
             -c conda-forge \
             --output-folder build_output \
-            --python ${{ matrix.python-version }} \
             --no-test
           echo "--- Build output ---"
           find build_output -type f
