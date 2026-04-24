@@ -69,14 +69,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build_output
-          # Force conda-build to target exactly the matrix Python version
-          printf 'python:\n  - "%s"\npin_run_as_build:\n  python:\n    min_pin: x.x\n    max_pin: x.x\n' \
-            "${{ matrix.python-version }}" > conda.recipe/conda_build_config.yaml
           conda run --no-capture-output -n buildenv \
             conda build conda.recipe \
               -c conda-forge \
               --output-folder "$(pwd)/build_output" \
-              --no-test
+              --no-test \
+              --python "${{ matrix.python-version }}"
           find build_output -type f
 
       - name: Upload build artifact
