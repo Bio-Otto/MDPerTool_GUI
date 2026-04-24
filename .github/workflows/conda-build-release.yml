@@ -69,12 +69,28 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build_output
+          # Write exclusive variant config so conda-forge global pinning can't override
+          {
+            echo "python:"
+            echo "  - \"${{ matrix.python-version }}\""
+            echo "pin_run_as_build:"
+            echo "  python:"
+            echo "    min_pin: x.x"
+            echo "    max_pin: x.x"
+          } > "$(pwd)/variant_config.yaml"
+          echo "=== variant_config.yaml ==="
+          cat "$(pwd)/variant_config.yaml"
+          echo "=== buildenv Python version ==="
+          conda run -n buildenv python --version
+          echo "=== conda-build version ==="
+          conda run -n buildenv conda-build --version || conda run -n buildenv conda build --version || true
+          echo "=== Running conda build with --exclusive-config-files ==="
           conda run --no-capture-output -n buildenv \
             conda build conda.recipe \
               -c conda-forge \
               --output-folder "$(pwd)/build_output" \
               --no-test \
-              --python "${{ matrix.python-version }}"
+              --exclusive-config-files "$(pwd)/variant_config.yaml"
           find build_output -type f
 
       - name: Upload build artifact
