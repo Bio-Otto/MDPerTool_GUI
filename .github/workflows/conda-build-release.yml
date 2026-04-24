@@ -58,7 +58,8 @@ jobs:
         shell: bash -el {0}
         run: |
           pip uninstall conda-content-trust -y || true
-          conda install -y conda-build anaconda-client
+          conda install -y "python=${{ matrix.python-version }}" conda-build anaconda-client
+          python --version
           conda info
 
       - name: Build conda package
