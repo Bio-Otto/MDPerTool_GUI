@@ -18,11 +18,11 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.10,<3.14
+    - python >=3.10,<3.13
     - setuptools
 
   run:
-    - python >=3.10,<3.14
+    - python >=3.10,<3.13
     - setuptools
     - lxml
     - pyside2 >=5.15,<6
