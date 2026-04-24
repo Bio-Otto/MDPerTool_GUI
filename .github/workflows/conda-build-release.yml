@@ -58,26 +58,23 @@ jobs:
         shell: bash -el {0}
         run: |
           pip uninstall conda-content-trust -y || true
-          conda install -y "python=${{ matrix.python-version }}" conda-build anaconda-client
-          python --version
-          conda info
+          # Create an isolated env with the exact target Python so conda-build
+          # inherits the correct Python version without touching the base env.
+          conda create -y -n buildenv \
+            -c conda-forge \
+            "python=${{ matrix.python-version }}" conda-build anaconda-client
+          conda run -n buildenv python --version
 
       - name: Build conda package
         shell: bash -el {0}
         run: |
           set -euo pipefail
-
-          PY_VER="${{ matrix.python-version }}"
-          printf 'python:\n  - "%s"\n' "$PY_VER" > /tmp/build_variant.yaml
-          echo "Building for Python $PY_VER:"
-          cat /tmp/build_variant.yaml
-
           mkdir -p build_output
-          conda build conda.recipe \
-            -c conda-forge \
-            --output-folder build_output \
-            --variant-config-files /tmp/build_variant.yaml \
-            --no-test
+          conda run --no-capture-output -n buildenv \
+            conda build conda.recipe \
+              -c conda-forge \
+              --output-folder "$(pwd)/build_output" \
+              --no-test
           find build_output -type f
 
       - name: Upload build artifact
