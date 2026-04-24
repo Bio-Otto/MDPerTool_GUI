@@ -47,7 +47,6 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: false
-          python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
           channel-priority: strict
           auto-activate: true
@@ -90,8 +89,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # conda index is provided by conda-build (installed only in buildenv)
-          conda run -n buildenv conda index "$(pwd)/build_output"
+          # conda-index binary is installed as a dep of conda-build
+          conda run -n buildenv conda-index "$(pwd)/build_output"
 
           conda create -y -n smoke \
             -c "$(pwd)/build_output" \
