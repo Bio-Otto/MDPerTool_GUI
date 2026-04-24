@@ -69,7 +69,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build_output
-          # Write exclusive variant config so conda-forge global pinning can't override
+
+          # Nuclear: delete any conda_build_config.yaml files in buildenv.
+          # conda-forge-pinning ships one that keeps overriding our python variant.
+          ENV_PREFIX="${CONDA}/envs/buildenv"
+          echo "=== Searching for pinning files in $ENV_PREFIX ==="
+          find "$ENV_PREFIX" -name "conda_build_config.yaml" 2>/dev/null | while read -r f; do
+            echo "Found and removing: $f"
+            rm -f "$f"
+          done
+
+          # Write exclusive variant config with the exact matrix Python
           {
             echo "python:"
             echo "  - \"${{ matrix.python-version }}\""
@@ -80,16 +90,27 @@ jobs:
           } > "$(pwd)/variant_config.yaml"
           echo "=== variant_config.yaml ==="
           cat "$(pwd)/variant_config.yaml"
+
           echo "=== buildenv Python version ==="
           conda run -n buildenv python --version
           echo "=== conda-build version ==="
-          conda run -n buildenv conda-build --version || conda run -n buildenv conda build --version || true
-          echo "=== Running conda build with --exclusive-config-files ==="
+          conda run -n buildenv conda-build --version || true
+
+          echo "=== Dry-run: expected output filename ==="
+          conda run --no-capture-output -n buildenv \
+            conda build conda.recipe \
+              -c conda-forge \
+              --python "${{ matrix.python-version }}" \
+              --exclusive-config-files "$(pwd)/variant_config.yaml" \
+              --output || true
+
+          echo "=== Actual build ==="
           conda run --no-capture-output -n buildenv \
             conda build conda.recipe \
               -c conda-forge \
               --output-folder "$(pwd)/build_output" \
               --no-test \
+              --python "${{ matrix.python-version }}" \
               --exclusive-config-files "$(pwd)/variant_config.yaml"
           find build_output -type f
 
