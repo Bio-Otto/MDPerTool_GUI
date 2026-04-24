@@ -89,8 +89,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # conda-index binary is installed as a dep of conda-build
-          conda run -n buildenv conda-index "$(pwd)/build_output"
+          conda run -n buildenv python -m conda_index "$(pwd)/build_output"
 
           conda create -y -n smoke \
             -c "$(pwd)/build_output" \
