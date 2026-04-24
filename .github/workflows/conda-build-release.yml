@@ -90,8 +90,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Index build_output as a local conda channel so deps are resolved
-          conda index build_output
+          # conda index is provided by conda-build (installed only in buildenv)
+          conda run -n buildenv conda index "$(pwd)/build_output"
 
           conda create -y -n smoke \
             -c "$(pwd)/build_output" \
