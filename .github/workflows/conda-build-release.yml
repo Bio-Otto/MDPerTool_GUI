@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
         os: [ubuntu-latest, macos-14, windows-latest]
         include:
           - os: ubuntu-latest
@@ -133,7 +133,7 @@ jobs:
             -c "$(pwd)/build_output" \
             -c conda-forge \
             -c defaults \
-            "mdpertool=0.0.8" "python=${{ matrix.python-version }}"
+            "mdpertool" "python=${{ matrix.python-version }}"
 
           conda run -n smoke python -c "import openmm; print('openmm', openmm.__version__)"
           conda run -n smoke python -c "from mdpertool._version import __version__; print('mdpertool', __version__)"
@@ -151,9 +151,17 @@ jobs:
         shell: bash
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "name=${{ github.event.inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+            TAG="${{ github.event.inputs.release_tag }}"
           else
-            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "name=${TAG}" >> "$GITHUB_OUTPUT"
+          # Detect PEP440 pre-release suffixes: aN, bN, rcN, .devN
+          if [[ "${TAG}" =~ ([0-9](a|b|rc)[0-9]|\.dev[0-9]) ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "Detected pre-release tag: ${TAG}"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download all platform artifacts
@@ -203,10 +211,18 @@ jobs:
             exit 1
           fi
 
+          # Pre-release tags upload to the `beta` label so default channel users
+          # don't get them automatically; they must opt in via -c bio-otto/label/beta.
+          UPLOAD_LABEL_ARGS=()
+          if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then
+            UPLOAD_LABEL_ARGS=(--label beta)
+            echo "Pre-release detected; uploading to label 'beta'."
+          fi
+
           echo "Uploading ${#PACKAGES[@]} package(s)..."
           for PACKAGE in "${PACKAGES[@]}"; do
             echo "  -> $PACKAGE"
-            binstar upload -u bio-otto "$PACKAGE" --skip-existing
+            binstar upload -u bio-otto "${UPLOAD_LABEL_ARGS[@]}" "$PACKAGE" --skip-existing
           done
 
       - name: Create GitHub Release
@@ -217,5 +233,6 @@ jobs:
           overwrite_files: true
           fail_on_unmatched_files: false
           generate_release_notes: true
+          prerelease: ${{ steps.tag.outputs.prerelease == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

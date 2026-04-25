@@ -1,6 +1,6 @@
 
 {% set name = "mdpertool" %}
-{% set version = "0.0.8" %}
+{% set version = "0.0.9b0" %}
 
 package:
   name: "{{ name|lower }}"
@@ -35,7 +35,6 @@ requirements:
     - pyopengl
     - pymol-open-source >=2.5
     - biopython
-    - prody
     - pyqtwebengine
     - pyyaml
     - pystache
@@ -49,7 +48,7 @@ test:
   commands:
     - mdpertool --help
     - mdpertool cli --help
-    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.8'"
+    - python -c "from mdpertool._version import __version__; assert __version__ == '0.0.9b0'"
   imports:
     - mdpertool
 
@@ -64,14 +63,14 @@ about:
     powered by OpenMM (CUDA supported).
 
     INSTALLATION — the Anaconda page shows a short command that omits required channels.
-    Use the full command below instead:
+    Use the full command below instead (Python 3.10–3.13 required):
 
       conda create -n mdpertool -c conda-forge -c bio-otto bio-otto::mdpertool
       conda activate mdpertool
 
-    Or into an existing environment (Python 3.10–3.13 required):
+    To install a beta/pre-release version, add the beta label to the channel:
 
-      conda install -c conda-forge -c bio-otto bio-otto::mdpertool
+      conda create -n mdpertool -c conda-forge -c bio-otto/label/beta bio-otto::mdpertool
 
   dev_url: "https://github.com/Bio-Otto/MDPerTool_GUI"
 

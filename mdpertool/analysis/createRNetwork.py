@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from Bio.PDB.PDBParser import PDBParser
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QProgressBar, QVBoxLayout, QWidget
-from prody import *
 # from collections import OrderedDict
 import math
 import argparse

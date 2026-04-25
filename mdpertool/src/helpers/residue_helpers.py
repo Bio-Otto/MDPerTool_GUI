@@ -6,23 +6,35 @@ import csv
 import os
 from typing import Any, Dict, List, Sequence
 
-from prody.proteins.pdbfile import parsePDB
+from Bio.PDB import PDBParser
+
+
+def _extract_residue_labels(pdb_path: str) -> List[str]:
+    """Parse a PDB file and return labels formatted as `{ResName}{ResNum}{ChainID}`.
+
+    Heteroatoms (waters, ligands) are skipped so only protein residues are returned,
+    matching the original prody `select('protein')` behaviour the GUI depends on.
+    """
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("s", pdb_path)
+
+    labels: List[str] = []
+    for model in structure:
+        for chain in model:
+            chain_id = chain.id
+            for residue in chain:
+                if residue.id[0] != " ":
+                    continue
+                labels.append(f"{residue.resname}{residue.id[1]}{chain_id}")
+    return labels
 
 
 class ResidueManager:
     """Manage residue selection, conservation scores, and related operations."""
 
     def fill_residue_combobox(self, pdb_path: str) -> List[str]:
-        """Extract chain identifiers from PDB file and populate combobox."""
-        combobox: List[str] = []
-        pdb = parsePDB(pdb_path)
-        protein = pdb.select('protein')
-        
-        for model in protein.getHierView():
-            for chain in model:
-                combobox.append(str(chain).replace(" ", "") + str(model).split(" ")[1])
-        
-        return combobox
+        """Extract residue labels from PDB file and populate combobox."""
+        return _extract_residue_labels(pdb_path)
 
     def _get_target_residues(
         self,

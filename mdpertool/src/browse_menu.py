@@ -99,22 +99,10 @@ class browse_file:
                 range(simtk.openmm.Platform.getNumPlatforms())]
 
     def fill_residue_combobox(self, pdb_path):
-        from prody.proteins.pdbfile import parsePDB
-        self.combobox = []
+        from .helpers.residue_helpers import _extract_residue_labels
         self.pdb_path = pdb_path
-        self.pdb = parsePDB(self.pdb_path)
-        self.protein = self.pdb.select('protein')
-        for model in self.protein.getHierView():
-            for chain in model:
-                # print(chain)
-                # self.combobox.append(str(model).split(" ")[1] + str(chain))
-                self.combobox.append(str(chain).replace(" ", "") + str(model).split(" ")[1])
-
-                # self.combobox_2.append(str(model).split(" ")[1] + str(chain))
-        for i in self.combobox:
-            self.res1_comboBox.addItem(str(i))
-            self.res2_comboBox.addItem(str(i))
-        self.res1_comboBox.clear()  # delete all items from comboBox
-        self.res1_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
-        self.res2_comboBox.clear()  # delete all items from comboBox
-        self.res2_comboBox.addItems(self.combobox)  # add the actual content of self.comboData
+        self.combobox = _extract_residue_labels(pdb_path)
+        self.res1_comboBox.clear()
+        self.res1_comboBox.addItems(self.combobox)
+        self.res2_comboBox.clear()
+        self.res2_comboBox.addItems(self.combobox)

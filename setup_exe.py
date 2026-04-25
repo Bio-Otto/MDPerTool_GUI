@@ -17,7 +17,7 @@ if sys.platform == "win32":
 build_exe_options = {
     "packages": ["os", "sys", "re", "PySide2.QtCore", "PySide2.QtWidgets", "PySide2.QtUiTools", "PySide2.QtQuick",
                  "PySide2.QtQml", "PySide2.QtGui", "matplotlib", "pandas", "pyqtgraph", "OpenGL", "pymol", "numpy",
-                 "networkx", "prody", "pystache", "shiboken2", "pdbfixer", "pyqtgraph", "openmm",
+                 "networkx", "pystache", "shiboken2", "pdbfixer", "pyqtgraph", "openmm",
                  "mdtraj", "parmed", "pyvis", "OpenGL"],
 
     "include_files": ['LICENSE', 'fonts/', 'test/', 'gui/', 'src/', 'analysis/', 'Download/', 'no_gui/'],

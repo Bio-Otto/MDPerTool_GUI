@@ -73,7 +73,6 @@ MDPERTOOL uses a number of open source projects to work properly:
 * __Matplotlib__ - Matplotlib is a comprehensive library for creating static, animated, and interactive visualizations in Python.
 * __Pyqtgraph__ - Scientific Graphics and GUI Library for Python
 * __PySide2__ - Python bindings for the Qt cross-platform application and UI framework
-* __ProDy__ - Protein Dynamics and Sequence Analysis
 * __Parmed__ - Parameter/topology editor and molecular simulator
 
 And of course MDPERTOOL v0.1 itself is open source with a [public repository][MDPERTOOL] on GitHub.

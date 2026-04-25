@@ -14,7 +14,6 @@ dependencies:
   - pyopengl
   - pymol-open-source>=2.5
   - biopython
-  - prody
   - pyqtwebengine
   - pyyaml
   - pystache

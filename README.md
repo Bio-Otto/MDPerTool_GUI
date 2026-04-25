@@ -162,7 +162,6 @@ This will display all the available options and their descriptions for running M
 * __Matplotlib__ - Matplotlib is a comprehensive library for creating static, animated, and interactive visualizations in Python.
 * __Pyqtgraph__ - Scientific Graphics and GUI Library for Python
 * __PySide2__ - Python bindings for the Qt cross-platform application and UI framework
-* __ProDy__ - Protein Dynamics and Sequence Analysis
 * __Parmed__ - Parameter/topology editor and molecular simulator
 
 

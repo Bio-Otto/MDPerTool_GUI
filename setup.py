@@ -34,7 +34,7 @@ setup(
     author=version_ns['__author__'],
     author_email=version_ns['__author_email__'],
     license='MIT',
-    python_requires='>=3.10,<3.12',
+    python_requires='>=3.10,<3.14',
     classifiers=[
 
         "License :: OSI Approved :: MIT License",
@@ -52,9 +52,7 @@ setup(
     packages=find_namespace_packages(include=['mdpertool', 'mdpertool.*']),
 
 
-    install_requires=[
-        'prody',
-    ],
+    install_requires=[],
 
 
     include_package_data=True,

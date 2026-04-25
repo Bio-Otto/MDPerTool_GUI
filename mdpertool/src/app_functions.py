@@ -180,16 +180,8 @@ class Helper_Functions():
         return Helper_Functions._progress_dialog_manager_class
 
     def fill_residue_combobox(self, pdb_path):
-        from prody.proteins.pdbfile import parsePDB
-        combobox = []
-
-        pdb = parsePDB(pdb_path)
-        protein = pdb.select('protein')
-        for model in protein.getHierView():
-            for chain in model:
-                combobox.append(str(chain).replace(" ", "") + str(model).split(" ")[1])
-
-        return combobox
+        from .helpers.residue_helpers import _extract_residue_labels
+        return _extract_residue_labels(pdb_path)
 
     def available_platforms(self):
         """Delegate to NetworkParametersManager for platform detection."""
@@ -3561,7 +3553,6 @@ class pdb_Tools:
         try:
             from pathlib import Path
             import os
-            from prody.proteins.localpdb import fetchPDB, pathPDBFolder
             from multiprocessing import Process
             Download_folder = os.path.join(os.getcwd(), 'Download')
 
