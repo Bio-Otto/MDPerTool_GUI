@@ -1,0 +1,971 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Software Tool for Investigation of Allosteric Communication within Proteins">
+      
+      
+        <meta name="author" content="Bio-Otto">
+      
+      
+        <link rel="canonical" href="https://bio-otto.github.io/MDPerTool_GUI/theory_energy_dissipation/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Energy Dissipation Model and Allosteric Signal Transmission - MDPerTool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#energy-dissipation-model-and-allosteric-signal-transmission" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="MDPerTool" class="md-header__button md-logo" aria-label="MDPerTool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MDPerTool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Energy Dissipation Model and Allosteric Signal Transmission
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Bio-Otto/MDPerTool_GUI" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../gui_usage/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorials/energy_dissipation/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="MDPerTool" class="md-nav__button md-logo" aria-label="MDPerTool" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    MDPerTool
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Bio-Otto/MDPerTool_GUI" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gui_usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GUI Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli_usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Line (CLI)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/energy_dissipation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Energy Dissipation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="energy-dissipation-model-and-allosteric-signal-transmission">Energy Dissipation Model and Allosteric Signal Transmission</h1>
+<p>This section provides a detailed explanation of the energy dissipation model developed to understand the dynamics of allosteric signal transmission in proteins, with direct references to figures and tables from the literature.</p>
+<hr />
+<h2 id="8-limitations-and-assumptions-of-the-energy-dissipation-model">8. Limitations and Assumptions of the Energy Dissipation Model</h2>
+<p>While the energy dissipation model provides a powerful framework for understanding allosteric signal transmission, it is important to recognize its limitations:</p>
+<ul>
+<li><strong>Structural Dependence:</strong> The accuracy of predictions depends on the quality and completeness of the input structure. Missing residues or incorrect atom positions can affect network connectivity and response times.</li>
+<li><strong>Simplified Energy Input:</strong> The model assumes a localized, instantaneous energy input (e.g., ligand binding), which may not capture all biologically relevant perturbations.</li>
+<li><strong>Neglect of Solvent and Ligand Effects:</strong> Long-range effects mediated by water molecules, ions, or ligands not present in the structure are not explicitly modeled.</li>
+<li><strong>Parameter Sensitivity:</strong> Results can be sensitive to simulation parameters such as the distance cutoff for network construction and the choice of perturbation site.</li>
+<li><strong>Assumption of Two-State Response:</strong> The use of a Boltzmann fit assumes a two-state transition, which may not fully capture more complex or multi-step allosteric mechanisms.</li>
+</ul>
+<hr />
+<h2 id="9-comparison-with-other-allosteric-models">9. Comparison with Other Allosteric Models</h2>
+<p>The energy dissipation model and propagation coefficient (PC) approach can be contrasted with other models of allostery:</p>
+<ul>
+<li><strong>Elastic Network Models (ENM):</strong> ENMs focus on collective motions and normal modes but do not explicitly model energy flow or directionality of signal propagation.</li>
+<li><strong>Mutual Information and Correlation Analyses:</strong> These methods identify correlated motions but may not reveal causal pathways or the temporal order of residue responses.</li>
+<li><strong>Statistical Coupling Analysis (SCA):</strong> SCA uses sequence conservation to infer networks of co-evolving residues, which can complement but not replace dynamic response-based models.</li>
+<li><strong>Experimental Approaches:</strong> Mutagenesis, NMR, and single-molecule FRET provide direct evidence for allosteric pathways but are often limited in throughput and resolution.</li>
+</ul>
+<p>The energy dissipation model uniquely combines dynamic simulation with network theory, enabling the identification of both key residues and the directionality of information flow.</p>
+<hr />
+<h2 id="10-future-directions-and-open-questions">10. Future Directions and Open Questions</h2>
+<p>Recent advances and open research questions include:</p>
+<ul>
+<li><strong>Integration with Experimental Data:</strong> Combining computational predictions with high-throughput mutagenesis and structural data to refine models and validate key residues.</li>
+<li><strong>Modeling of Solvent and Ligand Effects:</strong> Incorporating explicit water molecules, ions, and dynamic ligand binding to better capture real biological environments.</li>
+<li><strong>Application to Large Complexes:</strong> Scaling the approach to multi-domain proteins, protein-protein complexes, and membrane proteins.</li>
+<li><strong>Machine Learning Integration:</strong> Using machine learning to predict allosteric sites and pathways from large datasets of protein structures and simulations.</li>
+<li><strong>Time-Resolved Allostery:</strong> Developing models that capture the full temporal evolution of allosteric signaling, beyond two-state transitions.</li>
+</ul>
+<hr />
+<p>For further reading and the latest developments, see the <a href="../advanced_scientific_insights/">advanced_scientific_insights.md</a> and the referenced literature.</p>
+<hr />
+<h2 id="11-glossary-of-key-terms">11. Glossary of Key Terms</h2>
+<ul>
+<li><strong>Allostery:</strong> Regulation of a protein's activity through binding or perturbation at a site distinct from the active site.</li>
+<li><strong>Response Time:</strong> The time required for a residue to respond to an energy input, reflecting its position in the signal propagation pathway.</li>
+<li><strong>Dynamic Module:</strong> A group of residues with similar response times, often corresponding to functional or structural regions.</li>
+<li><strong>Propagation Coefficient (PC):</strong> A metric quantifying the importance of a residue in transmitting allosteric signals within its network layer.</li>
+<li><strong>Residue-Residue Interaction (RRI) Network:</strong> A graph where nodes are residues and edges represent physical or functional interactions.</li>
+</ul>
+<hr />
+<h2 id="12-step-by-step-example-calculating-pc">12. Step-by-Step Example: Calculating PC</h2>
+<p>Suppose you have a small protein with 5 residues (A–E) and the following response times after perturbation:</p>
+<table>
+<thead>
+<tr>
+<th>Residue</th>
+<th>Response Time (ps)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>10</td>
+</tr>
+<tr>
+<td>B</td>
+<td>15</td>
+</tr>
+<tr>
+<td>C</td>
+<td>20</td>
+</tr>
+<tr>
+<td>D</td>
+<td>25</td>
+</tr>
+<tr>
+<td>E</td>
+<td>30</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li><strong>Build the RRI network</strong> using a distance cutoff (e.g., 6 Å).</li>
+<li><strong>Assign directionality</strong>: edges point from faster to slower responding residues.</li>
+<li><strong>Layer the network</strong>: e.g., Layer 1 (A), Layer 2 (B), etc.</li>
+<li><strong>Calculate PC for Layer 2 (B):</strong><ul>
+<li>Suppose B has in-degree $m_B = 1$ (from A) and out-degree $n_B = 1$ (to C).</li>
+<li>If Layer 2 has only B, then $PC(B) = 1$.</li>
+<li>For more complex layers, use the full formula.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="13-parameter-selection-guide">13. Parameter Selection Guide</h2>
+<ul>
+<li><strong>Distance Cutoff:</strong> 5–7 Å is typical for defining residue contacts; too small may fragment the network, too large may add noise.</li>
+<li><strong>Perturbation Site:</strong> Prefer known allosteric or regulatory residues; systematic scanning can reveal hidden sites.</li>
+<li><strong>Simulation Length:</strong> Ensure sufficient time for energy dissipation to reach all regions.</li>
+<li><strong>Network Layering:</strong> Use response times to define layers; check for clear separation between groups.</li>
+</ul>
+<hr />
+<h2 id="14-practical-tips-and-troubleshooting">14. Practical Tips and Troubleshooting</h2>
+<ul>
+<li>If all PC values are low or zero, check network connectivity and input structure completeness.</li>
+<li>Unexpected results may arise from incorrect residue numbering or missing atoms.</li>
+<li>Compare predicted key residues with experimental data for validation.</li>
+<li>Use visualization tools to inspect network structure and information flow.</li>
+</ul>
+<hr />
+<h2 id="15-biological-implications">15. Biological Implications</h2>
+<p>Findings from the energy dissipation model and PC analysis can:
+- Guide mutagenesis experiments by highlighting key regulatory residues.
+- Inform drug discovery by identifying allosteric sites and communication pathways.
+- Reveal evolutionary conservation of allosteric mechanisms across protein families.</p>
+<hr />
+<h2 id="1-theoretical-basis-and-scientific-background-of-the-energy-dissipation-model">1. Theoretical Basis and Scientific Background of the Energy Dissipation Model</h2>
+<p>The energy dissipation model proposes that ligand binding introduces external energy into the protein, which then propagates through nonlinear interactions within the protein. As a result, the protein reaches a new conformational distribution.</p>
+<p><strong>Key Principles:</strong>
+- The protein is an open system; energy is transferred from the environment through events such as ligand binding.
+- Residues within the protein are dynamic and in a state of constant fluctuation.
+- Allosteric regulation is mediated by nonlinear interactions within the protein.
+- After ligand binding, the protein reaches a new conformational equilibrium.</p>
+<p><strong>Figure 1A: Structural Regions</strong>
+<img alt="Figure 1A" src="https://pmc.ncbi.nlm.nih.gov/articles/PMC3195717/figure/pone-0026453-g001/" />
+<em>Structural regions and simulation parameters of E. coli aspartokinase III.</em></p>
+<hr />
+<h2 id="2-energy-dissipation-process-and-mathematical-modeling">2. Energy Dissipation Process and Mathematical Modeling</h2>
+<p>After ligand binding, the number of affected residues during the energy dissipation process follows a sigmoidal curve over time. This process is modeled using a two-state Boltzmann equation:</p>
+<p>$$
+N_R = N_{R1} + \frac{N_{R2} - N_{R1}}{1 + e^{-(t-t_0)/dt}}
+$$</p>
+<ul>
+<li>$N_R$: Number of affected residues</li>
+<li>$t_0$: Half response time</li>
+<li>$dt$: Time constant</li>
+</ul>
+<p><strong>Figure 3A: Energy Dissipation Curve</strong>
+<img alt="Figure 3A" src="https://pmc.ncbi.nlm.nih.gov/articles/PMC3195717/figure/pone-0026453-g003/" />
+<em>Energy dissipation curve and Boltzmann fit.</em></p>
+<p><strong>Table 1: Boltzmann Parameters</strong>
+<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3195717/table/pone-0026453-t001/">Go to Table 1</a></p>
+<hr />
+<h2 id="21-methodological-note-thermostatbarostat-during-perturbation">2.1 Methodological Note: Thermostat/Barostat During Perturbation</h2>
+<p>The equilibration and the perturbation-propagation phases serve different purposes and should not be mixed conceptually.</p>
+<ul>
+<li><strong>Equilibration phase:</strong> Conventional NVT/NPT coupling can be used to prepare a stable starting state.</li>
+<li><strong>Perturbation phase (response-time extraction):</strong> Reference and dissipation trajectories should be generated with thermostat and barostat disabled (NVE-like window) and identical numerical settings.</li>
+</ul>
+<p>Rationale:</p>
+<ul>
+<li>External thermal/pressure coupling acts as an additional energy pathway.</li>
+<li>During early-time signal transmission, this coupling can smooth or damp local energy contrasts and obscure causality.</li>
+<li>Using paired uncoupled trajectories improves interpretability of the difference signal used to derive residue response times.</li>
+</ul>
+<p>This is aligned with the conceptual motivation in the original energy dissipation framework, where the focus is the intrinsic intramolecular propagation pattern after a defined perturbation event.</p>
+<hr />
+<h2 id="3-residue-response-time-and-protein-dynamic-modules">3. Residue Response Time and Protein Dynamic Modules</h2>
+<p>The response time of each residue to the energy input is calculated. This reveals how the signal propagates within the protein and which pathways it follows.</p>
+<p>Based on their response times, residues are grouped into different dynamic modules. These modules indicate the main signal propagation routes and highlight critical regions within the protein.</p>
+<p><strong>Figure 4A: Residue Response Time</strong>
+<img alt="Figure 4A" src="https://pmc.ncbi.nlm.nih.gov/articles/PMC3195717/figure/pone-0026453-g004/" />
+<em>Response time of each residue, color-coded by structural region.</em></p>
+<p><strong>Figure 5A: Protein Dynamic Modules</strong>
+<img alt="Figure 5A" src="https://pmc.ncbi.nlm.nih.gov/articles/PMC3195717/figure/pone-0026453-g005/" />
+<em>Protein dynamic modules and mutation regions.</em></p>
+<hr />
+<h2 id="4-signal-transduction-network-and-propagation-coefficient-pc">4. Signal Transduction Network and Propagation Coefficient (PC)</h2>
+<p>After obtaining residue response times from energy dissipation simulations, these data are used to construct a residue-residue interaction (RRI) network with directionality. This network reveals the main pathways of allosteric signal transmission and identifies key residues involved in the process.</p>
+<p><strong>Network Construction:</strong>
+- The undirected RRI network is built from the crystal structure (e.g., PDB: 2J0W) using a distance cutoff (typically 6 Å).
+- Residue response times are mapped onto this network, introducing directionality (from faster to slower responding residues).
+- A hierarchical layout is used to visualize information flow from regulatory to catalytic sites.</p>
+<p><strong>Figure Reference:</strong>
+- <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/figure/pone-0031529-g002/">Figure 2: Procedure for obtaining residue response time</a>
+- <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/figure/pone-0031529-g003/">Figure 3: Algorithm for constructing source-target pair networks</a></p>
+<h3 id="propagation-coefficient-pc">Propagation Coefficient (PC)</h3>
+<p>To quantify the importance of each residue in signal propagation, the propagation coefficient (PC) is defined as follows:</p>
+<p>$$
+PC(i) = \frac{m_i n_i}{\sum_{j=1}^k m_j n_j}
+$$</p>
+<ul>
+<li>$m_i$: In-degree of node $i$ in layer $N$</li>
+<li>$n_i$: Out-degree of node $i$ in layer $N$</li>
+<li>$k$: Number of nodes in layer $N$</li>
+</ul>
+<p>A higher PC value indicates that a residue is responsible for a larger fraction of the information flow in its layer, making it a key node for allosteric communication.</p>
+<p><strong>Figure Reference:</strong>
+- <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/figure/pone-0031529-g009/">Figure 9: Hierarchical layout of the core signal transduction network</a>
+- <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/figure/pone-0031529-g010/">Figure 10: Propagation coefficient distribution</a></p>
+<hr />
+<h2 id="5-experimental-validation-and-mutation-analysis">5. Experimental Validation and Mutation Analysis</h2>
+<p>The critical residues predicted by the energy dissipation model and PC analysis have been validated by experimental mutagenesis studies. Most mutations at these sites lead to a loss or reduction of allosteric regulation, confirming the model's predictive power.</p>
+<p><strong>Table Reference:</strong>
+- <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/table/pone-0031529-t003/">Table 3: Comparison of predicted and experimentally validated mutation sites</a></p>
+<hr />
+<h2 id="6-application-workflow-mdpertool-example">6. Application Workflow: MDPerTool Example</h2>
+<p><strong>Step-by-step workflow:</strong>
+1. Load the protein structure (e.g., PDB: 2J0W).
+2. Run energy dissipation simulation (e.g., perturb Ser345).
+3. Analyze residue response times and dynamic modules.
+4. Construct the signal transduction network and calculate PC values.
+5. Identify key residues and potential mutation targets.</p>
+<p><strong>Workflow Figure:</strong>
+- <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/figure/pone-0031529-g002/">Figure 2: Procedure for obtaining residue response time</a></p>
+<hr />
+<h2 id="7-references">7. References</h2>
+<ul>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3195717/">PMC3195717: Energy Dissipation Model</a></li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3282753/">PMC3282753: Signal Transduction Network &amp; PC</a></li>
+<li><a href="https://www.tandfonline.com/doi/full/10.1080/07391102.2013.855145?needAccess=true#d1e164">Tandfonline 2013: Signal transduction in heteromultimeric proteins</a></li>
+</ul>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
