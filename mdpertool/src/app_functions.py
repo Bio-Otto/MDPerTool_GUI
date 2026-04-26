@@ -99,6 +99,15 @@ colors = ['#957DAD', '#D291BC', '#8565c4', '#8dbdc7', '#B3ABCF', '#b5b1c8', '#e8
           '#b39eb5', '#c6a4a4', '#ff694f', '#95b8d1', '#52b2cf', '#d3ab9e', '#fb6f92', '#872187',
           '#74138C', '', '#ff70a6', '#dab894', '#f6bc66', '#e27396', '#6e78ff', '#ff686b']
 
+# High-contrast, readable PyMOL colors used for shortest-path arrows so that
+# multiple simultaneously-active paths stay visually distinguishable on the 3D
+# cartoon. Pastel list-widget background colors above are unsuitable on the
+# protein surface.
+PATH_COLOR_PALETTE = [
+    'magenta', 'limegreen', 'cyan', 'orange', 'yellow', 'red',
+    'tv_blue', 'hotpink', 'forest', 'salmon', 'purple', 'deepteal',
+]
+
 logger = logging.getLogger(__name__)
 
 
@@ -2396,6 +2405,9 @@ class Functions:
             pending_done_message = None
             current_shortest_path_graphs = []
             latest_critical_rows = []
+            # Per-tab tracking for the toggleable shortest-path visualization.
+            # Maps row index -> {'cgo_prefix', 'color', 'residues'}.
+            active_shortest_paths: dict = {}
 
             if self.initial_network is not None and len(self.initial_network.nodes()) > 0:
                 _building_views_percent(95, "computing centrality")
@@ -2443,6 +2455,9 @@ class Functions:
                 shortest_path_listWidget.clear()
                 current_shortest_path_graphs.clear()
                 current_shortest_path_graphs.extend(target_graph_list[:len(shortest_path_strings_local)])
+                # Reset toggle state: the rows about to be re-populated reset
+                # the index space, so any leftover entries refer to stale rows.
+                active_shortest_paths.clear()
 
                 for cnt, shortest_path_text in enumerate(shortest_path_strings_local):
                     item = QListWidgetItem(shortest_path_text)
@@ -2566,22 +2581,56 @@ class Functions:
                 import sys
                 print(f"Warning: Could not build superhub table: {superhub_error}", file=sys.stderr)
 
-            def _show_selected_shortest_path(item):
-                selected_row = shortest_path_listWidget.currentRow()
+            check_icon = self.style().standardIcon(QtWidgets.QStyle.SP_DialogApplyButton)
+
+            def _toggle_selected_shortest_path(item):
+                selected_row = shortest_path_listWidget.row(item)
                 if not (0 <= selected_row < len(current_shortest_path_graphs)):
                     return
                 pymol_widget = _ensure_analysis_pymol_loaded()
                 if pymol_widget is None:
                     return
-                Functions.show_shortest_paths_on_3D_ProteinView(
-                    self,
-                    item,
-                    pymol_widget,
-                    current_shortest_path_graphs[selected_row],
-                )
+
+                if selected_row in active_shortest_paths:
+                    # Toggle OFF: remove this path's CGO arrows and clear the
+                    # check mark on its row.
+                    info = active_shortest_paths.pop(selected_row)
+                    pymol_widget.remove_shortest_path_cgos(info['cgo_prefix'])
+
+                    # Only unlabel residues that no other active path still uses.
+                    residues_in_use = set()
+                    for other in active_shortest_paths.values():
+                        residues_in_use.update(other.get('residues', ()))
+                    to_unlabel = [r for r in info.get('residues', ()) if r not in residues_in_use]
+                    if to_unlabel:
+                        pymol_widget.remove_residue_labels(to_unlabel)
+
+                    item.setIcon(QtGui.QIcon())
+                    pymol_widget.update()
+                    pymol_widget.show()
+                else:
+                    # Toggle ON: assign a stable, row-based color so every path
+                    # always renders in the same shade and adjacent paths stay
+                    # visually distinguishable.
+                    color = PATH_COLOR_PALETTE[selected_row % len(PATH_COLOR_PALETTE)]
+                    cgo_prefix = f"sp_{id(shortest_path_listWidget):x}_{selected_row}"
+                    residues = Functions.show_shortest_paths_on_3D_ProteinView(
+                        self,
+                        item,
+                        pymol_widget,
+                        current_shortest_path_graphs[selected_row],
+                        color=color,
+                        path_id=cgo_prefix,
+                    )
+                    active_shortest_paths[selected_row] = {
+                        'cgo_prefix': cgo_prefix,
+                        'color': color,
+                        'residues': list(residues or []),
+                    }
+                    item.setIcon(check_icon)
 
             shortest_path_listWidget.itemDoubleClicked.connect(
-                _show_selected_shortest_path)
+                _toggle_selected_shortest_path)
             # #########################################################################################################
 
             # #########################################################################################################
@@ -2605,6 +2654,81 @@ class Functions:
                                                                      atom2=arrow_coord[1],
                                                                      radius=0.05, gap=0.4, hradius=0.4,
                                                                      hlength=0.8, color='cyan')
+
+                        # ------> PER-TARGET / UNION / INTERSECTION (passive groups) <------ #
+                        # Each per-target subgraph plus the cross-target union and
+                        # intersection are loaded into separate PyMOL groups, all
+                        # starting disabled. The user toggles them on demand from
+                        # PyMOL's object panel. Reference: PMC3282753 — union and
+                        # intersection of source-target response networks.
+
+                        # Deduplicate per-target graphs (compose duplicates that
+                        # share the same target across different sources).
+                        per_target_graphs = {}
+                        for tlabel, tgraph in zip(target_res_list, target_graph_list):
+                            if tgraph is None or tgraph.number_of_edges() == 0:
+                                continue
+                            existing = per_target_graphs.get(tlabel)
+                            per_target_graphs[tlabel] = (
+                                nx.compose(existing, tgraph) if existing is not None else tgraph
+                            )
+
+                        per_target_palette = [
+                            'yellow', 'salmon', 'palegreen', 'lightblue', 'lightpink',
+                            'wheat', 'paleyellow', 'lightorange', 'violet', 'aquamarine',
+                        ]
+
+                        def _safe_pymol_group_name(label):
+                            return ''.join(c if c.isalnum() else '_' for c in str(label))
+
+                        # Per-target groups: Target_<label>
+                        for tidx, (tlabel, tgraph) in enumerate(per_target_graphs.items()):
+                            try:
+                                tcoords, _ = Pymol_Visualize_Path(graph=tgraph, pdb_file=self.pdb)
+                                tcolor = per_target_palette[tidx % len(per_target_palette)]
+                                tgroup = f"Target_{_safe_pymol_group_name(tlabel)}"
+                                for arrow_coord in tcoords:
+                                    pymol_widget.create_interacting_Residues(
+                                        atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                        radius=0.05, gap=0.4, hradius=0.4, hlength=0.8,
+                                        color=tcolor, group=tgroup,
+                                    )
+                            except Exception as per_target_render_error:
+                                print(
+                                    f"Warning: per-target ({tlabel}) network 3D render failed: {per_target_render_error}",
+                                    file=sys.stderr,
+                                )
+
+                        # Union of per-target graphs: Union_Network
+                        target_graph_values = list(per_target_graphs.values())
+                        if len(target_graph_values) >= 1:
+                            try:
+                                union_view_graph = build_union_graph(target_graph_values)
+                                if union_view_graph.number_of_edges() > 0:
+                                    ucoords, _ = Pymol_Visualize_Path(graph=union_view_graph, pdb_file=self.pdb)
+                                    for arrow_coord in ucoords:
+                                        pymol_widget.create_interacting_Residues(
+                                            atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                            radius=0.06, gap=0.4, hradius=0.4, hlength=0.8,
+                                            color='orange', group='Union_Network',
+                                        )
+                            except Exception as union_render_error:
+                                print(f"Warning: union network 3D render failed: {union_render_error}", file=sys.stderr)
+
+                        # Intersection of per-target graphs: Intersection_Network
+                        if len(target_graph_values) >= 2:
+                            try:
+                                intersection_view_graph = build_intersection_graph(target_graph_values)
+                                if intersection_view_graph.number_of_edges() > 0:
+                                    icoords, _ = Pymol_Visualize_Path(graph=intersection_view_graph, pdb_file=self.pdb)
+                                    for arrow_coord in icoords:
+                                        pymol_widget.create_interacting_Residues(
+                                            atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                            radius=0.08, gap=0.4, hradius=0.4, hlength=0.8,
+                                            color='magenta', group='Intersection_Network',
+                                        )
+                            except Exception as inter_render_error:
+                                print(f"Warning: intersection network 3D render failed: {inter_render_error}", file=sys.stderr)
 
                         # MAKE PYMOL VISUALIZATION BETTER
                         pymol_widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
@@ -2669,36 +2793,45 @@ class Functions:
         if hasattr(self, '_active_network_engine'):
             self._active_network_engine = None
 
-    def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget, selected_graph):
+    def show_shortest_paths_on_3D_ProteinView(self, item, PyMOL_Widget, selected_graph,
+                                               color='magenta', path_id=None):
+        """Render a single shortest path on the PyMOL view.
+
+        Returns the list of residue labels that were labelled so the caller
+        can clean them up when the path is toggled off.
+        """
         processed_path = [x.strip() for x in item.text().split('-->')]
         shortest_path_arrow_coords = Shortest_Path_Visualize(pdb_file=self.pdb, selected_path=processed_path)
-        arrows_cordinates, _ = Pymol_Visualize_Path(graph=selected_graph, pdb_file=self.pdb)
 
-        for arrow_coord in arrows_cordinates:
-            PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                radius=0.05, name='pairNet',
-                                                gap=0.4, hradius=0.4, hlength=0.8,
-                                                color='orange')
+        cgo_prefix = path_id if path_id else 'path'
 
-        for arrow_coord in shortest_path_arrow_coords:
-            PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
-                                                radius=0.055,
-                                                gap=0.4, hradius=0.4, hlength=0.8,
-                                                color='magenta', shortest_path=True)
+        # Toggling a path must not move the camera; PyMOL otherwise auto-zooms
+        # on every new CGO and selection.
+        prev_auto_zoom = PyMOL_Widget._pymol.cmd.get_setting_int("auto_zoom")
+        PyMOL_Widget._pymol.cmd.set("auto_zoom", 0)
+        try:
+            for arrow_coord in shortest_path_arrow_coords:
+                PyMOL_Widget.create_directed_arrows(atom1=arrow_coord[0], atom2=arrow_coord[1],
+                                                    radius=0.055,
+                                                    gap=0.4, hradius=0.4, hlength=0.8,
+                                                    color=color, shortest_path=True,
+                                                    name=cgo_prefix)
 
-        for node in processed_path:
-            pymol_selection = PyMOL_Widget._build_residue_selection_query(node)
-            if pymol_selection is None:
-                continue
-            PyMOL_Widget.resi_label_add(pymol_selection)
+            for node in processed_path:
+                pymol_selection = PyMOL_Widget._build_residue_selection_query(node)
+                if pymol_selection is None:
+                    continue
+                PyMOL_Widget.resi_label_add(pymol_selection)
 
-        # MAKE PYMOL VISUALIZATION BETTER
-        PyMOL_Widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
-        PyMOL_Widget._pymol.cmd.set('cartoon_oval_width', 0.2)
-        PyMOL_Widget._pymol.cmd.center(selection="all", state=0, origin=1, animate=0)
-        PyMOL_Widget._pymol.cmd.zoom('all', buffer=0.0, state=0, complete=0)
+            # MAKE PYMOL VISUALIZATION BETTER
+            PyMOL_Widget._pymol.cmd.set('cartoon_oval_length', 0.8)  # default is 1.20)
+            PyMOL_Widget._pymol.cmd.set('cartoon_oval_width', 0.2)
+        finally:
+            PyMOL_Widget._pymol.cmd.set("auto_zoom", prev_auto_zoom)
+
         PyMOL_Widget.update()
         PyMOL_Widget.show()
+        return processed_path
 
     def get_conservation_scores(self):
         try:

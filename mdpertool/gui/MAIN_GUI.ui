@@ -4825,7 +4825,7 @@ QCheckBox::indicator:checked {
                                   <string>Real Time Monitoring</string>
                                  </property>
                                  <property name="checked">
-                                  <bool>true</bool>
+                                  <bool>false</bool>
                                  </property>
                                 </widget>
                                </item>
@@ -5250,7 +5250,7 @@ QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {
                              <enum>QTabWidget::Rounded</enum>
                             </property>
                             <property name="currentIndex">
-                             <number>0</number>
+                             <number>1</number>
                             </property>
                             <property name="movable">
                              <bool>true</bool>

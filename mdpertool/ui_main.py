@@ -211,8 +211,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setMinimumWidth(20)
         UIF.UIFunctions.addNewMenu(self, "Perturbation", "btn_perturbation",
                                    "url(:/20x20/icons/20x20/chemical_20x20.png)", True)
-        UIF.UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring",
-                                   "url(:/20x20/icons/20x20/cil-monitor.png)", True)
+        # Hidden: Monitoring page (real-time temperature/energy graphs).
+        # Bottom-right of the Perturbation tab covers process tracking now.
+        # TO RESTORE: uncomment the addNewMenu call below AND revert the
+        # `_start_simulation_runner` call in `run_script_send_to_engine` to
+        # `self.show_simulation_monitoring()`.
+        # UIF.UIFunctions.addNewMenu(self, "Monitoring", "btn_monitoring",
+        #                            "url(:/20x20/icons/20x20/cil-monitor.png)", True)
         UIF.UIFunctions.addNewMenu(self, "Analysis", "btn_analysis",
                                    "url(:/16x16/icons/16x16/cil-chart-line.png)", True)
         UIF.UIFunctions.addNewMenu(self, "About&Contact", "btn_about",
@@ -399,7 +404,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pert_velocity_file = os.path.join(self.current_output_folder_path, "dis_protein_velocities.xml")
             self.ref_velocity_file = os.path.join(self.current_output_folder_path, "ref_protein_velocities.xml")
             self.effected_atom_percentage_keper = os.path.join(self.current_output_folder_path, "effected_atom_count.txt")
-            self.show_simulation_monitoring()
+            # Monitoring page is hidden: stay on the Perturbation tab and let
+            # the bottom-right groupBox_3 (timers + decomposition progress bar)
+            # report run progress. Still kick off the OpenMM runner here.
+            # TO RESTORE: replace the line below with `self.show_simulation_monitoring()`.
+            self.Real_Time_Graphs.run_script(self.created_script)
 
             self.Real_Time_Graphs.temperature_graph_plot.clear()
             self.Real_Time_Graphs.temperature_graph.clear()

@@ -395,6 +395,31 @@ class PymolQtWidget(QGLWidget):
         except Exception as expression:
             print("ERROR on PyMOL (Labeling): ", expression)
 
+    def remove_shortest_path_cgos(self, name_prefix):
+        """Delete all CGO objects whose name starts with ``name_prefix``.
+
+        Used to toggle a previously-shown shortest path off without disturbing
+        other active paths or the underlying network arrows.
+        """
+        try:
+            existing = self._pymol.cmd.get_names("objects") or []
+            for obj_name in existing:
+                if obj_name.startswith(name_prefix):
+                    self._pymol.cmd.delete(obj_name)
+        except Exception as expression:
+            print("ERROR on PyMOL (remove_shortest_path_cgos): ", expression)
+
+    def remove_residue_labels(self, residue_labels):
+        """Clear PyMOL labels on the CA atoms of the given residue labels."""
+        for residue_label in residue_labels or []:
+            try:
+                selection_query = self._build_residue_selection_query(residue_label)
+                if not selection_query:
+                    continue
+                self._pymol.cmd.label(f"({selection_query}) and name ca", "")
+            except Exception as expression:
+                print("ERROR on PyMOL (remove_residue_labels): ", expression)
+
     def highlight_residue_labels(self, residue_labels, color='hotpink', label=True):
         try:
             selections = []
@@ -557,11 +582,8 @@ class PymolQtWidget(QGLWidget):
         except:
             pass
 
-        if shortest_path:
-            color = 'magenta'
-
-        else:
-            pass
+        # Color for shortest_path arrows is now driven by the caller so each
+        # active path in the analysis tab can use a distinct, readable color.
 
         radius, gap = float(radius), float(gap)
         hlength, hradius = float(hlength), float(hradius)
@@ -632,16 +654,21 @@ class PymolQtWidget(QGLWidget):
                   [cgo.CONE] + xyz3 + xyz2 + [hradius, 0.0] + color2 + color2 + \
                   [1.0, 0.0]
 
-            name = self._pymol.cmd.get_unused_name('path')
-            self._pymol.cmd.load_cgo(obj, name)
-            self._pymol.cmd.group("Sh_Paths", name)
+            # When `name` is supplied, use it as a stable prefix so callers can
+            # locate and delete this path's CGOs later (toggle off support).
+            base = name if name else 'path'
+            cgo_name = self._pymol.cmd.get_unused_name(base + '_seg_') if name else self._pymol.cmd.get_unused_name('path')
+            self._pymol.cmd.load_cgo(obj, cgo_name)
+            self._pymol.cmd.group("Sh_Paths", cgo_name)
+            return cgo_name
+        return None
 
 
         self.update()
         # cmd.extend('cgo_arrow', cgo_arrow)
 
     def create_interacting_Residues(self, atom1='pk1', atom2='pk2', radius=0.5, gap=0.0, hlength=-1, hradius=-1,
-                                    color='red', name=''):
+                                    color='red', name='', group='Interacts'):
 
         radius, gap = float(radius), float(gap)
         hlength = float(hlength)
@@ -683,11 +710,15 @@ class PymolQtWidget(QGLWidget):
             obj = [cgo.CYLINDER] + xyz1 + xyz3 + [radius] + color1 + color2
 
             if not name:
-                name = self._pymol.cmd.get_unused_name('interact')
+                # Stable per-group prefix so simultaneously-rendered groups stay
+                # name-distinct.
+                name = self._pymol.cmd.get_unused_name(str(group).lower() + '_')
 
             self._pymol.cmd.load_cgo(obj, name)
-            self._pymol.cmd.group("Interacts", name)
-            self._pymol.cmd.disable("Interacts")  # This will disable (hide) the group
+            self._pymol.cmd.group(group, name)
+            # Render in PASSIVE mode: every group starts disabled so the user
+            # toggles each network on demand from PyMOL's object panel.
+            self._pymol.cmd.disable(group)
             self.update()
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
