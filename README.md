@@ -1,3 +1,5 @@
+
+
 # MDPERTOOL: Perturbation-based Allosteric Pathway Finder
 
 <a href="http://compbio.bioe.eng.marmara.edu.tr/" target="_parent">
@@ -47,7 +49,7 @@ conda install -c conda-forge bio-otto::mdpertool
 For automatic cross-platform CUDA-aware installation (single command, no extra user tuning):
 
 ```sh
-python scripts/bootstrap_mdpertool_env.py
+python scripts/bootstrap_mdpertool_env.py --python-version 3.11
 ```
 
 This installer automatically:
